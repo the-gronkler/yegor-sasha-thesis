@@ -1,14 +1,15 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\big_scary_pivots;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ReviewSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * also seeds review images.
+     *
+     * probably run order seeder first?
      */
     public function run(): void
     {

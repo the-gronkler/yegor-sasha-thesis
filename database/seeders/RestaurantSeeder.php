@@ -7,6 +7,12 @@ use Illuminate\Database\Seeder;
 
 class RestaurantSeeder extends Seeder
 {
+    // responible for seeding tables:
+    // Restaurants, FoodTypes, Images,
+    // MenuItems, MenuItemAllergens,
+    // and employees (and partially users because inheritance :P )
+
+
     /**
      * Run the database seeds.
      */

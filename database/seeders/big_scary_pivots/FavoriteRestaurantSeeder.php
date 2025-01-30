@@ -1,14 +1,14 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\big_scary_pivots;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class MenuItemAllergenSeeder extends Seeder
+class FavoriteRestaurantSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *  probably run order and review seeders first?
      */
     public function run(): void
     {

@@ -1,12 +1,12 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\big_scary_pivots;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class FoodTypeSeeder extends Seeder
+class OrderSeeder extends Seeder
 {
+    // also seeds order items (obv.)
     /**
      * Run the database seeds.
      */
