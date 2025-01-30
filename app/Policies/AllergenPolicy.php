@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\MenuItemAlergen;
+use App\Models\Allergen;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class MenuItemAlergenPolicy
+class AllergenPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +19,7 @@ class MenuItemAlergenPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, MenuItemAlergen $menuItemAlergen): bool
+    public function view(User $user, Allergen $allergen): bool
     {
         return false;
     }
@@ -35,7 +35,7 @@ class MenuItemAlergenPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, MenuItemAlergen $menuItemAlergen): bool
+    public function update(User $user, Allergen $allergen): bool
     {
         return false;
     }
@@ -43,7 +43,7 @@ class MenuItemAlergenPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, MenuItemAlergen $menuItemAlergen): bool
+    public function delete(User $user, Allergen $allergen): bool
     {
         return false;
     }
@@ -51,7 +51,7 @@ class MenuItemAlergenPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, MenuItemAlergen $menuItemAlergen): bool
+    public function restore(User $user, Allergen $allergen): bool
     {
         return false;
     }
@@ -59,7 +59,7 @@ class MenuItemAlergenPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, MenuItemAlergen $menuItemAlergen): bool
+    public function forceDelete(User $user, Allergen $allergen): bool
     {
         return false;
     }

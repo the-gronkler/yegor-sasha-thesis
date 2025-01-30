@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Policies\UserPolicy;
-use App\Models\Alergen;
-use App\Policies\AlergenPolicy;
+use App\Models\Allergen;
+use App\Policies\AllergenPolicy;
 use App\Models\Customer;
 use App\Policies\CustomerPolicy;
 use App\Models\Employee;
@@ -18,8 +18,8 @@ use App\Models\Image;
 use App\Policies\ImagePolicy;
 use App\Models\MenuItem;
 use App\Policies\MenuItemPolicy;
-use App\Models\MenuItemAlergen;
-use App\Policies\MenuItemAlergenPolicy;
+use App\Models\MenuItemAllergen;
+use App\Policies\MenuItemAllergenPolicy;
 use App\Models\Order;
 use App\Policies\OrderPolicy;
 use App\Models\OrderItem;
@@ -44,14 +44,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         User::class => UserPolicy::class,
-        Alergen::class => AlergenPolicy::class,
+        Allergen::class => AllergenPolicy::class,
         Customer::class => CustomerPolicy::class,
         Employee::class => EmployeePolicy::class,
         FavoriteRestaurant::class => FavoriteRestaurantPolicy::class,
         FoodType::class => FoodTypePolicy::class,
         Image::class => ImagePolicy::class,
         MenuItem::class => MenuItemPolicy::class,
-        MenuItemAlergen::class => MenuItemAlergenPolicy::class,
+        MenuItemAllergen::class => MenuItemAllergenPolicy::class,
         Order::class => OrderPolicy::class,
         OrderItem::class => OrderItemPolicy::class,
         OrderStatus::class => OrderStatusPolicy::class,

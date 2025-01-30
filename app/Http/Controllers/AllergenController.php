@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MenuItemAlergen;
+use App\Models\Allergen;
 use Illuminate\Http\Request;
 
-class MenuItemAlergenController extends Controller
+class AllergenController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,7 +26,7 @@ class MenuItemAlergenController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(MenuItemAlergen $menuItemAlergen)
+    public function show(Allergen $allergen)
     {
         //
     }
@@ -34,7 +34,7 @@ class MenuItemAlergenController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, MenuItemAlergen $menuItemAlergen)
+    public function update(Request $request, Allergen $allergen)
     {
         //
     }
@@ -42,7 +42,7 @@ class MenuItemAlergenController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MenuItemAlergen $menuItemAlergen)
+    public function destroy(Allergen $allergen)
     {
         //
     }

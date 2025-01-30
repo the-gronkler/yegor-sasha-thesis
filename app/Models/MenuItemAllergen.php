@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Alergen extends Model
+class MenuItemAllergen extends Model
 {
     //
 }
