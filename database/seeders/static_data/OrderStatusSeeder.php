@@ -13,7 +13,7 @@ class OrderStatusSeeder extends Seeder
     public function run(): void
     {
         $statuses = [
-            'Cart Draft',
+            'in Cart',
             'Placed',
             'Accepted',
             'Declined',
