@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        // order important !!!!!!!!!
         $this->call([
             AllergenSeeder::class,
             OrderStatusSeeder::class,
@@ -37,9 +38,6 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class,
             ReviewSeeder::class,
             FavoriteRestaurantSeeder::class
-
-
-
         ]);
     }
 }
