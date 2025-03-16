@@ -36,21 +36,25 @@ class RestaurantSeeder extends Seeder
         // Create Food Types
         $pizzaType = FoodType::create(['name' => 'Pizza', 'restaurant_id' => $restaurant1->id]);
         $pastaType = FoodType::create(['name' => 'Pasta', 'restaurant_id' => $restaurant1->id]);
+        $rizzType = FoodType::create(['name' => 'Rizz', 'restaurant_id' => $restaurant1->id]);
 
         $burgerType = FoodType::create(['name' => 'Burger', 'restaurant_id' => $restaurant2->id]);
         $bingusType = FoodType::create(['name' => 'Bingus', 'restaurant_id' => $restaurant2->id]);
         $dessertType = FoodType::create(['name' => 'Dessert', 'restaurant_id' => $restaurant2->id]);
 
-        // Create Menu Items (More Items Added)
+        // Create Menu Items, 5 for each restaurant
         $menuItems = [
             ['Pizza Margherita', 10.99, $pizzaType, 'Classic cheese and tomato pizza.'],
             ['Pepperoni Pizza', 12.99, $pizzaType, 'Classic pepperoni pizza with extra cheese.'],
             ['Spaghetti Carbonara', 11.49, $pastaType, 'Creamy pasta with pancetta.'],
             ['Lasagna', 13.99, $pastaType, 'Rich lasagna with beef ragu.'],
+            ['Bingus', 69.69, $bingusType, 'Bingus.'],
+
             ['Cheese Burger', 9.99, $burgerType, 'Juicy beef patty with melted cheese.'],
             ['Double Bacon Burger', 11.99, $burgerType, 'Two patties, crispy bacon, and cheddar.'],
-            ['Juicy Bingus Salad', 22.99, $bingusType, 'W Rizz'],
+            ['Rizz Salad', 22.99, $rizzType, 'W Rizz'],
             ['Chocolate Cake', 6.49, $dessertType, 'Decadent chocolate cake slice.'],
+            ['Vanilla Ice Cream', 3.99, $dessertType, 'Creamy vanilla ice cream.']
         ];
 
         $menuItemModels = [];
@@ -75,7 +79,28 @@ class RestaurantSeeder extends Seeder
             ]);
         }
 
-        // Create Allergens & Attach to Menu Items
+        // Create Allergens
+        $allergens = [
+            ['name' => 'Celery'],
+            ['name' => 'Crustaceans'],
+            ['name' => 'Eggs'],
+            ['name' => 'Fish'],
+            ['name' => 'Gluten'],
+            ['name' => 'Lupin'],
+            ['name' => 'Milk'],
+            ['name' => 'Molluscs'],
+            ['name' => 'Mustard'],
+            ['name' => 'Nuts'],
+            ['name' => 'Peanuts'],
+            ['name' => 'Sesame Seeds'],
+            ['name' => 'Soybeans'],
+            ['name' => 'Sulfites'],
+        ];
+        foreach($allergens as $allergen){
+            Allergen::create($allergen);
+        }
+
+        // Attach Allergens to Menu Items
         $gluten = Allergen::firstOrCreate(['name' => 'Gluten']);
         $dairy = Allergen::firstOrCreate(['name' => 'Dairy']);
 

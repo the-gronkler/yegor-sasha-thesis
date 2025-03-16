@@ -6,7 +6,7 @@ use App\Models\User;
 use Database\Seeders\big_scary_pivots\FavoriteRestaurantSeeder;
 use Database\Seeders\big_scary_pivots\OrderSeeder;
 use Database\Seeders\big_scary_pivots\ReviewSeeder;
-use Database\Seeders\static_data\AllergenSeeder;
+//use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\OrderStatusSeeder;
 use Illuminate\Database\Seeder;
 
@@ -26,11 +26,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // order important !!!!!!!!!
         $this->call([
-            AllergenSeeder::class,
             OrderStatusSeeder::class,
-
             RestaurantSeeder::class,
             UserSeeder::class,
 

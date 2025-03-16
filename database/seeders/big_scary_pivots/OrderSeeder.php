@@ -17,17 +17,16 @@ class OrderSeeder extends Seeder
     public function run(): void
     {
         // Get customers and other necessary data
-        $customers = Customer::all(); // Now, we only get actual customers
+        $customers = Customer::all();
         $restaurants = Restaurant::all();
         $orderStatuses = OrderStatus::all();
-        $menuItems = MenuItem::all();
 
-        if ($customers->isEmpty() || $restaurants->isEmpty() || $orderStatuses->isEmpty() || $menuItems->isEmpty()) {
+        if ($customers->isEmpty() || $restaurants->isEmpty() || $orderStatuses->isEmpty()) {
             return; // Avoid running if data is missing
         }
 
         // Generate 10 orders
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 10; $i++) { // Corrected the typo here
             $customer = $customers->random();
             $restaurant = $restaurants->random();
             $status = $orderStatuses->random();
@@ -39,7 +38,10 @@ class OrderSeeder extends Seeder
                 'notes' => fake()->optional()->sentence(),
             ]);
 
-            // Attach random menu items
+            // Get menu items for the specific restaurant
+            $menuItems = MenuItem::where('restaurant_id', $restaurant->id)->get();
+
+            // Attach random menu items from the same restaurant
             $order->menuItems()->attach(
                 $menuItems->random(rand(1, 5))->pluck('id')->mapWithKeys(fn($id) => [$id => ['quantity' => rand(1, 3)]])
             );
