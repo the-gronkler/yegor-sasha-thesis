@@ -30,10 +30,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AllergenSeeder::class,
             OrderStatusSeeder::class,
-            UserSeeder::class,
 
-            CustomerSeeder::class,
             RestaurantSeeder::class,
+            UserSeeder::class,
 
             OrderSeeder::class,
             ReviewSeeder::class,

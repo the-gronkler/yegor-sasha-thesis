@@ -2,21 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\User as Authenticate;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class User extends Authenticatable
+class User extends Authenticate
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -24,26 +18,48 @@ class User extends Authenticatable
         'is_admin',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the customer profile for this user (if applicable).
+     */
+    public function customer(): HasOne
+    {
+        return $this->hasOne(Customer::class, 'user_id');
+    }
+
+    /**
+     * Get the employee profile for this user (if applicable).
+     */
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class, 'user_id');
+    }
+
+    /**
+     * Determine if the user is a customer.
+     */
+    public function isCustomer(): bool
+    {
+        return $this->customer()->exists();
+    }
+
+    /**
+     * Determine if the user is an employee.
+     */
+    public function isEmployee(): bool
+    {
+        return $this->employee()->exists();
     }
 }
