@@ -79,27 +79,6 @@ class RestaurantSeeder extends Seeder
             ]);
         }
 
-        // Create Allergens
-        $allergens = [
-            ['name' => 'Celery'],
-            ['name' => 'Crustaceans'],
-            ['name' => 'Eggs'],
-            ['name' => 'Fish'],
-            ['name' => 'Gluten'],
-            ['name' => 'Lupin'],
-            ['name' => 'Milk'],
-            ['name' => 'Molluscs'],
-            ['name' => 'Mustard'],
-            ['name' => 'Nuts'],
-            ['name' => 'Peanuts'],
-            ['name' => 'Sesame Seeds'],
-            ['name' => 'Soybeans'],
-            ['name' => 'Sulfites'],
-        ];
-        foreach($allergens as $allergen){
-            Allergen::create($allergen);
-        }
-
         // Attach Allergens to Menu Items
         $gluten = Allergen::firstOrCreate(['name' => 'Gluten']);
         $dairy = Allergen::firstOrCreate(['name' => 'Dairy']);
