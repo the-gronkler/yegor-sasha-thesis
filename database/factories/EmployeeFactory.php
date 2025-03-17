@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * @extends Factory<Employee>
  */
+
 class EmployeeFactory extends Factory
 {
     protected $restaurantId;
@@ -19,14 +20,18 @@ class EmployeeFactory extends Factory
      * Define the model's default state.
      *
      * @return array<string, mixed>
+     * @throws \Exception
      */
     public function definition(): array
     {
         // Ensure a user is created first
         $user = User::factory()->create();
 
-        // Use the provided restaurant ID or fetch a random one if not provided
-        $restaurantId = $this->restaurantId ?? Restaurant::inRandomOrder()->first()?->id ?? Restaurant::factory()->create()->id;
+        // Use the provided restaurant ID or throw exception
+        if (!isset($this->restaurantId))
+             throw new \Exception('Restaurant ID not set for EmployeeFactory. Use ->forRestaurant($restaurantId) method to set it.');
+
+        $restaurantId = $this->restaurantId;
 
 
         return [
