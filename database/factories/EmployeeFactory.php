@@ -35,14 +35,20 @@ class EmployeeFactory extends Factory
 
 
         return [
-            'user_id' => $user->id, // Use the ID of the created User
+            'user_id' => $user->id,
             'restaurant_id' => $restaurantId,
-            'is_admin' => fake()->boolean(), // Generates a random boolean value (true or false)
+            'is_admin' => false //fake()->boolean(),
         ];
     }
 
     /**
-     * Indicate that the employee belongs to a specific restaurant.
+     * MANDATORY: cannot have orphaned employees
+     * Use this last in the chain to ensure the restaurant ID is set, i.e.:
+     * Employee::factory()
+     * ->count(1)
+     * ->admin()
+     * ->forRestaurant($restaurant->id)     <-- this must be last
+     * ->create();
      *
      * @param  int  $restaurantId
      * @return $this
@@ -52,6 +58,15 @@ class EmployeeFactory extends Factory
         $this->restaurantId = $restaurantId;
 
         return $this;
+    }
+
+    public function admin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'is_admin' => true,
+            ];
+        });
     }
 
 

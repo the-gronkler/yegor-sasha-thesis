@@ -16,7 +16,13 @@ class EmployeeSeeder extends Seeder
         $restaurants = Restaurant::all();
 
         foreach ($restaurants as $restaurant) {
-            $employeeCount = rand(3, 15);
+            Employee::factory()
+                ->count(1)
+                ->admin()
+                ->forRestaurant($restaurant->id)
+                ->create();
+
+            $employeeCount = rand(2, 14);
             Employee::factory()
                 ->count($employeeCount)
                 ->forRestaurant($restaurant->id)
