@@ -9,6 +9,15 @@ Welcome to the repository for our thesis! Below are the key resources to help yo
 - 🔌 [**Endpoints**](https://docs.google.com/document/d/1E955BQFnevlgxs8YLM71R924gzzgWy1Xd2LhYZYi-ic/edit?usp=sharing)
 - 🗺️ [**Lucdichart**](https://lucid.app/lucidchart/598bdabb-3a0e-4ad1-8daf-9b95e059ef49/edit?viewport_loc=-7883%2C-1292%2C3068%2C1420%2C0_0&invitationId=inv_233120c5-a944-4b79-8ae4-d14f9602685f)
 
+## 📄 **Abstract**
+Our thesis is a mobile app/website for restaurants with 2 main functions:
+1. Track and manage orders placed by customers
+2. Display restaurants on a map with a heatmap layer, helping customers filter and find cool establishments (cafes, kebab shops, etc.), and hotspots with high concentrations of them,
+ based on distance, rating, popularity, etc...
+and possibly order ahead(point 1)
+
+Out product targets smaller buisnesses, focusing on low up-front costs, ease of set up, simple workflow integration, and easy staff training
+
 ## 🗂️ **ER Diagram**
 ![ER Diagram](docs/media/thesis_er_diagram.png)
 
