@@ -10,10 +10,21 @@ class Employee extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'user_id';
+    public $incrementing = false;
+
     protected $fillable = [
         'user_id',
-        'restaurant_id', // If an employee is tied to a restaurant
+        'restaurant_id',
+        'is_admin',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_admin' => 'boolean',
+        ];
+    }
 
     /**
      * Get the user associated with this employee.
@@ -21,5 +32,10 @@ class Employee extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
     }
 }
