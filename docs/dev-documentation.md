@@ -1,8 +1,8 @@
-# Developer Documention
+# Developer Documentation
 
 ## Intro
 
-This file stores technical documentation useful during development. if a PR intorduces something that needs to be 'kept in mind' during development, it should also update this file
+This file stores technical documentation useful during development. If a PR introduces something that needs to be 'kept in mind' during development, it should also update this file
 
 ## Console commands
 
