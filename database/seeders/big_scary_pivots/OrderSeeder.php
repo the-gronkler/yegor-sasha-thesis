@@ -26,7 +26,7 @@ class OrderSeeder extends Seeder
         }
 
         // Generate 10 orders
-        for ($i = 0; $i < 10; $i++) { // Corrected the typo here
+        for ($i = 0; $i < 10; $i++) {
             $customer = $customers->random();
             $restaurant = $restaurants->random();
             $status = $orderStatuses->random();
