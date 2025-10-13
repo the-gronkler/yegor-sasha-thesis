@@ -83,11 +83,11 @@ class RestaurantSeeder extends Seeder
         $gluten = Allergen::firstOrCreate(['name' => 'Gluten']);
         $dairy = Allergen::firstOrCreate(['name' => 'Dairy']);
 
+        $menuItemAllergenRows = [];
         foreach ($menuItemModels as $menuItem) {
-            DB::table('menu_item_allergen')->insert([
-                ['menu_item_id' => $menuItem->id, 'allergen_id' => $gluten->id],
-                ['menu_item_id' => $menuItem->id, 'allergen_id' => $dairy->id],
-            ]);
+            $menuItemAllergenRows[] = ['menu_item_id' => $menuItem->id, 'allergen_id' => $gluten->id];
+            $menuItemAllergenRows[] = ['menu_item_id' => $menuItem->id, 'allergen_id' => $dairy->id];
         }
+        DB::table('menu_item_allergen')->insert($menuItemAllergenRows);
     }
 }
