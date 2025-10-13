@@ -24,18 +24,14 @@ class EmployeeFactory extends Factory
      */
     public function definition(): array
     {
-        // Ensure a user is created first
-        $user = User::factory()->create();
-
         // Use the provided restaurant ID or throw exception
         if (!isset($this->restaurantId))
              throw new \Exception('Restaurant ID not set for EmployeeFactory. Use ->forRestaurant($restaurantId) method to set it.');
 
         $restaurantId = $this->restaurantId;
 
-
         return [
-            'user_id' => $user->id,
+            'user_id' => User::factory()->id,
             'restaurant_id' => $restaurantId,
             'is_admin' => false //fake()->boolean(),
         ];

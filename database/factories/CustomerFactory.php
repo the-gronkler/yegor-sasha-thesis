@@ -18,13 +18,10 @@ class CustomerFactory extends Factory
      */
     public function definition(): array
     {
-        // Ensure a user is created first
-        $user = User::factory()->create();
-
         return [
-            'user_id' => $user->id, // Use the ID of the created User
-            'payment_method_token' => null,
-        ];
+        'user_id' => User::factory(),
+        'payment_method_token' => null,
+    ];
     }
 
     /**
@@ -36,7 +33,7 @@ class CustomerFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'payment_method_token' => Str::random(40),
+                'payment_method_token' => (string) Str::uuid(),
             ];
         });
     }
