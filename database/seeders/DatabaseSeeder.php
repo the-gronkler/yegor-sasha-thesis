@@ -33,9 +33,6 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
             EmployeeSeeder::class,
             CustomerSeeder::class,
-            OrderSeeder::class,
-            ReviewSeeder::class,
-//            FavoriteRestaurantSeeder::class,
         ]);
     }
 }

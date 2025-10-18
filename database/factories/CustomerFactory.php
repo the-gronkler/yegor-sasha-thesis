@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Order;
 use App\Models\Restaurant;
+use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -55,6 +56,21 @@ class CustomerFactory extends Factory
                     $id => ['rank' => $i + 1]
                 ])->toArray();
                 $customer->favoriteRestaurants()->attach($pivot);
+            }
+        });
+    }
+
+    public function hasReviews(int $count = 3): static
+    {
+        return $this->afterCreating(function ($customer) use ($count) {
+            $restaurants = $customer->favoriteRestaurants()->pluck('id');
+            foreach ($restaurants as $restaurantId) {
+                Review::factory()
+                    ->count($count)
+                    ->create([
+                        'customer_user_id' => $customer->user_id,
+                        'restaurant_id' => $restaurantId,
+                    ]);
             }
         });
     }

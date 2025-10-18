@@ -29,7 +29,7 @@ class OrderFactory extends Factory
             $menuItems = $order->restaurant->menuItems;
             if ($menuItems->isNotEmpty()) {
                 // Ensure unique menu items are selected
-                $picked = $menuItems->unique()->random(rand(1, min(5, $menuItems->count())));
+                $picked = $menuItems->random(rand(1, min(5, $menuItems->count())));
                 $pivot = $picked->mapWithKeys(fn($item) => [
                     $item->id => ['quantity' => rand(1, 3)]
                 ])->toArray();

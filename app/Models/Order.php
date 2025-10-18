@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Order extends Model
 {
-                                            use HasFactory;
+                        use HasFactory;
 
     protected $fillable = [
         'restaurant_id',
