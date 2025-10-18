@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Controllers\Customer;
+
+use App\Http\Controllers\Controller;
+use App\Models\Review;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+
+class ReviewController extends Controller
+{
+    /**
+     * Display a listing of reviews (for the authenticated customer).
+     */
+    public function index(Request $request)
+    {
+        $customerUserId = Auth::id(); // assuming customers use users table
+        $reviews = Review::with('restaurant:id,name,address')
+            ->where('customer_user_id', $customerUserId)
+            ->latest()
+            ->get(['id', 'rating', 'title', 'content', 'restaurant_id', 'created_at']);
+
+        return Inertia::render('Customer/Reviews/Index', [
+            'reviews' => $reviews,
+        ]);
+    }
+
+    /**
+     * Store a newly created review.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'restaurant_id' => 'required|integer|exists:restaurants,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string|max:1024',
+        ]);
+
+        Review::create([
+            'customer_user_id' => Auth::id(),
+            'restaurant_id' => $validated['restaurant_id'],
+            'rating' => $validated['rating'],
+            'title' => $validated['title'],
+            'content' => $validated['content'] ?? null,
+        ]);
+
+        return redirect()->route('reviews.index')
+            ->with('success', 'Review submitted successfully.');
+    }
+}

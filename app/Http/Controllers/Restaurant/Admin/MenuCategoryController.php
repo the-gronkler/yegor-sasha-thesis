@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers\Restaurant\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\FoodType;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class MenuCategoryController extends Controller
+{
+    public function index(Request $request)
+    {
+        $restaurant = $request->user()->employee->restaurant; // assuming employee→restaurant relation
+
+        $categories = FoodType::where('restaurant_id', $restaurant->id)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return Inertia::render('Restaurant/Admin/MenuCategories/Index', [
+            'restaurant' => ['id' => $restaurant->id, 'name' => $restaurant->name],
+            'categories' => $categories,
+        ]);
+    }
+
+    public function create(Request $request)
+    {
+        return Inertia::render('Restaurant/Admin/MenuCategories/Create');
+    }
+
+    public function store(Request $request)
+    {
+        $restaurant = $request->user()->employee->restaurant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        FoodType::create([
+            'restaurant_id' => $restaurant->id,
+            'name' => $validated['name'],
+        ]);
+
+        return redirect()->route('menu-categories.index')
+            ->with('success', 'Category created.');
+    }
+
+    public function edit(Request $request, FoodType $menuCategory)
+    {
+        // Ensure the category belongs to this restaurant
+        $this->authorize('update', $menuCategory);
+
+        return Inertia::render('Restaurant/Admin/MenuCategories/Edit', [
+            'category' => ['id' => $menuCategory->id, 'name' => $menuCategory->name],
+        ]);
+    }
+
+    public function update(Request $request, FoodType $menuCategory)
+    {
+        $this->authorize('update', $menuCategory);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $menuCategory->update(['name' => $validated['name']]);
+
+        return redirect()->route('menu-categories.index')
+            ->with('success', 'Category updated.');
+    }
+
+    public function destroy(Request $request, FoodType $menuCategory)
+    {
+        $this->authorize('delete', $menuCategory);
+
+        $menuCategory->delete();
+
+        return redirect()->route('menu-categories.index')
+            ->with('success', 'Category deleted.');
+    }
+
+    private function authorize(string $string, FoodType $menuCategory) {}
+}
