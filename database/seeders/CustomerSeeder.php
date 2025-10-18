@@ -3,16 +3,21 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Restaurant;
 use Illuminate\Database\Seeder;
 
 class CustomerSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Customer::factory()->count(50)->create();
+        Customer::factory()
+            ->count(30)
+            ->hasOrders(4) // requires orders() on model and OrderFactory
+            ->hasAttached(
+                Restaurant::factory()->count(3), // requires favoriteRestaurants() on model
+                'favoriteRestaurants',
+                fn () => ['rank' => rand(1, 5)]
+            )
+            ->create();
     }
 }
