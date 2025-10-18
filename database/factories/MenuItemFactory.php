@@ -14,7 +14,7 @@ class MenuItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'restaurant_id' => Restaurant::factory(),
+            'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
             'name' => $this->faker->word(),
             'price' => $this->faker->randomFloat(2, 1, 100),
             'description' => $this->faker->sentence(),

@@ -18,7 +18,7 @@ class EmployeeFactory extends Factory
     {
         return [
             'user_id'       => User::factory(),
-            'restaurant_id' => Restaurant::factory(),
+            'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
             'is_admin'      => false,
         ];
     }

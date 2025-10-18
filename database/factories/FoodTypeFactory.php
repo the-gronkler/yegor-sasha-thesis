@@ -14,7 +14,7 @@ class FoodTypeFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'restaurant_id' => Restaurant::factory(),
+            'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
         ];
     }
 }
