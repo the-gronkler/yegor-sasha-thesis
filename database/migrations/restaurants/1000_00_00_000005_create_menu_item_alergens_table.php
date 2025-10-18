@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('menu_item_allergen', function (Blueprint $table) {
             $table->unsignedBigInteger('menu_item_id');
             $table->unsignedBigInteger('allergen_id');
-            $table->primary(['menu_item_id','allergen_id']);
+            $table->primary(['menu_item_id', 'allergen_id']);
             $table->foreign('menu_item_id')->references('id')->on('menu_items')->onDelete('cascade');
             $table->foreign('allergen_id')->references('id')->on('allergens')->onDelete('cascade');
             $table->timestamps();

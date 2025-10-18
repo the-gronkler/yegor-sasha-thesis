@@ -15,7 +15,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_user_id');
             $table->unsignedBigInteger('restaurant_id');
             $table->integer('rank');
-            $table->primary(['customer_user_id','restaurant_id']);
+            $table->primary(['customer_user_id', 'restaurant_id']);
             $table->foreign('customer_user_id')->references('user_id')->on('customers')->onDelete('cascade');
             $table->foreign('restaurant_id')->references('id')->on('restaurants')->onDelete('cascade');
             $table->timestamps();

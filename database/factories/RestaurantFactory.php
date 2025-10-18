@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\Restaurant;
-use App\Models\FoodType;
-use App\Models\MenuItem;
-use App\Models\Image;
 use App\Models\Allergen;
+use App\Models\FoodType;
+use App\Models\Image;
+use App\Models\MenuItem;
+use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RestaurantFactory extends Factory
@@ -141,7 +141,7 @@ class RestaurantFactory extends Factory
                 $attachCount = rand(1, min(3, $allergenIds->count()));
                 $subset = $allergenIds->random($attachCount);
                 $mi->allergens()->attach(
-                    $subset->mapWithKeys(fn($id) => [$id => []])
+                    $subset->mapWithKeys(fn ($id) => [$id => []])
                 );
             }
         });

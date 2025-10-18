@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("ALTER TABLE review_images MODIFY COLUMN image MEDIUMBLOB");
+        DB::statement('ALTER TABLE review_images MODIFY COLUMN image MEDIUMBLOB');
     }
 
     /**

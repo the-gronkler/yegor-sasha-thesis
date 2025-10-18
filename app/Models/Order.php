@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Order extends Model
 {
-                                            use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'restaurant_id',
         'notes',
         'order_status_id',
         'customer_user_id',
-        'time_placed'
+        'time_placed',
     ];
 
     public function menuItems(): BelongsToMany

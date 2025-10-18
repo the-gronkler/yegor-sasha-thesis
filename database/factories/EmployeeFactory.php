@@ -17,9 +17,9 @@ class EmployeeFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'       => User::factory(),
+            'user_id' => User::factory(),
             'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
-            'is_admin'      => false,
+            'is_admin' => false,
         ];
     }
 

@@ -2,36 +2,36 @@
 
 namespace App\Providers;
 
-use App\Models\User;
-use App\Policies\UserPolicy;
 use App\Models\Allergen;
-use App\Policies\AllergenPolicy;
 use App\Models\Customer;
-use App\Policies\CustomerPolicy;
 use App\Models\Employee;
-use App\Policies\EmployeePolicy;
 use App\Models\FavoriteRestaurant;
-use App\Policies\FavoriteRestaurantPolicy;
 use App\Models\FoodType;
-use App\Policies\FoodTypePolicy;
 use App\Models\Image;
-use App\Policies\ImagePolicy;
 use App\Models\MenuItem;
-use App\Policies\MenuItemPolicy;
 use App\Models\MenuItemAllergen;
-use App\Policies\MenuItemAllergenPolicy;
 use App\Models\Order;
-use App\Policies\OrderPolicy;
 use App\Models\OrderItem;
-use App\Policies\OrderItemPolicy;
 use App\Models\OrderStatus;
-use App\Policies\OrderStatusPolicy;
 use App\Models\Restaurant;
-use App\Policies\RestaurantPolicy;
 use App\Models\Review;
-use App\Policies\ReviewPolicy;
 use App\Models\ReviewImage;
+use App\Models\User;
+use App\Policies\AllergenPolicy;
+use App\Policies\CustomerPolicy;
+use App\Policies\EmployeePolicy;
+use App\Policies\FavoriteRestaurantPolicy;
+use App\Policies\FoodTypePolicy;
+use App\Policies\ImagePolicy;
+use App\Policies\MenuItemAllergenPolicy;
+use App\Policies\MenuItemPolicy;
+use App\Policies\OrderItemPolicy;
+use App\Policies\OrderPolicy;
+use App\Policies\OrderStatusPolicy;
+use App\Policies\RestaurantPolicy;
 use App\Policies\ReviewImagePolicy;
+use App\Policies\ReviewPolicy;
+use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -67,7 +67,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //First check if the user is an admin, and if so, allow all actions. If not, go to check policies.
+        // First check if the user is an admin, and if so, allow all actions. If not, go to check policies.
         Gate::before(function ($user, $ability) {
             return $user->is_admin === true ? true : null;
         });

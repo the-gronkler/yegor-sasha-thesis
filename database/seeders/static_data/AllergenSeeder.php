@@ -28,7 +28,7 @@ class AllergenSeeder extends Seeder
             ['name' => 'Soybeans'],
             ['name' => 'Sulfites'],
         ];
-        foreach($allergens as $allergen){
+        foreach ($allergens as $allergen) {
             Allergen::create($allergen);
         }
     }

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReviewImage extends Model
 {
-
     protected $fillable = [
         'image',
         'review_id',

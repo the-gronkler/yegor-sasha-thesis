@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_user_id');
             $table->integer('rating');
             $table->string('title')->nullable();
-            $table->string('content',1024)->nullable();
+            $table->string('content', 1024)->nullable();
             $table->unsignedBigInteger('restaurant_id');
             $table->foreign('customer_user_id')->references('user_id')->on('customers')->onDelete('cascade');
             $table->foreign('restaurant_id')->references('id')->on('restaurants')->onDelete('cascade');
