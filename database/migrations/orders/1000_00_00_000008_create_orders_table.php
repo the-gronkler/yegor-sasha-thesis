@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('restaurant_id');
             $table->string('notes', 512)->nullable();
-                        $table->dateTime('time_placed');
+            $table->dateTime('time_placed');
             $table->unsignedBigInteger('order_status_id');
             $table->unsignedBigInteger('customer_user_id');
             $table->foreign('restaurant_id')->references('id')->on('restaurants')->onDelete('cascade');

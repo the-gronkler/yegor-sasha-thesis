@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\Review;
 use App\Models\User;
@@ -22,9 +21,9 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-        'user_id' => User::factory(),
-        'payment_method_token' => null,
-    ];
+            'user_id' => User::factory(),
+            'payment_method_token' => null,
+        ];
     }
 
     /**
@@ -53,7 +52,7 @@ class CustomerFactory extends Factory
             if (! $customer->favoriteRestaurants()->exists()) {
                 $restaurants = Restaurant::inRandomOrder()->take(rand(1, 3))->pluck('id');
                 $pivot = $restaurants->mapWithKeys(fn ($id, $i) => [
-                    $id => ['rank' => $i + 1]
+                    $id => ['rank' => $i + 1],
                 ])->toArray();
                 $customer->favoriteRestaurants()->attach($pivot);
             }

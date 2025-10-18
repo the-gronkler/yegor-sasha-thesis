@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Order;
 use App\Models\Customer;
-use App\Models\Restaurant;
+use App\Models\Order;
 use App\Models\OrderStatus;
+use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class OrderFactory extends Factory
@@ -30,8 +30,8 @@ class OrderFactory extends Factory
             if ($menuItems->isNotEmpty()) {
                 // Ensure unique menu items are selected
                 $picked = $menuItems->random(rand(1, min(5, $menuItems->count())));
-                $pivot = $picked->mapWithKeys(fn($item) => [
-                    $item->id => ['quantity' => rand(1, 3)]
+                $pivot = $picked->mapWithKeys(fn ($item) => [
+                    $item->id => ['quantity' => rand(1, 3)],
                 ])->toArray();
 
                 $order->menuItems()->attach($pivot);

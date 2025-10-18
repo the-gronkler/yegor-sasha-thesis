@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Review extends Model
 {
-        use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'customer_user_id',
