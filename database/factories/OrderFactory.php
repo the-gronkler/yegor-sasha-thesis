@@ -15,7 +15,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'restaurant_id' => Restaurant::factory(),
+            'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
             'customer_user_id' => Customer::factory(),
             'order_status_id' => OrderStatus::inRandomOrder()->value('id'),
             'time_placed' => now()->subMinutes(rand(0, 1000)),
@@ -28,7 +28,8 @@ class OrderFactory extends Factory
         return $this->afterCreating(function (Order $order) {
             $menuItems = $order->restaurant->menuItems;
             if ($menuItems->isNotEmpty()) {
-                $picked = $menuItems->random(rand(1, min(5, $menuItems->count())));
+                // Ensure unique menu items are selected
+                $picked = $menuItems->unique()->random(rand(1, min(5, $menuItems->count())));
                 $pivot = $picked->mapWithKeys(fn($item) => [
                     $item->id => ['quantity' => rand(1, 3)]
                 ])->toArray();

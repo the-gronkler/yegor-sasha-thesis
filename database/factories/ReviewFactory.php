@@ -42,7 +42,7 @@ class ReviewFactory extends Factory
 
         return [
             'customer_user_id' => Customer::factory(), // creates a Customer and uses its primary key
-            'restaurant_id' => Restaurant::factory(),
+            'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
             'rating' => rand(1, 5),
             'title' => self::$sampleTitles[$i],
             'content' => self::$sampleContents[$i],
