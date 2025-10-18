@@ -3,6 +3,7 @@
 <head>
     @viteReactRefresh
     @vite('resources/js/app.jsx')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>PRO Thesis</title>
 </head>
 <body>
