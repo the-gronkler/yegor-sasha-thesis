@@ -84,7 +84,7 @@ class RestaurantFactory extends Factory
             foreach ($restaurant->menuItems as $mi) {
                 $attachCount = rand(1, min(3, $allergenIds->count()));
                 $subset = $allergenIds->random($attachCount);
-                $mi->alergens()->attach(
+                $mi->allergens()->attach(
                     $subset->mapWithKeys(fn($id) => [$id => []])
                 );
             }

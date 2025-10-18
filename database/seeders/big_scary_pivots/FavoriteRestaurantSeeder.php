@@ -3,7 +3,6 @@
 namespace Database\Seeders\big_scary_pivots;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
 use App\Models\Restaurant;
 
@@ -25,7 +24,9 @@ class FavoriteRestaurantSeeder extends Seeder
         foreach ($customers as $customer) {
             // each customer gets 1 to 5 favorites
             $count = rand(1, min(5, $restaurants->count()));
-            $favRestaurants = $restaurants->random($count);
+            $favRestaurants = collect(
+                $restaurants->random($count)
+            )->values(); // so it will be a collection in case of 1 item
 
             foreach ($favRestaurants as $index => $restaurant) {
                 $customer->favoriteRestaurants()->attach($restaurant->id, [

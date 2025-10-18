@@ -14,9 +14,9 @@ class CustomerSeeder extends Seeder
             ->count(30)
             ->hasOrders(4) // requires orders() on model and OrderFactory
             ->hasAttached(
-                Restaurant::factory()->count(3), // requires favoriteRestaurants() on model
-                'favoriteRestaurants',
-                fn () => ['rank' => rand(1, 5)]
+                Restaurant::factory()->count(3),  // requires favoriteRestaurants() on model
+                fn () => ['rank' => rand(1, 5)],
+                'favoriteRestaurants'
             )
             ->create();
     }

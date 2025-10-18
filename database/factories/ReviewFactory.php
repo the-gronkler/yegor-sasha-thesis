@@ -38,11 +38,10 @@ class ReviewFactory extends Factory
 
     public function definition(): array
     {
-        // pick a random index (same index for title & content, just in case)
         $i = rand(0, count(self::$sampleTitles) - 1);
 
         return [
-            'customer_user_id' => Customer::factory()->user_id,
+            'customer_user_id' => Customer::factory(), // creates a Customer and uses its primary key
             'restaurant_id' => Restaurant::factory(),
             'rating' => rand(1, 5),
             'title' => self::$sampleTitles[$i],

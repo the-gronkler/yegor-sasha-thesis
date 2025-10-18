@@ -16,7 +16,7 @@ class OrderFactory extends Factory
     {
         return [
             'restaurant_id' => Restaurant::factory(),
-            'customer_user_id' => Customer::factory()->user_id,  // or use for()
+            'customer_user_id' => Customer::factory(),
             'order_status_id' => OrderStatus::inRandomOrder()->value('id'),
             'time_placed' => now()->subMinutes(rand(0, 1000)),
             'notes' => $this->faker->optional()->sentence(),

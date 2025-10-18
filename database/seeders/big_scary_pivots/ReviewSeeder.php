@@ -4,8 +4,6 @@ namespace Database\Seeders\big_scary_pivots;
 
 use Illuminate\Database\Seeder;
 use App\Models\Review;
-use App\Models\Restaurant;
-use App\Models\Customer;
 
 class ReviewSeeder extends Seeder
 {

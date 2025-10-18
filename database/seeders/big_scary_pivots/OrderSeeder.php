@@ -15,8 +15,8 @@ class OrderSeeder extends Seeder
             ->count(30)
             ->hasAttached(
                 MenuItem::factory()->count(3),
-                'menuItems',
-                fn() => ['quantity' => rand(1,3)] // configuring pivot data (menu_item quantity)
+                fn () => ['quantity' => rand(1, 3)], // Configuring pivot data
+                'menuItems'
             )
             ->create();
     }

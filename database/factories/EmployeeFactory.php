@@ -6,75 +6,45 @@ use App\Models\Employee;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @extends Factory<Employee>
  */
-
 class EmployeeFactory extends Factory
 {
-    protected $restaurantId;
+    protected $model = Employee::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     * @throws \Exception
-     */
     public function definition(): array
     {
-        // Use the provided restaurant ID or throw exception
-        if (!isset($this->restaurantId))
-             throw new \Exception('Restaurant ID not set for EmployeeFactory. Use ->forRestaurant($restaurantId) method to set it.');
-
-        $restaurantId = $this->restaurantId;
-
         return [
-            'user_id' => User::factory()->id,
-            'restaurant_id' => $restaurantId,
-            'is_admin' => false //fake()->boolean(),
+            'user_id'       => User::factory(),
+            'restaurant_id' => Restaurant::factory(),
+            'is_admin'      => false,
         ];
     }
 
     /**
-     * MANDATORY: cannot have orphaned employees
-     * Use this last in the chain to ensure the restaurant ID is set, i.e.:
-     * Employee::factory()
-     * ->count(1)
-     * ->admin()
-     * ->forRestaurant($restaurant->id)     <-- this must be last
-     * ->create();
-     *
-     * @param  int  $restaurantId
-     * @return $this
+     * Indicates the employee is an admin.
      */
-    public function forRestaurant(int $restaurantId)
+    public function admin(): static
     {
-        $this->restaurantId = $restaurantId;
-
-        return $this;
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => true,
+        ]);
     }
 
-    public function admin()
+    // Optionally if you want a method to force a specific restaurant instance:
+    public function forRestaurant(Restaurant $restaurant): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_admin' => true,
-            ];
+        return $this->state(fn (array $attributes) => [
+            'restaurant_id' => $restaurant->id,
+        ]);
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Employee $employee) {
+            // You might want to do something after creation, e.g. assign permissions
         });
     }
-
-
-    /**
-     * Configure the model factory.
-     *
-     * @return $this
-     */
-//    public function configure()
-//    {
-//        return $this->afterCreating(function ($employee) {
-//            // You might want to perform actions after creating the employee, like assigning roles or permissions.
-//        });
-//    }
 }
