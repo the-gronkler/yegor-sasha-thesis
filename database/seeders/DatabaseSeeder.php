@@ -20,8 +20,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         // make site-wide admin for testing.
         User::factory()->create([
             'name' => 'admin',
@@ -29,27 +27,15 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('admin'),
         ]);
 
-        /*
-
-
-         */
-
-
         $this->call([
-            AllergenSeeder::class, // seeds allergens
-            OrderStatusSeeder::class, // seeds order statuses
-
-            RestaurantSeeder::class, // seeds tables restaurants, foodTypes, menu items, images
-            EmployeeSeeder::class, // seeds employees, automatically creating underlying user.
-            // attached random num of new ems to each restaurant
-
-            CustomerSeeder::class, // just creates customers
-
-            // id like to add some checks for the pivot seeders, so that the generated data makes sense,
-            // but i also dont really care that much so...
+            AllergenSeeder::class,
+            OrderStatusSeeder::class,
+            RestaurantSeeder::class,
+            EmployeeSeeder::class,
+            CustomerSeeder::class,
             OrderSeeder::class,
             ReviewSeeder::class,
-            FavoriteRestaurantSeeder::class
+            FavoriteRestaurantSeeder::class,
         ]);
     }
 }
