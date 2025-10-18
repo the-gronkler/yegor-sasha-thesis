@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class MenuItemAllergen extends Model
+class MenuItemAllergen extends Pivot
 {
-    //
+    protected $table = 'menu_item_allergen';
 }
