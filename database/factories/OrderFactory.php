@@ -12,6 +12,32 @@ class OrderFactory extends Factory
 {
     protected $model = Order::class;
 
+    /**
+     * Predefined order notes.
+     */
+    protected static array $orderNotes = [
+        'Please deliver to the back door.',
+        'No onions, please.',
+        'Extra spicy.',
+        'Leave the food at the doorstep.',
+        'Add extra napkins.',
+        'Please include utensils.',
+        'No cheese on the burger.',
+        'Gluten-free options only.',
+        'Call upon arrival.',
+        'Add extra sauce.',
+        'No peanuts due to allergies.',
+        'Deliver as soon as possible.',
+        'Please separate the sauces.',
+        'No pickles on the sandwich.',
+        'Add extra toppings.',
+        'Make it well-done.',
+        'Please include a receipt.',
+        'No dairy products.',
+        'Add extra dressing on the side.',
+        'Deliver between 6 PM and 7 PM.',
+    ];
+
     public function definition(): array
     {
         return [
@@ -19,7 +45,7 @@ class OrderFactory extends Factory
             'customer_user_id' => Customer::factory(),
             'order_status_id' => OrderStatus::inRandomOrder()->value('id'),
             'time_placed' => now()->subMinutes(rand(0, 1000)),
-            'notes' => $this->faker->optional()->sentence(),
+            'notes' => rand(0, 1) ? self::$orderNotes[array_rand(self::$orderNotes)] : null,
         ];
     }
 
