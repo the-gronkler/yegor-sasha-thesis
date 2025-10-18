@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Order;
+use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -18,13 +20,10 @@ class CustomerFactory extends Factory
      */
     public function definition(): array
     {
-        // Ensure a user is created first
-        $user = User::factory()->create();
-
         return [
-            'user_id' => $user->id, // Use the ID of the created User
-            'payment_method_token' => null,
-        ];
+        'user_id' => User::factory(),
+        'payment_method_token' => null,
+    ];
     }
 
     /**
@@ -36,7 +35,7 @@ class CustomerFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'payment_method_token' => Str::random(40),
+                'payment_method_token' => (string) Str::uuid(),
             ];
         });
     }
@@ -49,7 +48,14 @@ class CustomerFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function ($customer) {
-            // Perform actions after creating the customer (e.g., assigning roles, sending welcome email).
+            // Attach favorite restaurants if none have been attached via hasAttached
+            if (! $customer->favoriteRestaurants()->exists()) {
+                $restaurants = Restaurant::inRandomOrder()->take(rand(1, 3))->pluck('id');
+                $pivot = $restaurants->mapWithKeys(fn ($id, $i) => [
+                    $id => ['rank' => $i + 1]
+                ])->toArray();
+                $customer->favoriteRestaurants()->attach($pivot);
+            }
         });
     }
 }

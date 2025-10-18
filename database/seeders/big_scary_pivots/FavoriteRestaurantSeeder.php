@@ -3,7 +3,6 @@
 namespace Database\Seeders\big_scary_pivots;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
 use App\Models\Restaurant;
 
@@ -23,14 +22,15 @@ class FavoriteRestaurantSeeder extends Seeder
         }
 
         foreach ($customers as $customer) {
-            // Each customer gets 1-1 <--(can change that) favorite restaurants
-            $favRestaurants = $restaurants->random(rand(1, min(1, $restaurants->count())))->values();
+            // each customer gets 1 to 5 favorites
+            $count = rand(1, min(5, $restaurants->count()));
+            $favRestaurants = collect(
+                $restaurants->random($count)
+            )->values(); // so it will be a collection in case of 1 item
 
             foreach ($favRestaurants as $index => $restaurant) {
-                DB::table('favorite_restaurants')->insert([
-                    'customer_user_id' => $customer->user_id,
-                    'restaurant_id' => $restaurant->id,
-                    'rank' => $index + 1, // rank starts at 1
+                $customer->favoriteRestaurants()->attach($restaurant->id, [
+                    'rank' => $index + 1,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

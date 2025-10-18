@@ -13,20 +13,18 @@ class EmployeeSeeder extends Seeder
      */
     public function run(): void
     {
-        $restaurants = Restaurant::all();
-
-        foreach ($restaurants as $restaurant) {
+        Restaurant::all()->each(function ($restaurant) {
+            // One admin per restaurant
             Employee::factory()
-                ->count(1)
                 ->admin()
-                ->forRestaurant($restaurant->id)
+                ->forRestaurant($restaurant)
                 ->create();
 
-            $employeeCount = rand(2, 14);
+            // Regular employees
             Employee::factory()
-                ->count($employeeCount)
-                ->forRestaurant($restaurant->id)
+                ->count(rand(2, 14))
+                ->forRestaurant($restaurant)
                 ->create();
-        }
+        });
     }
 }
