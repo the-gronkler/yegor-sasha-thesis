@@ -14,7 +14,7 @@ createInertiaApp({
     }
     return importPage();
   },
-  setup({ el, App, props, plugin }) {
+  setup({ el, App, props }) {
     const root = createRoot(el);
     root.render(
       <React.StrictMode>
