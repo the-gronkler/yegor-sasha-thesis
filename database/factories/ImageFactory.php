@@ -11,7 +11,7 @@ class ImageFactory extends Factory
     public function definition(): array
     {
         return [
-            'image' => $this->faker->imageDataUri(), // or your blob logic
+            'image' => $this->faker->imageUrl(),
             'description' => $this->faker->sentence(),
             'restaurant_id' => null,
             'menu_item_id' => null,

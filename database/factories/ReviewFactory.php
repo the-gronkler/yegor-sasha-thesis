@@ -53,8 +53,8 @@ class ReviewFactory extends Factory
     {
         return $this->afterCreating(function (Review $review) {
             // Create a review image
-            $review->reviewImages()->create([
-                'image' => $this->faker->imageDataUri(),
+            $review->images()->create([
+                'image' => $this->faker->imageUrl(),
             ]);
         });
     }
