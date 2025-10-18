@@ -11,7 +11,7 @@ class CustomerSeeder extends Seeder
     public function run(): void
     {
         Customer::factory()
-            ->count(30)
+            ->count(5)
             ->hasOrders(4) // requires orders() on model and OrderFactory
             ->hasAttached(
                 Restaurant::factory()->count(3),  // requires favoriteRestaurants() on model

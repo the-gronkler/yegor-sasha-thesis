@@ -4,6 +4,7 @@ namespace Database\Factories;
 use App\Models\FoodType;
 use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FoodTypeFactory extends Factory
 {

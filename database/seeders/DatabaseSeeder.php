@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             CustomerSeeder::class,
             OrderSeeder::class,
             ReviewSeeder::class,
-            FavoriteRestaurantSeeder::class,
+//            FavoriteRestaurantSeeder::class,
         ]);
     }
 }
