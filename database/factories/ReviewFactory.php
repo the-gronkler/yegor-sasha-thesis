@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Review;
 use App\Models\Customer;
 use App\Models\Restaurant;
+use App\Models\Review;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ReviewFactory extends Factory

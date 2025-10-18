@@ -10,10 +10,10 @@ Artisan::command('inspire', function () {
 
 Artisan::command(
     'mfs',
-    fn() =>  Artisan::call('migrate:fresh', [
+    fn () => Artisan::call('migrate:fresh', [
         '--path' => 'database/migrations/*',
         '--seed' => true,
         '--no-interaction' => true,
-        ], new ConsoleOutput()
+    ], new ConsoleOutput
     )
 )->describe('Runs migrate:fresh with seed, including migrations from all subdirectories');

@@ -3,10 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Database\Seeders\big_scary_pivots\FavoriteRestaurantSeeder;
-use Database\Seeders\big_scary_pivots\OrderSeeder;
-use Database\Seeders\big_scary_pivots\ReviewSeeder;
-//use Database\Seeders\static_data\AllergenSeeder;
+// use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\OrderStatusSeeder;
 use Illuminate\Database\Seeder;
@@ -33,9 +30,6 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
             EmployeeSeeder::class,
             CustomerSeeder::class,
-            OrderSeeder::class,
-            ReviewSeeder::class,
-//            FavoriteRestaurantSeeder::class,
         ]);
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Allergen extends Model
 {
-        use HasFactory;
+    use HasFactory;
 
     protected $fillable = ['name'];
 
