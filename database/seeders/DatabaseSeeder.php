@@ -6,6 +6,7 @@ use App\Models\User;
 use Database\Seeders\big_scary_pivots\FavoriteRestaurantSeeder;
 use Database\Seeders\big_scary_pivots\OrderSeeder;
 use Database\Seeders\big_scary_pivots\ReviewSeeder;
+//use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\OrderStatusSeeder;
 use Illuminate\Database\Seeder;
@@ -19,25 +20,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // make site-wide admin for testing.
         User::factory()->create([
-            'name' => 'Test User',
+            'name' => 'admin',
             'email' => 'test@example.com',
+            'password' => bcrypt('admin'),
         ]);
 
-        // order important !!!!!!!!!
         $this->call([
             AllergenSeeder::class,
             OrderStatusSeeder::class,
-            UserSeeder::class,
-
-            CustomerSeeder::class,
             RestaurantSeeder::class,
-
+            EmployeeSeeder::class,
+            CustomerSeeder::class,
             OrderSeeder::class,
             ReviewSeeder::class,
-            FavoriteRestaurantSeeder::class
+            FavoriteRestaurantSeeder::class,
         ]);
     }
 }

@@ -20,6 +20,7 @@ class OrderStatusSeeder extends Seeder
             'Preparing',
             'Ready',
             'Cancelled',
+            'Fulfilled',
         ];
 
         foreach ($statuses as $status) {
