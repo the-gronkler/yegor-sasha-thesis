@@ -5,13 +5,14 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [
     laravel({
-      input: ['resources/js/app.jsx'],  // our entry
+      input: ['resources/css/app.css', 'resources/js/app.jsx'], // our entry
       refresh: true,
     }),
     react(),
   ],
-  resolve: {alias: {
+  resolve: {
+    alias: {
       '@': '/resources/js',
-      },
+    },
   },
 });
