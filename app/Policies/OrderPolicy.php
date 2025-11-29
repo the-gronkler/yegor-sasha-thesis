@@ -9,8 +9,8 @@ class OrderPolicy
 {
     /**
      * Determine whether the user can view any models.
-     * NOTE: This authorizes access to the "List Orders" page.
-     * The Controller is responsible for filtering the actual rows returned.
+     * Allows admins, customers, and employees to access the orders list.
+     * Controllers must filter results based on user role.
      */
     public function viewAny(User $user): bool
     {

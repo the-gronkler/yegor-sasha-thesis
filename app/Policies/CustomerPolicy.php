@@ -28,7 +28,8 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        // Only allow creation if the user does not already have a customer profile
+        return Customer::where('user_id', $user->id)->doesntExist();
     }
 
     /**

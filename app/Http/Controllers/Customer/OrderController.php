@@ -15,7 +15,6 @@ class OrderController extends Controller
 
         $customer = $request->user()->customer;
 
-        // Changed 'orderStatus' to 'status' to match the Model relationship
         $orders = Order::with(['menuItems', 'status', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
             ->where('order_status_id', '!=', Order::STATUS_IN_CART)
@@ -33,7 +32,6 @@ class OrderController extends Controller
 
         $customer = $request->user()->customer;
 
-        // Changed 'orderStatus' to 'status'
         $oldOrders = Order::with(['menuItems', 'status', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
             ->where('order_status_id', '!=', Order::STATUS_IN_CART)

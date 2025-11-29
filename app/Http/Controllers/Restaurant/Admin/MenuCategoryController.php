@@ -31,8 +31,18 @@ class MenuCategoryController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', FoodType::class);
-        $restaurant = $request->restaurant;
-        
+
+        // Securely retrieve the restaurant from the authenticated user
+        // This prevents attackers from injecting an arbitrary restaurant ID
+        $restaurant = $request->user()->employee?->restaurant;
+
+        if (!$restaurant) {
+            abort(403, 'User is not associated with a restaurant.');
+        }
+
+        // Validate that the user has update rights on that specific restaurant
+        $this->authorize('update', $restaurant);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);
