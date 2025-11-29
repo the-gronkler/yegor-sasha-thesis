@@ -15,6 +15,8 @@ class ReviewController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Review::class);
+
         $customerUserId = Auth::id(); // assuming customers use users table
         $reviews = Review::with('restaurant:id,name,address')
             ->where('customer_user_id', $customerUserId)
@@ -31,6 +33,8 @@ class ReviewController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Review::class);
+
         $validated = $request->validate([
             'restaurant_id' => 'required|integer|exists:restaurants,id',
             'rating' => 'required|integer|min:1|max:5',

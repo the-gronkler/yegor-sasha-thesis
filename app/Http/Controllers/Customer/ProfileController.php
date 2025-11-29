@@ -16,6 +16,8 @@ class ProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
+        $this->authorize('view', $user);
+
         $customer = $user->customer; // assuming one-to-one relationship
 
         // Prepare favorites maybe
@@ -39,6 +41,7 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
+        $this->authorize('update', $user);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -56,9 +59,12 @@ class ProfileController extends Controller
         $user->save();
 
         // If you also allow updating customer details:
-        $user->customer()->update([
-            'payment_method_token' => $request->input('payment_method_token'),
-        ]);
+        if ($user->customer) {
+            $this->authorize('update', $user->customer);
+            $user->customer()->update([
+                'payment_method_token' => $request->input('payment_method_token'),
+            ]);
+        }
 
         return back()->with('success', 'Profile updated.');
     }
@@ -69,6 +75,7 @@ class ProfileController extends Controller
     public function destroy(Request $request)
     {
         $user = $request->user();
+        $this->authorize('delete', $user);
 
         // Optionally you can soft-delete or cascade delete
         $user->customer()->delete();

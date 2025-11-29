@@ -12,7 +12,7 @@ class OrderStatusPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +20,7 @@ class OrderStatusPolicy
      */
     public function view(User $user, OrderStatus $orderStatus): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class OrderStatusPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -36,7 +36,7 @@ class OrderStatusPolicy
      */
     public function update(User $user, OrderStatus $orderStatus): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -44,7 +44,7 @@ class OrderStatusPolicy
      */
     public function delete(User $user, OrderStatus $orderStatus): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -52,7 +52,7 @@ class OrderStatusPolicy
      */
     public function restore(User $user, OrderStatus $orderStatus): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -60,6 +60,6 @@ class OrderStatusPolicy
      */
     public function forceDelete(User $user, OrderStatus $orderStatus): bool
     {
-        return false;
+        return $user->is_admin;
     }
 }

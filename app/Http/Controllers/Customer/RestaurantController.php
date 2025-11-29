@@ -14,6 +14,8 @@ class RestaurantController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Restaurant::class);
+
         // You might paginate, or fetch subset, etc.
         $restaurants = Restaurant::with('foodTypes', 'images')
             ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating'])
@@ -30,6 +32,8 @@ class RestaurantController extends Controller
      */
     public function show(Request $request, Restaurant $restaurant)
     {
+        $this->authorize('view', $restaurant);
+
         // Load related data
         $restaurant->load([
             'foodTypes.menuItems.images',         // food types → menu items → images

@@ -12,7 +12,7 @@ class FavoriteRestaurantPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->is_admin || $user->isCustomer();
     }
 
     /**
@@ -20,7 +20,7 @@ class FavoriteRestaurantPolicy
      */
     public function view(User $user, FavoriteRestaurant $favoriteRestaurant): bool
     {
-        return false;
+        return $user->is_admin || ($user->isCustomer() && $user->id === $favoriteRestaurant->customer_user_id);
     }
 
     /**
@@ -28,7 +28,7 @@ class FavoriteRestaurantPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isCustomer();
     }
 
     /**
@@ -36,7 +36,7 @@ class FavoriteRestaurantPolicy
      */
     public function update(User $user, FavoriteRestaurant $favoriteRestaurant): bool
     {
-        return false;
+        return $user->is_admin || ($user->isCustomer() && $user->id === $favoriteRestaurant->customer_user_id);
     }
 
     /**
@@ -44,7 +44,7 @@ class FavoriteRestaurantPolicy
      */
     public function delete(User $user, FavoriteRestaurant $favoriteRestaurant): bool
     {
-        return false;
+        return $user->is_admin || ($user->isCustomer() && $user->id === $favoriteRestaurant->customer_user_id);
     }
 
     /**
@@ -52,7 +52,7 @@ class FavoriteRestaurantPolicy
      */
     public function restore(User $user, FavoriteRestaurant $favoriteRestaurant): bool
     {
-        return false;
+        return $user->is_admin || ($user->isCustomer() && $user->id === $favoriteRestaurant->customer_user_id);
     }
 
     /**
@@ -60,6 +60,6 @@ class FavoriteRestaurantPolicy
      */
     public function forceDelete(User $user, FavoriteRestaurant $favoriteRestaurant): bool
     {
-        return false;
+        return $user->is_admin || ($user->isCustomer() && $user->id === $favoriteRestaurant->customer_user_id);
     }
 }

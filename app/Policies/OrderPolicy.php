@@ -9,18 +9,23 @@ class OrderPolicy
 {
     /**
      * Determine whether the user can view any models.
+     * Allows admins, customers, and employees to access the orders list.
+     * Controllers must filter results based on user role.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->is_admin || $user->isCustomer() || $user->isEmployee();
     }
 
     /**
      * Determine whether the user can view the model.
+     * STRICT CHECK: Only Admin, the specific Restaurant's Employee, or the Customer who owns it.
      */
     public function view(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin ||
+            ($user->isEmployee() && $user->employee?->restaurant_id === $order->restaurant_id) ||
+            ($user->id === $order->customer_user_id);
     }
 
     /**
@@ -28,7 +33,7 @@ class OrderPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isCustomer();
     }
 
     /**
@@ -36,7 +41,9 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin ||
+               ($user->isEmployee() && $user->employee?->restaurant_id === $order->restaurant_id) ||
+               ($user->id === $order->customer_user_id); // Needed if customer updates cart
     }
 
     /**
@@ -44,7 +51,9 @@ class OrderPolicy
      */
     public function delete(User $user, Order $order): bool
     {
-        return false;
+        // Allow customer to delete their own order (used for clearing cart)
+        return $user->is_admin ||
+               ($user->id === $order->customer_user_id);
     }
 
     /**
@@ -52,7 +61,7 @@ class OrderPolicy
      */
     public function restore(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -60,6 +69,6 @@ class OrderPolicy
      */
     public function forceDelete(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin;
     }
 }

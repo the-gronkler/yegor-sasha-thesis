@@ -12,7 +12,7 @@ class AllergenPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +20,7 @@ class AllergenPolicy
      */
     public function view(User $user, Allergen $allergen): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class AllergenPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -36,7 +36,7 @@ class AllergenPolicy
      */
     public function update(User $user, Allergen $allergen): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -44,7 +44,7 @@ class AllergenPolicy
      */
     public function delete(User $user, Allergen $allergen): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -52,7 +52,7 @@ class AllergenPolicy
      */
     public function restore(User $user, Allergen $allergen): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -60,6 +60,6 @@ class AllergenPolicy
      */
     public function forceDelete(User $user, Allergen $allergen): bool
     {
-        return false;
+        return $user->is_admin;
     }
 }

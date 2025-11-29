@@ -76,9 +76,4 @@ class CartController extends Controller
 
         return redirect()->route('cart.index')->with('success', 'Note updated');
     }
-
-    private function authorize(string $string, Order $order)
-    {
-        // TODO: Implement authorization logic (not sure if that should be here and if that is the best approach)
-    }
 }
