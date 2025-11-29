@@ -11,6 +11,8 @@ class Order extends Model
 {
     use HasFactory;
 
+    const STATUS_IN_CART = 1;
+
     protected $fillable = [
         'restaurant_id',
         'notes',

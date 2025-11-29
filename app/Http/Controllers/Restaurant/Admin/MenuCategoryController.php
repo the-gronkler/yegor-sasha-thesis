@@ -78,6 +78,4 @@ class MenuCategoryController extends Controller
         return redirect()->route('menu-categories.index')
             ->with('success', 'Category deleted.');
     }
-
-    private function authorize(string $string, FoodType $menuCategory) {}
 }

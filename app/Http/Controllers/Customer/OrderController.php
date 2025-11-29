@@ -11,6 +11,8 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Order::class);
+
         $customer = $request->user()->customer;
 
         $orders = Order::with(['menuItems', 'orderStatus', 'restaurant'])
@@ -26,6 +28,8 @@ class OrderController extends Controller
 
     public function old(Request $request)
     {
+        $this->authorize('viewAny', Order::class);
+
         $customer = $request->user()->customer;
 
         $oldOrders = Order::with(['menuItems', 'orderStatus', 'restaurant'])

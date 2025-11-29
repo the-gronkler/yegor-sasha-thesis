@@ -28,7 +28,7 @@ class MenuItemPolicy
      */
     public function create(User $user): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $menuItem->restaurant_id);
+        return $user->is_admin || $user->isEmployee();
     }
 
     /**
