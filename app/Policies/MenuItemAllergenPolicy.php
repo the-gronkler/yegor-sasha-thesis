@@ -12,7 +12,7 @@ class MenuItemAllergenPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +20,7 @@ class MenuItemAllergenPolicy
      */
     public function view(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class MenuItemAllergenPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->is_admin || $user->isEmployee();
     }
 
     /**
@@ -36,7 +36,7 @@ class MenuItemAllergenPolicy
      */
     public function update(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 
     /**
@@ -44,7 +44,7 @@ class MenuItemAllergenPolicy
      */
     public function delete(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 
     /**
@@ -52,7 +52,7 @@ class MenuItemAllergenPolicy
      */
     public function restore(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 
     /**
@@ -60,6 +60,6 @@ class MenuItemAllergenPolicy
      */
     public function forceDelete(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 }

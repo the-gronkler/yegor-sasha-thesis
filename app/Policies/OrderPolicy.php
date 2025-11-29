@@ -12,7 +12,7 @@ class OrderPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->is_admin
     }
 
     /**
@@ -20,7 +20,9 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin ||
+               ($user->isEmployee() && $user->employee->restaurant_id === $order->restaurant_id) ||
+               ($user->id === $order->customer_user_id);
     }
 
     /**
@@ -28,7 +30,7 @@ class OrderPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isCustomer();
     }
 
     /**
@@ -36,7 +38,8 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin ||
+               ($user->isEmployee() && $user->employee->restaurant_id === $order->restaurant_id);
     }
 
     /**
@@ -44,7 +47,7 @@ class OrderPolicy
      */
     public function delete(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -52,7 +55,7 @@ class OrderPolicy
      */
     public function restore(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -60,6 +63,6 @@ class OrderPolicy
      */
     public function forceDelete(User $user, Order $order): bool
     {
-        return false;
+        return $user->is_admin;
     }
 }

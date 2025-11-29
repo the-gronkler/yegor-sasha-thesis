@@ -12,7 +12,7 @@ class FoodTypePolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +20,7 @@ class FoodTypePolicy
      */
     public function view(User $user, FoodType $foodType): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class FoodTypePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->is_admin || $user->isEmployee();
     }
 
     /**
@@ -36,7 +36,7 @@ class FoodTypePolicy
      */
     public function update(User $user, FoodType $foodType): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $foodType->restaurant_id);
     }
 
     /**
@@ -44,7 +44,7 @@ class FoodTypePolicy
      */
     public function delete(User $user, FoodType $foodType): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $foodType->restaurant_id);
     }
 
     /**
@@ -52,7 +52,7 @@ class FoodTypePolicy
      */
     public function restore(User $user, FoodType $foodType): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $foodType->restaurant_id);
     }
 
     /**
@@ -60,6 +60,6 @@ class FoodTypePolicy
      */
     public function forceDelete(User $user, FoodType $foodType): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $foodType->restaurant_id);
     }
 }
