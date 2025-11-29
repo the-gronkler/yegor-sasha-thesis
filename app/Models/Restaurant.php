@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $address
+ * @property float|null $latitude
+ * @property float|null $longitude
+ * @property string|null $description
+ * @property float|null $rating
+ */
 class Restaurant extends Model
 {
     use HasFactory;

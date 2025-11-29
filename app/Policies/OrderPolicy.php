@@ -9,20 +9,23 @@ class OrderPolicy
 {
     /**
      * Determine whether the user can view any models.
+     * NOTE: This authorizes access to the "List Orders" page.
+     * The Controller is responsible for filtering the actual rows returned.
      */
     public function viewAny(User $user): bool
     {
-        return $user->is_admin;
+        return $user->is_admin || $user->isCustomer() || $user->isEmployee();
     }
 
     /**
      * Determine whether the user can view the model.
+     * STRICT CHECK: Only Admin, the specific Restaurant's Employee, or the Customer who owns it.
      */
     public function view(User $user, Order $order): bool
     {
         return $user->is_admin ||
-               ($user->isEmployee() && $user->employee->restaurant_id === $order->restaurant_id) ||
-               ($user->id === $order->customer_user_id);
+            ($user->isEmployee() && $user->employee?->restaurant_id === $order->restaurant_id) ||
+            ($user->id === $order->customer_user_id);
     }
 
     /**
@@ -39,7 +42,8 @@ class OrderPolicy
     public function update(User $user, Order $order): bool
     {
         return $user->is_admin ||
-               ($user->isEmployee() && $user->employee->restaurant_id === $order->restaurant_id);
+               ($user->isEmployee() && $user->employee?->restaurant_id === $order->restaurant_id) ||
+               ($user->id === $order->customer_user_id); // Needed if customer updates cart
     }
 
     /**
@@ -47,7 +51,9 @@ class OrderPolicy
      */
     public function delete(User $user, Order $order): bool
     {
-        return $user->is_admin;
+        // Allow customer to delete their own order (used for clearing cart)
+        return $user->is_admin ||
+               ($user->id === $order->customer_user_id);
     }
 
     /**

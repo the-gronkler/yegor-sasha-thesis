@@ -15,9 +15,10 @@ class OrderController extends Controller
 
         $customer = $request->user()->customer;
 
-        $orders = Order::with(['menuItems', 'orderStatus', 'restaurant'])
+        // Changed 'orderStatus' to 'status' to match the Model relationship
+        $orders = Order::with(['menuItems', 'status', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', '!=', Order::STATUS_IN_CART) // Not sure how to implement this stuff...
+            ->where('order_status_id', '!=', Order::STATUS_IN_CART)
             ->latest()
             ->paginate(10);
 
@@ -32,9 +33,10 @@ class OrderController extends Controller
 
         $customer = $request->user()->customer;
 
-        $oldOrders = Order::with(['menuItems', 'orderStatus', 'restaurant'])
+        // Changed 'orderStatus' to 'status'
+        $oldOrders = Order::with(['menuItems', 'status', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', '!=', Order::STATUS_IN_CART) // Not sure how to implement this stuff...
+            ->where('order_status_id', '!=', Order::STATUS_IN_CART)
             ->get();
 
         return Inertia::render('Customer/Orders/Old', [
@@ -46,7 +48,7 @@ class OrderController extends Controller
     {
         $this->authorize('delete', $order);
 
-        if ($order->order_status_id !== Order::STATUS_IN_CART) { // Not sure how to implement this stuff...
+        if ($order->order_status_id !== Order::STATUS_IN_CART) {
             abort(403, 'Can only delete cart orders');
         }
 

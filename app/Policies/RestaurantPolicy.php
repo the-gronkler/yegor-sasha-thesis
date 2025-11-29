@@ -36,7 +36,7 @@ class RestaurantPolicy
      */
     public function update(User $user, Restaurant $restaurant): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $restaurant->id && $user->employee->is_admin);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $restaurant->id && $user->employee?->is_admin);
     }
 
     /**

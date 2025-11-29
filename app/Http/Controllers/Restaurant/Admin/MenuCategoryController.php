@@ -30,8 +30,9 @@ class MenuCategoryController extends Controller
 
     public function store(Request $request)
     {
-        $restaurant = $request->user()->employee->restaurant;
-
+        $this->authorize('create', FoodType::class);
+        $restaurant = $request->restaurant;
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);

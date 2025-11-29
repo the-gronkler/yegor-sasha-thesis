@@ -36,7 +36,7 @@ class ReviewImagePolicy
      */
     public function update(User $user, ReviewImage $reviewImage): bool
     {
-        return $user->is_admin || ($user->id === $reviewImage->review->customer_user_id);
+        return $user->is_admin || ($user->id === $reviewImage->review?->customer_user_id);
     }
 
     /**
@@ -44,7 +44,7 @@ class ReviewImagePolicy
      */
     public function delete(User $user, ReviewImage $reviewImage): bool
     {
-        return $user->is_admin || ($user->id === $reviewImage->review->customer_user_id);
+        return $user->is_admin || ($user->id === $reviewImage->review?->customer_user_id);
     }
 
     /**
@@ -52,7 +52,7 @@ class ReviewImagePolicy
      */
     public function restore(User $user, ReviewImage $reviewImage): bool
     {
-        return $user->is_admin || ($user->id === $reviewImage->review->customer_user_id);
+        return $user->is_admin || ($user->id === $reviewImage->review?->customer_user_id);
     }
 
     /**
@@ -60,6 +60,6 @@ class ReviewImagePolicy
      */
     public function forceDelete(User $user, ReviewImage $reviewImage): bool
     {
-        return $user->is_admin || ($user->id === $reviewImage->review->customer_user_id);
+        return $user->is_admin || ($user->id === $reviewImage->review?->customer_user_id);
     }
 }

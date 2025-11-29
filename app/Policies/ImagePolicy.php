@@ -36,7 +36,7 @@ class ImagePolicy
      */
     public function update(User $user, Image $image): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $image->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $image->restaurant_id);
     }
 
     /**
@@ -44,7 +44,7 @@ class ImagePolicy
      */
     public function delete(User $user, Image $image): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $image->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $image->restaurant_id);
     }
 
     /**
@@ -52,7 +52,7 @@ class ImagePolicy
      */
     public function restore(User $user, Image $image): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $image->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $image->restaurant_id);
     }
 
     /**
@@ -60,6 +60,6 @@ class ImagePolicy
      */
     public function forceDelete(User $user, Image $image): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee->restaurant_id === $image->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $image->restaurant_id);
     }
 }

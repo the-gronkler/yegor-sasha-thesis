@@ -11,7 +11,13 @@ class Order extends Model
 {
     use HasFactory;
 
+    // These constants map to the IDs in your 'order_statuses' table
     const STATUS_IN_CART = 1;
+    const STATUS_PENDING = 2;
+    const STATUS_PREPARING = 3;
+    const STATUS_READY = 4;
+    const STATUS_COMPLETED = 5;
+    const STATUS_CANCELLED = 6;
 
     protected $fillable = [
         'restaurant_id',
