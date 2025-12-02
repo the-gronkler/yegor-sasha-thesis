@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Image;
+use App\Models\Restaurant;
 use App\Models\User;
 
 class ImagePolicy
@@ -26,9 +27,21 @@ class ImagePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, ?Restaurant $restaurant = null): bool
     {
-        return $user->is_admin || $user->isEmployee();
+        if ($user->is_admin) {
+            return true;
+        }
+
+        if (! $user->isEmployee() || $user->employee?->restaurant_id === null) {
+            return false;
+        }
+
+        if ($restaurant !== null) {
+            return $user->employee->restaurant_id === $restaurant->id;
+        }
+
+        return true;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\MenuItem;
+use App\Models\Restaurant; // Import Restaurant model
 use App\Models\User;
 
 class MenuItemPolicy
@@ -25,10 +26,29 @@ class MenuItemPolicy
 
     /**
      * Determine whether the user can create models.
+     *
+     * We accept an optional Restaurant instance here.
+     * Controller usage: $this->authorize('create', [MenuItem::class, $restaurant]);
      */
-    public function create(User $user): bool
+    public function create(User $user, ?Restaurant $restaurant = null): bool
     {
-        return $user->is_admin || $user->isEmployee();
+        if ($user->is_admin) {
+            return true;
+        }
+
+        // Must be an employee with a restaurant assignment
+        if (! $user->isEmployee() || $user->employee?->restaurant_id === null) {
+            return false;
+        }
+
+        // If a specific restaurant context is provided, enforce ownership
+        if ($restaurant !== null) {
+            return $user->employee->restaurant_id === $restaurant->id;
+        }
+
+        // If no restaurant is passed, we allow it based on the fact they are a valid employee.
+        // (Ideally, your controller should always pass the restaurant to be strict).
+        return true;
     }
 
     /**

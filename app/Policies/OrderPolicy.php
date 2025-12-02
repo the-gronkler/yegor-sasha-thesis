@@ -43,7 +43,10 @@ class OrderPolicy
     {
         return $user->is_admin ||
                ($user->isEmployee() && $user->employee?->restaurant_id === $order->restaurant_id) ||
-               ($user->id === $order->customer_user_id); // Needed if customer updates cart
+               (
+                   $user->id === $order->customer_user_id
+                   && $order->order_status_id === Order::STATUS_IN_CART
+               ); // Only allow customer to update if order is in cart
     }
 
     /**
@@ -51,9 +54,9 @@ class OrderPolicy
      */
     public function delete(User $user, Order $order): bool
     {
-        // Allow customer to delete their own order (used for clearing cart)
+        // Allow customer to delete their own order ONLY if it is in the cart
         return $user->is_admin ||
-               ($user->id === $order->customer_user_id);
+               ($user->id === $order->customer_user_id && $order->order_status_id === Order::STATUS_IN_CART);
     }
 
     /**

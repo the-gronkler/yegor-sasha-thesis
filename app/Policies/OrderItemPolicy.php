@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
 
@@ -12,7 +13,7 @@ class OrderItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->is_admin || $user->isEmployee();
+        return $user->is_admin || $user->isEmployee() || $user->isCustomer();
     }
 
     /**
@@ -39,7 +40,8 @@ class OrderItemPolicy
     public function update(User $user, OrderItem $orderItem): bool
     {
         return $user->is_admin ||
-               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id);
+               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
     }
 
     /**
@@ -48,7 +50,8 @@ class OrderItemPolicy
     public function delete(User $user, OrderItem $orderItem): bool
     {
         return $user->is_admin ||
-               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id);
+               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
     }
 
     /**
@@ -57,7 +60,8 @@ class OrderItemPolicy
     public function restore(User $user, OrderItem $orderItem): bool
     {
         return $user->is_admin ||
-               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id);
+               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
     }
 
     /**
@@ -66,6 +70,7 @@ class OrderItemPolicy
     public function forceDelete(User $user, OrderItem $orderItem): bool
     {
         return $user->is_admin ||
-               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id);
+               ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
     }
 }
