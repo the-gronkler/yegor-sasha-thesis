@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
 use App\Models\Order;
@@ -15,7 +16,7 @@ class CartController extends Controller
         $customer = $request->user()->customer; // assuming relation user→customer
         $cartOrder = Order::with('menuItems')
             ->where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', Order::STATUS_IN_CART) // constant
+            ->where('order_status_id', OrderStatus::InCart) // constant
             ->first();
 
         return Inertia::render('Customer/Cart/Index', [
@@ -36,7 +37,7 @@ class CartController extends Controller
         $order = Order::firstOrCreate([
             'customer_user_id' => $customer->user_id,
             'restaurant_id' => MenuItem::find($data['menu_item_id'])->restaurant_id,
-            'order_status_id' => Order::STATUS_IN_CART,
+            'order_status_id' => OrderStatus::InCart,
         ]);
 
         // attach item or update quantity
@@ -56,7 +57,7 @@ class CartController extends Controller
         $customer = $request->user()->customer;
 
         $order = Order::where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', Order::STATUS_IN_CART)
+            ->where('order_status_id', OrderStatus::InCart)
             ->firstOrFail();
 
         $order->menuItems()->detach($data['menu_item_id']);
