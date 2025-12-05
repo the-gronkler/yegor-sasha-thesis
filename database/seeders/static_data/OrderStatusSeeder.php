@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\static_data;
 
+use App\Enums\OrderStatus as OrderStatusEnum;
 use App\Models\OrderStatus;
 use Illuminate\Database\Seeder;
 
@@ -12,21 +13,11 @@ class OrderStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        $statuses = [
-            'in Cart',
-            'Placed',
-            'Accepted',
-            'Declined',
-            'Preparing',
-            'Ready',
-            'Cancelled',
-            'Fulfilled',
-        ];
-
-        foreach ($statuses as $status) {
-            OrderStatus::create([
-                'name' => $status,
-            ]);
+        foreach (OrderStatusEnum::cases() as $status) {
+            OrderStatus::updateOrCreate(
+                ['id' => $status->value],
+                ['name' => $status->label()]
+            );
         }
     }
 }

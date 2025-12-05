@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class OrderController extends Controller
 
         $orders = Order::with(['menuItems', 'status', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', '!=', Order::STATUS_IN_CART)
+            ->where('order_status_id', '!=', OrderStatus::InCart)
             ->latest()
             ->paginate(10);
 
@@ -34,7 +35,7 @@ class OrderController extends Controller
 
         $oldOrders = Order::with(['menuItems', 'status', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', '!=', Order::STATUS_IN_CART)
+            ->where('order_status_id', '!=', OrderStatus::InCart)
             ->get();
 
         return Inertia::render('Customer/Orders/Old', [
@@ -46,7 +47,7 @@ class OrderController extends Controller
     {
         $this->authorize('delete', $order);
 
-        if ($order->order_status_id !== Order::STATUS_IN_CART) {
+        if ($order->order_status_id !== OrderStatus::InCart) {
             abort(403, 'Can only delete cart orders');
         }
 

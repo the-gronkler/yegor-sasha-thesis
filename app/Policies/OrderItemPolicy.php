@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Order;
+use App\Enums\OrderStatus;
 use App\Models\OrderItem;
 use App\Models\User;
 
@@ -41,7 +41,7 @@ class OrderItemPolicy
     {
         return $user->is_admin ||
                ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
-               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === OrderStatus::InCart);
     }
 
     /**
@@ -51,7 +51,7 @@ class OrderItemPolicy
     {
         return $user->is_admin ||
                ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
-               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === OrderStatus::InCart);
     }
 
     /**
@@ -61,7 +61,7 @@ class OrderItemPolicy
     {
         return $user->is_admin ||
                ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
-               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === OrderStatus::InCart);
     }
 
     /**
@@ -71,6 +71,6 @@ class OrderItemPolicy
     {
         return $user->is_admin ||
                ($user->isEmployee() && $user->employee?->restaurant_id === $orderItem->order->restaurant_id) ||
-               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === Order::STATUS_IN_CART);
+               ($user->id === $orderItem->order->customer_user_id && $orderItem->order->order_status_id === OrderStatus::InCart);
     }
 }

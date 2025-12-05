@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\User;
 
@@ -45,7 +46,7 @@ class OrderPolicy
                ($user->isEmployee() && $user->employee?->restaurant_id === $order->restaurant_id) ||
                (
                    $user->id === $order->customer_user_id
-                   && $order->order_status_id === Order::STATUS_IN_CART
+                   && $order->order_status_id === OrderStatus::InCart
                ); // Only allow customer to update if order is in cart
     }
 
@@ -56,7 +57,7 @@ class OrderPolicy
     {
         // Allow customer to delete their own order ONLY if it is in the cart
         return $user->is_admin ||
-               ($user->id === $order->customer_user_id && $order->order_status_id === Order::STATUS_IN_CART);
+               ($user->id === $order->customer_user_id && $order->order_status_id === OrderStatus::InCart);
     }
 
     /**
