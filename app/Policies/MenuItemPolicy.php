@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\MenuItem;
+use App\Models\Restaurant; // Import Restaurant model
 use App\Models\User;
 
 class MenuItemPolicy
@@ -12,7 +13,7 @@ class MenuItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,15 +21,34 @@ class MenuItemPolicy
      */
     public function view(User $user, MenuItem $menuItem): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can create models.
+     *
+     * We accept an optional Restaurant instance here.
+     * Controller usage: $this->authorize('create', [MenuItem::class, $restaurant]);
      */
-    public function create(User $user): bool
+    public function create(User $user, ?Restaurant $restaurant = null): bool
     {
-        return false;
+        if ($user->is_admin) {
+            return true;
+        }
+
+        // Must be an employee with a restaurant assignment
+        if (! $user->isEmployee() || $user->employee?->restaurant_id === null) {
+            return false;
+        }
+
+        // If a specific restaurant context is provided, enforce ownership
+        if ($restaurant !== null) {
+            return $user->employee->restaurant_id === $restaurant->id;
+        }
+
+        // If no restaurant is passed, we allow it based on the fact they are a valid employee.
+        // (Ideally, your controller should always pass the restaurant to be strict).
+        return true;
     }
 
     /**
@@ -36,7 +56,7 @@ class MenuItemPolicy
      */
     public function update(User $user, MenuItem $menuItem): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
     }
 
     /**
@@ -44,7 +64,7 @@ class MenuItemPolicy
      */
     public function delete(User $user, MenuItem $menuItem): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
     }
 
     /**
@@ -52,7 +72,7 @@ class MenuItemPolicy
      */
     public function restore(User $user, MenuItem $menuItem): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
     }
 
     /**
@@ -60,6 +80,6 @@ class MenuItemPolicy
      */
     public function forceDelete(User $user, MenuItem $menuItem): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
     }
 }

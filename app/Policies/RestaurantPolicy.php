@@ -12,7 +12,7 @@ class RestaurantPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +20,7 @@ class RestaurantPolicy
      */
     public function view(User $user, Restaurant $restaurant): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class RestaurantPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -36,7 +36,7 @@ class RestaurantPolicy
      */
     public function update(User $user, Restaurant $restaurant): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $restaurant->id && $user->employee?->is_admin);
     }
 
     /**
@@ -44,7 +44,7 @@ class RestaurantPolicy
      */
     public function delete(User $user, Restaurant $restaurant): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -52,7 +52,7 @@ class RestaurantPolicy
      */
     public function restore(User $user, Restaurant $restaurant): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -60,6 +60,6 @@ class RestaurantPolicy
      */
     public function forceDelete(User $user, Restaurant $restaurant): bool
     {
-        return false;
+        return $user->is_admin;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\MenuItemAllergen;
+use App\Models\Restaurant;
 use App\Models\User;
 
 class MenuItemAllergenPolicy
@@ -12,7 +13,7 @@ class MenuItemAllergenPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,15 +21,27 @@ class MenuItemAllergenPolicy
      */
     public function view(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, ?Restaurant $restaurant = null): bool
     {
-        return false;
+        if ($user->is_admin) {
+            return true;
+        }
+
+        if (! $user->isEmployee() || $user->employee?->restaurant_id === null) {
+            return false;
+        }
+
+        if ($restaurant !== null) {
+            return $user->employee->restaurant_id === $restaurant->id;
+        }
+
+        return true;
     }
 
     /**
@@ -36,7 +49,7 @@ class MenuItemAllergenPolicy
      */
     public function update(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 
     /**
@@ -44,7 +57,7 @@ class MenuItemAllergenPolicy
      */
     public function delete(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 
     /**
@@ -52,7 +65,7 @@ class MenuItemAllergenPolicy
      */
     public function restore(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 
     /**
@@ -60,6 +73,6 @@ class MenuItemAllergenPolicy
      */
     public function forceDelete(User $user, MenuItemAllergen $menuItemAllergen): bool
     {
-        return false;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItemAllergen->menuItem->restaurant_id);
     }
 }

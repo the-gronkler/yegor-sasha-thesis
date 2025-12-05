@@ -12,7 +12,7 @@ class ReviewPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -20,7 +20,7 @@ class ReviewPolicy
      */
     public function view(User $user, Review $review): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,7 +28,7 @@ class ReviewPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isCustomer();
     }
 
     /**
@@ -36,7 +36,7 @@ class ReviewPolicy
      */
     public function update(User $user, Review $review): bool
     {
-        return false;
+        return $user->is_admin || $user->id === $review->customer_user_id;
     }
 
     /**
@@ -44,7 +44,7 @@ class ReviewPolicy
      */
     public function delete(User $user, Review $review): bool
     {
-        return false;
+        return $user->is_admin || $user->id === $review->customer_user_id;
     }
 
     /**
@@ -52,7 +52,7 @@ class ReviewPolicy
      */
     public function restore(User $user, Review $review): bool
     {
-        return false;
+        return $user->is_admin || $user->id === $review->customer_user_id;
     }
 
     /**
@@ -60,6 +60,6 @@ class ReviewPolicy
      */
     public function forceDelete(User $user, Review $review): bool
     {
-        return false;
+        return $user->is_admin || $user->id === $review->customer_user_id;
     }
 }
