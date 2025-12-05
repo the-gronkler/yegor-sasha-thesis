@@ -15,7 +15,7 @@ enum OrderStatus: int
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::InCart => 'in Cart',
             self::Placed => 'Placed',
             self::Accepted => 'Accepted',
