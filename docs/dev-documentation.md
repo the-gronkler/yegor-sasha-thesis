@@ -15,6 +15,24 @@ php artisan <command-name>
   
     Alias for: `migrate:fresh --path=database/migrations/* --seed`. Wipes the DB, reruns all migrations in the specified folder and its subfolders, and then seeds the database.
 
+## Internationalization (i18n)
+
+The project supports English (`en`) and Polish (`pl`).
+
+### Adding Translations
+1.  Add keys to `lang/en.json` and `lang/pl.json`.
+2.  Keys should be consistent across files.
+
+### Using in Frontend
+Use the `useTranslation` hook:
+```jsx
+import useTranslation from '@/Hooks/useTranslation';
+
+const { t } = useTranslation();
+
+return <div>{t('KeyName')}</div>;
+```
+
 
 
   
