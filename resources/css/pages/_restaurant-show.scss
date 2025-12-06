@@ -18,9 +18,27 @@
             justify-content: space-between;
 
             .back-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
                 color: $text-inverse;
-                font-size: 1.5rem;
-                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                background-color: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(4px);
+                transition: all 0.2s ease;
+
+                .icon {
+                    width: 24px;
+                    height: 24px;
+                    stroke-width: 2;
+                }
+
+                &:hover {
+                    background-color: rgba(0, 0, 0, 0.5);
+                    transform: scale(1.05);
+                }
             }
         }
     }
@@ -46,9 +64,23 @@
             position: absolute;
             top: 1rem;
             right: 1rem;
-            font-size: 1.5rem;
             color: $text-primary;
             cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: transform 0.2s;
+
+            .icon {
+                width: 28px;
+                height: 28px;
+                stroke-width: 1.5;
+            }
+
+            &:hover {
+                transform: scale(1.1);
+                color: $brand-primary;
+            }
         }
 
         .info-row {
@@ -72,14 +104,33 @@
 
     .menu-search {
         margin: 0 1rem 1.5rem;
+        position: relative;
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: $text-secondary;
+            pointer-events: none;
+        }
 
         input {
             width: 100%;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1rem 0.75rem 2.75rem; // Added padding-left for icon
             border-radius: $border-radius-pill;
             border: none;
             background-color: $bg-alt-2;
             color: $text-primary;
+            font-weight: 500;
+            transition: box-shadow 0.2s;
+
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px $brand-primary-soft;
+            }
 
             &::placeholder {
                 color: $text-secondary;
