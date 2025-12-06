@@ -1,10 +1,13 @@
+@use "../variables/layout";
+@use "../variables/main-colors";
+
 .restaurant-show-page {
-    background-color: $bg-main;
+    background-color: main-colors.$bg-main;
     min-height: 100vh;
 
     .restaurant-banner {
         height: 200px;
-        background-color: $bg-alt-2; // Placeholder color
+        background-color: main-colors.$bg-alt-2; // Placeholder color
         background-size: cover;
         background-position: center;
         position: relative;
@@ -24,7 +27,7 @@
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
-                color: $text-inverse;
+                color: main-colors.$text-inverse;
                 background-color: rgba(0, 0, 0, 0.3);
                 backdrop-filter: blur(4px);
                 transition: all 0.2s ease;
@@ -44,11 +47,11 @@
     }
 
     .restaurant-info-card {
-        background: $bg-surface;
+        background: main-colors.$bg-surface;
         margin: -2rem 1rem 1rem; // Overlap banner
         padding: 1rem;
         border-radius: 16px;
-        box-shadow: $box-shadow;
+        box-shadow: layout.$box-shadow;
         position: relative;
         text-align: center;
 
@@ -57,14 +60,14 @@
             font-weight: 900;
             margin-bottom: 0.25rem;
             text-transform: uppercase;
-            color: $text-primary;
+            color: main-colors.$text-primary;
         }
 
         .favorite-button {
             position: absolute;
             top: 1rem;
             right: 1rem;
-            color: $text-primary;
+            color: main-colors.$text-primary;
             cursor: pointer;
             background: none;
             border: none;
@@ -79,26 +82,26 @@
 
             &:hover {
                 transform: scale(1.1);
-                color: $brand-primary;
+                color: main-colors.$brand-primary;
             }
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
-            background-color: $bg-alt-1;
+            background-color: main-colors.$bg-alt-1;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-size: 0.8rem;
             font-weight: 600;
             margin: 0.5rem 0;
-            color: $text-secondary;
+            color: main-colors.$text-secondary;
         }
 
         .restaurant-description {
             font-size: 0.9rem;
             font-weight: 600;
-            color: $text-secondary;
+            color: main-colors.$text-secondary;
         }
     }
 
@@ -113,27 +116,27 @@
             transform: translateY(-50%);
             width: 20px;
             height: 20px;
-            color: $text-secondary;
+            color: main-colors.$text-secondary;
             pointer-events: none;
         }
 
         input {
             width: 100%;
             padding: 0.75rem 1rem 0.75rem 2.75rem; // Added padding-left for icon
-            border-radius: $border-radius-pill;
+            border-radius: layout.$border-radius-pill;
             border: none;
-            background-color: $bg-alt-2;
-            color: $text-primary;
+            background-color: main-colors.$bg-alt-2;
+            color: main-colors.$text-primary;
             font-weight: 500;
             transition: box-shadow 0.2s;
 
             &:focus {
                 outline: none;
-                box-shadow: 0 0 0 2px $brand-primary-soft;
+                box-shadow: 0 0 0 2px main-colors.$brand-primary-soft;
             }
 
             &::placeholder {
-                color: $text-secondary;
+                color: main-colors.$text-secondary;
             }
         }
     }
@@ -145,11 +148,11 @@
             font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            border-bottom: 4px solid $border-light;
+            border-bottom: 4px solid main-colors.$border-light;
             display: inline-block;
             padding-right: 2rem;
             width: 100%;
-            color: $text-primary;
+            color: main-colors.$text-primary;
         }
     }
 }

@@ -1,16 +1,16 @@
-@import 'variables';
-@import 'reset';
+@use 'variables';
+@use 'reset';
 
 // Layouts
-@import 'layouts/customer';
+@use 'layouts/customer';
 
 // Components
-@import 'components/buttons';
-@import 'components/star-rating';
-@import 'components/menu-item-card';
+@use 'components/buttons';
+@use 'components/star-rating';
+@use 'components/menu-item-card';
 
 // Pages
-@import 'pages/restaurant-index';
-@import 'pages/restaurant-show';
-@import 'pages/profile';
-@import 'pages/auth';
+@use 'pages/restaurant-index';
+@use 'pages/restaurant-show';
+@use 'pages/profile';
+@use 'pages/auth';

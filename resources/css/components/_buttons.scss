@@ -1,23 +1,26 @@
+@use "../variables/layout";
+@use "../variables/main-colors";
+
 .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0.5rem 1rem;
-    background-color: $btn-primary-bg;
-    color: $btn-primary-text;
+    background-color: main-colors.$btn-primary-bg;
+    color: main-colors.$btn-primary-text;
     border: none;
-    border-radius: $border-radius-pill;
+    border-radius: layout.$border-radius-pill;
     font-weight: 600;
     cursor: pointer;
     transition: opacity 0.2s;
 
     &:hover {
-        background-color: $btn-primary-hover-bg;
+        background-color: main-colors.$btn-primary-hover-bg;
     }
 
     &.disabled {
-        background-color: $btn-primary-disabled-bg;
-        color: $btn-primary-disabled-text;
+        background-color: main-colors.$btn-primary-disabled-bg;
+        color: main-colors.$btn-primary-disabled-text;
         cursor: not-allowed;
     }
 }
@@ -29,11 +32,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: $bg-alt-1;
+    background-color: main-colors.$bg-alt-1;
     border: none;
     cursor: pointer;
 
     &:hover {
-        background-color: $bg-alt-2;
+        background-color: main-colors.$bg-alt-2;
     }
 }

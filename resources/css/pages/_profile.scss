@@ -1,10 +1,13 @@
+@use "../variables/layout";
+@use "../variables/main-colors";
+
 // ======================================================================
 // PROFILE PAGE
 // ======================================================================
 
 .profile-page {
     min-height: 100vh;
-    background-color: $bg-main;
+    background-color: main-colors.$bg-main;
     padding: 1rem;
     padding-bottom: 100px; // Space for bottom nav
 }
@@ -23,24 +26,24 @@
 .profile-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: $text-primary;
+    color: main-colors.$text-primary;
     margin: 0;
 }
 
 .logout-button {
     background-color: transparent;
-    color: $brand-primary;
-    border: 1px solid $brand-primary;
+    color: main-colors.$brand-primary;
+    border: 1px solid main-colors.$brand-primary;
     padding: 0.5rem 1rem;
-    border-radius: $border-radius;
+    border-radius: layout.$border-radius;
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        background-color: $brand-primary;
-        color: $text-inverse;
+        background-color: main-colors.$brand-primary;
+        color: main-colors.$text-inverse;
     }
 
     &:active {
@@ -53,8 +56,8 @@
 // ======================================================================
 
 .profile-card {
-    background-color: $bg-surface;
-    border-radius: $border-radius;
+    background-color: main-colors.$bg-surface;
+    border-radius: layout.$border-radius;
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 1.5rem;
@@ -77,25 +80,25 @@
         label {
             font-size: 0.875rem;
             font-weight: 600;
-            color: $text-primary;
+            color: main-colors.$text-primary;
         }
 
         .form-input {
             padding: 0.75rem;
-            border: 1px solid $border-light;
-            border-radius: $border-radius;
+            border: 1px solid main-colors.$border-light;
+            border-radius: layout.$border-radius;
             font-size: 1rem;
-            color: $text-primary;
-            background-color: $bg-surface;
+            color: main-colors.$text-primary;
+            background-color: main-colors.$bg-surface;
             transition: border-color 0.2s ease;
 
             &:focus {
                 outline: none;
-                border-color: $brand-primary;
+                border-color: main-colors.$brand-primary;
             }
 
             &::placeholder {
-                color: $text-secondary;
+                color: main-colors.$text-secondary;
             }
         }
 
@@ -110,22 +113,22 @@
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;
         padding-top: 1rem;
-        border-top: 1px solid $border-light;
+        border-top: 1px solid main-colors.$border-light;
 
         .section-title {
             font-size: 1rem;
             font-weight: 600;
-            color: $text-primary;
+            color: main-colors.$text-primary;
             margin: 0;
         }
     }
 
     .btn-submit {
-        background-color: $brand-primary;
-        color: $text-inverse;
+        background-color: main-colors.$brand-primary;
+        color: main-colors.$text-inverse;
         border: none;
         padding: 0.875rem 1.5rem;
-        border-radius: $border-radius;
+        border-radius: layout.$border-radius;
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
@@ -133,7 +136,7 @@
         margin-top: 0.5rem;
 
         &:hover {
-            background-color: $brand-primary-hover;
+            background-color: main-colors.$brand-primary-hover;
         }
 
         &:active {
@@ -141,8 +144,8 @@
         }
 
         &:disabled {
-            background-color: $btn-primary-disabled-bg;
-            color: $btn-primary-disabled-text;
+            background-color: main-colors.$btn-primary-disabled-bg;
+            color: main-colors.$btn-primary-disabled-text;
             cursor: not-allowed;
         }
     }
@@ -153,8 +156,8 @@
 // ======================================================================
 
 .favorites-section {
-    background-color: $bg-surface;
-    border-radius: $border-radius;
+    background-color: main-colors.$bg-surface;
+    border-radius: layout.$border-radius;
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
@@ -167,13 +170,13 @@
         .section-title {
             font-size: 1.125rem;
             font-weight: 700;
-            color: $text-primary;
+            color: main-colors.$text-primary;
             margin: 0;
         }
 
         .view-all-link {
             font-size: 0.875rem;
-            color: $brand-primary;
+            color: main-colors.$brand-primary;
             text-decoration: none;
             font-weight: 600;
 
@@ -194,21 +197,21 @@
         align-items: center;
         gap: 1rem;
         padding: 1rem;
-        background-color: $bg-main;
-        border-radius: $border-radius;
+        background-color: main-colors.$bg-main;
+        border-radius: layout.$border-radius;
         text-decoration: none;
         color: inherit;
         transition: all 0.2s ease;
 
         &:hover {
-            background-color: $bg-alt-1;
+            background-color: main-colors.$bg-alt-1;
             transform: translateX(4px);
         }
 
         .favorite-rank {
             font-size: 1.25rem;
             font-weight: 700;
-            color: $brand-primary;
+            color: main-colors.$brand-primary;
             min-width: 2.5rem;
             text-align: center;
         }
@@ -219,14 +222,14 @@
             .favorite-name {
                 font-size: 1rem;
                 font-weight: 600;
-                color: $text-primary;
+                color: main-colors.$text-primary;
                 margin: 0;
             }
         }
 
         .favorite-arrow {
             font-size: 1.25rem;
-            color: $text-secondary;
+            color: main-colors.$text-secondary;
         }
     }
 }
