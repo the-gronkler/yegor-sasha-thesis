@@ -19,12 +19,8 @@ class ProfileController extends Controller
         $this->authorize('view', $user);
 
         // Get or create customer record
+        // Will always have a customer record since it is required by the policy
         $customer = $user->customer;
-        if (!$customer) {
-            $customer = $user->customer()->create([
-                'user_id' => $user->id,
-            ]);
-        }
 
         // Prepare favorites
         $favorites = $customer->favoriteRestaurants()
