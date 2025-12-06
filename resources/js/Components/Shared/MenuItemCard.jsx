@@ -6,7 +6,7 @@ export default function MenuItemCard({ item }) {
     const isAvailable = true;
 
     const primaryImage = item.images.find(img => img.is_primary_for_menu_item) || item.images[0];
-    const imageUrl = primaryImage ? `/storage/${primaryImage.url}` : null; // Adjust path as needed
+    const imageUrl = primaryImage ? primaryImage.url : null; // Adjust path as needed
 
     return (
         <div className={`menu-item-card ${!isAvailable ? 'unavailable' : ''}`}>

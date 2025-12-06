@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { MapPinIcon, ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline';
 
 export default function CustomerLayout({ children }) {
     return (
@@ -6,19 +7,34 @@ export default function CustomerLayout({ children }) {
             <main className="main-content">{children}</main>
 
             <nav className="bottom-nav">
-                <Link href={route('restaurants.index')} className="nav-item">
-                    <span className="icon">📍</span>
-                    <span className="label">Explore</span>
-                </Link>
-                <Link href={route('orders.index')} className="nav-item">
-                    <span className="icon">🛒</span>
-                    <span className="label">Orders</span>
-                </Link>
-                <Link href={route('profile.show')} className="nav-item">
-                    <span className="icon">👤</span>
-                    <span className="label">Profile</span>
-                </Link>
+                <NavLink
+                    href={route('restaurants.index')}
+                    active={route().current('restaurants.index')}
+                    icon={MapPinIcon}
+                    label="Explore"
+                />
+                <NavLink
+                    href={route('orders.index')}
+                    active={route().current('orders.index')}
+                    icon={ShoppingCartIcon}
+                    label="Orders"
+                />
+                <NavLink
+                    href={route('profile.show')}
+                    active={route().current('profile.show')}
+                    icon={UserIcon}
+                    label="Profile"
+                />
             </nav>
         </div>
+    );
+}
+
+function NavLink({ href, active, icon: Icon, label }) {
+    return (
+        <Link href={href} className={`nav-item ${active ? 'active' : ''}`}>
+            <Icon className="icon" aria-hidden="true" />
+            <span className="label">{label}</span>
+        </Link>
     );
 }

@@ -1,12 +1,13 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
+import { ArrowLeftIcon, HeartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
 
 export default function RestaurantShow({ restaurant }) {
     const primaryImage = restaurant.restaurant_images.find(img => img.is_primary_for_restaurant) || restaurant.restaurant_images[0];
-    const bannerUrl = primaryImage ? `/storage/${primaryImage.url}` : null;
+    const bannerUrl = primaryImage ? primaryImage.url : null;
 
     return (
         <CustomerLayout>
@@ -20,7 +21,7 @@ export default function RestaurantShow({ restaurant }) {
                 >
                     <div className="banner-actions">
                         <Link href={route('restaurants.index')} className="back-button">
-                            ←
+                            <ArrowLeftIcon className="icon" />
                         </Link>
                     </div>
                 </div>
@@ -28,14 +29,20 @@ export default function RestaurantShow({ restaurant }) {
                 {/* Info Card */}
                 <div className="restaurant-info-card">
                     <h1 className="restaurant-name">{restaurant.name}</h1>
-                    <div className="favorite-button">♡</div>
+                    <button className="favorite-button" aria-label="Add to favorites">
+                        <HeartIcon className="icon" />
+                    </button>
 
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
                         <StarRating rating={restaurant.rating} />
                     </div>
 
                     <div className="info-row">
-                        <span>Open 12:00 - 21:00</span> {/* Placeholder data */}
+                        {restaurant.opening_hours ? (
+                            <span>Open {restaurant.opening_hours}</span>
+                        ) : (
+                            <span>Hours not available</span>
+                        )}
                         <span>~3km</span> {/* Placeholder data */}
                     </div>
 
@@ -46,7 +53,8 @@ export default function RestaurantShow({ restaurant }) {
 
                 {/* Search */}
                 <div className="menu-search">
-                    <input type="text" placeholder="Search menu..." />
+                    <MagnifyingGlassIcon className="search-icon" aria-hidden="true" />
+                    <input type="text" placeholder="Search menu..." aria-label="Search menu" />
                 </div>
 
                 {/* Menu Categories */}

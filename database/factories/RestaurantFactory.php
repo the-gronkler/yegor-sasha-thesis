@@ -78,6 +78,13 @@ class RestaurantFactory extends Factory
             'longitude' => $this->faker->longitude(),
             'description' => self::$restaurantDescriptions[array_rand(self::$restaurantDescriptions)],
             'rating' => $this->faker->randomFloat(2, 1, 5),
+            'opening_hours' => $this->faker->randomElement([
+                '10:00 - 22:00',
+                '11:00 - 23:00',
+                '12:00 - 21:00',
+                '09:00 - 20:00',
+                '08:00 - 18:00',
+            ]),
         ];
     }
 
@@ -127,7 +134,8 @@ class RestaurantFactory extends Factory
             // Mark one image as primary for restaurant (based on one menu item)
             $firstMenuItem = $restaurant->menuItems()->first();
             if ($firstMenuItem) {
-                $restaurant->images()->create([
+                Image::factory()->create([
+                    'restaurant_id' => $restaurant->id,
                     'menu_item_id' => $firstMenuItem->id,
                     'is_primary_for_restaurant' => true,
                     'is_primary_for_menu_item' => false,

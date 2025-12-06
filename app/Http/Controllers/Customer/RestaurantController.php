@@ -18,7 +18,7 @@ class RestaurantController extends Controller
 
         // Fetch restaurants with their images
         $restaurants = Restaurant::with('images')
-            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description'])
+            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
             ->latest('rating')
             ->get()
             ->map(function ($restaurant) {
@@ -30,6 +30,7 @@ class RestaurantController extends Controller
                     'longitude' => $restaurant->longitude,
                     'rating' => $restaurant->rating,
                     'description' => $restaurant->description,
+                    'opening_hours' => $restaurant->opening_hours,
                     'images' => $restaurant->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->image,
@@ -67,6 +68,7 @@ class RestaurantController extends Controller
                 'longitude' => $restaurant->longitude,
                 'description' => $restaurant->description,
                 'rating' => $restaurant->rating,
+                'opening_hours' => $restaurant->opening_hours,
                 // relations:
                 'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
                     'id' => $ft->id,
