@@ -6,7 +6,7 @@ import MenuItemCard from '@/Components/Shared/MenuItemCard';
 
 export default function RestaurantShow({ restaurant }) {
     const primaryImage = restaurant.restaurant_images.find(img => img.is_primary_for_restaurant) || restaurant.restaurant_images[0];
-    const bannerUrl = primaryImage ? `/storage/${primaryImage.url}` : null;
+    const bannerUrl = primaryImage ? primaryImage.url : null;
 
     return (
         <CustomerLayout>

@@ -25,7 +25,7 @@ export default function RestaurantIndex({ restaurants }) {
                 <div className="restaurant-list">
                     {restaurants.map((restaurant) => {
                         const primaryImage = restaurant.images?.find(img => img.is_primary_for_restaurant) || restaurant.images?.[0];
-                        const imageUrl = primaryImage ? `/storage/${primaryImage.url}` : '/images/placeholder-restaurant.jpg';
+                        const imageUrl = primaryImage ? primaryImage.url : '/images/placeholder-restaurant.jpg';
 
                         return (
                             <Link

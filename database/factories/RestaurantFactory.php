@@ -127,7 +127,8 @@ class RestaurantFactory extends Factory
             // Mark one image as primary for restaurant (based on one menu item)
             $firstMenuItem = $restaurant->menuItems()->first();
             if ($firstMenuItem) {
-                $restaurant->images()->create([
+                Image::factory()->create([
+                    'restaurant_id' => $restaurant->id,
                     'menu_item_id' => $firstMenuItem->id,
                     'is_primary_for_restaurant' => true,
                     'is_primary_for_menu_item' => false,
