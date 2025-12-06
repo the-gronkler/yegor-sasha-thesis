@@ -35,7 +35,11 @@ export default function RestaurantShow({ restaurant }) {
                     </div>
 
                     <div className="info-row">
-                        <span>Open 12:00 - 21:00</span> {/* Placeholder data */}
+                        {restaurant.opening_hours ? (
+                            <span>Open {restaurant.opening_hours}</span>
+                        ) : (
+                            <span>Hours not available</span>
+                        )}
                         <span>~3km</span> {/* Placeholder data */}
                     </div>
 

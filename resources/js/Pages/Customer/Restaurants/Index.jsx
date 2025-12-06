@@ -51,7 +51,11 @@ export default function RestaurantIndex({ restaurants }) {
                                         </div>
 
                                         <div className="restaurant-meta">
-                                            <span className="meta-item">12:00 - 21:00</span>
+                                            {restaurant.opening_hours ? (
+                                                <span className="meta-item">{restaurant.opening_hours}</span>
+                                            ) : (
+                                                <span className="meta-item">Hours not available</span>
+                                            )}
                                             <span className="meta-separator">•</span>
                                             <span className="meta-item">~3km</span>
                                         </div>
