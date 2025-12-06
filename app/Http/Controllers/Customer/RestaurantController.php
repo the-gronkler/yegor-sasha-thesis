@@ -10,17 +10,34 @@ use Inertia\Inertia;
 class RestaurantController extends Controller
 {
     /**
-     * Display a listing of restaurants (e.g., the “main page”).
+     * Display a listing of restaurants (e.g., the "main page").
      */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Restaurant::class);
 
-        // You might paginate, or fetch subset, etc.
-        $restaurants = Restaurant::with('foodTypes', 'images')
-            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating'])
+        // Fetch restaurants with their images
+        $restaurants = Restaurant::with('images')
+            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
             ->latest('rating')
-            ->get();
+            ->get()
+            ->map(function ($restaurant) {
+                return [
+                    'id' => $restaurant->id,
+                    'name' => $restaurant->name,
+                    'address' => $restaurant->address,
+                    'latitude' => $restaurant->latitude,
+                    'longitude' => $restaurant->longitude,
+                    'rating' => $restaurant->rating,
+                    'description' => $restaurant->description,
+                    'opening_hours' => $restaurant->opening_hours,
+                    'images' => $restaurant->images->map(fn ($img) => [
+                        'id' => $img->id,
+                        'url' => $img->image,
+                        'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
+                    ]),
+                ];
+            });
 
         return Inertia::render('Customer/Restaurants/Index', [
             'restaurants' => $restaurants,
@@ -51,6 +68,7 @@ class RestaurantController extends Controller
                 'longitude' => $restaurant->longitude,
                 'description' => $restaurant->description,
                 'rating' => $restaurant->rating,
+                'opening_hours' => $restaurant->opening_hours,
                 // relations:
                 'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
                     'id' => $ft->id,

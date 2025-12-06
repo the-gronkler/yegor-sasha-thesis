@@ -27,6 +27,7 @@ class Restaurant extends Model
         'longitude',
         'description',
         'rating',
+        'opening_hours',
     ];
 
     public function employees(): HasMany

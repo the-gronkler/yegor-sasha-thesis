@@ -71,6 +71,17 @@ A component for displaying ratings.
 - `.star.filled`: Modifier for active/filled stars (uses `$accent-warm`).
 
 ## Pages
+### `pages/_restaurant-index.scss`
+Styles for the Restaurant Index page (Explore Restaurants).
+- `.restaurant-index-page`: The page wrapper with bottom padding for the navigation.
+- `.search-header`: A sticky header containing the search bar.
+- `.search-bar`: The search input container with icon and input field.
+- `.restaurant-list`: A vertical list of restaurant cards.
+- `.restaurant-card`: Individual restaurant card with image and info sections.
+- `.restaurant-image-wrapper`: Fixed-height container for restaurant images.
+- `.restaurant-info`: Contains restaurant details (name, rating, meta, description).
+- Responsive design: Centers content on larger screens (max-width: 600px).
+
 ### `pages/_auth.scss`
 Styles specific to authentication pages (Login/Register).
 - `.auth-page`: A full-height, centered flex layout.

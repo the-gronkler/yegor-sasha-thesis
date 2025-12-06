@@ -7,7 +7,7 @@ import MenuItemCard from '@/Components/Shared/MenuItemCard';
 
 export default function RestaurantShow({ restaurant }) {
     const primaryImage = restaurant.restaurant_images.find(img => img.is_primary_for_restaurant) || restaurant.restaurant_images[0];
-    const bannerUrl = primaryImage ? `/storage/${primaryImage.url}` : null;
+    const bannerUrl = primaryImage ? primaryImage.url : null;
 
     return (
         <CustomerLayout>
@@ -38,7 +38,11 @@ export default function RestaurantShow({ restaurant }) {
                     </div>
 
                     <div className="info-row">
-                        <span>Open 12:00 - 21:00</span> {/* Placeholder data */}
+                        {restaurant.opening_hours ? (
+                            <span>Open {restaurant.opening_hours}</span>
+                        ) : (
+                            <span>Hours not available</span>
+                        )}
                         <span>~3km</span> {/* Placeholder data */}
                     </div>
 
