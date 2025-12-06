@@ -10,17 +10,33 @@ use Inertia\Inertia;
 class RestaurantController extends Controller
 {
     /**
-     * Display a listing of restaurants (e.g., the “main page”).
+     * Display a listing of restaurants (e.g., the "main page").
      */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Restaurant::class);
 
-        // You might paginate, or fetch subset, etc.
-        $restaurants = Restaurant::with('foodTypes', 'images')
-            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating'])
+        // Fetch restaurants with their images
+        $restaurants = Restaurant::with('images')
+            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description'])
             ->latest('rating')
-            ->get();
+            ->get()
+            ->map(function ($restaurant) {
+                return [
+                    'id' => $restaurant->id,
+                    'name' => $restaurant->name,
+                    'address' => $restaurant->address,
+                    'latitude' => $restaurant->latitude,
+                    'longitude' => $restaurant->longitude,
+                    'rating' => $restaurant->rating,
+                    'description' => $restaurant->description,
+                    'images' => $restaurant->images->map(fn ($img) => [
+                        'id' => $img->id,
+                        'url' => $img->image,
+                        'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
+                    ]),
+                ];
+            });
 
         return Inertia::render('Customer/Restaurants/Index', [
             'restaurants' => $restaurants,

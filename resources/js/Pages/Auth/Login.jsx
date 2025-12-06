@@ -9,7 +9,7 @@ export default function Login({ canResetPassword = false, status }) {
 
   const submit = (e) => {
     e.preventDefault();
-    form.post(window.route('login'), {
+    form.post(window.route('login.store'), {
       onFinish: () => form.reset('password'),
     });
   };
