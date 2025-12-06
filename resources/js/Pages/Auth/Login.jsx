@@ -1,11 +1,11 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Login({ canResetPassword = false, status }) {
+export default function Login({ canResetPassword = false, errors }) {
   const form = useForm({
     email: '',
     password: '',
     remember: false,
-  });
+  }, errors || {});
 
   const submit = (e) => {
     e.preventDefault();
@@ -26,9 +26,6 @@ export default function Login({ canResetPassword = false, status }) {
             <p className="auth-subtitle">
               Welcome back! Please sign in to your account.
             </p>
-            {status && (
-              <div className="status-message">{status}</div>
-            )}
           </div>
 
           <form className="auth-form" onSubmit={submit}>
@@ -45,9 +42,6 @@ export default function Login({ canResetPassword = false, status }) {
                 value={form.data.email}
                 onChange={(e) => form.setData('email', e.target.value)}
               />
-              {form.errors.email && (
-                <p className="error-message">{form.errors.email}</p>
-              )}
             </div>
 
             <div className="form-group">
@@ -63,8 +57,8 @@ export default function Login({ canResetPassword = false, status }) {
                 value={form.data.password}
                 onChange={(e) => form.setData('password', e.target.value)}
               />
-              {form.errors.password && (
-                <p className="error-message">{form.errors.password}</p>
+              {(form.errors.email || form.errors.password) && (
+                <p className="error-message">{form.errors.email || form.errors.password}</p>
               )}
             </div>
 
