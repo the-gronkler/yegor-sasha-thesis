@@ -10,11 +10,11 @@ export default function CustomerLayout({ children }) {
                     <span className="icon">📍</span>
                     <span className="label">Explore</span>
                 </Link>
-                <Link href="#" className="nav-item">
+                <Link href={route('orders.index')} className="nav-item">
                     <span className="icon">🛒</span>
                     <span className="label">Orders</span>
                 </Link>
-                <Link href="#" className="nav-item">
+                <Link href={route('profile.show')} className="nav-item">
                     <span className="icon">👤</span>
                     <span className="label">Profile</span>
                 </Link>

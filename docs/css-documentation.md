@@ -82,12 +82,6 @@ Styles for the Restaurant Index page (Explore Restaurants).
 - `.restaurant-info`: Contains restaurant details (name, rating, meta, description).
 - Responsive design: Centers content on larger screens (max-width: 600px).
 
-### `pages/_auth.scss`
-Styles specific to authentication pages (Login/Register).
-- `.auth-page`: A full-height, centered flex layout.
-- `.auth-card`: The container for the authentication form.
-- Includes specific styles for form groups, inputs, error messages, and form actions (remember me, forgot password).
-
 ### `pages/_restaurant-show.scss`
 Styles for the Restaurant Details page.
 - `.restaurant-show-page`: The page wrapper.
@@ -95,5 +89,23 @@ Styles for the Restaurant Details page.
 - `.restaurant-info-card`: A card containing restaurant details that overlaps the banner.
 - `.menu-search`: Styles for the search input within the menu.
 - `.menu-category`: Styles for category headers.
+
+### `pages/_profile.scss`
+Styles for the Customer Profile page.
+- `.profile-page`: The page wrapper with bottom padding for navigation.
+- `.profile-header`: Contains the page title and logout button.
+- `.logout-button`: A bordered button with hover transition.
+- `.profile-card`: Main card container for the profile form.
+- `.profile-form`: Form with input groups for user information.
+- `.section-divider`: Visual separator for different form sections.
+- `.favorites-section`: Card displaying favorite restaurants.
+- `.favorite-item`: Individual favorite restaurant row with rank badge.
+- Responsive design: Centers content on larger screens (max-width: 600px).
+
+### `pages/_auth.scss`
+Styles specific to authentication pages (Login/Register).
+- `.auth-page`: A full-height, centered flex layout.
+- `.auth-card`: The container for the authentication form.
+- Includes specific styles for form groups, inputs, error messages, and form actions (remember me, forgot password).
 
 
