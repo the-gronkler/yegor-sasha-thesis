@@ -1,0 +1,39 @@
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background-color: $btn-primary-bg;
+    color: $btn-primary-text;
+    border: none;
+    border-radius: $border-radius-pill;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:hover {
+        background-color: $btn-primary-hover-bg;
+    }
+
+    &.disabled {
+        background-color: $btn-primary-disabled-bg;
+        color: $btn-primary-disabled-text;
+        cursor: not-allowed;
+    }
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $bg-alt-1;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+        background-color: $bg-alt-2;
+    }
+}

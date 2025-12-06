@@ -1,0 +1,13 @@
+.star-rating {
+    display: flex;
+    gap: 2px;
+
+    .star {
+        color: $border-light;
+        font-size: 1rem;
+
+        &.filled {
+            color: $accent-warm;
+        }
+    }
+}

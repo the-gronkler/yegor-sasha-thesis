@@ -18,22 +18,22 @@ export default function Login({ canResetPassword = false, status }) {
     <>
       <Head title="Log In" />
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md bg-white py-8 px-6 shadow-lg rounded-lg">
+      <div className="auth-page">
+        <div className="auth-card">
 
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-extrabold text-gray-900">Sign In</h2>
-            <p className="mt-2 text-sm text-gray-600">
+          <div className="auth-header">
+            <h2 className="auth-title">Sign In</h2>
+            <p className="auth-subtitle">
               Welcome back! Please sign in to your account.
             </p>
             {status && (
-              <div className="mt-4 text-sm text-green-600">{status}</div>
+              <div className="status-message">{status}</div>
             )}
           </div>
 
-          <form className="space-y-6 mx-auto max-w-sm" onSubmit={submit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <form className="auth-form" onSubmit={submit}>
+            <div className="form-group">
+              <label htmlFor="email">
                 Email Address
               </label>
               <input
@@ -41,18 +41,17 @@ export default function Login({ canResetPassword = false, status }) {
                 type="email"
                 autoComplete="username"
                 required
-                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
-                           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="form-input"
                 value={form.data.email}
                 onChange={(e) => form.setData('email', e.target.value)}
               />
               {form.errors.email && (
-                <p className="mt-1 text-xs text-red-600">{form.errors.email}</p>
+                <p className="error-message">{form.errors.email}</p>
               )}
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="form-group">
+              <label htmlFor="password">
                 Password
               </label>
               <input
@@ -60,22 +59,21 @@ export default function Login({ canResetPassword = false, status }) {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400
-                           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="form-input"
                 value={form.data.password}
                 onChange={(e) => form.setData('password', e.target.value)}
               />
               {form.errors.password && (
-                <p className="mt-1 text-xs text-red-600">{form.errors.password}</p>
+                <p className="error-message">{form.errors.password}</p>
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <label htmlFor="remember" className="flex items-center text-sm text-gray-700">
+            <div className="form-actions">
+              <label htmlFor="remember" className="remember-me">
                 <input
                   id="remember"
                   type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  className="form-checkbox"
                   checked={form.data.remember}
                   onChange={(e) => form.setData('remember', e.target.checked)}
                 />
@@ -83,14 +81,12 @@ export default function Login({ canResetPassword = false, status }) {
               </label>
 
               {canResetPassword && (
-                <div className="text-sm">
-                  <Link
-                    href={window.route('password.request')}
-                    className="font-medium text-indigo-600 hover:text-indigo-500"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
+                <Link
+                  href={window.route('password.request')}
+                  className="forgot-password"
+                >
+                  Forgot your password?
+                </Link>
               )}
             </div>
 
@@ -98,20 +94,18 @@ export default function Login({ canResetPassword = false, status }) {
               <button
                 type="submit"
                 disabled={form.processing}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium
-                           text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                           disabled:opacity-50"
+                className="btn-submit"
               >
                 {form.processing ? 'Signing in...' : 'Sign In'}
               </button>
             </div>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="auth-footer">
             Don’t have an account?{' '}
             <Link
               href={window.route('register')}
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="auth-link"
             >
               Register
             </Link>
