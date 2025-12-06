@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
+import { ArrowLeftIcon, HeartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
@@ -20,7 +21,7 @@ export default function RestaurantShow({ restaurant }) {
                 >
                     <div className="banner-actions">
                         <Link href={route('restaurants.index')} className="back-button">
-                            ←
+                            <ArrowLeftIcon className="icon" />
                         </Link>
                     </div>
                 </div>
@@ -28,7 +29,9 @@ export default function RestaurantShow({ restaurant }) {
                 {/* Info Card */}
                 <div className="restaurant-info-card">
                     <h1 className="restaurant-name">{restaurant.name}</h1>
-                    <div className="favorite-button">♡</div>
+                    <button className="favorite-button">
+                        <HeartIcon className="icon" />
+                    </button>
 
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
                         <StarRating rating={restaurant.rating} />
@@ -46,6 +49,7 @@ export default function RestaurantShow({ restaurant }) {
 
                 {/* Search */}
                 <div className="menu-search">
+                    <MagnifyingGlassIcon className="search-icon" />
                     <input type="text" placeholder="Search menu..." />
                 </div>
 
