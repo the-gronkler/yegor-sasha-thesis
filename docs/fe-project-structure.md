@@ -1,47 +1,88 @@
 The best way to structure an Inertia app is to mirror the Backend structure for **Pages**, while keeping reusable UI elements in **Components**.
 
-### 1. Recommended Directory Structure
+### 1. Recommended Directory Structure (Laravel 12 + Inertia 2 + React 19 + SASS)
 
 ```text
 resources/
-├── css/                  # Global Styles (SCSS)
-│   ├── main.scss         # The HUB: Imports all partials. Imported once in app.jsx
-│   ├── _variables.scss   # Global variables ($primary-color, etc.)
-│   ├── _reset.scss       # CSS Resets
-│   ├── components/       # Styles for specific components (_buttons.scss, _cards.scss)
-│   └── pages/            # Styles specific to pages (_home.scss)
+├── css/                  # Global Styles (SASS/SCSS)
+│   ├── app.scss          # Main SASS entry point (imports all partials)
+│   ├── _variables.scss   # Global variables ($primary-color, $spacing, etc.)
+│   ├── _mixins.scss      # Reusable SASS mixins
+│   ├── _reset.scss       # CSS reset/normalize
+│   ├── components/       # Component-specific styles
+│   │   ├── _buttons.scss
+│   │   ├── _cards.scss
+│   │   ├── _forms.scss
+│   │   └── _modals.scss
+│   ├── layouts/          # Layout-specific styles
+│   │   ├── _auth-layout.scss
+│   │   ├── _customer-layout.scss
+│   │   └── _guest-layout.scss
+│   └── pages/            # Page-specific styles
+│       ├── _home.scss
+│       ├── _login.scss
+│       └── _restaurants.scss
 │
 ├── js/
-│   ├── Components/       # Reusable UI elements
-│   │   ├── UI/           # "Atoms": Basic HTML wrappers
+│   ├── Components/       # Reusable UI elements (PascalCase for React)
+│   │   ├── UI/           # "Atoms": Basic reusable components
 │   │   │   ├── Button.jsx
 │   │   │   ├── Input.jsx
-│   │   │   └── Modal.jsx
-│   │   └── Shared/       # "Molecules": Specific blocks used in multiple places
+│   │   │   ├── Card.jsx
+│   │   │   ├── Modal.jsx
+│   │   │   └── Label.jsx
+│   │   └── Shared/       # "Molecules": Domain-specific reusable components
 │   │       ├── RestaurantCard.jsx
-│   │       └── StarRating.jsx
+│   │       ├── StarRating.jsx
+│   │       ├── CartItem.jsx
+│   │       └── Navbar.jsx
 │   │
-│   ├── Layouts/          # Page wrappers (Navbar, Footer, Sidebar)
-│   │   ├── GuestLayout.jsx
-│   │   ├── CustomerLayout.jsx
-│   │   └── AdminLayout.jsx
+│   ├── Layouts/          # Layout wrappers (Navbar, Footer, Sidebar)
+│   │   ├── GuestLayout.jsx      # Public/unauthenticated pages
+│   │   ├── CustomerLayout.jsx   # Customer-facing authenticated pages
+│   │   ├── AuthLayout.jsx       # Authentication pages (Login/Register)
+│   │   └── AdminLayout.jsx      # Restaurant/Admin pages
 │   │
-│   ├── Pages/            # The Views returned by Laravel Controllers
-│   │   ├── Auth/             # Login, Register, ForgotPassword
-│   │   ├── Customer/         # Matches Customer Controller Namespace
+│   ├── Pages/            # Inertia pages (returned by Laravel Controllers)
+│   │   ├── Auth/         # Authentication pages
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   └── ForgotPassword.jsx
+│   │   ├── Customer/     # Customer-facing pages
 │   │   │   ├── Restaurants/
 │   │   │   │   ├── Index.jsx
 │   │   │   │   └── Show.jsx
-│   │   │   └── Cart/
-│   │   │       └── Index.jsx
-│   │   └── Restaurant/       # Matches Restaurant/Admin Controller Namespace
-│   │       └── Admin/
-│   │           ├── Menu/
-│   │           └── Orders/
+│   │   │   ├── Cart/
+│   │   │   │   └── Index.jsx
+│   │   │   ├── Orders/
+│   │   │   │   ├── Index.jsx
+│   │   │   │   └── Show.jsx
+│   │   │   ├── Profile/
+│   │   │   │   └── Index.jsx
+│   │   │   └── Dashboard.jsx
+│   │   ├── Restaurant/   # Restaurant/Admin pages
+│   │   │   ├── Menu/
+│   │   │   │   ├── Index.jsx
+│   │   │   │   ├── Create.jsx
+│   │   │   │   └── Edit.jsx
+│   │   │   └── Orders/
+│   │   │       ├── Index.jsx
+│   │   │       └── Show.jsx
+│   │   └── Home.jsx      # Public homepage
 │   │
-│   ├── Hooks/            # Custom React Hooks
-│   ├── Utils/            # Helper functions
-│   └── app.jsx           # Main entry point (Imports ../css/main.scss)
+│   ├── Hooks/            # Custom React Hooks (PascalCase)
+│   │   ├── useCart.js
+│   │   ├── useAuth.js
+│   │   └── useFlashMessages.js
+│   │
+│   ├── Utils/            # Helper functions and utilities
+│   │   ├── formatters.js    # Date, currency formatters
+│   │   ├── validators.js    # Form validation helpers
+│   │   └── constants.js     # App constants
+│   │
+│   ├── app.jsx           # Main Inertia entry point
+│   ├── bootstrap.js      # Bootstrap imports (axios, Echo, etc.)
+│   └── ziggy.js          # Auto-generated Ziggy routes (do not edit manually)
 ```
 
 ---
@@ -72,16 +113,21 @@ We split these into two types:
 ### 3. Code Examples
 
 #### 1. The UI Component (`Components/UI/Button.jsx`)
-This is a wrapper around the HTML button. We use a semantic class `btn-primary` instead of utility classes.
+This is a reusable button component with semantic class names. Styles are defined in `resources/css/components/_buttons.scss`.
 
 ```jsx
-import './Button.scss';
-
-export default function Button({ className = '', disabled, children, ...props }) {
+// resources/js/Components/UI/Button.jsx
+export default function Button({ 
+    variant = 'primary', 
+    className = '', 
+    disabled, 
+    children, 
+    ...props 
+}) {
     return (
         <button
             {...props}
-            className={`btn-primary ${disabled ? 'disabled' : ''} ${className}`}
+            className={`btn btn-${variant} ${disabled ? 'btn-disabled' : ''} ${className}`}
             disabled={disabled}
         >
             {children}
@@ -91,14 +137,14 @@ export default function Button({ className = '', disabled, children, ...props })
 ```
 
 #### 2. The Layout (`Layouts/CustomerLayout.jsx`)
-This wraps your customer pages. Note the `{children}` prop—this is where the Page content goes.
+This wraps your customer pages. Note the `{children}` prop—this is where the Page content goes. Styles are defined in `resources/css/layouts/_customer-layout.scss`.
 
 ```jsx
+// resources/js/Layouts/CustomerLayout.jsx
 import { Link, usePage } from '@inertiajs/react';
-import './CustomerLayout.scss';
 
 export default function CustomerLayout({ children }) {
-    const { auth } = usePage().props; // Access shared data like User
+    const { auth } = usePage().props; // Access shared data like authenticated User
 
     return (
         <div className="customer-layout">
@@ -106,32 +152,49 @@ export default function CustomerLayout({ children }) {
                 <div className="container">
                     <div className="nav-wrapper">
                         <div className="nav-left">
-                            <Link href={route('restaurants.index')} className="brand-logo">
+                            <Link href={route('customer.dashboard')} className="brand-logo">
                                 🍔 ThesisEats
                             </Link>
+                            <div className="nav-links">
+                                <Link href={route('restaurants.index')} className="nav-link">
+                                    Restaurants
+                                </Link>
+                                <Link href={route('customer.orders.index')} className="nav-link">
+                                    My Orders
+                                </Link>
+                            </div>
                         </div>
                         <div className="nav-right">
-                            Hello, {auth.user.name}
+                            <span className="user-greeting">Hello, {auth.user.name}</span>
+                            <Link href={route('customer.cart.index')} className="cart-link">
+                                🛒 Cart
+                            </Link>
                         </div>
                     </div>
                 </div>
             </nav>
 
             <main className="main-content">{children}</main>
+
+            <footer className="main-footer">
+                <div className="container">
+                    <p>&copy; 2025 ThesisEats. All rights reserved.</p>
+                </div>
+            </footer>
         </div>
     );
 }
 ```
 
 #### 3. The Page (`Pages/Customer/Restaurants/Index.jsx`)
-This connects everything. It receives `restaurants` from your Laravel Controller.
+This connects everything. It receives `restaurants` from your Laravel Controller. Styles are defined in `resources/css/pages/_restaurants.scss`.
 
 ```jsx
+// resources/js/Pages/Customer/Restaurants/Index.jsx
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import Button from '@/Components/UI/Button';
-import './Index.scss';
 
 export default function RestaurantIndex({ restaurants }) {
     return (
@@ -140,20 +203,34 @@ export default function RestaurantIndex({ restaurants }) {
 
             <div className="restaurant-index-page">
                 <div className="container">
+                    <h1 className="page-title">Browse Restaurants</h1>
+                    
                     <div className="restaurant-grid">
-                        
                         {restaurants.map((restaurant) => (
                             <div key={restaurant.id} className="restaurant-card">
-                                <h3 className="card-title">{restaurant.name}</h3>
-                                <p className="card-address">{restaurant.address}</p>
-                                <div className="card-actions">
-                                    <Link href={route('restaurants.show', restaurant.id)}>
-                                        <Button>View Menu</Button>
-                                    </Link>
+                                {restaurant.image_url && (
+                                    <img 
+                                        src={restaurant.image_url} 
+                                        alt={restaurant.name}
+                                        className="card-image"
+                                    />
+                                )}
+                                <div className="card-body">
+                                    <h3 className="card-title">{restaurant.name}</h3>
+                                    <p className="card-address">{restaurant.address}</p>
+                                    {restaurant.rating && (
+                                        <div className="card-rating">
+                                            ⭐ {restaurant.rating} / 5
+                                        </div>
+                                    )}
+                                    <div className="card-actions">
+                                        <Link href={route('restaurants.show', restaurant.id)}>
+                                            <Button variant="primary">View Menu</Button>
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         ))}
-
                     </div>
                 </div>
             </div>
