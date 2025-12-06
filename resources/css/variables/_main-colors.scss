@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // ======================================================================
 // CORE BRAND & ACCENT COLORS
 // ======================================================================
@@ -6,11 +8,11 @@ $brand-primary: #EE5B2B;
 // Purpose: Main brand / action color.
 // Use for: primary buttons, key CTAs, toggles, icons requiring emphasis.
 
-$brand-primary-hover: darken($brand-primary, 8%);
+$brand-primary-hover: color.adjust($brand-primary, $lightness: -8%);
 // Purpose: Hover state for primary elements.
 // Use for: button:hover, active icon states.
 
-$brand-primary-soft: rgba(#EE5B2B, 0.20);
+$brand-primary-soft: rgba($brand-primary, 0.20);
 // Purpose: Subtle emphasis.
 // Use for: tag backgrounds, "Popular" chip BGs, soft highlight zones.
 
@@ -79,10 +81,10 @@ $btn-primary-text: $text-inverse;
 $btn-primary-hover-bg: $brand-primary-hover;
 // Hovered primary button.
 
-$btn-primary-disabled-bg: lighten($brand-primary, 30%);
+$btn-primary-disabled-bg: color.adjust($brand-primary, $lightness: 30%);
 // Disabled version of brand color.
 
-$btn-primary-disabled-text: lighten($text-primary, 40%);
+$btn-primary-disabled-text: color.adjust($text-primary, $lightness: 40%);
 // For disabled button labels.
 
 
@@ -96,7 +98,7 @@ $disabled-bg: #EDEDED;
 $disabled-border: #E6E6E6;
 // Purpose: Disabled border color.
 
-$disabled-text: lighten(#896B61, 35%);
+$disabled-text: color.adjust($text-secondary, $lightness: 35%);
 // Purpose: Disabled text/icons.
 // Derived from known palette, but still within allowed transformations.
 
