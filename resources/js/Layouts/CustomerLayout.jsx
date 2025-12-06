@@ -14,14 +14,14 @@ export default function CustomerLayout({ children }) {
                     label="Explore"
                 />
                 <NavLink
-                    href="#"
-                    active={false}
+                    href={route('orders.index')}
+                    active={route().current('orders.index')}
                     icon={ShoppingCartIcon}
                     label="Orders"
                 />
                 <NavLink
-                    href="#"
-                    active={false}
+                    href={route('profile.show')}
+                    active={route().current('profile.show')}
                     icon={UserIcon}
                     label="Profile"
                 />

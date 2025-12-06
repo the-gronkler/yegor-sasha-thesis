@@ -18,9 +18,11 @@ class ProfileController extends Controller
         $user = $request->user();
         $this->authorize('view', $user);
 
-        $customer = $user->customer; // assuming one-to-one relationship
+        // Get or create customer record
+        // Will always have a customer record since it is required by the policy
+        $customer = $user->customer;
 
-        // Prepare favorites maybe
+        // Prepare favorites
         $favorites = $customer->favoriteRestaurants()
             ->select(['restaurants.id', 'restaurants.name', 'favorite_restaurants.rank'])
             ->orderBy('favorite_restaurants.rank')
@@ -51,20 +53,26 @@ class ProfileController extends Controller
         ]);
 
         $user->name = $validated['name'];
-        $user->surname = $validated['surname'] ?? $user->surname;
+        $user->surname = $validated['surname'] ?? null;
         $user->email = $validated['email'];
         if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
         $user->save();
 
-        // If you also allow updating customer details:
-        if ($user->customer) {
-            $this->authorize('update', $user->customer);
-            $user->customer()->update([
-                'payment_method_token' => $request->input('payment_method_token'),
+        // Get or create customer record
+        $customer = $user->customer;
+        if (!$customer) {
+            $customer = $user->customer()->create([
+                'user_id' => $user->id,
             ]);
         }
+
+        // Update customer details
+        $this->authorize('update', $customer);
+        $customer->update([
+            'payment_method_token' => $request->input('payment_method_token'),
+        ]);
 
         return back()->with('success', 'Profile updated.');
     }

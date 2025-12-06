@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         // make site-wide admin for testing.
         User::factory()->create([
             'name' => 'admin',
+            'surname' => 'user',
             'email' => 'test@example.com',
             'password' => bcrypt('admin'),
         ]);
