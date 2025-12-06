@@ -47,7 +47,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: $text-primary;
+            color: $text-secondary;
             font-size: 0.75rem; // Slightly smaller text
             font-weight: 600;
             text-decoration: none; // Remove underline from Link
@@ -57,7 +57,7 @@
                 width: 24px;  // Explicit size for SVG
                 height: 24px;
                 margin-bottom: 4px;
-                stroke-width: 1.5; // Adjust icon thickness
+                stroke-width: 2; // Adjust icon thickness
             }
 
             &.active, &:hover {
