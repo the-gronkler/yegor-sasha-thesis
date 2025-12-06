@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\User;
 use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\OrderStatusSeeder;
@@ -15,11 +16,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // make site-wide admin for testing.
-        User::factory()->create([
+        $adminUser = User::factory()->create([
             'name' => 'admin',
             'surname' => 'user',
             'email' => 'test@example.com',
             'password' => bcrypt('admin'),
+        ]);
+
+        // Create a customer record for the admin user
+        Customer::factory()->create([
+            'user_id' => $adminUser->id,
         ]);
 
         $this->call([
