@@ -32,7 +32,7 @@
     border: 1px solid main-colors.$border-light;
     border-radius: layout.$border-radius;
     padding: 0.75rem 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 2px main-colors.$shadow-color;
 
     .search-icon {
         font-size: 1.25rem;
@@ -88,7 +88,7 @@
     background-color: main-colors.$bg-surface;
     border-radius: layout.$border-radius;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
     transition: box-shadow 0.2s ease;
 
     &:hover {

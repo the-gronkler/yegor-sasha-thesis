@@ -28,7 +28,7 @@
                 height: 40px;
                 border-radius: 50%;
                 color: main-colors.$text-inverse;
-                background-color: rgba(0, 0, 0, 0.3);
+                background-color: main-colors.$overlay-light;
                 backdrop-filter: blur(4px);
                 transition: all 0.2s ease;
 
@@ -39,7 +39,7 @@
                 }
 
                 &:hover {
-                    background-color: rgba(0, 0, 0, 0.5);
+                    background-color: main-colors.$overlay-dark;
                     transform: scale(1.05);
                 }
             }

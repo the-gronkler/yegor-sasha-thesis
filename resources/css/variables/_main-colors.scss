@@ -109,3 +109,18 @@ $disabled-text: color.adjust($text-secondary, $lightness: 35%);
 
 $shadow-color: rgba(0, 0, 0, 0.05);
 // Purpose: Soft card shadows (as seen in your mockup).
+
+$shadow-color-strong: rgba(0, 0, 0, 0.1);
+// Purpose: Stronger shadow.
+
+$shadow-color-medium: rgba(0, 0, 0, 0.06);
+// Purpose: Medium shadow.
+
+$shadow-color-text: rgba(0, 0, 0, 0.2);
+// Purpose: Text shadow.
+
+$overlay-light: rgba(0, 0, 0, 0.3);
+// Purpose: Light overlay.
+
+$overlay-dark: rgba(0, 0, 0, 0.5);
+// Purpose: Dark overlay.

@@ -11,7 +11,8 @@ resources/css/
 ├── _reset.scss         # CSS Resets
 ├── variables/          # Variable definitions
 │   ├── _main-colors.scss
-│   └── _layout.scss
+│   ├── _layout.scss
+│   └── _exception-colors.scss
 ├── components/         # Styles for specific components
 │   ├── _buttons.scss
 │   ├── _menu-item-card.scss
@@ -22,6 +23,28 @@ resources/css/
     ├── _auth.scss
     └── _restaurant-show.scss
 ```
+
+## Style Guidelines
+### Color Management
+- **No Hardcoded Colors**: Colors must not be defined outside of a colors variable file.
+- **Preferred Source**: Always look for a suitable replacement in `variables/_main-colors.scss`.
+- **Exceptions**: If absolutely no suitable replacement/match can be found, create a variable in `variables/_exception-colors.scss`.
+
+### Sass Modules
+- **Use `@use`**: Always use the `@use` rule to load mixins, functions, and variables from other Sass files. Do not use `@import` as it is deprecated.
+- **Namespacing**: Utilize the automatic namespacing provided by `@use` (e.g., `main-colors.$brand-primary`) to avoid naming collisions and make dependencies explicit.
+
+### Nesting
+- **Limit Depth**: Avoid nesting selectors more than 3 levels deep. Deep nesting increases CSS specificity and makes overriding styles difficult.
+- **Readability**: Use nesting primarily to scope styles to a component or to group related states (like `&:hover`).
+
+### Naming Conventions
+- **Kebab-case**: Use `kebab-case` for all class names, variables, and filenames (e.g., `.btn-primary`, `$text-secondary`, `_main-colors.scss`).
+- **Descriptive Names**: Choose class names that describe the *purpose* or *content* of the element, not its appearance (e.g., `.error-message` instead of `.red-text`).
+
+### Responsive Design
+- **Mobile-First**: Write base styles for mobile devices first.
+- **Media Queries**: Use `min-width` media queries to layer on styles for larger screens (tablets, desktops).
 
 ## Base
 ### `_reset.scss`
@@ -45,6 +68,9 @@ Defines the color palette for the application.
 Defines structural variables.
 - **Borders**: `$border-radius` (8px), `$border-radius-pill`.
 - **Shadows**: `$box-shadow` for elevated elements.
+
+### `variables/_exception-colors.scss`
+Contains color definitions that do not fit into the main color palette but are necessary for specific UI elements. Use sparingly.
 
 ## Layouts
 ### `layouts/_customer.scss`

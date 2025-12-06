@@ -1,5 +1,6 @@
 @use "../variables/layout";
 @use "../variables/main-colors";
+@use "../variables/exception-colors";
 
 .auth-page {
     min-height: 100vh;
@@ -36,7 +37,7 @@
             .status-message {
                 margin-top: 1rem;
                 font-size: 0.875rem;
-                color: #16a34a; // green-600
+                color: exception-colors.$status-success;
             }
         }
 
@@ -74,12 +75,12 @@
 
                 .error-message {
                     font-size: 0.75rem;
-                    color: #dc2626; // Red for errors
+                    color: exception-colors.$status-error;
                     margin-top: 0.25rem;
                     font-weight: 500;
-                    background-color: #fef2f2;
+                    background-color: main-colors.$bg-alt-1;
                     padding: 0.5rem;
-                    border: 1px solid #fecaca;
+                    border: 1px solid main-colors.$border-light;
                     border-radius: 0.25rem;
                 }
             }
@@ -106,7 +107,7 @@
 
                         &:focus {
                             outline: none;
-                            box-shadow: 0 0 0 2px rgba(main-colors.$brand-primary, 0.2);
+                            box-shadow: 0 0 0 2px main-colors.$brand-primary-soft;
                         }
                     }
                 }

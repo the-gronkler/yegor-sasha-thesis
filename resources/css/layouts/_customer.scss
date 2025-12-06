@@ -10,9 +10,9 @@
     @media (min-width: 1024px) {
         max-width: 768px; // Constrain width to simulate mobile/tablet view
         margin: 0 auto;
-        border-left: 1px solid #eee;
-        border-right: 1px solid #eee;
-        background-color: #fff; // Ensure content has background
+        border-left: 1px solid main-colors.$bg-alt-1;
+        border-right: 1px solid main-colors.$bg-alt-1;
+        background-color: main-colors.$bg-surface; // Ensure content has background
         min-height: 100vh;
     }
 
@@ -40,8 +40,8 @@
             width: 768px; // Match max-width of .customer-layout
             left: 50%;
             transform: translateX(-50%);
-            border-left: 1px solid #eee;
-            border-right: 1px solid #eee;
+            border-left: 1px solid main-colors.$bg-alt-1;
+            border-right: 1px solid main-colors.$bg-alt-1;
         }
 
         .nav-item {
