@@ -3,8 +3,10 @@ import { Head, Link } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
+import useTranslation from '@/Hooks/useTranslation';
 
 export default function RestaurantShow({ restaurant }) {
+    const { t } = useTranslation();
     const primaryImage = restaurant.restaurant_images.find(img => img.is_primary_for_restaurant) || restaurant.restaurant_images[0];
     const bannerUrl = primaryImage ? `/storage/${primaryImage.url}` : null;
 
@@ -35,18 +37,18 @@ export default function RestaurantShow({ restaurant }) {
                     </div>
 
                     <div className="info-row">
-                        <span>Open 12:00 - 21:00</span> {/* Placeholder data */}
+                        <span>{t('Open')} 12:00 - 21:00</span> {/* Placeholder data */}
                         <span>~3km</span> {/* Placeholder data */}
                     </div>
 
                     <p className="restaurant-description">
-                        {restaurant.description || "The best food in the world please buy it ASAP"}
+                        {restaurant.description || t('DefaultRestaurantDescription')}
                     </p>
                 </div>
 
                 {/* Search */}
                 <div className="menu-search">
-                    <input type="text" placeholder="Search menu..." />
+                    <input type="text" placeholder={t('SearchMenu')} />
                 </div>
 
                 {/* Menu Categories */}
