@@ -33,7 +33,7 @@ export default function CustomerLayout({ children }) {
 function NavLink({ href, active, icon: Icon, label }) {
     return (
         <Link href={href} className={`nav-item ${active ? 'active' : ''}`}>
-            <Icon className="icon" />
+            <Icon className="icon" aria-hidden="true" />
             <span className="label">{label}</span>
         </Link>
     );

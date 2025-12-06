@@ -29,7 +29,7 @@ export default function RestaurantShow({ restaurant }) {
                 {/* Info Card */}
                 <div className="restaurant-info-card">
                     <h1 className="restaurant-name">{restaurant.name}</h1>
-                    <button className="favorite-button">
+                    <button className="favorite-button" aria-label="Add to favorites">
                         <HeartIcon className="icon" />
                     </button>
 
@@ -49,8 +49,8 @@ export default function RestaurantShow({ restaurant }) {
 
                 {/* Search */}
                 <div className="menu-search">
-                    <MagnifyingGlassIcon className="search-icon" />
-                    <input type="text" placeholder="Search menu..." />
+                    <MagnifyingGlassIcon className="search-icon" aria-hidden="true" />
+                    <input type="text" placeholder="Search menu..." aria-label="Search menu" />
                 </div>
 
                 {/* Menu Categories */}
