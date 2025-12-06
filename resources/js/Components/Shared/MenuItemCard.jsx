@@ -1,6 +1,8 @@
 import React from 'react';
+import useTranslation from '@/Hooks/useTranslation';
 
 export default function MenuItemCard({ item }) {
+    const { t } = useTranslation();
     // Placeholder for availability logic.
     // Assuming available unless specified otherwise (not in current data).
     const isAvailable = true;
@@ -22,7 +24,7 @@ export default function MenuItemCard({ item }) {
                 <p className="menu-item-price">€{item.price}</p>
             </div>
 
-            <button className="add-button" disabled={!isAvailable}>
+            <button className="add-button" disabled={!isAvailable} title={t('Add')}>
                 +
             </button>
         </div>
