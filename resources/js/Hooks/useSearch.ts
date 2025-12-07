@@ -1,6 +1,27 @@
 import { useState, useMemo } from 'react';
 import Fuse, { IFuseOptions } from 'fuse.js';
 
+/**
+ * A custom React hook that provides fuzzy search functionality over an array of items using Fuse.js.
+ * It manages the search query state and returns filtered items based on the query.
+ *
+ * @template T - The type of items in the array.
+ * @param items - The array of items to search through. Each item should be an object with properties matching the searchKeys.
+ * @param searchKeys - An array of keys (properties) of the items to perform the search on. These must be valid keys of type T.
+ * @param options - Optional configuration options for Fuse.js, such as threshold, ignoreLocation, etc. These will be merged with default options.
+ * @returns An object containing:
+ *   - `query`: The current search query string.
+ *   - `setQuery`: A function to update the search query.
+ *   - `filteredItems`: The array of items filtered based on the search query. If no query is provided, returns the original items array.
+ *
+ * @example
+ * ```tsx
+ * const { query, setQuery, filteredItems } = useSearch(
+ *   [{ name: 'Apple', category: 'Fruit' }, { name: 'Banana', category: 'Fruit' }],
+ *   ['name', 'category']
+ * );
+ * ```
+ */
 export function useSearch<T>(
   items: T[],
   searchKeys: (keyof T)[],

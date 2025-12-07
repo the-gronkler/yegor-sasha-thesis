@@ -6,12 +6,14 @@ import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
 import SearchInput from '@/Components/UI/SearchInput';
 import { useSearch } from '@/Hooks/useSearch';
-import { Restaurant } from '@/types/models';
+import { Restaurant, MenuItem } from '@/types/models';
 import { PageProps } from '@/types';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
 }
+
+const SEARCH_KEYS: (keyof MenuItem)[] = ['name', 'description'];
 
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const primaryImage =
@@ -30,7 +32,7 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     query,
     setQuery,
     filteredItems: filteredMenuItems,
-  } = useSearch(allMenuItems, ['name', 'description']);
+  } = useSearch(allMenuItems, SEARCH_KEYS);
 
   // Group filtered items back into categories
   const displayedCategories = useMemo(() => {

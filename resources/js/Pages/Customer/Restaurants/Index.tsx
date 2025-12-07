@@ -10,12 +10,14 @@ interface RestaurantIndexProps extends PageProps {
   restaurants: Restaurant[];
 }
 
+const SEARCH_KEYS: (keyof Restaurant)[] = ['name', 'description'];
+
 export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
   const {
     query,
     setQuery,
     filteredItems: filteredRestaurants,
-  } = useSearch(restaurants, ['name', 'description']);
+  } = useSearch(restaurants, SEARCH_KEYS);
 
   return (
     <CustomerLayout>
