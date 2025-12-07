@@ -4,7 +4,14 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:php": "composer run format",
+    "format:all": "npm run format && npm run format:php",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,css,scss,md,json}": "prettier --write",
+    "**/*.php": "php vendor/bin/pint"
   },
   "devDependencies": {
     "@inertiajs/react": "^2.2.8",
@@ -15,7 +22,9 @@
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.4",
     "concurrently": "^9.0.1",
+    "husky": "^9.1.7",
     "laravel-vite-plugin": "^1.2.0",
+    "lint-staged": "^16.2.7",
     "postcss": "^8.4.47",
     "prettier": "^3.7.4",
     "react": "^19.2.0",
