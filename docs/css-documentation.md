@@ -178,6 +178,6 @@ We use **Prettier** to enforce consistent code formatting.
 
 - **Configuration**: [`.prettierrc`](../.prettierrc)
 - **Command**: To format all files, run:
-    ```powershell
-    npm run format
-    ```
+  ```powershell
+  npm run format
+  ```

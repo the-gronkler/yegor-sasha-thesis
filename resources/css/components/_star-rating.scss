@@ -1,15 +1,15 @@
-@use "../variables/main-colors";
+@use '../variables/main-colors';
 
 .star-rating {
-    display: flex;
-    gap: 2px;
+  display: flex;
+  gap: 2px;
 
-    .star {
-        color: main-colors.$border-light;
-        font-size: 1rem;
+  .star {
+    color: main-colors.$border-light;
+    font-size: 1rem;
 
-        &.filled {
-            color: main-colors.$accent-warm;
-        }
+    &.filled {
+      color: main-colors.$accent-warm;
     }
+  }
 }

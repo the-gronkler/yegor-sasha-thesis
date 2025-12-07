@@ -1,91 +1,91 @@
-@use "../variables/layout";
-@use "../variables/main-colors";
+@use '../variables/layout';
+@use '../variables/main-colors';
 
 .menu-item-card {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    background: main-colors.$bg-surface;
-    border: 1px solid main-colors.$border-light;
-    border-radius: layout.$border-radius;
-    margin-bottom: 1rem;
-    position: relative;
-    overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: main-colors.$bg-surface;
+  border: 1px solid main-colors.$border-light;
+  border-radius: layout.$border-radius;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
 
-    &.unavailable {
-        background-color: main-colors.$disabled-bg;
-        color: main-colors.$disabled-text;
-
-        .menu-item-image {
-            opacity: 0.5;
-        }
-
-        &::after {
-            content: "UNAVAILABLE";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-weight: 900;
-            color: main-colors.$text-inverse;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-            text-shadow: 0 1px 2px main-colors.$shadow-color-text;
-        }
-    }
+  &.unavailable {
+    background-color: main-colors.$disabled-bg;
+    color: main-colors.$disabled-text;
 
     .menu-item-image {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background-color: main-colors.$bg-alt-1;
-        object-fit: cover;
-        margin-right: 1rem;
-        flex-shrink: 0;
+      opacity: 0.5;
     }
 
-    .menu-item-details {
-        flex: 1;
+    &::after {
+      content: 'UNAVAILABLE';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 900;
+      color: main-colors.$text-inverse;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 2px main-colors.$shadow-color-text;
+    }
+  }
 
-        .menu-item-name {
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-            color: main-colors.$text-primary;
-        }
+  .menu-item-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: main-colors.$bg-alt-1;
+    object-fit: cover;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
 
-        .menu-item-description {
-            font-size: 0.8rem;
-            color: main-colors.$text-secondary;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+  .menu-item-details {
+    flex: 1;
 
-        .menu-item-price {
-            font-weight: 600;
-            margin-top: 0.25rem;
-            color: main-colors.$text-primary;
-        }
+    .menu-item-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+      color: main-colors.$text-primary;
     }
 
-    .add-button {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background-color: main-colors.$brand-primary;
-        color: main-colors.$text-inverse;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        cursor: pointer;
-        margin-left: 1rem;
-        font-size: 1.2rem;
-
-        &:hover {
-            background-color: main-colors.$brand-primary-hover;
-        }
+    .menu-item-description {
+      font-size: 0.8rem;
+      color: main-colors.$text-secondary;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
+
+    .menu-item-price {
+      font-weight: 600;
+      margin-top: 0.25rem;
+      color: main-colors.$text-primary;
+    }
+  }
+
+  .add-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: main-colors.$brand-primary;
+    color: main-colors.$text-inverse;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    margin-left: 1rem;
+    font-size: 1.2rem;
+
+    &:hover {
+      background-color: main-colors.$brand-primary-hover;
+    }
+  }
 }
