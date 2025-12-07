@@ -1,9 +1,14 @@
-import React from "react";
 import { Head, Link } from "@inertiajs/react";
 import CustomerLayout from "@/Layouts/CustomerLayout";
 import StarRating from "@/Components/Shared/StarRating";
+import { Restaurant } from "@/types/models";
+import { PageProps } from "@/types";
 
-export default function RestaurantIndex({ restaurants }) {
+interface RestaurantIndexProps extends PageProps {
+    restaurants: Restaurant[];
+}
+
+export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
     return (
         <CustomerLayout>
             <Head title="Explore Restaurants" />
@@ -12,6 +17,8 @@ export default function RestaurantIndex({ restaurants }) {
                 {/* Search Bar */}
                 <div className="search-header">
                     <div className="search-bar">
+                        {/* TODO: Implement search functionality */}
+                        {/* TODO: Use an icon */}
                         <span className="search-icon">🔍</span>
                         <input
                             type="text"
@@ -26,7 +33,7 @@ export default function RestaurantIndex({ restaurants }) {
                     {restaurants.map((restaurant) => {
                         const primaryImage =
                             restaurant.images?.find(
-                                (img) => img.is_primary_for_restaurant
+                                (img) => img.is_primary_for_restaurant,
                             ) || restaurant.images?.[0];
                         const imageUrl = primaryImage
                             ? primaryImage.url

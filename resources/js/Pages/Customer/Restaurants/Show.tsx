@@ -1,4 +1,3 @@
-import React from "react";
 import { Head, Link } from "@inertiajs/react";
 import {
     ArrowLeftIcon,
@@ -8,12 +7,18 @@ import {
 import CustomerLayout from "@/Layouts/CustomerLayout";
 import StarRating from "@/Components/Shared/StarRating";
 import MenuItemCard from "@/Components/Shared/MenuItemCard";
+import { Restaurant } from "@/types/models";
+import { PageProps } from "@/types";
 
-export default function RestaurantShow({ restaurant }) {
+interface RestaurantShowProps extends PageProps {
+    restaurant: Restaurant;
+}
+
+export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     const primaryImage =
-        restaurant.restaurant_images.find(
-            (img) => img.is_primary_for_restaurant
-        ) || restaurant.restaurant_images[0];
+        restaurant.restaurant_images?.find(
+            (img) => img.is_primary_for_restaurant,
+        ) || restaurant.restaurant_images?.[0];
     const bannerUrl = primaryImage ? primaryImage.url : null;
 
     return (
@@ -57,7 +62,7 @@ export default function RestaurantShow({ restaurant }) {
                             marginBottom: "0.5rem",
                         }}
                     >
-                        <StarRating rating={restaurant.rating} />
+                        <StarRating rating={restaurant.rating || 0} />
                     </div>
 
                     <div className="info-row">
@@ -89,7 +94,7 @@ export default function RestaurantShow({ restaurant }) {
                 </div>
 
                 {/* Menu Categories */}
-                {restaurant.food_types.map((category) => (
+                {restaurant.food_types?.map((category) => (
                     <div key={category.id} className="menu-category">
                         <h3 className="category-title">{category.name}</h3>
 

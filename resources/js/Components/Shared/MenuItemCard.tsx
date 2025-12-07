@@ -1,13 +1,18 @@
 import React from "react";
+import { MenuItem } from "@/types/models";
 
-export default function MenuItemCard({ item }) {
+interface MenuItemCardProps {
+    item: MenuItem;
+}
+
+export default function MenuItemCard({ item }: MenuItemCardProps) {
     // Placeholder for availability logic.
     // Assuming available unless specified otherwise (not in current data).
     const isAvailable = true;
 
     const primaryImage =
-        item.images.find((img) => img.is_primary_for_menu_item) ||
-        item.images[0];
+        item.images?.find((img) => img.is_primary_for_menu_item) ||
+        item.images?.[0];
     const imageUrl = primaryImage ? primaryImage.url : null; // Adjust path as needed
 
     return (

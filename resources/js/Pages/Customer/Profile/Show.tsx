@@ -1,9 +1,29 @@
-import React from "react";
-import { Head, Link, useForm, router } from "@inertiajs/react";
+import { FormEventHandler } from "react";
+import { Head, useForm, router, Link } from "@inertiajs/react";
 import CustomerLayout from "@/Layouts/CustomerLayout";
+import { User, Restaurant, Customer } from "@/types/models";
 
-export default function ProfileShow({ user, customer, favorites }) {
-    const form = useForm({
+interface ProfileShowProps {
+    user: User;
+    customer: Customer;
+    favorites: Restaurant[];
+}
+
+interface ProfileFormData {
+    name: string;
+    surname: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+    payment_method_token: string;
+}
+
+export default function ProfileShow({
+    user,
+    customer,
+    favorites,
+}: ProfileShowProps) {
+    const form = useForm<ProfileFormData>({
         name: user.name || "",
         surname: user.surname || "",
         email: user.email || "",
@@ -12,7 +32,7 @@ export default function ProfileShow({ user, customer, favorites }) {
         payment_method_token: customer?.payment_method_token || "",
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         form.put(route("profile.update"), {
             preserveScroll: true,
@@ -22,7 +42,7 @@ export default function ProfileShow({ user, customer, favorites }) {
         });
     };
 
-    const handleLogout = (e) => {
+    const handleLogout: FormEventHandler = (e) => {
         e.preventDefault();
         router.post(route("logout"));
     };
@@ -116,7 +136,7 @@ export default function ProfileShow({ user, customer, favorites }) {
                                 onChange={(e) =>
                                     form.setData(
                                         "payment_method_token",
-                                        e.target.value
+                                        e.target.value,
                                     )
                                 }
                             />
@@ -166,7 +186,7 @@ export default function ProfileShow({ user, customer, favorites }) {
                                 onChange={(e) =>
                                     form.setData(
                                         "password_confirmation",
-                                        e.target.value
+                                        e.target.value,
                                     )
                                 }
                                 autoComplete="new-password"
@@ -210,7 +230,7 @@ export default function ProfileShow({ user, customer, favorites }) {
                                     key={favorite.id}
                                     href={route(
                                         "restaurants.show",
-                                        favorite.id
+                                        favorite.id,
                                     )}
                                     className="favorite-item"
                                 >

@@ -1,3 +1,4 @@
+import { PropsWithChildren } from "react";
 import { Link } from "@inertiajs/react";
 import {
     MapPinIcon,
@@ -5,7 +6,25 @@ import {
     UserIcon,
 } from "@heroicons/react/24/outline";
 
-export default function CustomerLayout({ children }) {
+interface CustomerLayoutProps extends PropsWithChildren {}
+
+interface NavLinkProps {
+    href: string;
+    active: boolean;
+    icon: React.ElementType;
+    label: string;
+}
+
+function NavLink({ href, active, icon: Icon, label }: NavLinkProps) {
+    return (
+        <Link href={href} className={`nav-item ${active ? "active" : ""}`}>
+            <Icon className="icon" aria-hidden="true" />
+            <span className="label">{label}</span>
+        </Link>
+    );
+}
+
+export default function CustomerLayout({ children }: CustomerLayoutProps) {
     return (
         <div className="customer-layout">
             <main className="main-content">{children}</main>
@@ -31,14 +50,5 @@ export default function CustomerLayout({ children }) {
                 />
             </nav>
         </div>
-    );
-}
-
-function NavLink({ href, active, icon: Icon, label }) {
-    return (
-        <Link href={href} className={`nav-item ${active ? "active" : ""}`}>
-            <Icon className="icon" aria-hidden="true" />
-            <span className="label">{label}</span>
-        </Link>
     );
 }
