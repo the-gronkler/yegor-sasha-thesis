@@ -17,6 +17,8 @@ export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
                 {/* Search Bar */}
                 <div className="search-header">
                     <div className="search-bar">
+                        {/* TODO: Implement search functionality */}
+                        {/* TODO: Use an icon */}
                         <span className="search-icon">🔍</span>
                         <input
                             type="text"
