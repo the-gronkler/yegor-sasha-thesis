@@ -1,1 +1,1 @@
-npx lint-staged || true
+npx lint-staged || echo "⚠️ Lint-staged failed, but committing anyway..."
