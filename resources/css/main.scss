@@ -1,16 +1,16 @@
-@use 'variables';
-@use 'reset';
+@use "variables";
+@use "reset";
 
 // Layouts
-@use 'layouts/customer';
+@use "layouts/customer";
 
 // Components
-@use 'components/buttons';
-@use 'components/star-rating';
-@use 'components/menu-item-card';
+@use "components/buttons";
+@use "components/star-rating";
+@use "components/menu-item-card";
 
 // Pages
-@use 'pages/restaurant-index';
-@use 'pages/restaurant-show';
-@use 'pages/profile';
-@use 'pages/auth';
+@use "pages/restaurant-index";
+@use "pages/restaurant-show";
+@use "pages/profile";
+@use "pages/auth";
