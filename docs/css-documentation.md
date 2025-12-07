@@ -171,3 +171,13 @@ Styles specific to authentication pages (Login/Register).
 - `.auth-page`: A full-height, centered flex layout.
 - `.auth-card`: The container for the authentication form.
 - Includes specific styles for form groups, inputs, error messages, and form actions (remember me, forgot password).
+
+## Formatting
+
+We use **Prettier** to enforce consistent code formatting.
+
+- **Configuration**: [`.prettierrc`](../.prettierrc)
+- **Command**: To format all files, run:
+  ```powershell
+  npm run format
+  ```

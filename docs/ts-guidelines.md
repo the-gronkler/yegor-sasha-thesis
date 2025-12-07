@@ -138,3 +138,13 @@ Components should follow this ordering:
 ## 7. Global Namespace
 
 - **Window Object**: If extending the `window` object (e.g., for `axios` or `Ziggy`), definitions must be placed in `resources/js/types/global.d.ts`.
+
+## 8. Formatting
+
+We use **Prettier** to enforce consistent code formatting.
+
+- **Configuration**: [`.prettierrc`](../.prettierrc)
+- **Command**: To format all files, run:
+  ```powershell
+  npm run format
+  ```

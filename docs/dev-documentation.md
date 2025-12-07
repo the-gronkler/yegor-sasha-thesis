@@ -15,3 +15,13 @@ php artisan <command-name>
 - `mfs`
 
   Alias for: `migrate:fresh --path=database/migrations/* --seed`. Wipes the DB, reruns all migrations in the specified folder and its subfolders, and then seeds the database.
+
+## Formatting
+
+We use **Prettier** for code formatting. The configuration is located in [`.prettierrc`](../.prettierrc).
+
+To format all files in the project, run:
+
+```powershell
+npm run format
+```
