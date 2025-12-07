@@ -40,6 +40,7 @@ class RegisteredUserController extends Controller
         ]);
 
         // Mark email as verified for new registrations
+        // TODO: implement email verification later
         $user->email_verified_at = now();
         $user->save();
 
