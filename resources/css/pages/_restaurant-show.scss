@@ -107,38 +107,6 @@
 
   .menu-search {
     margin: 0 1rem 1.5rem;
-    position: relative;
-
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      color: main-colors.$text-secondary;
-      pointer-events: none;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.75rem; // Added padding-left for icon
-      border-radius: layout.$border-radius-pill;
-      border: none;
-      background-color: main-colors.$bg-alt-2;
-      color: main-colors.$text-primary;
-      font-weight: 500;
-      transition: box-shadow 0.2s;
-
-      &:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px main-colors.$brand-primary-soft;
-      }
-
-      &::placeholder {
-        color: main-colors.$text-secondary;
-      }
-    }
   }
 
   .menu-category {

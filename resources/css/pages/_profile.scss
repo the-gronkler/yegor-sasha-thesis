@@ -1,5 +1,6 @@
 @use '../variables/layout';
 @use '../variables/main-colors';
+@use '../variables/exception-colors';
 
 // ======================================================================
 // PROFILE PAGE
@@ -104,7 +105,7 @@
 
     .error-message {
       font-size: 0.75rem;
-      color: #dc2626;
+      color: exception-colors.$status-error;
       margin: 0;
     }
   }

@@ -1,6 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
+import SearchInput from '@/Components/UI/SearchInput';
+import { useSearch } from '@/Hooks/useSearch';
 import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
 
@@ -9,6 +11,12 @@ interface RestaurantIndexProps extends PageProps {
 }
 
 export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
+  const {
+    query,
+    setQuery,
+    filteredItems: filteredRestaurants,
+  } = useSearch(restaurants, ['name', 'description']);
+
   return (
     <CustomerLayout>
       <Head title="Explore Restaurants" />
@@ -16,21 +24,17 @@ export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
       <div className="restaurant-index-page">
         {/* Search Bar */}
         <div className="search-header">
-          <div className="search-bar">
-            {/* TODO: Implement search functionality */}
-            {/* TODO: Use an icon */}
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Search restaurants..."
-              className="search-input"
-            />
-          </div>
+          <SearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder="Search restaurants..."
+            className="search-bar"
+          />
         </div>
 
         {/* Restaurant List */}
         <div className="restaurant-list">
-          {restaurants.map((restaurant) => {
+          {filteredRestaurants.map((restaurant) => {
             const primaryImage =
               restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
               restaurant.images?.[0];

@@ -1,12 +1,11 @@
+import { useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import {
-  ArrowLeftIcon,
-  HeartIcon,
-  MagnifyingGlassIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
+import SearchInput from '@/Components/UI/SearchInput';
+import { useSearch } from '@/Hooks/useSearch';
 import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
 
@@ -20,6 +19,34 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
       (img) => img.is_primary_for_restaurant,
     ) || restaurant.restaurant_images?.[0];
   const bannerUrl = primaryImage ? primaryImage.url : null;
+
+  // Flatten menu items for searching
+  const allMenuItems = useMemo(
+    () => restaurant.food_types?.flatMap((ft) => ft.menu_items) || [],
+    [restaurant.food_types],
+  );
+
+  const {
+    query,
+    setQuery,
+    filteredItems: filteredMenuItems,
+  } = useSearch(allMenuItems, ['name', 'description']);
+
+  // Group filtered items back into categories
+  const displayedCategories = useMemo(() => {
+    if (!query) return restaurant.food_types;
+
+    const filteredIds = new Set(filteredMenuItems.map((item) => item.id));
+
+    return restaurant.food_types
+      ?.map((category) => ({
+        ...category,
+        menu_items: category.menu_items.filter((item) =>
+          filteredIds.has(item.id),
+        ),
+      }))
+      .filter((category) => category.menu_items.length > 0);
+  }, [query, restaurant.food_types, filteredMenuItems]);
 
   return (
     <CustomerLayout>
@@ -72,16 +99,16 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
 
         {/* Search */}
         <div className="menu-search">
-          <MagnifyingGlassIcon className="search-icon" aria-hidden="true" />
-          <input
-            type="text"
+          <SearchInput
+            value={query}
+            onChange={setQuery}
             placeholder="Search menu..."
-            aria-label="Search menu"
+            className="search-bar"
           />
         </div>
 
         {/* Menu Categories */}
-        {restaurant.food_types?.map((category) => (
+        {displayedCategories?.map((category) => (
           <div key={category.id} className="menu-category">
             <h3 className="category-title">{category.name}</h3>
 
