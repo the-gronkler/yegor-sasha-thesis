@@ -1,158 +1,158 @@
-@use '../variables/layout';
-@use '../variables/main-colors';
+@use "../variables/layout";
+@use "../variables/main-colors";
 
 .restaurant-show-page {
-  background-color: main-colors.$bg-main;
-  min-height: 100vh;
+    background-color: main-colors.$bg-main;
+    min-height: 100vh;
 
-  .restaurant-banner {
-    height: 200px;
-    background-color: main-colors.$bg-alt-2; // Placeholder color
-    background-size: cover;
-    background-position: center;
-    position: relative;
+    .restaurant-banner {
+        height: 200px;
+        background-color: main-colors.$bg-alt-2; // Placeholder color
+        background-size: cover;
+        background-position: center;
+        position: relative;
 
-    .banner-actions {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      right: 1rem;
-      display: flex;
-      justify-content: space-between;
+        .banner-actions {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            display: flex;
+            justify-content: space-between;
 
-      .back-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        color: main-colors.$text-inverse;
-        background-color: main-colors.$overlay-light;
-        backdrop-filter: blur(4px);
-        transition: all 0.2s ease;
+            .back-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                color: main-colors.$text-inverse;
+                background-color: main-colors.$overlay-light;
+                backdrop-filter: blur(4px);
+                transition: all 0.2s ease;
 
-        .icon {
-          width: 24px;
-          height: 24px;
-          stroke-width: 2;
+                .icon {
+                    width: 24px;
+                    height: 24px;
+                    stroke-width: 2;
+                }
+
+                &:hover {
+                    background-color: main-colors.$overlay-dark;
+                    transform: scale(1.05);
+                }
+            }
+        }
+    }
+
+    .restaurant-info-card {
+        background: main-colors.$bg-surface;
+        margin: -2rem 1rem 1rem; // Overlap banner
+        padding: 1rem;
+        border-radius: 16px;
+        box-shadow: layout.$box-shadow;
+        position: relative;
+        text-align: center;
+
+        .restaurant-name {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            color: main-colors.$text-primary;
         }
 
-        &:hover {
-          background-color: main-colors.$overlay-dark;
-          transform: scale(1.05);
+        .favorite-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: main-colors.$text-primary;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: transform 0.2s;
+
+            .icon {
+                width: 28px;
+                height: 28px;
+                stroke-width: 1.5;
+            }
+
+            &:hover {
+                transform: scale(1.1);
+                color: main-colors.$brand-primary;
+            }
         }
-      }
-    }
-  }
 
-  .restaurant-info-card {
-    background: main-colors.$bg-surface;
-    margin: -2rem 1rem 1rem; // Overlap banner
-    padding: 1rem;
-    border-radius: 16px;
-    box-shadow: layout.$box-shadow;
-    position: relative;
-    text-align: center;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            background-color: main-colors.$bg-alt-1;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            color: main-colors.$text-secondary;
+        }
 
-    .restaurant-name {
-      font-size: 1.5rem;
-      font-weight: 900;
-      margin-bottom: 0.25rem;
-      text-transform: uppercase;
-      color: main-colors.$text-primary;
-    }
-
-    .favorite-button {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      color: main-colors.$text-primary;
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-      transition: transform 0.2s;
-
-      .icon {
-        width: 28px;
-        height: 28px;
-        stroke-width: 1.5;
-      }
-
-      &:hover {
-        transform: scale(1.1);
-        color: main-colors.$brand-primary;
-      }
+        .restaurant-description {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: main-colors.$text-secondary;
+        }
     }
 
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      background-color: main-colors.$bg-alt-1;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin: 0.5rem 0;
-      color: main-colors.$text-secondary;
+    .menu-search {
+        margin: 0 1rem 1.5rem;
+        position: relative;
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: main-colors.$text-secondary;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem; // Added padding-left for icon
+            border-radius: layout.$border-radius-pill;
+            border: none;
+            background-color: main-colors.$bg-alt-2;
+            color: main-colors.$text-primary;
+            font-weight: 500;
+            transition: box-shadow 0.2s;
+
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px main-colors.$brand-primary-soft;
+            }
+
+            &::placeholder {
+                color: main-colors.$text-secondary;
+            }
+        }
     }
 
-    .restaurant-description {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: main-colors.$text-secondary;
+    .menu-category {
+        margin: 0 1rem 2rem;
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            border-bottom: 4px solid main-colors.$border-light;
+            display: inline-block;
+            padding-right: 2rem;
+            width: 100%;
+            color: main-colors.$text-primary;
+        }
     }
-  }
-
-  .menu-search {
-    margin: 0 1rem 1.5rem;
-    position: relative;
-
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      color: main-colors.$text-secondary;
-      pointer-events: none;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.75rem; // Added padding-left for icon
-      border-radius: layout.$border-radius-pill;
-      border: none;
-      background-color: main-colors.$bg-alt-2;
-      color: main-colors.$text-primary;
-      font-weight: 500;
-      transition: box-shadow 0.2s;
-
-      &:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px main-colors.$brand-primary-soft;
-      }
-
-      &::placeholder {
-        color: main-colors.$text-secondary;
-      }
-    }
-  }
-
-  .menu-category {
-    margin: 0 1rem 2rem;
-
-    .category-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      border-bottom: 4px solid main-colors.$border-light;
-      display: inline-block;
-      padding-right: 2rem;
-      width: 100%;
-      color: main-colors.$text-primary;
-    }
-  }
 }

@@ -121,27 +121,27 @@ This is a reusable button component with semantic class names. Styles are define
 
 ```tsx
 // resources/js/Components/UI/Button.tsx
-import { ButtonHTMLAttributes } from 'react';
+import { ButtonHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  className?: string;
+    className?: string;
 }
 
 export default function Button({
-  className = '',
-  disabled,
-  children,
-  ...props
+    className = "",
+    disabled,
+    children,
+    ...props
 }: ButtonProps) {
-  return (
-    <button
-      {...props}
-      className={`btn-primary ${disabled ? 'disabled' : ''} ${className}`}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  );
+    return (
+        <button
+            {...props}
+            className={`btn-primary ${disabled ? "disabled" : ""} ${className}`}
+            disabled={disabled}
+        >
+            {children}
+        </button>
+    );
 }
 ```
 
@@ -151,59 +151,59 @@ This wraps your customer pages. Note the `{children}` prop—this is where the P
 
 ```tsx
 // resources/js/Layouts/CustomerLayout.tsx
-import { PropsWithChildren } from 'react';
-import { Link } from '@inertiajs/react';
+import { PropsWithChildren } from "react";
+import { Link } from "@inertiajs/react";
 import {
-  MapPinIcon,
-  ShoppingCartIcon,
-  UserIcon,
-} from '@heroicons/react/24/outline';
+    MapPinIcon,
+    ShoppingCartIcon,
+    UserIcon,
+} from "@heroicons/react/24/outline";
 
 interface CustomerLayoutProps extends PropsWithChildren {}
 
 interface NavLinkProps {
-  href: string;
-  active: boolean;
-  icon: React.ElementType;
-  label: string;
+    href: string;
+    active: boolean;
+    icon: React.ElementType;
+    label: string;
 }
 
 function NavLink({ href, active, icon: Icon, label }: NavLinkProps) {
-  return (
-    <Link href={href} className={`nav-item ${active ? 'active' : ''}`}>
-      <Icon className="icon" aria-hidden="true" />
-      <span className="label">{label}</span>
-    </Link>
-  );
+    return (
+        <Link href={href} className={`nav-item ${active ? "active" : ""}`}>
+            <Icon className="icon" aria-hidden="true" />
+            <span className="label">{label}</span>
+        </Link>
+    );
 }
 
 export default function CustomerLayout({ children }: CustomerLayoutProps) {
-  return (
-    <div className="customer-layout">
-      <main className="main-content">{children}</main>
+    return (
+        <div className="customer-layout">
+            <main className="main-content">{children}</main>
 
-      <nav className="bottom-nav">
-        <NavLink
-          href={route('restaurants.index')}
-          active={route().current('restaurants.index')}
-          icon={MapPinIcon}
-          label="Explore"
-        />
-        <NavLink
-          href={route('orders.index')}
-          active={route().current('orders.index')}
-          icon={ShoppingCartIcon}
-          label="Orders"
-        />
-        <NavLink
-          href={route('profile.show')}
-          active={route().current('profile.show')}
-          icon={UserIcon}
-          label="Profile"
-        />
-      </nav>
-    </div>
-  );
+            <nav className="bottom-nav">
+                <NavLink
+                    href={route("restaurants.index")}
+                    active={route().current("restaurants.index")}
+                    icon={MapPinIcon}
+                    label="Explore"
+                />
+                <NavLink
+                    href={route("orders.index")}
+                    active={route().current("orders.index")}
+                    icon={ShoppingCartIcon}
+                    label="Orders"
+                />
+                <NavLink
+                    href={route("profile.show")}
+                    active={route().current("profile.show")}
+                    icon={UserIcon}
+                    label="Profile"
+                />
+            </nav>
+        </div>
+    );
 }
 ```
 
@@ -213,92 +213,103 @@ This connects everything. It receives `restaurants` from your Laravel Controller
 
 ```tsx
 // resources/js/Pages/Customer/Restaurants/Index.tsx
-import { Head, Link } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
-import StarRating from '@/Components/Shared/StarRating';
-import { Restaurant } from '@/types/models';
-import { PageProps } from '@/types';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { Head, Link } from "@inertiajs/react";
+import CustomerLayout from "@/Layouts/CustomerLayout";
+import StarRating from "@/Components/Shared/StarRating";
+import { Restaurant } from "@/types/models";
+import { PageProps } from "@/types";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface RestaurantIndexProps extends PageProps {
-  restaurants: Restaurant[];
+    restaurants: Restaurant[];
 }
 
 export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
-  return (
-    <CustomerLayout>
-      <Head title="Explore Restaurants" />
+    return (
+        <CustomerLayout>
+            <Head title="Explore Restaurants" />
 
-      <div className="restaurant-index-page">
-        {/* Search Bar */}
-        <div className="search-header">
-          <div className="search-bar">
-            <MagnifyingGlassIcon className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search restaurants..."
-              className="search-input"
-            />
-          </div>
-        </div>
-
-        {/* Restaurant List */}
-        <div className="restaurant-list">
-          {restaurants.map((restaurant) => {
-            const primaryImage =
-              restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
-              restaurant.images?.[0];
-            const imageUrl = primaryImage
-              ? primaryImage.url
-              : '/images/placeholder-restaurant.jpg';
-
-            return (
-              <Link
-                key={restaurant.id}
-                href={route('restaurants.show', restaurant.id)}
-                className="restaurant-card-link"
-              >
-                <div className="restaurant-card">
-                  {/* Restaurant Image */}
-                  <div className="restaurant-image-wrapper">
-                    <img
-                      src={imageUrl}
-                      alt={restaurant.name}
-                      className="restaurant-image"
-                    />
-                  </div>
-
-                  {/* Restaurant Info */}
-                  <div className="restaurant-info">
-                    <div className="restaurant-header">
-                      <h3 className="restaurant-name">{restaurant.name}</h3>
-                      <StarRating rating={restaurant.rating || 0} />
+            <div className="restaurant-index-page">
+                {/* Search Bar */}
+                <div className="search-header">
+                    <div className="search-bar">
+                        <MagnifyingGlassIcon className="search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Search restaurants..."
+                            className="search-input"
+                        />
                     </div>
-
-                    <div className="restaurant-meta">
-                      {restaurant.opening_hours ? (
-                        <span className="meta-item">
-                          {restaurant.opening_hours}
-                        </span>
-                      ) : (
-                        <span className="meta-item">Hours not available</span>
-                      )}
-                      <span className="meta-separator">•</span>
-                      <span className="meta-item">~3km</span>
-                    </div>
-
-                    <p className="restaurant-description">
-                      {restaurant.description ||
-                        'The best food in the world please buy it ASAP'}
-                    </p>
-                  </div>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </CustomerLayout>
-  );
+
+                {/* Restaurant List */}
+                <div className="restaurant-list">
+                    {restaurants.map((restaurant) => {
+                        const primaryImage =
+                            restaurant.images?.find(
+                                (img) => img.is_primary_for_restaurant,
+                            ) || restaurant.images?.[0];
+                        const imageUrl = primaryImage
+                            ? primaryImage.url
+                            : "/images/placeholder-restaurant.jpg";
+
+                        return (
+                            <Link
+                                key={restaurant.id}
+                                href={route("restaurants.show", restaurant.id)}
+                                className="restaurant-card-link"
+                            >
+                                <div className="restaurant-card">
+                                    {/* Restaurant Image */}
+                                    <div className="restaurant-image-wrapper">
+                                        <img
+                                            src={imageUrl}
+                                            alt={restaurant.name}
+                                            className="restaurant-image"
+                                        />
+                                    </div>
+
+                                    {/* Restaurant Info */}
+                                    <div className="restaurant-info">
+                                        <div className="restaurant-header">
+                                            <h3 className="restaurant-name">
+                                                {restaurant.name}
+                                            </h3>
+                                            <StarRating
+                                                rating={restaurant.rating || 0}
+                                            />
+                                        </div>
+
+                                        <div className="restaurant-meta">
+                                            {restaurant.opening_hours ? (
+                                                <span className="meta-item">
+                                                    {restaurant.opening_hours}
+                                                </span>
+                                            ) : (
+                                                <span className="meta-item">
+                                                    Hours not available
+                                                </span>
+                                            )}
+                                            <span className="meta-separator">
+                                                •
+                                            </span>
+                                            <span className="meta-item">
+                                                ~3km
+                                            </span>
+                                        </div>
+
+                                        <p className="restaurant-description">
+                                            {restaurant.description ||
+                                                "The best food in the world please buy it ASAP"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </div>
+        </CustomerLayout>
+    );
 }
 ```

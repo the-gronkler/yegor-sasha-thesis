@@ -1,42 +1,42 @@
-@use '../variables/layout';
-@use '../variables/main-colors';
+@use "../variables/layout";
+@use "../variables/main-colors";
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  background-color: main-colors.$btn-primary-bg;
-  color: main-colors.$btn-primary-text;
-  border: none;
-  border-radius: layout.$border-radius-pill;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background-color: main-colors.$btn-primary-bg;
+    color: main-colors.$btn-primary-text;
+    border: none;
+    border-radius: layout.$border-radius-pill;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
 
-  &:hover {
-    background-color: main-colors.$btn-primary-hover-bg;
-  }
+    &:hover {
+        background-color: main-colors.$btn-primary-hover-bg;
+    }
 
-  &.disabled {
-    background-color: main-colors.$btn-primary-disabled-bg;
-    color: main-colors.$btn-primary-disabled-text;
-    cursor: not-allowed;
-  }
+    &.disabled {
+        background-color: main-colors.$btn-primary-disabled-bg;
+        color: main-colors.$btn-primary-disabled-text;
+        cursor: not-allowed;
+    }
 }
 
 .btn-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: main-colors.$bg-alt-1;
-  border: none;
-  cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: main-colors.$bg-alt-1;
+    border: none;
+    cursor: pointer;
 
-  &:hover {
-    background-color: main-colors.$bg-alt-2;
-  }
+    &:hover {
+        background-color: main-colors.$bg-alt-2;
+    }
 }

@@ -8,10 +8,10 @@ This document outlines the strict guidelines for TypeScript usage and code struc
 - **Hooks & Utilities**: Must use `.ts` extension (unless they return JSX, then `.tsx`).
 - **Type Definitions**: Must use `.d.ts` for declaration files or `.ts` for exported types.
 - **Naming Convention**:
-  - **Components/Pages**: `PascalCase` (e.g., `RestaurantCard.tsx`, `UserProfile.tsx`).
-  - **Hooks**: `camelCase` prefixed with `use` (e.g., `useAuth.ts`).
-  - **Utilities**: `camelCase` (e.g., `formatDate.ts`).
-  - **Types**: `PascalCase` (e.g., `User`, `PaginatedResponse`).
+    - **Components/Pages**: `PascalCase` (e.g., `RestaurantCard.tsx`, `UserProfile.tsx`).
+    - **Hooks**: `camelCase` prefixed with `use` (e.g., `useAuth.ts`).
+    - **Utilities**: `camelCase` (e.g., `formatDate.ts`).
+    - **Types**: `PascalCase` (e.g., `User`, `PaginatedResponse`).
 
 ## 2. Type Definitions
 
@@ -20,16 +20,16 @@ This document outlines the strict guidelines for TypeScript usage and code struc
 - **Database Models**: All interfaces reflecting database tables must be defined in `resources/js/types/models.d.ts`.
 - **Do NOT** redefine models locally in components. Import them.
 
-  ```typescript
-  // ✅ Correct
-  import { User } from '@/types/models';
+    ```typescript
+    // ✅ Correct
+    import { User } from "@/types/models";
 
-  // ❌ Incorrect
-  interface User {
-    id: number;
-    name: string;
-  }
-  ```
+    // ❌ Incorrect
+    interface User {
+        id: number;
+        name: string;
+    }
+    ```
 
 ### B. Component Props
 
@@ -37,29 +37,29 @@ This document outlines the strict guidelines for TypeScript usage and code struc
 - **Exporting Props**: Export the props interface if it might be reused or needed for testing.
 - **Naming**: Use `[ComponentName]Props`.
 
-  ```typescript
-  interface ButtonProps {
-      label: string;
-      onClick: () => void;
-  }
+    ```typescript
+    interface ButtonProps {
+        label: string;
+        onClick: () => void;
+    }
 
-  export default function Button({ label, onClick }: ButtonProps) { ... }
-  ```
+    export default function Button({ label, onClick }: ButtonProps) { ... }
+    ```
 
 ### C. Page Props (Inertia)
 
 - **Extending PageProps**: Page components must define a props interface that extends the global `PageProps` (if accessing global data) or simply defines the specific data passed from the controller.
 
-  ```typescript
-  import { PageProps } from '@/types';
-  import { Restaurant } from '@/types/models';
+    ```typescript
+    import { PageProps } from '@/types';
+    import { Restaurant } from '@/types/models';
 
-  interface DashboardProps extends PageProps {
-      restaurants: Restaurant[];
-  }
+    interface DashboardProps extends PageProps {
+        restaurants: Restaurant[];
+    }
 
-  export default function Dashboard({ auth, restaurants }: DashboardProps) { ... }
-  ```
+    export default function Dashboard({ auth, restaurants }: DashboardProps) { ... }
+    ```
 
 ## 3. Strict Typing Rules
 
@@ -67,26 +67,26 @@ This document outlines the strict guidelines for TypeScript usage and code struc
 - **No Implicit `any`**: All function parameters must have explicit types.
 - **Optional Fields**: Use `?` for optional properties. Do not use `| undefined` unless explicitly required by a library.
 
-  ```typescript
-  // ✅ Correct
-  interface User {
-    middleName?: string;
-  }
+    ```typescript
+    // ✅ Correct
+    interface User {
+        middleName?: string;
+    }
 
-  // ❌ Avoid
-  interface User {
-    middleName: string | undefined;
-  }
-  ```
+    // ❌ Avoid
+    interface User {
+        middleName: string | undefined;
+    }
+    ```
 
 - **Event Handlers**: Use React's built-in types for events.
 
-  ```typescript
-  import { FormEventHandler, ChangeEvent } from 'react';
+    ```typescript
+    import { FormEventHandler, ChangeEvent } from 'react';
 
-  const handleSubmit: FormEventHandler = (e) => { ... };
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => { ... };
-  ```
+    const handleSubmit: FormEventHandler = (e) => { ... };
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => { ... };
+    ```
 
 ## 4. Component Structure
 
@@ -110,30 +110,30 @@ Components should follow this ordering:
 
 - **Routes**: Use the global `route()` helper. Ensure `ziggy-js` types are configured if using advanced features.
 - **Forms**: Use the `useForm` hook from `@inertiajs/react`.
-  - **Type the Form Data**: Pass a generic to `useForm` to ensure type safety for `data`, `setData`, etc.
+    - **Type the Form Data**: Pass a generic to `useForm` to ensure type safety for `data`, `setData`, etc.
 
-  ```typescript
-  interface LoginForm {
-    email: string;
-    remember: boolean;
-  }
+    ```typescript
+    interface LoginForm {
+        email: string;
+        remember: boolean;
+    }
 
-  const { data, setData, post } = useForm<LoginForm>({
-    email: '',
-    remember: false,
-  });
-  ```
+    const { data, setData, post } = useForm<LoginForm>({
+        email: "",
+        remember: false,
+    });
+    ```
 
 ## 6. Null Safety
 
 - **Optional Chaining**: Use `?.` when accessing nested properties that might be undefined (especially relationships loaded via Eloquent).
-  ```typescript
-  const primaryImage = restaurant.images?.find((img) => img.is_primary);
-  ```
+    ```typescript
+    const primaryImage = restaurant.images?.find((img) => img.is_primary);
+    ```
 - **Null Coalescing**: Use `??` to provide default values for null/undefined.
-  ```typescript
-  const rating = restaurant.rating ?? 0;
-  ```
+    ```typescript
+    const rating = restaurant.rating ?? 0;
+    ```
 
 ## 7. Global Namespace
 
@@ -145,6 +145,6 @@ We use **Prettier** to enforce consistent code formatting.
 
 - **Configuration**: [`.prettierrc`](../.prettierrc)
 - **Command**: To format all files, run:
-  ```powershell
-  npm run format
-  ```
+    ```powershell
+    npm run format
+    ```
