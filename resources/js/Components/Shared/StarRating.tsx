@@ -5,7 +5,10 @@ export default function StarRating({ rating }) {
     return (
         <div className="star-rating">
             {stars.map((star) => (
-                <span key={star} className={`star ${rating >= star ? 'filled' : ''}`}>
+                <span
+                    key={star}
+                    className={`star ${rating >= star ? "filled" : ""}`}
+                >
                     ★
                 </span>
             ))}

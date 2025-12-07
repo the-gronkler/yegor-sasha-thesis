@@ -21,7 +21,7 @@
         }
 
         &::after {
-            content: 'UNAVAILABLE';
+            content: "UNAVAILABLE";
             position: absolute;
             top: 50%;
             left: 50%;
@@ -64,9 +64,9 @@
         }
 
         .menu-item-price {
-             font-weight: 600;
-             margin-top: 0.25rem;
-             color: main-colors.$text-primary;
+            font-weight: 600;
+            margin-top: 0.25rem;
+            color: main-colors.$text-primary;
         }
     }
 

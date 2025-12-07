@@ -56,13 +56,14 @@
             transition: color 0.2s ease;
 
             .icon {
-                width: 24px;  // Explicit size for SVG
+                width: 24px; // Explicit size for SVG
                 height: 24px;
                 margin-bottom: 4px;
                 stroke-width: 2; // Adjust icon thickness
             }
 
-            &.active, &:hover {
+            &.active,
+            &:hover {
                 color: main-colors.$brand-primary;
             }
         }
