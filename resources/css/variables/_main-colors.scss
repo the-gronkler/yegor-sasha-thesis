@@ -4,7 +4,7 @@
 // CORE BRAND & ACCENT COLORS
 // ======================================================================
 
-$brand-primary: #EE5B2B;
+$brand-primary: #ee5b2b;
 // Purpose: Main brand / action color.
 // Use for: primary buttons, key CTAs, toggles, icons requiring emphasis.
 
@@ -12,14 +12,13 @@ $brand-primary-hover: color.adjust($brand-primary, $lightness: -8%);
 // Purpose: Hover state for primary elements.
 // Use for: button:hover, active icon states.
 
-$brand-primary-soft: rgba($brand-primary, 0.20);
+$brand-primary-soft: rgba($brand-primary, 0.2);
 // Purpose: Subtle emphasis.
 // Use for: tag backgrounds, "Popular" chip BGs, soft highlight zones.
 
-$accent-warm: #F59E0B;
+$accent-warm: #f59e0b;
 // Purpose: Highlight or supporting accent.
 // Use for: ratings stars, promotional tags (e.g. “50% OFF”).
-
 
 // ======================================================================
 // TEXT COLORS
@@ -29,44 +28,41 @@ $text-primary: #181311;
 // Purpose: Main text color on light backgrounds.
 // Use for: all headings, body text, labels.
 
-$text-secondary: #896B61;
+$text-secondary: #896b61;
 // Purpose: Secondary / supportive text.
 // Use for: descriptions, prices, form hints, timestamps.
 
-$text-inverse: #FFFFFF;
+$text-inverse: #ffffff;
 // Purpose: Text on dark or saturated backgrounds.
 // Use for: buttons on primary color, chips on dark mode.
-
 
 // ======================================================================
 // BACKGROUND COLORS
 // ======================================================================
 
-$bg-main: #F8F6F6;
+$bg-main: #f8f6f6;
 // Purpose: Main app background.
 // Use for: page background, container backgrounds.
 
-$bg-surface: #FFFFFF;
+$bg-surface: #ffffff;
 // Purpose: Elevated surfaces.
 // Use for: cards, sheets, dropdowns, search field background.
 
-$bg-alt-1: #EDEDED;
+$bg-alt-1: #ededed;
 // Purpose: Neutral UI surfaces.
 // Use for: subtle section separators, alt rows.
 
-$bg-alt-2: #ECECEC;
+$bg-alt-2: #ececec;
 // Purpose: Slightly stronger neutral surface.
 // Use for: input backgrounds, secondary surface areas.
-
 
 // ======================================================================
 // NEUTRAL BORDERS & DIVIDERS
 // ======================================================================
 
-$border-light: #E6E6E6;
+$border-light: #e6e6e6;
 // Purpose: Border around cards, inputs, controls.
 // Use for: input borders, card outlines, section separators.
-
 
 // ======================================================================
 // BUTTON STATES (DERIVED WITH ALLOWED LIGHTEN/DARKEN)
@@ -87,21 +83,19 @@ $btn-primary-disabled-bg: color.adjust($brand-primary, $lightness: 30%);
 $btn-primary-disabled-text: color.adjust($text-primary, $lightness: 40%);
 // For disabled button labels.
 
-
 // ======================================================================
 // DISABLED / INACTIVE STATES
 // ======================================================================
 
-$disabled-bg: #EDEDED;
+$disabled-bg: #ededed;
 // Purpose: Disabled input background.
 
-$disabled-border: #E6E6E6;
+$disabled-border: #e6e6e6;
 // Purpose: Disabled border color.
 
 $disabled-text: color.adjust($text-secondary, $lightness: 35%);
 // Purpose: Disabled text/icons.
 // Derived from known palette, but still within allowed transformations.
-
 
 // ======================================================================
 // UTILITY

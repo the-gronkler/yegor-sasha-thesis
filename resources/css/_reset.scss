@@ -1,13 +1,15 @@
 @use "variables/main-colors";
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
 body {
-    font-family: 'Inter', sans-serif; // Assuming Inter or system font
+    font-family: "Inter", sans-serif; // Assuming Inter or system font
     line-height: 1.5;
     color: main-colors.$text-primary;
     background-color: main-colors.$bg-main;

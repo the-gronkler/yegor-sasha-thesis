@@ -1,30 +1,30 @@
-import React from 'react';
-import { Head, Link, useForm, router } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import React from "react";
+import { Head, Link, useForm, router } from "@inertiajs/react";
+import CustomerLayout from "@/Layouts/CustomerLayout";
 
 export default function ProfileShow({ user, customer, favorites }) {
     const form = useForm({
-        name: user.name || '',
-        surname: user.surname || '',
-        email: user.email || '',
-        password: '',
-        password_confirmation: '',
-        payment_method_token: customer?.payment_method_token || '',
+        name: user.name || "",
+        surname: user.surname || "",
+        email: user.email || "",
+        password: "",
+        password_confirmation: "",
+        payment_method_token: customer?.payment_method_token || "",
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        form.put(route('profile.update'), {
+        form.put(route("profile.update"), {
             preserveScroll: true,
             onSuccess: () => {
-                form.reset('password', 'password_confirmation');
+                form.reset("password", "password_confirmation");
             },
         });
     };
 
     const handleLogout = (e) => {
         e.preventDefault();
-        router.post(route('logout'));
+        router.post(route("logout"));
     };
 
     return (
@@ -51,11 +51,15 @@ export default function ProfileShow({ user, customer, favorites }) {
                                 type="text"
                                 className="form-input"
                                 value={form.data.name}
-                                onChange={(e) => form.setData('name', e.target.value)}
+                                onChange={(e) =>
+                                    form.setData("name", e.target.value)
+                                }
                                 required
                             />
                             {form.errors.name && (
-                                <p className="error-message">{form.errors.name}</p>
+                                <p className="error-message">
+                                    {form.errors.name}
+                                </p>
                             )}
                         </div>
 
@@ -67,10 +71,14 @@ export default function ProfileShow({ user, customer, favorites }) {
                                 type="text"
                                 className="form-input"
                                 value={form.data.surname}
-                                onChange={(e) => form.setData('surname', e.target.value)}
+                                onChange={(e) =>
+                                    form.setData("surname", e.target.value)
+                                }
                             />
                             {form.errors.surname && (
-                                <p className="error-message">{form.errors.surname}</p>
+                                <p className="error-message">
+                                    {form.errors.surname}
+                                </p>
                             )}
                         </div>
 
@@ -82,27 +90,40 @@ export default function ProfileShow({ user, customer, favorites }) {
                                 type="email"
                                 className="form-input"
                                 value={form.data.email}
-                                onChange={(e) => form.setData('email', e.target.value)}
+                                onChange={(e) =>
+                                    form.setData("email", e.target.value)
+                                }
                                 required
                             />
                             {form.errors.email && (
-                                <p className="error-message">{form.errors.email}</p>
+                                <p className="error-message">
+                                    {form.errors.email}
+                                </p>
                             )}
                         </div>
 
                         {/* Payment Method Token */}
                         <div className="form-group">
-                            <label htmlFor="payment_method_token">Payment Method</label>
+                            <label htmlFor="payment_method_token">
+                                Payment Method
+                            </label>
                             <input
                                 id="payment_method_token"
                                 type="text"
                                 className="form-input"
                                 placeholder="e.g., Card ending in 1234"
                                 value={form.data.payment_method_token}
-                                onChange={(e) => form.setData('payment_method_token', e.target.value)}
+                                onChange={(e) =>
+                                    form.setData(
+                                        "payment_method_token",
+                                        e.target.value
+                                    )
+                                }
                             />
                             {form.errors.payment_method_token && (
-                                <p className="error-message">{form.errors.payment_method_token}</p>
+                                <p className="error-message">
+                                    {form.errors.payment_method_token}
+                                </p>
                             )}
                         </div>
 
@@ -120,27 +141,40 @@ export default function ProfileShow({ user, customer, favorites }) {
                                 className="form-input"
                                 placeholder="Leave blank to keep current password"
                                 value={form.data.password}
-                                onChange={(e) => form.setData('password', e.target.value)}
+                                onChange={(e) =>
+                                    form.setData("password", e.target.value)
+                                }
                                 autoComplete="new-password"
                             />
                             {form.errors.password && (
-                                <p className="error-message">{form.errors.password}</p>
+                                <p className="error-message">
+                                    {form.errors.password}
+                                </p>
                             )}
                         </div>
 
                         {/* Confirm Password */}
                         <div className="form-group">
-                            <label htmlFor="password_confirmation">Confirm Password</label>
+                            <label htmlFor="password_confirmation">
+                                Confirm Password
+                            </label>
                             <input
                                 id="password_confirmation"
                                 type="password"
                                 className="form-input"
                                 value={form.data.password_confirmation}
-                                onChange={(e) => form.setData('password_confirmation', e.target.value)}
+                                onChange={(e) =>
+                                    form.setData(
+                                        "password_confirmation",
+                                        e.target.value
+                                    )
+                                }
                                 autoComplete="new-password"
                             />
                             {form.errors.password_confirmation && (
-                                <p className="error-message">{form.errors.password_confirmation}</p>
+                                <p className="error-message">
+                                    {form.errors.password_confirmation}
+                                </p>
                             )}
                         </div>
 
@@ -150,7 +184,7 @@ export default function ProfileShow({ user, customer, favorites }) {
                             disabled={form.processing}
                             className="btn-submit"
                         >
-                            {form.processing ? 'Saving...' : 'Save Changes'}
+                            {form.processing ? "Saving..." : "Save Changes"}
                         </button>
                     </form>
                 </div>
@@ -159,8 +193,13 @@ export default function ProfileShow({ user, customer, favorites }) {
                 {favorites && favorites.length > 0 && (
                     <div className="favorites-section">
                         <div className="section-header">
-                            <h2 className="section-title">My Favorite Restaurants</h2>
-                            <Link href={route('profile.favorites')} className="view-all-link">
+                            <h2 className="section-title">
+                                My Favorite Restaurants
+                            </h2>
+                            <Link
+                                href={route("profile.favorites")}
+                                className="view-all-link"
+                            >
                                 View All
                             </Link>
                         </div>
@@ -169,12 +208,19 @@ export default function ProfileShow({ user, customer, favorites }) {
                             {favorites.slice(0, 3).map((favorite) => (
                                 <Link
                                     key={favorite.id}
-                                    href={route('restaurants.show', favorite.id)}
+                                    href={route(
+                                        "restaurants.show",
+                                        favorite.id
+                                    )}
                                     className="favorite-item"
                                 >
-                                    <span className="favorite-rank">#{favorite.rank}</span>
+                                    <span className="favorite-rank">
+                                        #{favorite.rank}
+                                    </span>
                                     <div className="favorite-info">
-                                        <h4 className="favorite-name">{favorite.name}</h4>
+                                        <h4 className="favorite-name">
+                                            {favorite.name}
+                                        </h4>
                                     </div>
                                     <span className="favorite-arrow">→</span>
                                 </Link>
