@@ -67,6 +67,8 @@ Provides a baseline for consistent styling across browsers.
 - Resets default margins and paddings.
 - Sets default styles for links, lists, and images.
 
+
+
 ## Variables
 
 Variables are split into partials within the `variables/` directory and aggregated in `_variables.scss`.
