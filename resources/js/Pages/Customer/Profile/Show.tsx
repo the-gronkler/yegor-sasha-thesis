@@ -136,7 +136,7 @@ export default function ProfileShow({
                                 onChange={(e) =>
                                     form.setData(
                                         "payment_method_token",
-                                        e.target.value
+                                        e.target.value,
                                     )
                                 }
                             />
@@ -186,7 +186,7 @@ export default function ProfileShow({
                                 onChange={(e) =>
                                     form.setData(
                                         "password_confirmation",
-                                        e.target.value
+                                        e.target.value,
                                     )
                                 }
                                 autoComplete="new-password"
@@ -230,7 +230,7 @@ export default function ProfileShow({
                                     key={favorite.id}
                                     href={route(
                                         "restaurants.show",
-                                        favorite.id
+                                        favorite.id,
                                     )}
                                     className="favorite-item"
                                 >

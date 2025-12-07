@@ -52,4 +52,3 @@ export default function CustomerLayout({ children }: CustomerLayoutProps) {
         </div>
     );
 }
-

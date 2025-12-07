@@ -1,4 +1,3 @@
-
 import { Head, Link } from "@inertiajs/react";
 import {
     ArrowLeftIcon,
@@ -18,7 +17,7 @@ interface RestaurantShowProps extends PageProps {
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     const primaryImage =
         restaurant.restaurant_images?.find(
-            (img) => img.is_primary_for_restaurant
+            (img) => img.is_primary_for_restaurant,
         ) || restaurant.restaurant_images?.[0];
     const bannerUrl = primaryImage ? primaryImage.url : null;
 

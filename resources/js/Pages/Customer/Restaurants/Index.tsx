@@ -33,7 +33,7 @@ export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
                     {restaurants.map((restaurant) => {
                         const primaryImage =
                             restaurant.images?.find(
-                                (img) => img.is_primary_for_restaurant
+                                (img) => img.is_primary_for_restaurant,
                             ) || restaurant.images?.[0];
                         const imageUrl = primaryImage
                             ? primaryImage.url
