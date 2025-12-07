@@ -1,9 +1,14 @@
-import React from "react";
 import { Head, Link } from "@inertiajs/react";
 import CustomerLayout from "@/Layouts/CustomerLayout";
 import StarRating from "@/Components/Shared/StarRating";
+import { Restaurant } from "@/types/models";
+import { PageProps } from "@/types";
 
-export default function RestaurantIndex({ restaurants }) {
+interface RestaurantIndexProps extends PageProps {
+    restaurants: Restaurant[];
+}
+
+export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
     return (
         <CustomerLayout>
             <Head title="Explore Restaurants" />

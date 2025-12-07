@@ -1,16 +1,25 @@
+import { FormEventHandler } from "react";
 import { Head, Link, useForm } from "@inertiajs/react";
+import { PageProps } from "@/types";
 
-export default function Login({ canResetPassword = false, errors }) {
-    const form = useForm(
-        {
-            email: "",
-            password: "",
-            remember: false,
-        },
-        errors || {}
-    );
+interface LoginProps extends PageProps {
+    canResetPassword?: boolean;
+}
 
-    const submit = (e) => {
+interface LoginForm {
+    email: string;
+    password: string;
+    remember: boolean;
+}
+
+export default function Login({ canResetPassword = false }: LoginProps) {
+    const form = useForm<LoginForm>({
+        email: "",
+        password: "",
+        remember: false,
+    });
+
+    const submit: FormEventHandler = (e) => {
         e.preventDefault();
         form.post(window.route("login.store"), {
             onFinish: () => form.reset("password"),
