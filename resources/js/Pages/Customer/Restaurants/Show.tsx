@@ -1,3 +1,4 @@
+
 import { Head, Link } from "@inertiajs/react";
 import {
     ArrowLeftIcon,

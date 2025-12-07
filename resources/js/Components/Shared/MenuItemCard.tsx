@@ -1,3 +1,4 @@
+import React from "react";
 import { MenuItem } from "@/types/models";
 
 interface MenuItemCardProps {
