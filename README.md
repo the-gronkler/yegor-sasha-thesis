@@ -3,6 +3,7 @@
 Welcome to the repository for our thesis! Below are the key resources to help you navigate our project.
 
 ## 🗂️ **Quick Links**
+
 - ⚙️ [**Developer technical documentation**](/docs/dev-documentation.md)
 - 📋 [**Project Management Board**](https://www.notion.so/18f8b4fe95688005b1f9e1fd46df94ff?v=18f8b4fe9568809dbb68000c6e55a492&pvs=4)
 - 📄 [**Thesis Draft Document**](https://docs.google.com/document/d/1GfDUPtL-NAAx4kYY9g9sp-yzu_g05wHX5Sq4E4YY3JI/edit?usp=sharing)
@@ -11,15 +12,18 @@ Welcome to the repository for our thesis! Below are the key resources to help yo
 - 🗺️ [**Lucdichart**](https://lucid.app/lucidchart/598bdabb-3a0e-4ad1-8daf-9b95e059ef49/edit?viewport_loc=-7883%2C-1292%2C3068%2C1420%2C0_0&invitationId=inv_233120c5-a944-4b79-8ae4-d14f9602685f)
 
 ## 📄 **Abstract**
+
 Our thesis is a mobile app/website for restaurants with 2 main functions:
+
 1. Track and manage orders placed by customers
 2. Display restaurants on a map with a heatmap layer, helping customers filter and find cool establishments (cafes, kebab shops, etc.), and hotspots with high concentrations of them,
- based on distance, rating, popularity, etc...
-and possibly order ahead(point 1)
+   based on distance, rating, popularity, etc...
+   and possibly order ahead(point 1)
 
 Out product targets smaller buisnesses, focusing on low up-front costs, ease of set up, simple workflow integration, and easy staff training
 
 ## 🗂️ **ER Diagram**
+
 ![ER Diagram](docs/media/thesis_er_diagram.png)
 
 ### **Here are some fun facts about the **Ankylosaurus**, one of the coolest dinosaurs around:**
@@ -38,7 +42,6 @@ Out product targets smaller buisnesses, focusing on low up-front costs, ease of 
                                 \\  \          \\  \
                                 <"_V_">        <"_V_">
 ```
-
 
 1. **Armored Tank**: Ankylosaurus was heavily armored with thick, bony plates (osteoderms) and spikes that protected it from predators like T. rex. It was like a walking tank!
 
