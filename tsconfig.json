@@ -22,6 +22,12 @@
     },
     "types": ["vite/client", "@inertiajs/react"]
   },
-  "include": ["resources/js/**/*.ts", "resources/js/**/*.tsx", "resources/js/**/*.d.ts", "resources/js/**/*.js", "resources/js/**/*.jsx"],
+  "include": [
+    "resources/js/**/*.ts",
+    "resources/js/**/*.tsx",
+    "resources/js/**/*.d.ts",
+    "resources/js/**/*.js",
+    "resources/js/**/*.jsx"
+  ],
   "exclude": ["node_modules", "public"]
 }

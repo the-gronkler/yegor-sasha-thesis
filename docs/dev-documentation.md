@@ -12,6 +12,6 @@ Custom artisan commands, to use type:
 php artisan <command-name>
 ```
 
--   `mfs`
+- `mfs`
 
-    Alias for: `migrate:fresh --path=database/migrations/* --seed`. Wipes the DB, reruns all migrations in the specified folder and its subfolders, and then seeds the database.
+  Alias for: `migrate:fresh --path=database/migrations/* --seed`. Wipes the DB, reruns all migrations in the specified folder and its subfolders, and then seeds the database.

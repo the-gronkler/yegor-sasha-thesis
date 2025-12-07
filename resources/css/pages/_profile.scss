@@ -1,15 +1,15 @@
-@use "../variables/layout";
-@use "../variables/main-colors";
+@use '../variables/layout';
+@use '../variables/main-colors';
 
 // ======================================================================
 // PROFILE PAGE
 // ======================================================================
 
 .profile-page {
-    min-height: 100vh;
-    background-color: main-colors.$bg-main;
-    padding: 1rem;
-    padding-bottom: 100px; // Space for bottom nav
+  min-height: 100vh;
+  background-color: main-colors.$bg-main;
+  padding: 1rem;
+  padding-bottom: 100px; // Space for bottom nav
 }
 
 // ======================================================================
@@ -17,38 +17,38 @@
 // ======================================================================
 
 .profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
 .profile-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: main-colors.$text-primary;
-    margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: main-colors.$text-primary;
+  margin: 0;
 }
 
 .logout-button {
-    background-color: transparent;
-    color: main-colors.$brand-primary;
-    border: 1px solid main-colors.$brand-primary;
-    padding: 0.5rem 1rem;
-    border-radius: layout.$border-radius;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  background-color: transparent;
+  color: main-colors.$brand-primary;
+  border: 1px solid main-colors.$brand-primary;
+  padding: 0.5rem 1rem;
+  border-radius: layout.$border-radius;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
-    &:hover {
-        background-color: main-colors.$brand-primary;
-        color: main-colors.$text-inverse;
-    }
+  &:hover {
+    background-color: main-colors.$brand-primary;
+    color: main-colors.$text-inverse;
+  }
 
-    &:active {
-        transform: scale(0.98);
-    }
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
 // ======================================================================
@@ -56,11 +56,11 @@
 // ======================================================================
 
 .profile-card {
-    background-color: main-colors.$bg-surface;
-    border-radius: layout.$border-radius;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
-    margin-bottom: 1.5rem;
+  background-color: main-colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
+  margin-bottom: 1.5rem;
 }
 
 // ======================================================================
@@ -68,87 +68,87 @@
 // ======================================================================
 
 .profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  .form-group {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0.5rem;
 
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-
-        label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: main-colors.$text-primary;
-        }
-
-        .form-input {
-            padding: 0.75rem;
-            border: 1px solid main-colors.$border-light;
-            border-radius: layout.$border-radius;
-            font-size: 1rem;
-            color: main-colors.$text-primary;
-            background-color: main-colors.$bg-surface;
-            transition: border-color 0.2s ease;
-
-            &:focus {
-                outline: none;
-                border-color: main-colors.$brand-primary;
-            }
-
-            &::placeholder {
-                color: main-colors.$text-secondary;
-            }
-        }
-
-        .error-message {
-            font-size: 0.75rem;
-            color: #dc2626;
-            margin: 0;
-        }
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
     }
 
-    .section-divider {
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-        padding-top: 1rem;
-        border-top: 1px solid main-colors.$border-light;
+    .form-input {
+      padding: 0.75rem;
+      border: 1px solid main-colors.$border-light;
+      border-radius: layout.$border-radius;
+      font-size: 1rem;
+      color: main-colors.$text-primary;
+      background-color: main-colors.$bg-surface;
+      transition: border-color 0.2s ease;
 
-        .section-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: main-colors.$text-primary;
-            margin: 0;
-        }
+      &:focus {
+        outline: none;
+        border-color: main-colors.$brand-primary;
+      }
+
+      &::placeholder {
+        color: main-colors.$text-secondary;
+      }
     }
 
-    .btn-submit {
-        background-color: main-colors.$brand-primary;
-        color: main-colors.$text-inverse;
-        border: none;
-        padding: 0.875rem 1.5rem;
-        border-radius: layout.$border-radius;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-top: 0.5rem;
-
-        &:hover {
-            background-color: main-colors.$brand-primary-hover;
-        }
-
-        &:active {
-            transform: scale(0.98);
-        }
-
-        &:disabled {
-            background-color: main-colors.$btn-primary-disabled-bg;
-            color: main-colors.$btn-primary-disabled-text;
-            cursor: not-allowed;
-        }
+    .error-message {
+      font-size: 0.75rem;
+      color: #dc2626;
+      margin: 0;
     }
+  }
+
+  .section-divider {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid main-colors.$border-light;
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin: 0;
+    }
+  }
+
+  .btn-submit {
+    background-color: main-colors.$brand-primary;
+    color: main-colors.$text-inverse;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: layout.$border-radius;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.5rem;
+
+    &:hover {
+      background-color: main-colors.$brand-primary-hover;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      background-color: main-colors.$btn-primary-disabled-bg;
+      color: main-colors.$btn-primary-disabled-text;
+      cursor: not-allowed;
+    }
+  }
 }
 
 // ======================================================================
@@ -156,82 +156,82 @@
 // ======================================================================
 
 .favorites-section {
-    background-color: main-colors.$bg-surface;
+  background-color: main-colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: main-colors.$text-primary;
+      margin: 0;
+    }
+
+    .view-all-link {
+      font-size: 0.875rem;
+      color: main-colors.$brand-primary;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .favorite-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: main-colors.$bg-main;
     border-radius: layout.$border-radius;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
 
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-
-        .section-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: main-colors.$text-primary;
-            margin: 0;
-        }
-
-        .view-all-link {
-            font-size: 0.875rem;
-            color: main-colors.$brand-primary;
-            text-decoration: none;
-            font-weight: 600;
-
-            &:hover {
-                text-decoration: underline;
-            }
-        }
+    &:hover {
+      background-color: main-colors.$bg-alt-1;
+      transform: translateX(4px);
     }
 
-    .favorites-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
+    .favorite-rank {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: main-colors.$brand-primary;
+      min-width: 2.5rem;
+      text-align: center;
     }
 
-    .favorite-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background-color: main-colors.$bg-main;
-        border-radius: layout.$border-radius;
-        text-decoration: none;
-        color: inherit;
-        transition: all 0.2s ease;
+    .favorite-info {
+      flex: 1;
 
-        &:hover {
-            background-color: main-colors.$bg-alt-1;
-            transform: translateX(4px);
-        }
-
-        .favorite-rank {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: main-colors.$brand-primary;
-            min-width: 2.5rem;
-            text-align: center;
-        }
-
-        .favorite-info {
-            flex: 1;
-
-            .favorite-name {
-                font-size: 1rem;
-                font-weight: 600;
-                color: main-colors.$text-primary;
-                margin: 0;
-            }
-        }
-
-        .favorite-arrow {
-            font-size: 1.25rem;
-            color: main-colors.$text-secondary;
-        }
+      .favorite-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: main-colors.$text-primary;
+        margin: 0;
+      }
     }
+
+    .favorite-arrow {
+      font-size: 1.25rem;
+      color: main-colors.$text-secondary;
+    }
+  }
 }
 
 // ======================================================================
@@ -239,8 +239,8 @@
 // ======================================================================
 
 @media (min-width: 768px) {
-    .profile-page {
-        max-width: 600px;
-        margin: 0 auto;
-    }
+  .profile-page {
+    max-width: 600px;
+    margin: 0 auto;
+  }
 }

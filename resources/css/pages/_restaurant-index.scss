@@ -1,14 +1,14 @@
-@use "../variables/layout";
-@use "../variables/main-colors";
+@use '../variables/layout';
+@use '../variables/main-colors';
 
 // ======================================================================
 // RESTAURANT INDEX PAGE (Explore Restaurants)
 // ======================================================================
 
 .restaurant-index-page {
-    min-height: 100vh;
-    background-color: main-colors.$bg-main;
-    padding-bottom: 80px; // Space for bottom nav
+  min-height: 100vh;
+  background-color: main-colors.$bg-main;
+  padding-bottom: 80px; // Space for bottom nav
 }
 
 // ======================================================================
@@ -16,42 +16,42 @@
 // ======================================================================
 
 .search-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: main-colors.$bg-main;
-    padding: 1rem;
-    border-bottom: 1px solid main-colors.$border-light;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: main-colors.$bg-main;
+  padding: 1rem;
+  border-bottom: 1px solid main-colors.$border-light;
 }
 
 .search-bar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    background-color: main-colors.$bg-surface;
-    border: 1px solid main-colors.$border-light;
-    border-radius: layout.$border-radius;
-    padding: 0.75rem 1rem;
-    box-shadow: 0 1px 2px main-colors.$shadow-color;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: main-colors.$bg-surface;
+  border: 1px solid main-colors.$border-light;
+  border-radius: layout.$border-radius;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 2px main-colors.$shadow-color;
 
-    .search-icon {
-        font-size: 1.25rem;
-        margin-right: 0.75rem;
-        color: main-colors.$text-secondary;
+  .search-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    color: main-colors.$text-secondary;
+  }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    color: main-colors.$text-primary;
+
+    &::placeholder {
+      color: main-colors.$text-secondary;
     }
-
-    .search-input {
-        flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 1rem;
-        color: main-colors.$text-primary;
-
-        &::placeholder {
-            color: main-colors.$text-secondary;
-        }
-    }
+  }
 }
 
 // ======================================================================
@@ -59,25 +59,25 @@
 // ======================================================================
 
 .restaurant-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
 }
 
 .restaurant-card-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    transition: transform 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.2s ease;
 
-    &:hover {
-        transform: translateY(-2px);
-    }
+  &:hover {
+    transform: translateY(-2px);
+  }
 
-    &:active {
-        transform: translateY(0);
-    }
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 // ======================================================================
@@ -85,29 +85,29 @@
 // ======================================================================
 
 .restaurant-card {
-    background-color: main-colors.$bg-surface;
-    border-radius: layout.$border-radius;
-    overflow: hidden;
-    box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
-    transition: box-shadow 0.2s ease;
+  background-color: main-colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  overflow: hidden;
+  box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
+  transition: box-shadow 0.2s ease;
 
-    &:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
 }
 
 .restaurant-image-wrapper {
-    width: 100%;
-    height: 180px;
-    overflow: hidden;
-    background-color: main-colors.$bg-alt-1;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background-color: main-colors.$bg-alt-1;
 }
 
 .restaurant-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 // ======================================================================
@@ -115,51 +115,51 @@
 // ======================================================================
 
 .restaurant-info {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 .restaurant-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .restaurant-name {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: main-colors.$text-primary;
-    margin: 0;
-    flex: 1;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: main-colors.$text-primary;
+  margin: 0;
+  flex: 1;
 }
 
 .restaurant-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    color: main-colors.$text-secondary;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: main-colors.$text-secondary;
 
-    .meta-item {
-        // Hours, distance, etc.
-    }
+  .meta-item {
+    // Hours, distance, etc.
+  }
 
-    .meta-separator {
-        color: main-colors.$border-light;
-    }
+  .meta-separator {
+    color: main-colors.$border-light;
+  }
 }
 
 .restaurant-description {
-    font-size: 0.875rem;
-    color: main-colors.$text-secondary;
-    margin: 0;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  font-size: 0.875rem;
+  color: main-colors.$text-secondary;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 // ======================================================================
@@ -167,8 +167,8 @@
 // ======================================================================
 
 @media (min-width: 768px) {
-    .restaurant-index-page {
-        max-width: 600px;
-        margin: 0 auto;
-    }
+  .restaurant-index-page {
+    max-width: 600px;
+    margin: 0 auto;
+  }
 }
