@@ -50,16 +50,15 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const displayedCategories = useMemo(() => {
     if (!query) return restaurant.food_types;
 
-    const filteredIds = new Set(filteredMenuItems.map((item) => item.id));
+    if (filteredMenuItems.length === 0) return [];
 
-    return restaurant.food_types
-      ?.map((category) => ({
-        ...category,
-        menu_items: category.menu_items.filter((item) =>
-          filteredIds.has(item.id),
-        ),
-      }))
-      .filter((category) => category.menu_items.length > 0);
+    return [
+      {
+        id: -1,
+        name: 'Search Results',
+        menu_items: filteredMenuItems,
+      },
+    ];
   }, [query, restaurant.food_types, filteredMenuItems]);
 
   return (

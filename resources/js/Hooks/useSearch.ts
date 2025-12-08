@@ -49,15 +49,16 @@ export function useSearch<T>(
       threshold: 0.3, // 0.0 = exact match, 1.0 = match anything
       ignoreLocation: true, // Find matches anywhere in the string
       includeScore: true,
+      shouldSort: true,
     };
 
     return new Fuse(items, { ...defaultOptions, ...options });
-  }, [items, searchKeys, JSON.stringify(options)]);
+  }, [items, JSON.stringify(searchKeys), JSON.stringify(options)]);
 
   const filteredItems = useMemo(() => {
     if (!query) return items;
     return fuse.search(query).map((result) => result.item);
-  }, [fuse, query, items]);
+  }, [fuse, query]);
 
   return { query, setQuery, filteredItems };
 }

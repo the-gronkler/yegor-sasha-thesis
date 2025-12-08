@@ -38,7 +38,6 @@ export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
             value={query}
             onChange={setQuery}
             placeholder="Search restaurants..."
-            className="search-bar"
           />
         </div>
 
