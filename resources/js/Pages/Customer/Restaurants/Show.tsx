@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { IFuseOptions } from 'fuse.js';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
@@ -13,7 +14,15 @@ interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
 }
 
-const SEARCH_KEYS: (keyof MenuItem)[] = ['name', 'description'];
+type MenuItemWithCategory = MenuItem & { category_name: string };
+
+const SEARCH_OPTIONS: IFuseOptions<MenuItemWithCategory> = {
+  keys: [
+    { name: 'name', weight: 2 },
+    { name: 'description', weight: 1.5 },
+    { name: 'category_name', weight: 0.5 },
+  ],
+};
 
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const primaryImage =
@@ -24,7 +33,10 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
 
   // Flatten menu items for searching
   const allMenuItems = useMemo(
-    () => restaurant.food_types?.flatMap((ft) => ft.menu_items) || [],
+    () =>
+      restaurant.food_types?.flatMap((ft) =>
+        ft.menu_items.map((item) => ({ ...item, category_name: ft.name })),
+      ) || [],
     [restaurant.food_types],
   );
 
@@ -32,7 +44,7 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     query,
     setQuery,
     filteredItems: filteredMenuItems,
-  } = useSearch(allMenuItems, SEARCH_KEYS);
+  } = useSearch<MenuItemWithCategory>(allMenuItems, [], SEARCH_OPTIONS);
 
   // Group filtered items back into categories
   const displayedCategories = useMemo(() => {
@@ -105,7 +117,6 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
             value={query}
             onChange={setQuery}
             placeholder="Search menu..."
-            className="search-bar"
           />
         </div>
 

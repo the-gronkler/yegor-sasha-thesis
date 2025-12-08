@@ -7,8 +7,9 @@ import Fuse, { IFuseOptions } from 'fuse.js';
  *
  * @template T - The type of items in the array.
  * @param items - The array of items to search through. Each item should be an object with properties matching the searchKeys.
- * @param searchKeys - An array of keys (properties) of the items to perform the search on. These must be valid keys of type T.
+ * @param searchKeys - An array of keys (properties) of the items to perform the search on. These must be valid keys of type T. Can be empty if keys are provided in options.
  * @param options - Optional configuration options for Fuse.js, such as threshold, ignoreLocation, etc. These will be merged with default options.
+ *                  If keys are provided here (e.g. with weights), they will override searchKeys.
  * @returns An object containing:
  *   - `query`: The current search query string.
  *   - `setQuery`: A function to update the search query.
@@ -16,9 +17,22 @@ import Fuse, { IFuseOptions } from 'fuse.js';
  *
  * @example
  * ```tsx
+ * // Simple usage
  * const { query, setQuery, filteredItems } = useSearch(
  *   [{ name: 'Apple', category: 'Fruit' }, { name: 'Banana', category: 'Fruit' }],
  *   ['name', 'category']
+ * );
+ *
+ * // Usage with weighted keys
+ * const { query, setQuery, filteredItems } = useSearch(
+ *   items,
+ *   [],
+ *   {
+ *     keys: [
+ *       { name: 'name', weight: 2 },
+ *       { name: 'description', weight: 1 }
+ *     ]
+ *   }
  * );
  * ```
  */
@@ -38,7 +52,7 @@ export function useSearch<T>(
     };
 
     return new Fuse(items, { ...defaultOptions, ...options });
-  }, [items, searchKeys, options]);
+  }, [items, searchKeys, JSON.stringify(options)]);
 
   const filteredItems = useMemo(() => {
     if (!query) return items;

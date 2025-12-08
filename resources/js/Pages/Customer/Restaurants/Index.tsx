@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { IFuseOptions } from 'fuse.js';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import SearchInput from '@/Components/UI/SearchInput';
@@ -10,14 +11,21 @@ interface RestaurantIndexProps extends PageProps {
   restaurants: Restaurant[];
 }
 
-const SEARCH_KEYS: (keyof Restaurant)[] = ['name', 'description'];
+const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
+  keys: [
+    { name: 'name', weight: 2 },
+    { name: 'description', weight: 1.5 },
+    { name: 'food_types.name', weight: 1 },
+    { name: 'food_types.menu_items.name', weight: 0.5 },
+  ],
+};
 
 export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
   const {
     query,
     setQuery,
     filteredItems: filteredRestaurants,
-  } = useSearch(restaurants, SEARCH_KEYS);
+  } = useSearch(restaurants, [], SEARCH_OPTIONS);
 
   return (
     <CustomerLayout>

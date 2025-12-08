@@ -15,9 +15,9 @@ class RestaurantController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Restaurant::class);
-
-        // Fetch restaurants with their images
-        $restaurants = Restaurant::with('images')
+        // TODO: limit selection of restaurants by user's geolocation, accept filtering/sorting? params
+        // Fetch restaurants with their images, food types, and menu items
+        $restaurants = Restaurant::with(['images', 'foodTypes.menuItems'])
             ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
             ->latest('rating')
             ->get()
@@ -35,6 +35,14 @@ class RestaurantController extends Controller
                         'id' => $img->id,
                         'url' => $img->image,
                         'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
+                    ]),
+                    'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
+                        'id' => $ft->id,
+                        'name' => $ft->name,
+                        'menu_items' => $ft->menuItems->map(fn ($mi) => [
+                            'id' => $mi->id,
+                            'name' => $mi->name,
+                        ]),
                     ]),
                 ];
             });
