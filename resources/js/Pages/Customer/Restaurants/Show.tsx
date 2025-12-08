@@ -1,18 +1,30 @@
+import { useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import {
-  ArrowLeftIcon,
-  HeartIcon,
-  MagnifyingGlassIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { IFuseOptions } from 'fuse.js';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
-import { Restaurant } from '@/types/models';
+import SearchInput from '@/Components/UI/SearchInput';
+import { useSearch } from '@/Hooks/useSearch';
+import { Restaurant, MenuItem } from '@/types/models';
 import { PageProps } from '@/types';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
 }
+
+type MenuItemWithCategory = MenuItem & { category_name: string };
+
+const SEARCH_OPTIONS: IFuseOptions<MenuItemWithCategory> = {
+  keys: [
+    { name: 'name', weight: 2 },
+    { name: 'description', weight: 1.5 },
+    { name: 'category_name', weight: 0.5 },
+  ],
+};
+
+const EMPTY_KEYS: any[] = [];
 
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const primaryImage =
@@ -20,6 +32,36 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
       (img) => img.is_primary_for_restaurant,
     ) || restaurant.restaurant_images?.[0];
   const bannerUrl = primaryImage ? primaryImage.url : null;
+
+  // Flatten menu items for searching
+  const allMenuItems = useMemo(
+    () =>
+      restaurant.food_types?.flatMap((ft) =>
+        ft.menu_items.map((item) => ({ ...item, category_name: ft.name })),
+      ) || [],
+    [restaurant.food_types],
+  );
+
+  const {
+    query,
+    setQuery,
+    filteredItems: filteredMenuItems,
+  } = useSearch<MenuItemWithCategory>(allMenuItems, EMPTY_KEYS, SEARCH_OPTIONS);
+
+  // Group filtered items back into categories
+  const displayedCategories = useMemo(() => {
+    if (!query) return restaurant.food_types;
+
+    if (filteredMenuItems.length === 0) return [];
+
+    return [
+      {
+        id: -1,
+        name: 'Search Results',
+        menu_items: filteredMenuItems,
+      },
+    ];
+  }, [query, restaurant.food_types, filteredMenuItems]);
 
   return (
     <CustomerLayout>
@@ -72,26 +114,31 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
 
         {/* Search */}
         <div className="menu-search">
-          <MagnifyingGlassIcon className="search-icon" aria-hidden="true" />
-          <input
-            type="text"
+          <SearchInput
+            value={query}
+            onChange={setQuery}
             placeholder="Search menu..."
-            aria-label="Search menu"
           />
         </div>
 
         {/* Menu Categories */}
-        {restaurant.food_types?.map((category) => (
-          <div key={category.id} className="menu-category">
-            <h3 className="category-title">{category.name}</h3>
+        {displayedCategories?.length ? (
+          displayedCategories.map((category) => (
+            <div key={category.id} className="menu-category">
+              <h3 className="category-title">{category.name}</h3>
 
-            <div className="menu-items-list">
-              {category.menu_items.map((item) => (
-                <MenuItemCard key={item.id} item={item} />
-              ))}
+              <div className="menu-items-list">
+                {category.menu_items.map((item) => (
+                  <MenuItemCard key={item.id} item={item} />
+                ))}
+              </div>
             </div>
+          ))
+        ) : query ? (
+          <div className="no-results">
+            <p>No menu items found matching "{query}".</p>
           </div>
-        ))}
+        ) : null}
       </div>
     </CustomerLayout>
   );

@@ -106,6 +106,8 @@ Components should follow this ordering:
     - Return statement (JSX).
 4.  **Exports**: Default export for the component.
 
+> > **Strict Rule:** **Tailwind CSS is strictly prohibited.** Do not use utility classes in JSX. All styling must be done via semantic class names and SCSS files. Do not use Tailwind CSS utility classes in `className`. Use semantic class names and define styles in the corresponding SCSS file in `resources/css/`.
+
 ## 5. Inertia & Laravel Integration
 
 - **Routes**: Use the global `route()` helper. Ensure `ziggy-js` types are configured if using advanced features.

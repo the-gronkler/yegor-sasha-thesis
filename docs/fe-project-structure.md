@@ -2,6 +2,8 @@ The best way to structure an Inertia app is to mirror the Backend structure for 
 
 ### 1. Recommended Directory Structure (Laravel 12 + Inertia 2 + React 19 + SASS)
 
+> **Note:** This project strictly uses **SCSS** for styling. **Tailwind CSS is NOT to be used.** All styles must be defined in the `resources/css` directory and imported via the main SCSS pipeline.
+
 ```text
 resources/
 ├── css/                  # Global Styles (SASS/SCSS)
