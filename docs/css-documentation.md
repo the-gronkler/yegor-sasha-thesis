@@ -4,6 +4,8 @@
 
 The project uses SCSS for styling, following a modular structure. The entry point is `resources/css/main.scss`, which imports all partials.
 
+> **Strict Rule:** **Tailwind CSS is strictly prohibited.** Do not use utility classes in JSX. All styling must be done via semantic class names and SCSS files.
+
 ## Directory Structure
 
 ```text

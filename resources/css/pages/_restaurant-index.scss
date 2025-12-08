@@ -63,6 +63,13 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.5rem;
+
+  .no-results {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: main-colors.$text-secondary;
+    font-style: italic;
+  }
 }
 
 .restaurant-card-link {

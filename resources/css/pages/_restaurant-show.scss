@@ -123,4 +123,14 @@
       color: main-colors.$text-primary;
     }
   }
+
+  .no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: main-colors.$text-secondary;
+    font-style: italic;
+    background-color: main-colors.$bg-surface;
+    margin: 0 1rem;
+    border-radius: layout.$border-radius;
+  }
 }

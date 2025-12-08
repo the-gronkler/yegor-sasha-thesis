@@ -24,6 +24,8 @@ const SEARCH_OPTIONS: IFuseOptions<MenuItemWithCategory> = {
   ],
 };
 
+const EMPTY_KEYS: any[] = [];
+
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const primaryImage =
     restaurant.restaurant_images?.find(
@@ -44,7 +46,7 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     query,
     setQuery,
     filteredItems: filteredMenuItems,
-  } = useSearch<MenuItemWithCategory>(allMenuItems, [], SEARCH_OPTIONS);
+  } = useSearch<MenuItemWithCategory>(allMenuItems, EMPTY_KEYS, SEARCH_OPTIONS);
 
   // Group filtered items back into categories
   const displayedCategories = useMemo(() => {
@@ -120,17 +122,23 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
         </div>
 
         {/* Menu Categories */}
-        {displayedCategories?.map((category) => (
-          <div key={category.id} className="menu-category">
-            <h3 className="category-title">{category.name}</h3>
+        {displayedCategories?.length ? (
+          displayedCategories.map((category) => (
+            <div key={category.id} className="menu-category">
+              <h3 className="category-title">{category.name}</h3>
 
-            <div className="menu-items-list">
-              {category.menu_items.map((item) => (
-                <MenuItemCard key={item.id} item={item} />
-              ))}
+              <div className="menu-items-list">
+                {category.menu_items.map((item) => (
+                  <MenuItemCard key={item.id} item={item} />
+                ))}
+              </div>
             </div>
+          ))
+        ) : query ? (
+          <div className="no-results">
+            <p>No menu items found matching "{query}".</p>
           </div>
-        ))}
+        ) : null}
       </div>
     </CustomerLayout>
   );

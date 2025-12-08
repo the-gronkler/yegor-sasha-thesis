@@ -53,7 +53,7 @@ export function useSearch<T>(
     };
 
     return new Fuse(items, { ...defaultOptions, ...options });
-  }, [items, JSON.stringify(searchKeys), JSON.stringify(options)]);
+  }, [items, searchKeys, options]);
 
   const filteredItems = useMemo(() => {
     if (!query) return items;
