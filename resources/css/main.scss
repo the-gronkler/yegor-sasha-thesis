@@ -3,15 +3,19 @@
 
 // Layouts
 @use 'layouts/customer';
+@use 'layouts/map' as layout-map;
 
 // Components
 @use 'components/buttons';
 @use 'components/star-rating';
 @use 'components/menu-item-card';
 @use 'components/search-input';
+@use 'components/map';
+@use 'components/bottom-nav';
 
 // Pages
 @use 'pages/restaurant-index';
 @use 'pages/restaurant-show';
+@use 'pages/map-index';
 @use 'pages/profile';
 @use 'pages/auth';

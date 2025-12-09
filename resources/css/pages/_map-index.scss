@@ -1,0 +1,47 @@
+@use '../variables/main-colors';
+
+.map-page {
+  position: relative;
+  padding: 0;
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 0 0.25rem 0;
+    color: main-colors.$text-inverse;
+  }
+
+  .map-container-box {
+    position: relative;
+    height: 100vh;
+    min-height: 480px;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+  }
+
+  .map-overlay {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 10;
+    padding: 0.75rem 1rem;
+    background: main-colors.$overlay-dark;
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    max-width: min(360px, 80vw);
+  }
+
+  .debug-text {
+    margin: 0;
+    color: main-colors.$text-inverse;
+    font-size: 0.85rem;
+  }
+
+  @media (min-width: 1024px) {
+    .map-container-box {
+      height: 100vh;
+      min-height: 600px;
+    }
+  }
+}
