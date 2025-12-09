@@ -18,7 +18,11 @@ $brand-primary-soft: rgba($brand-primary, 0.2);
 
 $accent-warm: #f59e0b;
 // Purpose: Highlight or supporting accent.
-// Use for: ratings stars, promotional tags (e.g. “50% OFF”).
+// Use for: ratings stars, promotional tags (e.g. "50% OFF").
+
+$bg-danger: #ef4444;
+// Purpose: Danger/error state color.
+// Use for: delete buttons, error badges, destructive actions.
 
 // ======================================================================
 // TEXT COLORS
@@ -32,6 +36,10 @@ $text-secondary: #896b61;
 // Purpose: Secondary / supportive text.
 // Use for: descriptions, prices, form hints, timestamps.
 
+$text-tertiary: #a8a29e;
+// Purpose: Tertiary / very subtle text.
+// Use for: placeholders, very low priority info, disabled text.
+
 $text-inverse: #ffffff;
 // Purpose: Text on dark or saturated backgrounds.
 // Use for: buttons on primary color, chips on dark mode.
@@ -43,6 +51,10 @@ $text-inverse: #ffffff;
 $bg-main: #f8f6f6;
 // Purpose: Main app background.
 // Use for: page background, container backgrounds.
+
+$bg-base: #fafafa;
+// Purpose: Base background for inputs and form elements.
+// Use for: input backgrounds, textarea backgrounds.
 
 $bg-surface: #ffffff;
 // Purpose: Elevated surfaces.

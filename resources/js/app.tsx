@@ -5,6 +5,8 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { InertiaProgress } from '@inertiajs/progress';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { CartProvider } from '@/Contexts/CartContext';
+import { Order } from '@/types/models';
 
 const appName =
   window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
@@ -18,10 +20,16 @@ createInertiaApp({
     ),
   setup({ el, App, props }) {
     const root = createRoot(el);
+    const cart = (props.initialPage.props.cart as Order[] | Order) || null;
+
+    // Will have to make sure that the Order/Cart code is needed here
+    const cartArray = cart ? (Array.isArray(cart) ? cart : [cart]) : null;
 
     root.render(
       <React.StrictMode>
-        <App {...props} />
+        <CartProvider initialCart={cartArray}>
+          <App {...props} />
+        </CartProvider>
       </React.StrictMode>,
     );
   },

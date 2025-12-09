@@ -129,7 +129,11 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
 
               <div className="menu-items-list">
                 {category.menu_items.map((item) => (
-                  <MenuItemCard key={item.id} item={item} />
+                  <MenuItemCard
+                    key={item.id}
+                    item={item}
+                    restaurantId={restaurant.id}
+                  />
                 ))}
               </div>
             </div>
