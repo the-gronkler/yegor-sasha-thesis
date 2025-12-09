@@ -11,6 +11,16 @@
     color: main-colors.$text-inverse;
   }
 
+  .map-search-input {
+    margin-top: 0.5rem;
+
+    .search-input-wrapper {
+      background: main-colors.$bg-surface;
+      border: 1px solid main-colors.$border-light;
+      box-shadow: 0 4px 10px main-colors.$shadow-color;
+    }
+  }
+
   .map-container-box {
     position: relative;
     height: 100vh;
@@ -20,14 +30,100 @@
     box-shadow: none;
   }
 
+  .map-bottom-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 80px; // sit above bottom nav
+    padding: 1rem 1.25rem;
+    background: linear-gradient(
+      180deg,
+      main-colors.$overlay-light 0%,
+      main-colors.$overlay-dark 100%
+    );
+    backdrop-filter: blur(8px);
+    max-height: 40vh;
+    overflow-y: auto;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .map-card {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 0.75rem;
+    background: main-colors.$bg-surface;
+    border: 1px solid main-colors.$border-light;
+    border-radius: 12px;
+    padding: 0.75rem;
+    text-decoration: none;
+    color: main-colors.$text-primary;
+    box-shadow: 0 6px 12px main-colors.$shadow-color-strong;
+  }
+
+  .map-card-image-wrapper {
+    width: 96px;
+    height: 96px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .map-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .map-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .map-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .map-card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: main-colors.$text-primary;
+  }
+
+  .map-card-hours {
+    font-size: 0.85rem;
+    color: main-colors.$text-secondary;
+    white-space: nowrap;
+  }
+
+  .map-card-description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: main-colors.$text-secondary;
+    line-height: 1.3;
+  }
+
+  .map-card-meta {
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.85rem;
+    color: main-colors.$text-secondary;
+    white-space: nowrap;
+    padding-top: 0.15rem;
+  }
+
   .map-overlay {
     position: absolute;
     top: 1rem;
     left: 1rem;
     z-index: 10;
     padding: 0.75rem 1rem;
-    background: main-colors.$overlay-dark;
-    backdrop-filter: blur(6px);
+    // background: main-colors.$overlay-dark;
+    // backdrop-filter: blur(6px);
     border-radius: 12px;
     max-width: min(360px, 80vw);
   }
@@ -42,6 +138,13 @@
     .map-container-box {
       height: 100vh;
       min-height: 600px;
+    }
+
+    .map-bottom-sheet {
+      left: 50%;
+      transform: translateX(-50%);
+      width: 768px;
+      border-radius: 16px 16px 0 0;
     }
   }
 }

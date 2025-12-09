@@ -1,7 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { IFuseOptions } from 'fuse.js';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import StarRating from '@/Components/Shared/StarRating';
+import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import SearchInput from '@/Components/UI/SearchInput';
 import { useSearch } from '@/Hooks/useSearch';
 import { Restaurant } from '@/types/models';
@@ -46,59 +46,9 @@ export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
         {/* Restaurant List */}
         <div className="restaurant-list">
           {filteredRestaurants.length > 0 ? (
-            filteredRestaurants.map((restaurant) => {
-              const primaryImage =
-                restaurant.images?.find(
-                  (img) => img.is_primary_for_restaurant,
-                ) || restaurant.images?.[0];
-              const imageUrl = primaryImage
-                ? primaryImage.url
-                : '/images/placeholder-restaurant.jpg';
-
-              return (
-                <Link
-                  key={restaurant.id}
-                  href={route('restaurants.show', restaurant.id)}
-                  className="restaurant-card-link"
-                >
-                  <div className="restaurant-card">
-                    {/* Restaurant Image */}
-                    <div className="restaurant-image-wrapper">
-                      <img
-                        src={imageUrl}
-                        alt={restaurant.name}
-                        className="restaurant-image"
-                      />
-                    </div>
-
-                    {/* Restaurant Info */}
-                    <div className="restaurant-info">
-                      <div className="restaurant-header">
-                        <h3 className="restaurant-name">{restaurant.name}</h3>
-                        <StarRating rating={restaurant.rating || 0} />
-                      </div>
-
-                      <div className="restaurant-meta">
-                        {restaurant.opening_hours ? (
-                          <span className="meta-item">
-                            {restaurant.opening_hours}
-                          </span>
-                        ) : (
-                          <span className="meta-item">Hours not available</span>
-                        )}
-                        <span className="meta-separator">•</span>
-                        <span className="meta-item">~3km</span>
-                      </div>
-
-                      <p className="restaurant-description">
-                        {restaurant.description ||
-                          'The best food in the world please buy it ASAP'}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })
+            filteredRestaurants.map((restaurant) => (
+              <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+            ))
           ) : (
             <div className="no-results">
               <p>No restaurants found matching "{query}".</p>
