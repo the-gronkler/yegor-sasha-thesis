@@ -5,8 +5,9 @@ import Map from '@/Components/Shared/Map';
 import SearchInput from '@/Components/UI/SearchInput';
 import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import { useSearch } from '@/Hooks/useSearch';
-import { IFuseOptions } from 'fuse.js';
 import { Restaurant } from '@/types/models';
+import { PageProps } from '@/types';
+import type { IFuseOptions } from 'fuse.js';
 
 const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
   keys: [
@@ -17,10 +18,11 @@ const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
   ],
 };
 
-const EMPTY_KEYS: any[] = [];
+const EMPTY_KEYS: (keyof Restaurant)[] = [];
 
-interface Props {
+interface MapIndexProps extends PageProps {
   restaurants: Restaurant[];
+  mapboxPublicKey: string;
 }
 
 const getLatLng = (restaurant: Restaurant): [number, number] | null => {
@@ -32,11 +34,13 @@ const getLatLng = (restaurant: Restaurant): [number, number] | null => {
   ) {
     return null;
   }
-
   return [restaurant.latitude, restaurant.longitude];
 };
 
-export default function MapIndex({ restaurants }: Props) {
+export default function MapIndex({
+  restaurants,
+  mapboxPublicKey,
+}: MapIndexProps) {
   const {
     query,
     setQuery,
@@ -46,22 +50,34 @@ export default function MapIndex({ restaurants }: Props) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null,
   );
-  const [center, setCenter] = useState<[number, number]>([51.505, -0.09]);
+  const [center, setCenter] = useState<[number, number]>([-0.09, 51.505]); // [lng, lat] for Mapbox
+
+  // Validate API key on mount
+  useEffect(() => {
+    if (!mapboxPublicKey) {
+      console.error('MAPBOX_PUBLIC_KEY is not configured in .env file');
+    } else if (!mapboxPublicKey.startsWith('pk.')) {
+      console.error(
+        'MAPBOX_PUBLIC_KEY must be a public key starting with "pk.", not a secret key starting with "sk."',
+      );
+    }
+  }, [mapboxPublicKey]);
 
   useEffect(() => {
     if (restaurants.length > 0) {
       const coords = getLatLng(restaurants[0]);
       if (coords) {
-        setCenter(coords);
+        // Convert [lat, lng] to [lng, lat] for Mapbox
+        setCenter([coords[1], coords[0]]);
       }
     }
-
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation([latitude, longitude]);
-          setCenter([latitude, longitude]);
+          // Convert [lat, lng] to [lng, lat] for Mapbox
+          setCenter([longitude, latitude]);
         },
         () => {
           // Silently fail - user denied location or browser blocked it
@@ -78,7 +94,8 @@ export default function MapIndex({ restaurants }: Props) {
     if (!userLocation && filteredRestaurants.length > 0) {
       const coords = getLatLng(filteredRestaurants[0]);
       if (coords) {
-        setCenter(coords);
+        // Convert [lat, lng] to [lng, lat] for Mapbox
+        setCenter([coords[1], coords[0]]);
       }
     }
   }, [filteredRestaurants, userLocation]);
@@ -119,7 +136,6 @@ export default function MapIndex({ restaurants }: Props) {
   return (
     <MapLayout>
       <Head title="Restaurant Map" />
-
       <div className="map-page">
         <div className="map-container-box">
           <div className="map-overlay">
@@ -130,9 +146,12 @@ export default function MapIndex({ restaurants }: Props) {
               className="map-search-input"
             />
           </div>
-
-          <Map center={center} zoom={13} markers={mapMarkers} />
-
+          <Map
+            center={center}
+            zoom={13}
+            markers={mapMarkers}
+            mapboxAccessToken={mapboxPublicKey}
+          />
           <div className="map-bottom-sheet">
             {filteredRestaurants.map((restaurant) => (
               <RestaurantCard key={restaurant.id} restaurant={restaurant} />

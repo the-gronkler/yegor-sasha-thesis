@@ -1,20 +1,7 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { LatLngExpression } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-// Fix for default Leaflet marker icons in Vite
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-const DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
+import * as React from 'react';
+import Map, { Marker, Popup } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface MapMarker {
   id: number;
@@ -24,41 +11,94 @@ interface MapMarker {
 }
 
 interface Props {
-  center?: LatLngExpression;
+  center?: [number, number]; // [lng, lat]
   zoom?: number;
   markers?: MapMarker[];
   className?: string;
+  mapboxAccessToken?: string;
 }
 
-export default function Map({
-  center = [51.505, -0.09],
+export default function MapComponent({
+  center = [-0.09, 51.505], // [lng, lat]
   zoom = 13,
   markers = [],
   className = '',
+  mapboxAccessToken = '',
 }: Props) {
+  const [popupId, setPopupId] = React.useState<number | null>(null);
+
+  // Validate API key
+  if (!mapboxAccessToken) {
+    return (
+      <div className={`map-wrapper map-error ${className}`}>
+        <div className="map-error-content">
+          <h3 className="map-error-title">Map Error</h3>
+          <p className="map-error-message">Mapbox API key is not configured.</p>
+          <p className="map-error-hint">
+            Please set MAPBOX_PUBLIC_KEY in your .env file.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!mapboxAccessToken.startsWith('pk.')) {
+    return (
+      <div className={`map-wrapper map-error ${className}`}>
+        <div className="map-error-content">
+          <h3 className="map-error-title">Map Error</h3>
+          <p className="map-error-message">Invalid Mapbox API key type.</p>
+          <p className="map-error-hint">
+            Public keys must start with "pk.", not "sk."
+          </p>
+          <p className="map-error-hint">
+            Secret keys cannot be used in the frontend.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`map-wrapper ${className}`}>
-      <MapContainer
-        center={center}
-        zoom={zoom}
-        scrollWheelZoom={true}
+      <Map
+        initialViewState={{ longitude: center[0], latitude: center[1], zoom }}
+        mapStyle="mapbox://styles/mapbox/dark-v10"
+        mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
-        whenReady={(mapInstance) => {
-          // Debug: confirm map mounts and center is applied
-          console.log('Leaflet map ready', mapInstance.target.getCenter());
-        }}
+        onClick={() => setPopupId(null)}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        />
-
         {markers.map((marker) => (
-          <Marker key={marker.id} position={[marker.lat, marker.lng]}>
-            <Popup>{marker.name}</Popup>
+          <Marker
+            key={marker.id}
+            longitude={marker.lng}
+            latitude={marker.lat}
+            anchor="bottom"
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              setPopupId(marker.id);
+            }}
+          >
+            <div className="map-marker" />
           </Marker>
         ))}
-      </MapContainer>
+        {markers.map((marker) =>
+          popupId === marker.id ? (
+            <Popup
+              key={marker.id}
+              longitude={marker.lng}
+              latitude={marker.lat}
+              anchor="bottom"
+              offset={25}
+              onClose={() => setPopupId(null)}
+              closeButton={true}
+              closeOnClick={false}
+            >
+              <div>{marker.name}</div>
+            </Popup>
+          ) : null,
+        )}
+      </Map>
     </div>
   );
 }

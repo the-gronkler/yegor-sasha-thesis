@@ -1,3 +1,6 @@
+@use '../variables/main-colors';
+@use '../variables/exception-colors';
+
 .map-wrapper {
   width: 100%;
   height: 100%;
@@ -8,10 +11,59 @@
   z-index: 1;
 
   :global {
-    .leaflet-container {
+    .mapboxgl-map {
       width: 100%;
       height: 100%;
-      z-index: 1;
     }
+
+    .mapboxgl-ctrl-attrib {
+      background-color: main-colors.$bg-surface;
+      color: main-colors.$text-secondary;
+    }
+  }
+}
+
+.map-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: main-colors.$bg-main;
+}
+
+.map-error-content {
+  text-align: center;
+  padding: 2rem;
+}
+
+.map-error-title {
+  color: exception-colors.$status-error;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.map-error-message {
+  color: exception-colors.$status-error;
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.map-error-hint {
+  color: main-colors.$text-secondary;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.map-marker {
+  width: 24px;
+  height: 24px;
+  background: main-colors.$brand-primary;
+  border: 2px solid main-colors.$text-inverse;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.2);
   }
 }

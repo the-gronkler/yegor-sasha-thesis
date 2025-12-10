@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mapbox Public API Key
+    |--------------------------------------------------------------------------
+    |
+    | This value is the Mapbox public API key (starts with 'pk.') that will be
+    | exposed to the frontend via Inertia for map rendering. Never use secret
+    | keys (starting with 'sk.') in the frontend.
+    |
+    */
+
+    'MAPBOX_PUBLIC_KEY' => env('MAPBOX_PUBLIC_KEY'),
+
 ];
