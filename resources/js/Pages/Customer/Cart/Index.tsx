@@ -17,7 +17,18 @@ interface CartIndexProps extends PageProps {
 
 export default function CartIndex({ cartOrders }: CartIndexProps) {
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
-  const [notes, setNotes] = useState<Record<number, string>>({});
+
+  // Initialize notes with saved notes from orders
+  const [notes, setNotes] = useState<Record<number, string>>(() => {
+    const initialNotes: Record<number, string> = {};
+    cartOrders.forEach((order) => {
+      if (order.restaurant && order.notes) {
+        initialNotes[order.restaurant.id] = order.notes;
+      }
+    });
+    return initialNotes;
+  });
+
   const [savingNotes, setSavingNotes] = useState<Record<number, boolean>>({});
 
   // Group items by restaurant
@@ -64,9 +75,12 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
     const noteText = notes[restaurantId] || '';
 
     setSavingNotes((prev) => ({ ...prev, [restaurantId]: true }));
-    router.put(
+    router.post(
       route('cart.addNote', { order: orderId }),
-      { notes: noteText },
+      {
+        _method: 'PUT',
+        notes: noteText,
+      },
       {
         preserveScroll: true,
         onFinish: () => {
@@ -76,8 +90,14 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
     );
   };
 
+  const handleRestaurantCheckout = (orderId: number) => {
+    // TODO: Implement individual restaurant checkout logic
+    // For now, navigate to checkout with order ID
+    router.visit(route('orders.checkout', { order: orderId }));
+  };
+
   const handleCheckout = () => {
-    // TODO: Implement checkout logic
+    // TODO: Implement checkout logic for all restaurants
     router.visit(route('orders.checkout'));
   };
 
@@ -221,6 +241,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
 
                 {/* Notes for this restaurant */}
                 <div className="restaurant-notes">
+                  <h4 className="notes-title">Special Instructions</h4>
                   <textarea
                     value={notes[restaurantId] ?? data.notes}
                     onChange={(e) =>
@@ -236,20 +257,28 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
                   <button
                     onClick={() => handleSaveNotes(data.orderId, restaurantId)}
                     disabled={savingNotes[restaurantId]}
-                    className="btn-secondary"
+                    className="btn-save-notes"
                   >
                     {savingNotes[restaurantId] ? 'Saving...' : 'Save Notes'}
                   </button>
                 </div>
 
-                {/* Subtotal for this restaurant */}
-                <div className="restaurant-subtotal">
-                  <span className="subtotal-label">Subtotal</span>
-                  <span className="subtotal-amount">
-                    €
-                    {restaurantSubtotals.get(restaurantId)?.toFixed(2) ||
-                      '0.00'}
-                  </span>
+                {/* Subtotal and Checkout for this restaurant */}
+                <div className="restaurant-footer">
+                  <div className="restaurant-subtotal">
+                    <span className="subtotal-label">Subtotal</span>
+                    <span className="subtotal-amount">
+                      €
+                      {restaurantSubtotals.get(restaurantId)?.toFixed(2) ||
+                        '0.00'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleRestaurantCheckout(data.orderId)}
+                    className="btn-restaurant-checkout"
+                  >
+                    Checkout {data.restaurant?.name}
+                  </button>
                 </div>
 
                 {/* Separator (not for last item) */}
