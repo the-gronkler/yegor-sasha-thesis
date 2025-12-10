@@ -3,6 +3,7 @@ import {
   MapPinIcon,
   ShoppingCartIcon,
   UserIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavLinkProps {
@@ -29,6 +30,12 @@ export default function BottomNav() {
         active={route().current('map.index')}
         icon={MapPinIcon}
         label="Explore"
+      />
+      <NavLink
+        href={route('restaurants.index')}
+        active={route().current('restaurants.index')}
+        icon={BuildingStorefrontIcon}
+        label="Restaurants"
       />
       <NavLink
         href={route('orders.index')}
