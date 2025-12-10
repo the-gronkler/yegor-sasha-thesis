@@ -10,6 +10,7 @@ import { MenuItem, Order } from '@/types/models';
 
 interface CartItem extends MenuItem {
   quantity: number;
+  restaurant_id: number;
 }
 
 interface CartContextType {
@@ -38,6 +39,7 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
         (order.menu_items || []).map((item) => ({
           ...item,
           quantity: item.pivot?.quantity || 1,
+          restaurant_id: order.restaurant_id,
         })),
       );
     }
@@ -64,7 +66,10 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i,
         );
       }
-      return [...prevItems, { ...item, quantity: 1 }];
+      return [
+        ...prevItems,
+        { ...item, quantity: 1, restaurant_id: restaurantId },
+      ];
     });
 
     // Send to server
@@ -150,11 +155,15 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
       );
 
       // Send to server
+      const currentItem = items.find((i) => i.id === menuItemId);
+      if (!currentItem) return;
+
       router.post(
-        route('cart.addItem'),
+        route('cart.updateItemQuantity'),
         {
           menu_item_id: menuItemId,
           quantity: quantity,
+          restaurant_id: currentItem.restaurant_id,
         },
         {
           preserveScroll: true,

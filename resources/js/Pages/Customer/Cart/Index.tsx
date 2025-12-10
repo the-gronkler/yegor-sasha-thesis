@@ -243,7 +243,11 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
                 <div className="restaurant-notes">
                   <h4 className="notes-title">Special Instructions</h4>
                   <textarea
-                    value={notes[restaurantId] ?? data.notes}
+                    value={
+                      notes[restaurantId] !== undefined
+                        ? notes[restaurantId]
+                        : data.notes
+                    }
                     onChange={(e) =>
                       setNotes((prev) => ({
                         ...prev,

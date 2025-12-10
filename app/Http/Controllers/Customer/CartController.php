@@ -49,9 +49,15 @@ class CartController extends Controller
             ->where('menu_item_id', $data['menu_item_id'])
             ->first()?->pivot?->quantity ?? 0;
 
-        $order->menuItems()->syncWithoutDetaching([
-            $data['menu_item_id'] => ['quantity' => $currentQuantity + $data['quantity']],
-        ]);
+        $newQuantity = $currentQuantity + $data['quantity'];
+
+        if ($newQuantity <= 0) {
+            $order->menuItems()->detach($data['menu_item_id']);
+        } else {
+            $order->menuItems()->syncWithoutDetaching([
+                $data['menu_item_id'] => ['quantity' => $newQuantity],
+            ]);
+        }
 
         return back();
     }
@@ -66,6 +72,9 @@ class CartController extends Controller
 
         $order = Order::where('customer_user_id', $customer->user_id)
             ->where('order_status_id', OrderStatus::InCart)
+            ->whereHas('menuItems', function ($q) use ($data) {
+                $q->where('menu_items.id', $data['menu_item_id']);
+            })
             ->firstOrFail();
 
         $order->menuItems()->detach($data['menu_item_id']);
@@ -84,5 +93,34 @@ class CartController extends Controller
         $order->update(['notes' => $data['notes']]);
 
         return redirect()->route('cart.index')->with('success', 'Note updated');
+    }
+
+    public function updateItemQuantity(Request $request)
+    {
+        $data = $request->validate([
+            'menu_item_id' => 'required|integer|exists:menu_items,id',
+            'quantity' => 'required|integer|min:0',
+            'restaurant_id' => 'required|integer|exists:restaurants,id',
+        ]);
+
+        $customer = $request->user()->customer;
+
+        $order = Order::firstOrCreate(
+            [
+                'customer_user_id' => $customer->user_id,
+                'order_status_id' => OrderStatus::InCart,
+                'restaurant_id' => $data['restaurant_id'],
+            ]
+        );
+
+        if ($data['quantity'] <= 0) {
+            $order->menuItems()->detach($data['menu_item_id']);
+        } else {
+            $order->menuItems()->syncWithoutDetaching([
+                $data['menu_item_id'] => ['quantity' => $data['quantity']],
+            ]);
+        }
+
+        return back();
     }
 }

@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'exception-colors';
 
 // ======================================================================
 // CORE BRAND & ACCENT COLORS
@@ -20,7 +21,7 @@ $accent-warm: #f59e0b;
 // Purpose: Highlight or supporting accent.
 // Use for: ratings stars, promotional tags (e.g. "50% OFF").
 
-$bg-danger: #ef4444;
+$bg-danger: exception-colors.$status-error;
 // Purpose: Danger/error state color.
 // Use for: delete buttons, error badges, destructive actions.
 
@@ -124,6 +125,15 @@ $shadow-color-medium: rgba(0, 0, 0, 0.06);
 
 $shadow-color-text: rgba(0, 0, 0, 0.2);
 // Purpose: Text shadow.
+
+$shadow-small: rgba(0, 0, 0, 0.2);
+// Purpose: Small shadows for badges and small elements.
+
+$shadow-focus: rgba(99, 102, 241, 0.3);
+// Purpose: Focus/hover shadow for interactive elements.
+
+$focus-ring: rgba(99, 102, 241, 0.1);
+// Purpose: Focus ring color for inputs and buttons.
 
 $overlay-light: rgba(0, 0, 0, 0.3);
 // Purpose: Light overlay.
