@@ -25,8 +25,8 @@ export default function BottomNav() {
   return (
     <nav className="bottom-nav">
       <NavLink
-        href={route('restaurants.index')}
-        active={route().current('restaurants.index')}
+        href={route('map.index')}
+        active={route().current('map.index')}
         icon={MapPinIcon}
         label="Explore"
       />

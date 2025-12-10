@@ -50,6 +50,8 @@ export default function MapIndex({
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null,
   );
+  const [locationError, setLocationError] = useState<string | null>(null);
+  // Default center coordinates correspond to London, UK (longitude, latitude)
   const [center, setCenter] = useState<[number, number]>([-0.09, 51.505]); // [lng, lat] for Mapbox
 
   // Validate API key on mount
@@ -78,27 +80,50 @@ export default function MapIndex({
           setUserLocation([latitude, longitude]);
           // Convert [lat, lng] to [lng, lat] for Mapbox
           setCenter([longitude, latitude]);
+          setLocationError(null);
         },
-        () => {
-          // Silently fail - user denied location or browser blocked it
+        (error) => {
+          let errorMessage = 'Unable to access your location';
+
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage =
+                'Location access denied. Enable location permissions to see nearby restaurants.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage =
+                'Location information unavailable. Showing default map view.';
+              break;
+            case error.TIMEOUT:
+              errorMessage =
+                'Location request timed out. Showing default map view.';
+              break;
+          }
+
+          setLocationError(errorMessage);
+          console.warn('Geolocation error:', error.message);
         },
         {
           timeout: 5000,
           maximumAge: 60000,
         },
       );
+    } else {
+      setLocationError('Geolocation is not supported by your browser.');
     }
   }, [restaurants]);
 
-  useEffect(() => {
-    if (!userLocation && filteredRestaurants.length > 0) {
-      const coords = getLatLng(filteredRestaurants[0]);
-      if (coords) {
-        // Convert [lat, lng] to [lng, lat] for Mapbox
-        setCenter([coords[1], coords[0]]);
-      }
-    }
-  }, [filteredRestaurants, userLocation]);
+  //   This code re-center the map on the first restaurant in the search results if user location is not available
+  // whether or not it should be here is beyound the sope of the current task, leaving this here commented out for now
+  //   useEffect(() => {
+  //     if (!userLocation && filteredRestaurants.length > 0) {
+  //       const coords = getLatLng(filteredRestaurants[0]);
+  //       if (coords) {
+  //         // Convert [lat, lng] to [lng, lat] for Mapbox
+  //         setCenter([coords[1], coords[0]]);
+  //       }
+  //     }
+  //   }, [filteredRestaurants, userLocation]);
 
   const mapMarkers = useMemo(() => {
     const restaurantMarkers = filteredRestaurants
@@ -137,6 +162,18 @@ export default function MapIndex({
     <MapLayout>
       <Head title="Restaurant Map" />
       <div className="map-page">
+        {locationError && (
+          <div className="location-error-banner">
+            <p className="location-error-message">{locationError}</p>
+            <button
+              className="location-error-dismiss"
+              onClick={() => setLocationError(null)}
+              aria-label="Dismiss location error"
+            >
+              ×
+            </button>
+          </div>
+        )}
         <div className="map-container-box">
           <div className="map-overlay">
             <SearchInput

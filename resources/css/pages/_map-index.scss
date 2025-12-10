@@ -1,4 +1,5 @@
 @use '../variables/main-colors';
+@use '../variables/exception-colors';
 
 .map-page {
   position: relative;
@@ -122,8 +123,6 @@
     left: 1rem;
     z-index: 10;
     padding: 0.75rem 1rem;
-    // background: main-colors.$overlay-dark;
-    // backdrop-filter: blur(6px);
     border-radius: 12px;
     max-width: min(360px, 80vw);
   }
@@ -132,6 +131,54 @@
     margin: 0;
     color: main-colors.$text-inverse;
     font-size: 0.85rem;
+  }
+
+  .location-error-banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: main-colors.$accent-warm;
+    color: main-colors.$text-inverse;
+    box-shadow: 0 4px 12px main-colors.$shadow-color-strong;
+  }
+
+  .location-error-message {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .location-error-dismiss {
+    background: transparent;
+    border: none;
+    color: main-colors.$text-inverse;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: main-colors.$overlay-white-light;
+    }
+
+    &:active {
+      background: main-colors.$overlay-white-medium;
+    }
   }
 
   @media (min-width: 1024px) {

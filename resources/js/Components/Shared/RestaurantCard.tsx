@@ -35,7 +35,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
             <h3 className="restaurant-name">{restaurant.name}</h3>
             <StarRating rating={restaurant.rating || 0} />
           </div>
-
+          {/* TODO: Use the restaurant's actual props here. */}
           <div className="restaurant-meta">
             {restaurant.opening_hours ? (
               <span className="meta-item">{restaurant.opening_hours}</span>
@@ -43,12 +43,12 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
               <span className="meta-item">Hours not available</span>
             )}
             <span className="meta-separator">•</span>
+            {/* TODO: Calculate and display actual distance */}
             <span className="meta-item">~3km</span>
           </div>
 
           <p className="restaurant-description">
-            {restaurant.description ||
-              'The best food in the world please buy it ASAP'}
+            {restaurant.description || 'No description available'}
           </p>
         </div>
       </div>

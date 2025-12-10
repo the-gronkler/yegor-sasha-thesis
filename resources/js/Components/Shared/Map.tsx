@@ -63,6 +63,7 @@ export default function MapComponent({
     <div className={`map-wrapper ${className}`}>
       <Map
         initialViewState={{ longitude: center[0], latitude: center[1], zoom }}
+        // TODO: select style for the map in general, beyond the scope of the currnet pr since its big already
         mapStyle="mapbox://styles/mapbox/dark-v10"
         mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
