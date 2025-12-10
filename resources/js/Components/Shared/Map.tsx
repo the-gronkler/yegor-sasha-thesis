@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Map, { Marker, Popup } from 'react-map-gl/mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { MapPinIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface MapMarker {
@@ -68,20 +68,27 @@ export default function MapComponent({
         style={{ height: '100%', width: '100%' }}
         onClick={() => setPopupId(null)}
       >
-        {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            longitude={marker.lng}
-            latitude={marker.lat}
-            anchor="bottom"
-            onClick={(e) => {
-              e.originalEvent.stopPropagation();
-              setPopupId(marker.id);
-            }}
-          >
-            <div className="map-marker" />
-          </Marker>
-        ))}
+        {markers.map((marker) => {
+          const isUserLocation = marker.id === -1;
+          return (
+            <Marker
+              key={marker.id}
+              longitude={marker.lng}
+              latitude={marker.lat}
+              anchor="bottom"
+              onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                setPopupId(marker.id);
+              }}
+            >
+              {isUserLocation ? (
+                <UserCircleIcon className="map-marker map-marker-user" />
+              ) : (
+                <MapPinIcon className="map-marker map-marker-restaurant" />
+              )}
+            </Marker>
+          );
+        })}
         {markers.map((marker) =>
           popupId === marker.id ? (
             <Popup

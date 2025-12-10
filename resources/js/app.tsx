@@ -1,10 +1,11 @@
 import './bootstrap';
 import '../css/main.scss';
-import React from 'react';
+import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { InertiaProgress } from '@inertiajs/progress';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import ErrorBoundary from '@/Components/UI/ErrorBoundary';
 
 const appName =
   window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
@@ -21,7 +22,9 @@ createInertiaApp({
 
     root.render(
       <React.StrictMode>
-        <App {...props} />
+        <ErrorBoundary>
+          <App {...props} />
+        </ErrorBoundary>
       </React.StrictMode>,
     );
   },

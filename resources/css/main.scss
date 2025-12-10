@@ -12,6 +12,7 @@
 @use 'components/search-input';
 @use 'components/map';
 @use 'components/bottom-nav';
+@use 'components/error-boundary';
 
 // Pages
 @use 'pages/restaurant-index';

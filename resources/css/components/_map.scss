@@ -55,15 +55,27 @@
 }
 
 .map-marker {
-  width: 24px;
-  height: 24px;
-  background: main-colors.$brand-primary;
-  border: 2px solid main-colors.$text-inverse;
-  border-radius: 50%;
   cursor: pointer;
   transition: transform 0.2s ease;
+  filter: drop-shadow(0 2px 4px main-colors.$shadow-color-strong);
 
   &:hover {
-    transform: scale(1.2);
+    transform: scale(1.15);
   }
+}
+
+.map-marker-restaurant {
+  width: 32px;
+  height: 32px;
+  color: main-colors.$brand-primary;
+
+  &:hover {
+    color: main-colors.$accent-warm;
+  }
+}
+
+.map-marker-user {
+  width: 36px;
+  height: 36px;
+  color: main-colors.$accent-warm;
 }
