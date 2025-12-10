@@ -39,7 +39,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             // TODO: expose other keys as needed
             // TODO: remove mapbox key from here if not needed globally. Probably will leave it
-            'mapboxPublicKey' => config('app.MAPBOX_PUBLIC_KEY'),
+            'mapboxPublicKey' => config('app.mapbox_public_key'),
         ];
     }
 }

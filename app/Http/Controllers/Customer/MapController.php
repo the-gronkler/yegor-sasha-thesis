@@ -13,6 +13,9 @@ class MapController extends Controller
     {
         $this->authorize('viewAny', Restaurant::class);
 
+        // TODO: limit number of restaurants by geolocation.
+        // Right now it loads all the additinal data for searching on fe, but i feel that there is a better approach.
+        // Anyways, this is a design issue for later
         $restaurants = Restaurant::with(['images', 'foodTypes.menuItems'])
             ->select([
                 'id',

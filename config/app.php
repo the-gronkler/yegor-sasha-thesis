@@ -134,6 +134,6 @@ return [
     |
     */
 
-    'MAPBOX_PUBLIC_KEY' => env('MAPBOX_PUBLIC_KEY'),
+    'mapbox_public_key' => env('MAPBOX_PUBLIC_KEY'),
 
 ];
