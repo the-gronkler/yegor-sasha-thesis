@@ -62,7 +62,7 @@ class ProfileController extends Controller
 
         // Get or create customer record
         $customer = $user->customer;
-        if (!$customer) {
+        if (! $customer) {
             $customer = $user->customer()->create([
                 'user_id' => $user->id,
             ]);

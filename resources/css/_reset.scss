@@ -1,28 +1,30 @@
-@use "variables/main-colors";
+@use 'variables/main-colors';
 
-*, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-    font-family: 'Inter', sans-serif; // Assuming Inter or system font
-    line-height: 1.5;
-    color: main-colors.$text-primary;
-    background-color: main-colors.$bg-main;
+  font-family: 'Inter', sans-serif; // Assuming Inter or system font
+  line-height: 1.5;
+  color: main-colors.$text-primary;
+  background-color: main-colors.$bg-main;
 }
 
 a {
-    text-decoration: none;
-    color: inherit;
+  text-decoration: none;
+  color: inherit;
 }
 
 ul {
-    list-style: none;
+  list-style: none;
 }
 
 img {
-    max-width: 100%;
-    display: block;
+  max-width: 100%;
+  display: block;
 }

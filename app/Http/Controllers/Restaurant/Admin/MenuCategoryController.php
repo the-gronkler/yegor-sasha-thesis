@@ -36,7 +36,7 @@ class MenuCategoryController extends Controller
         // This prevents attackers from injecting an arbitrary restaurant ID
         $restaurant = $request->user()->employee?->restaurant;
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(403, 'User is not associated with a restaurant.');
         }
 

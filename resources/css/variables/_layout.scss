@@ -2,11 +2,13 @@
 // LAYOUT VARIABLES (Preserved)
 // ======================================================================
 
-@use "main-colors";
+@use 'main-colors';
 
 // Borders
 $border-radius: 8px;
 $border-radius-pill: 9999px;
 
 // Shadows
-$box-shadow: 0 4px 6px -1px main-colors.$shadow-color-strong, 0 2px 4px -1px main-colors.$shadow-color-medium;
+$box-shadow:
+  0 4px 6px -1px main-colors.$shadow-color-strong,
+  0 2px 4px -1px main-colors.$shadow-color-medium;

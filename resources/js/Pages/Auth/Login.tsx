@@ -1,13 +1,25 @@
+import { FormEventHandler } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { PageProps } from '@/types';
 
-export default function Login({ canResetPassword = false, errors }) {
-  const form = useForm({
+interface LoginProps extends PageProps {
+  canResetPassword?: boolean;
+}
+
+interface LoginForm {
+  email: string;
+  password: string;
+  remember: boolean;
+}
+
+export default function Login({ canResetPassword = false }: LoginProps) {
+  const form = useForm<LoginForm>({
     email: '',
     password: '',
     remember: false,
-  }, errors || {});
+  });
 
-  const submit = (e) => {
+  const submit: FormEventHandler = (e) => {
     e.preventDefault();
     form.post(window.route('login.store'), {
       onFinish: () => form.reset('password'),
@@ -20,7 +32,6 @@ export default function Login({ canResetPassword = false, errors }) {
 
       <div className="auth-page">
         <div className="auth-card">
-
           <div className="auth-header">
             <h2 className="auth-title">Sign In</h2>
             <p className="auth-subtitle">
@@ -30,9 +41,7 @@ export default function Login({ canResetPassword = false, errors }) {
 
           <form className="auth-form" onSubmit={submit}>
             <div className="form-group">
-              <label htmlFor="email">
-                Email Address
-              </label>
+              <label htmlFor="email">Email Address</label>
               <input
                 id="email"
                 type="email"
@@ -45,9 +54,7 @@ export default function Login({ canResetPassword = false, errors }) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">
-                Password
-              </label>
+              <label htmlFor="password">Password</label>
               <input
                 id="password"
                 type="password"
@@ -58,7 +65,9 @@ export default function Login({ canResetPassword = false, errors }) {
                 onChange={(e) => form.setData('password', e.target.value)}
               />
               {(form.errors.email || form.errors.password) && (
-                <p className="error-message">{form.errors.email || form.errors.password}</p>
+                <p className="error-message">
+                  {form.errors.email || form.errors.password}
+                </p>
               )}
             </div>
 
@@ -97,14 +106,10 @@ export default function Login({ canResetPassword = false, errors }) {
 
           <div className="auth-footer">
             Don’t have an account?{' '}
-            <Link
-              href={window.route('register')}
-              className="auth-link"
-            >
+            <Link href={window.route('register')} className="auth-link">
               Register
             </Link>
           </div>
-
         </div>
       </div>
     </>
