@@ -1,6 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Register({ canResetPassword = false }) {
+// TODO: Add reset pwd functionality
+// TODO: Add client side validation
+export default function Register() {
   const form = useForm({
     name: '',
     surname: '',
@@ -9,7 +11,7 @@ export default function Register({ canResetPassword = false }) {
     password_confirmation: '',
   });
 
-  const submit = (e) => {
+  const submit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     form.post(window.route('register.store'), {
       onFinish: () => form.reset('password', 'password_confirmation'),

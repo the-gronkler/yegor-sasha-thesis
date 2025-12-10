@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Customer;
-use App\Http\Requests\RegisterRequest;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class RegisteredUserController extends Controller
 {
@@ -26,32 +30,34 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
+     * @throws Throwable
      */
-    public function store(RegisterRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validated();
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'surname' => $validated['surname'] ?? null,
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'surname' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Mark email as verified for new registrations
-        // TODO: implement email verification later
-        $user->email_verified_at = now();
-        $user->save();
+        DB::transaction(function () use ($validated) {
+            $user = User::create([
+                'name' => $validated['name'],
+                'surname' => $validated['surname'] ?? null,
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'email_verified_at' => now(),
+            ]);
 
-        // Create a customer record for the new user
-        Customer::create([
-            'user_id' => $user->id,
-        ]);
+            Customer::create([
+                'user_id' => $user->id,
+            ]);
 
-        event(new Registered($user));
-
-        Auth::login($user);
+            event(new Registered($user));
+            Auth::login($user);
+        });
 
         return redirect('/');
     }
