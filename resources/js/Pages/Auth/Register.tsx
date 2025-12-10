@@ -22,19 +22,14 @@ export default function Register({ canResetPassword = false }) {
 
       <div className="auth-page">
         <div className="auth-card">
-
           <div className="auth-header">
             <h2 className="auth-title">Sign Up</h2>
-            <p className="auth-subtitle">
-              Create your account to get started.
-            </p>
+            <p className="auth-subtitle">Create your account to get started.</p>
           </div>
 
           <form className="auth-form" onSubmit={submit}>
             <div className="form-group">
-              <label htmlFor="name">
-                First Name
-              </label>
+              <label htmlFor="name">First Name</label>
               <input
                 id="name"
                 type="text"
@@ -50,9 +45,7 @@ export default function Register({ canResetPassword = false }) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="surname">
-                Last Name (Optional)
-              </label>
+              <label htmlFor="surname">Last Name (Optional)</label>
               <input
                 id="surname"
                 type="text"
@@ -67,9 +60,7 @@ export default function Register({ canResetPassword = false }) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">
-                Email Address
-              </label>
+              <label htmlFor="email">Email Address</label>
               <input
                 id="email"
                 type="email"
@@ -85,9 +76,7 @@ export default function Register({ canResetPassword = false }) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">
-                Password
-              </label>
+              <label htmlFor="password">Password</label>
               <input
                 id="password"
                 type="password"
@@ -103,9 +92,7 @@ export default function Register({ canResetPassword = false }) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password_confirmation">
-                Confirm Password
-              </label>
+              <label htmlFor="password_confirmation">Confirm Password</label>
               <input
                 id="password_confirmation"
                 type="password"
@@ -113,10 +100,14 @@ export default function Register({ canResetPassword = false }) {
                 required
                 className="form-input"
                 value={form.data.password_confirmation}
-                onChange={(e) => form.setData('password_confirmation', e.target.value)}
+                onChange={(e) =>
+                  form.setData('password_confirmation', e.target.value)
+                }
               />
               {form.errors.password_confirmation && (
-                <p className="error-message">{form.errors.password_confirmation}</p>
+                <p className="error-message">
+                  {form.errors.password_confirmation}
+                </p>
               )}
             </div>
 
@@ -133,14 +124,10 @@ export default function Register({ canResetPassword = false }) {
 
           <div className="auth-footer">
             Already have an account?{' '}
-            <Link
-              href={window.route('login')}
-              className="auth-link"
-            >
+            <Link href={window.route('login')} className="auth-link">
               Sign In
             </Link>
           </div>
-
         </div>
       </div>
     </>
