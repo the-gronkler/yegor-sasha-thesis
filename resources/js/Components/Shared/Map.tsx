@@ -15,7 +15,7 @@ interface Props {
   zoom?: number;
   markers?: MapMarker[];
   className?: string;
-  mapboxAccessToken?: string;
+  mapboxAccessToken: string;
 }
 
 export default function MapComponent({
@@ -23,7 +23,7 @@ export default function MapComponent({
   zoom = 13,
   markers = [],
   className = '',
-  mapboxAccessToken = '',
+  mapboxAccessToken,
 }: Props) {
   const [popupId, setPopupId] = React.useState<number | null>(null);
 

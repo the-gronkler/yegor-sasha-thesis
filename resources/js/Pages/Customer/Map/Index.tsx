@@ -51,8 +51,8 @@ export default function MapIndex({
     null,
   );
   const [locationError, setLocationError] = useState<string | null>(null);
-  // Default center coordinates correspond to London, UK (longitude, latitude)
-  const [center, setCenter] = useState<[number, number]>([-0.09, 51.505]); // [lng, lat] for Mapbox
+  // Default center coordinates correspond to Warsaw, Poland (longitude, latitude)
+  const [center, setCenter] = useState<[number, number]>([21.0122, 52.2297]); // [lng, lat] for Mapbox
 
   // Validate API key on mount
   useEffect(() => {

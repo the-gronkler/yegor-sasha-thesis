@@ -1,6 +1,6 @@
 import './bootstrap';
 import '../css/main.scss';
-import * as React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { InertiaProgress } from '@inertiajs/progress';
@@ -21,11 +21,11 @@ createInertiaApp({
     const root = createRoot(el);
 
     root.render(
-      <React.StrictMode>
+      <StrictMode>
         <ErrorBoundary>
           <App {...props} />
         </ErrorBoundary>
-      </React.StrictMode>,
+      </StrictMode>,
     );
   },
   progress: {
