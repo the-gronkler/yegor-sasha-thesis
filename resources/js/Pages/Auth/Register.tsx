@@ -1,3 +1,4 @@
+import { FormEvent } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 // TODO: Add reset pwd functionality
@@ -11,8 +12,14 @@ export default function Register() {
     password_confirmation: '',
   });
 
-  const submit = (e: { preventDefault: () => void }) => {
+  const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (form.data.password !== form.data.password_confirmation) {
+      form.setError('password_confirmation', 'Passwords do not match');
+      return;
+    }
+
     form.post(window.route('register.store'), {
       onFinish: () => form.reset('password', 'password_confirmation'),
     });
@@ -68,12 +75,17 @@ export default function Register() {
                 type="email"
                 autoComplete="username"
                 required
+                aria-required="true"
+                aria-invalid={!!form.errors.email}
+                aria-describedby={form.errors.email ? 'email-error' : undefined}
                 className="form-input"
                 value={form.data.email}
                 onChange={(e) => form.setData('email', e.target.value)}
               />
               {form.errors.email && (
-                <p className="error-message">{form.errors.email}</p>
+                <p id="email-error" className="error-message">
+                  {form.errors.email}
+                </p>
               )}
             </div>
 
