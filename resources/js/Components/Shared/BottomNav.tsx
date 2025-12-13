@@ -4,25 +4,35 @@ import {
   ShoppingCartIcon,
   UserIcon,
   BuildingStorefrontIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
+import { useCart } from '@/Contexts/CartContext';
 
 interface NavLinkProps {
   href: string;
   active: boolean;
   icon: React.ElementType;
   label: string;
+  badge?: number;
 }
 
-function NavLink({ href, active, icon: Icon, label }: NavLinkProps) {
+function NavLink({ href, active, icon: Icon, label, badge }: NavLinkProps) {
   return (
     <Link href={href} className={`nav-item ${active ? 'active' : ''}`}>
-      <Icon className="icon" aria-hidden="true" />
+      <div className="nav-icon-wrapper">
+        <Icon className="icon" aria-hidden="true" />
+        {badge !== undefined && badge > 0 && (
+          <span className="nav-badge">{badge > 99 ? '99+' : badge}</span>
+        )}
+      </div>
       <span className="label">{label}</span>
     </Link>
   );
 }
 
 export default function BottomNav() {
+  const { itemCount } = useCart();
+
   return (
     <nav className="bottom-nav">
       <NavLink
@@ -38,10 +48,11 @@ export default function BottomNav() {
         label="Restaurants"
       />
       <NavLink
-        href={route('orders.index')}
-        active={route().current('orders.index')}
+        href={route('cart.index')}
+        active={route().current('cart.index')}
         icon={ShoppingCartIcon}
-        label="Orders"
+        label="Cart"
+        badge={itemCount}
       />
       <NavLink
         href={route('profile.show')}

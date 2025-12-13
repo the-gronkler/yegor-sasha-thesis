@@ -43,6 +43,10 @@ const Ziggy = {
     },
     'cart.index': { uri: 'cart', methods: ['GET', 'HEAD'] },
     'cart.addItem': { uri: 'cart\/add-item', methods: ['POST'] },
+    'cart.updateItemQuantity': {
+      uri: 'cart\/update-quantity',
+      methods: ['POST'],
+    },
     'cart.removeItem': { uri: 'cart\/remove-item', methods: ['DELETE'] },
     'cart.addNote': {
       uri: 'cart\/add-note\/{order}',

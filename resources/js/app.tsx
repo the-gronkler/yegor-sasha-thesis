@@ -6,6 +6,8 @@ import { createInertiaApp } from '@inertiajs/react';
 import { InertiaProgress } from '@inertiajs/progress';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import ErrorBoundary from '@/Components/UI/ErrorBoundary';
+import { CartProvider } from '@/Contexts/CartContext';
+import { Order } from '@/types/models';
 
 const appName =
   window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
@@ -19,11 +21,14 @@ createInertiaApp({
     ),
   setup({ el, App, props }) {
     const root = createRoot(el);
+    const cart = (props.initialPage.props.cart as Order[]) || null;
 
     root.render(
       <StrictMode>
         <ErrorBoundary>
-          <App {...props} />
+          <CartProvider initialCart={cart}>
+            <App {...props} />
+          </CartProvider>
         </ErrorBoundary>
       </StrictMode>,
     );

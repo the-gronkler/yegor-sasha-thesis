@@ -1,0 +1,534 @@
+@use '../variables/main-colors';
+@use '../variables/exception-colors';
+
+.cart-page {
+  padding: 1.5rem;
+  padding-bottom: 200px; // Extra padding to prevent footer overlap
+  max-width: 100%;
+
+  .cart-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid main-colors.$bg-alt-1;
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: main-colors.$text-primary;
+      margin-bottom: 0.5rem;
+    }
+
+    .item-count {
+      font-size: 0.875rem;
+      color: main-colors.$text-tertiary;
+    }
+  }
+
+  .cart-restaurants {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .restaurant-section {
+    margin-bottom: 2.5rem;
+
+    &:last-child {
+      margin-bottom: 3rem; // Extra margin for last restaurant to avoid footer overlap
+    }
+  }
+
+  .restaurant-header {
+    margin-bottom: 1rem;
+
+    .restaurant-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem 1.5rem;
+      background-color: main-colors.$bg-surface;
+      border-radius: 16px;
+      border: 3px solid main-colors.$brand-primary;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px main-colors.$shadow-color;
+      text-align: center;
+
+      &:hover {
+        background-color: main-colors.$brand-primary-soft;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px main-colors.$shadow-color-strong;
+        border-color: main-colors.$brand-primary-hover;
+      }
+
+      .restaurant-info {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .restaurant-name {
+          font-size: 1.375rem;
+          font-weight: 700;
+          color: main-colors.$text-primary;
+          display: block;
+          margin-bottom: 0.375rem;
+          letter-spacing: 0.5px;
+        }
+
+        .item-count-small {
+          font-size: 0.8rem;
+          color: main-colors.$text-secondary;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-weight: 600;
+        }
+      }
+
+      .chevron-icon {
+        width: 24px;
+        height: 24px;
+        color: main-colors.$brand-primary;
+        margin-top: 0.5rem;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+      }
+
+      &:hover .chevron-icon {
+        opacity: 1;
+      }
+    }
+  }
+
+  .restaurant-notes {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: main-colors.$bg-alt-1;
+    border-radius: 12px;
+
+    .notes-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .notes-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid main-colors.$border-light;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: main-colors.$text-primary;
+      background-color: main-colors.$bg-surface;
+      resize: vertical;
+      margin-bottom: 0.75rem;
+      font-family: inherit;
+
+      &:focus {
+        outline: none;
+        border-color: main-colors.$brand-primary;
+        box-shadow: 0 0 0 3px main-colors.$focus-ring;
+      }
+
+      &::placeholder {
+        color: main-colors.$text-tertiary;
+      }
+    }
+
+    .btn-save-notes {
+      padding: 0.5rem 1.5rem;
+      background-color: main-colors.$brand-primary;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background-color: main-colors.$brand-primary-hover;
+        transform: translateY(-1px);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .restaurant-footer {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: main-colors.$bg-surface;
+    border-radius: 12px;
+    border: 2px solid main-colors.$bg-alt-1;
+  }
+
+  .restaurant-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .subtotal-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: main-colors.$text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .subtotal-amount {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: main-colors.$brand-primary;
+    }
+  }
+
+  .btn-restaurant-checkout {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background-color: main-colors.$brand-primary;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px main-colors.$shadow-color;
+
+    &:hover {
+      background-color: main-colors.$brand-primary-hover;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px main-colors.$shadow-focus;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .restaurant-separator {
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      main-colors.$bg-alt-1 20%,
+      main-colors.$bg-alt-1 80%,
+      transparent
+    );
+    margin: 2rem 0;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background-color: main-colors.$brand-primary;
+      border-radius: 50%;
+    }
+  }
+
+  .empty-cart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    text-align: center;
+
+    p {
+      font-size: 1.125rem;
+      color: main-colors.$text-secondary;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+      padding: 0.75rem 2rem;
+      background-color: main-colors.$brand-primary;
+      color: white;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$brand-primary-hover;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px main-colors.$shadow-focus;
+      }
+    }
+  }
+
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cart-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: main-colors.$bg-surface;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px main-colors.$shadow-color;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px main-colors.$shadow-color;
+    }
+
+    .cart-item-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+
+      &.placeholder {
+        background-color: main-colors.$bg-alt-1;
+      }
+    }
+
+    .cart-item-details {
+      flex: 1;
+      min-width: 0;
+
+      .cart-item-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: main-colors.$text-primary;
+        margin-bottom: 0.25rem;
+      }
+
+      .cart-item-price {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: main-colors.$brand-primary;
+        margin-bottom: 0.5rem;
+      }
+
+      .cart-item-description {
+        font-size: 0.75rem;
+        color: main-colors.$text-tertiary;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    .cart-item-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 0.5rem;
+
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: main-colors.$bg-alt-1;
+        border-radius: 20px;
+        padding: 0.25rem 0.5rem;
+
+        .quantity-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          border: none;
+          background-color: transparent;
+          color: main-colors.$text-primary;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          .icon {
+            width: 16px;
+            height: 16px;
+          }
+
+          &:hover {
+            color: main-colors.$brand-primary;
+            transform: scale(1.1);
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
+        }
+
+        .quantity {
+          min-width: 24px;
+          text-align: center;
+          font-weight: 600;
+          color: main-colors.$text-primary;
+        }
+      }
+
+      .remove-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background-color: exception-colors.$status-error;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        .icon {
+          width: 16px;
+          height: 16px;
+        }
+
+        &:hover {
+          background-color: exception-colors.$status-error;
+          transform: scale(1.05);
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+  }
+
+  .cart-notes {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: main-colors.$bg-surface;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px main-colors.$shadow-color;
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin-bottom: 0.75rem;
+    }
+
+    .notes-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid main-colors.$bg-alt-1;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      color: main-colors.$text-primary;
+      background-color: main-colors.$bg-base;
+      resize: vertical;
+      margin-bottom: 0.75rem;
+      font-family: inherit;
+
+      &:focus {
+        outline: none;
+        border-color: main-colors.$brand-primary;
+        box-shadow: 0 0 0 3px main-colors.$focus-ring;
+      }
+
+      &::placeholder {
+        color: main-colors.$text-tertiary;
+      }
+    }
+
+    .btn-secondary {
+      padding: 0.5rem 1.5rem;
+      background-color: main-colors.$bg-alt-1;
+      color: main-colors.$text-primary;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background-color: main-colors.$bg-alt-2;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .cart-footer {
+    position: fixed;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.5rem;
+    background-color: main-colors.$bg-surface;
+    border-top: 1px solid main-colors.$bg-alt-1;
+    box-shadow: 0 -2px 10px main-colors.$shadow-color;
+    z-index: 50;
+
+    @media (min-width: 1024px) {
+      width: 768px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 1px solid main-colors.$bg-alt-1;
+      border-right: 1px solid main-colors.$bg-alt-1;
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .total-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: main-colors.$text-secondary;
+      }
+
+      .total-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: main-colors.$brand-primary;
+      }
+    }
+
+    .btn-checkout {
+      width: 100%;
+      padding: 1rem;
+      background-color: main-colors.$brand-primary;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$brand-primary-hover;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px main-colors.$shadow-focus;
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}
