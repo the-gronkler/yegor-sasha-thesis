@@ -1,5 +1,6 @@
 @use '../variables/layout';
 @use '../variables/main-colors';
+@use '../variables/exception-colors';
 
 .menu-item-card {
   display: flex;
@@ -93,7 +94,7 @@
       min-width: 18px;
       height: 18px;
       padding: 0 4px;
-      background-color: main-colors.$bg-danger;
+      background-color: exception-colors.$status-error;
       color: white;
       border-radius: 9px;
       font-size: 0.65rem;

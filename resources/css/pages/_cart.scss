@@ -1,4 +1,5 @@
 @use '../variables/main-colors';
+@use '../variables/exception-colors';
 
 .cart-page {
   padding: 1.5rem;
@@ -388,7 +389,7 @@
         width: 32px;
         height: 32px;
         border: none;
-        background-color: main-colors.$bg-danger;
+        background-color: exception-colors.$status-error;
         color: white;
         border-radius: 8px;
         cursor: pointer;
@@ -400,7 +401,7 @@
         }
 
         &:hover {
-          background-color: #dc2626;
+          background-color: exception-colors.$status-error;
           transform: scale(1.05);
         }
 
