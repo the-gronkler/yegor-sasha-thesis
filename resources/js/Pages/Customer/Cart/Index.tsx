@@ -1,15 +1,11 @@
 import { useState, useMemo } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
-import {
-  TrashIcon,
-  MinusIcon,
-  PlusIcon,
-  ChevronRightIcon,
-} from '@heroicons/react/24/outline';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import { useCart } from '@/Contexts/CartContext';
 import { PageProps } from '@/types';
 import { Order } from '@/types/models';
+import CartRestaurantSection from '@/Components/Shared/CartRestaurantSection';
+import { CartItemType } from '@/Components/Shared/CartItem';
 
 interface CartIndexProps extends PageProps {
   cartOrders: Order[];
@@ -38,7 +34,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
       {
         restaurant: Order['restaurant'];
         orderId: number;
-        items: typeof items;
+        items: CartItemType[];
         notes: string;
       }
     >();
@@ -47,7 +43,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
       if (order.restaurant && order.menu_items) {
         const orderItems = items.filter((item) =>
           order.menu_items?.some((mi) => mi.id === item.id),
-        );
+        ) as CartItemType[];
 
         if (orderItems.length > 0) {
           grouped.set(order.restaurant.id, {
@@ -147,144 +143,28 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
         <div className="cart-restaurants">
           {Array.from(itemsByRestaurant.entries()).map(
             ([restaurantId, data], index) => (
-              <div key={restaurantId} className="restaurant-section">
-                {/* Restaurant Header */}
-                <div className="restaurant-header">
-                  <Link
-                    href={route('restaurants.show', {
-                      restaurant: restaurantId,
-                    })}
-                    className="restaurant-link"
-                  >
-                    <div className="restaurant-info">
-                      <h2 className="restaurant-name">
-                        {data.restaurant?.name}
-                      </h2>
-                      <span className="item-count-small">
-                        {data.items.length} item
-                        {data.items.length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    <ChevronRightIcon className="chevron-icon" />
-                  </Link>
-                </div>
-
-                {/* Items from this restaurant */}
-                <div className="cart-items">
-                  {data.items.map((item) => {
-                    const primaryImage =
-                      item.images?.find(
-                        (img) => img.is_primary_for_menu_item,
-                      ) || item.images?.[0];
-                    const imageUrl = primaryImage?.url;
-
-                    return (
-                      <div key={item.id} className="cart-item">
-                        {imageUrl ? (
-                          <img
-                            src={imageUrl}
-                            alt={item.name}
-                            className="cart-item-image"
-                          />
-                        ) : (
-                          <div className="cart-item-image placeholder" />
-                        )}
-
-                        <div className="cart-item-details">
-                          <h3 className="cart-item-name">{item.name}</h3>
-                          <p className="cart-item-price">
-                            €{item.price.toFixed(2)}
-                          </p>
-
-                          {item.description && (
-                            <p className="cart-item-description">
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="cart-item-actions">
-                          <div className="quantity-controls">
-                            <button
-                              onClick={() =>
-                                handleUpdateQuantity(item.id, item.quantity - 1)
-                              }
-                              className="quantity-btn"
-                              aria-label="Decrease quantity"
-                            >
-                              <MinusIcon className="icon" />
-                            </button>
-                            <span className="quantity">{item.quantity}</span>
-                            <button
-                              onClick={() =>
-                                handleUpdateQuantity(item.id, item.quantity + 1)
-                              }
-                              className="quantity-btn"
-                              aria-label="Increase quantity"
-                            >
-                              <PlusIcon className="icon" />
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="remove-btn"
-                            aria-label={`Remove ${item.name}`}
-                          >
-                            <TrashIcon className="icon" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Notes for this restaurant */}
-                <div className="restaurant-notes">
-                  <h4 className="notes-title">Special Instructions</h4>
-                  <textarea
-                    value={
-                      notes[restaurantId] !== undefined
-                        ? notes[restaurantId]
-                        : data.notes
-                    }
-                    onChange={(e) =>
-                      setNotes((prev) => ({
-                        ...prev,
-                        [restaurantId]: e.target.value,
-                      }))
-                    }
-                    placeholder={`Add special instructions for ${data.restaurant?.name}...`}
-                    className="notes-input"
-                    rows={3}
-                  />
-                  <button
-                    onClick={() => handleSaveNotes(data.orderId, restaurantId)}
-                    disabled={savingNotes[restaurantId]}
-                    className="btn-save-notes"
-                  >
-                    {savingNotes[restaurantId] ? 'Saving...' : 'Save Notes'}
-                  </button>
-                </div>
-
-                {/* Subtotal and Checkout for this restaurant */}
-                <div className="restaurant-footer">
-                  <div className="restaurant-subtotal">
-                    <span className="subtotal-label">Subtotal</span>
-                    <span className="subtotal-amount">
-                      €
-                      {restaurantSubtotals.get(restaurantId)?.toFixed(2) ||
-                        '0.00'}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleRestaurantCheckout(data.orderId)}
-                    className="btn-restaurant-checkout"
-                  >
-                    Checkout {data.restaurant?.name}
-                  </button>
-                </div>
-
+              <div key={restaurantId}>
+                <CartRestaurantSection
+                  restaurant={data.restaurant!}
+                  orderId={data.orderId}
+                  items={data.items}
+                  subtotal={restaurantSubtotals.get(restaurantId) || 0}
+                  isSavingNotes={savingNotes[restaurantId] || false}
+                  currentNotes={
+                    notes[restaurantId] !== undefined
+                      ? notes[restaurantId]
+                      : data.notes
+                  }
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onRemoveItem={removeItem}
+                  onSaveNotes={() =>
+                    handleSaveNotes(data.orderId, restaurantId)
+                  }
+                  onCheckout={handleRestaurantCheckout}
+                  onNotesChange={(rId, val) =>
+                    setNotes((prev) => ({ ...prev, [rId]: val }))
+                  }
+                />
                 {/* Separator (not for last item) */}
                 {index < itemsByRestaurant.size - 1 && (
                   <div className="restaurant-separator" />

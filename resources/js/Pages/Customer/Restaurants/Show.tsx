@@ -129,6 +129,7 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
 
               <div className="menu-items-list">
                 {category.menu_items.map((item) => (
+                  // TODO add '-' button to reduce quantity if > 0
                   <MenuItemCard
                     key={item.id}
                     item={item}
