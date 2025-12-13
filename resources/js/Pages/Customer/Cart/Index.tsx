@@ -88,13 +88,13 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
 
   const handleRestaurantCheckout = (orderId: number) => {
     // TODO: Implement individual restaurant checkout logic
-    // For now, navigate to checkout with order ID
-    router.visit(route('orders.checkout', { order: orderId }));
+    // For now, show a message indicating checkout is not available
+    window.alert('Checkout is not yet available. Please try again later.');
   };
 
   const handleCheckout = () => {
     // TODO: Implement checkout logic for all restaurants
-    router.visit(route('orders.checkout'));
+    window.alert('Checkout is not yet available. Please try again later.');
   };
 
   if (items.length === 0) {

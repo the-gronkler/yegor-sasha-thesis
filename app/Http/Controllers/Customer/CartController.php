@@ -60,7 +60,7 @@ class CartController extends Controller
             ]);
         }
 
-        return back();
+        return back()->with('success', 'Item added to cart');
     }
 
     public function removeItem(Request $request)
@@ -123,8 +123,7 @@ class CartController extends Controller
             ]);
         }
 
-        // TODO
-        return back();
+        return back()->with('success', 'Cart updated');
     }
 
     private function cleanupEmptyOrder(Order $order): void
