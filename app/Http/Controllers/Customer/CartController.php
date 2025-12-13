@@ -53,6 +53,7 @@ class CartController extends Controller
 
         if ($newQuantity <= 0) {
             $order->menuItems()->detach($data['menu_item_id']);
+            $this->cleanupEmptyOrder($order);
         } else {
             $order->menuItems()->syncWithoutDetaching([
                 $data['menu_item_id'] => ['quantity' => $newQuantity],
@@ -78,6 +79,7 @@ class CartController extends Controller
             ->firstOrFail();
 
         $order->menuItems()->detach($data['menu_item_id']);
+        $this->cleanupEmptyOrder($order);
 
         return redirect()->route('cart.index')->with('success', 'Item removed from cart');
     }
@@ -112,15 +114,23 @@ class CartController extends Controller
                 'restaurant_id' => $data['restaurant_id'],
             ]
         );
-
         if ($data['quantity'] <= 0) {
             $order->menuItems()->detach($data['menu_item_id']);
+            $this->cleanupEmptyOrder($order);
         } else {
             $order->menuItems()->syncWithoutDetaching([
                 $data['menu_item_id'] => ['quantity' => $data['quantity']],
             ]);
         }
 
+        // TODO
         return back();
+    }
+
+    private function cleanupEmptyOrder(Order $order): void
+    {
+        if ($order->menuItems()->count() === 0) {
+            $order->delete();
+        }
     }
 }

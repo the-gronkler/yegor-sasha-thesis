@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -29,8 +30,12 @@ class AppServiceProvider extends ServiceProvider
                     return null;
                 }
 
-                $customer = auth()->user()->customer;
+                $user = auth()->user();
+                $customer = $user->customer;
+
                 if (! $customer) {
+                    Log::warning("Authenticated user {$user->id} attempted to access cart but has no customer record.");
+
                     return null;
                 }
 

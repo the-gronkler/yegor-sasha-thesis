@@ -134,7 +134,8 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
         <div className="cart-header">
           <h1>Cart</h1>
           <span className="item-count">
-            {items.length} items from {itemsByRestaurant.size} restaurant
+            {items.length} {items.length !== 1 ? 'items' : 'item'} from{' '}
+            {itemsByRestaurant.size} restaurant
             {itemsByRestaurant.size !== 1 ? 's' : ''}
           </span>
         </div>

@@ -20,14 +20,11 @@ createInertiaApp({
     ),
   setup({ el, App, props }) {
     const root = createRoot(el);
-    const cart = (props.initialPage.props.cart as Order[] | Order) || null;
-
-    // Will have to make sure that the Order/Cart code is needed here
-    const cartArray = cart ? (Array.isArray(cart) ? cart : [cart]) : null;
+    const cart = (props.initialPage.props.cart as Order[]) || null;
 
     root.render(
       <React.StrictMode>
-        <CartProvider initialCart={cartArray}>
+        <CartProvider initialCart={cart}>
           <App {...props} />
         </CartProvider>
       </React.StrictMode>,

@@ -8,6 +8,8 @@ import {
 import { router } from '@inertiajs/react';
 import { MenuItem, Order } from '@/types/models';
 
+// TODO optimize this file
+
 interface CartItem extends MenuItem {
   quantity: number;
   restaurant_id: number;

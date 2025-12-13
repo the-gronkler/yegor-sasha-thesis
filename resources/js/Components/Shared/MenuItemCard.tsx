@@ -18,6 +18,7 @@ export default function MenuItemCard({
 
   // Placeholder for availability logic.
   // Assuming available unless specified otherwise (not in current data).
+  //   TODO: implement actual availability check
   const isAvailable = true;
 
   const primaryImage =
