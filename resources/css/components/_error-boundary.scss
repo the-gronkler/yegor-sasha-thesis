@@ -1,0 +1,86 @@
+@use '../variables/main-colors';
+@use '../variables/exception-colors';
+
+.error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: main-colors.$bg-main;
+  padding: 2rem;
+}
+
+.error-boundary-content {
+  max-width: 600px;
+  text-align: center;
+  background: main-colors.$bg-surface;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px main-colors.$shadow-color-strong;
+}
+
+.error-boundary-title {
+  color: exception-colors.$status-error;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.error-boundary-message {
+  color: main-colors.$text-primary;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.error-boundary-details {
+  text-align: left;
+  margin: 2rem 0;
+  padding: 1rem;
+  background: main-colors.$bg-alt-1;
+  border-radius: 8px;
+  border: 1px solid main-colors.$border-light;
+}
+
+.error-boundary-summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: main-colors.$text-secondary;
+  margin-bottom: 0.5rem;
+
+  &:hover {
+    color: main-colors.$text-primary;
+  }
+}
+
+.error-boundary-stack {
+  margin: 1rem 0 0 0;
+  padding: 1rem;
+  background: main-colors.$bg-surface;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  color: main-colors.$text-secondary;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.error-boundary-button {
+  background: main-colors.$btn-primary-bg;
+  color: main-colors.$btn-primary-text;
+  border: none;
+  border-radius: 8px;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: main-colors.$btn-primary-hover-bg;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}

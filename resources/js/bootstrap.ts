@@ -18,4 +18,5 @@ window.route = (
   }
   return routeFn(name, params, absolute, config || Ziggy);
 };
+// @ts-ignore - Ziggy types may not match perfectly with generated routes
 window.Ziggy = Ziggy;

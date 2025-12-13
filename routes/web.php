@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\MapController;
 use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\RestaurantController;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
     // Customer-side: Restaurants
     Route::get('/', [RestaurantController::class, 'index'])->name('restaurants.index');
+    Route::get('/map', [MapController::class, 'index'])->name('map.index');
     Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
 
     // Cart (for current customer)

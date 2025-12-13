@@ -74,8 +74,9 @@ class RestaurantFactory extends Factory
         return [
             'name' => $this->faker->company(),
             'address' => $this->faker->address(),
-            'latitude' => $this->faker->latitude(),
-            'longitude' => $this->faker->longitude(),
+            // Vaguely in Warsaw area
+            'latitude' => $this->faker->latitude(52.08426, 52.18424),
+            'longitude' => $this->faker->longitude(20.54515, 21.06191),
             'description' => self::$restaurantDescriptions[array_rand(self::$restaurantDescriptions)],
             'rating' => $this->faker->randomFloat(2, 1, 5),
             'opening_hours' => $this->faker->randomElement([

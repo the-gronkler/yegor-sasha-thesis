@@ -136,3 +136,9 @@ $overlay-light: rgba(0, 0, 0, 0.3);
 
 $overlay-dark: rgba(0, 0, 0, 0.5);
 // Purpose: Dark overlay.
+
+$overlay-white-light: rgba(255, 255, 255, 0.2);
+// Purpose: Light white overlay for hover states on dark backgrounds.
+
+$overlay-white-medium: rgba(255, 255, 255, 0.3);
+// Purpose: Medium white overlay for active states on dark backgrounds.

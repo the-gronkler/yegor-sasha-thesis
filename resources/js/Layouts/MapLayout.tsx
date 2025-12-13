@@ -1,11 +1,11 @@
 import { PropsWithChildren } from 'react';
 import BottomNav from '@/Components/Shared/BottomNav';
 
-interface CustomerLayoutProps extends PropsWithChildren {}
+interface MapLayoutProps extends PropsWithChildren {}
 
-export default function CustomerLayout({ children }: CustomerLayoutProps) {
+export default function MapLayout({ children }: MapLayoutProps) {
   return (
-    <div className="customer-layout">
+    <div className="map-layout">
       <main className="main-content">{children}</main>
 
       <BottomNav />

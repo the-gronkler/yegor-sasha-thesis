@@ -22,6 +22,10 @@ php artisan <command-name>
 
   Alias for: `migrate:fresh --path=database/migrations/* --seed`. Wipes the DB, reruns all migrations in the specified folder and its subfolders, and then seeds the database.
 
+- `ziggy:generate`
+
+  Generates the `resources/js/ziggy.js` file. Run this whenever you add or modify named routes in `routes/web.php` to make them available in the frontend.
+
 ## Formatting
 
 ### Git Hooks (Automation)

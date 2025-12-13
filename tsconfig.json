@@ -4,12 +4,14 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -20,7 +22,7 @@
     "paths": {
       "@/*": ["resources/js/*"]
     },
-    "types": ["vite/client", "@inertiajs/react"]
+    "types": ["vite/client", "@inertiajs/react", "react-map-gl"]
   },
   "include": [
     "resources/js/**/*.ts",

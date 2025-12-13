@@ -34,6 +34,7 @@ const Ziggy = {
       methods: ['GET', 'HEAD'],
     },
     'restaurants.index': { uri: '\/', methods: ['GET', 'HEAD'] },
+    'map.index': { uri: 'map', methods: ['GET', 'HEAD'] },
     'restaurants.show': {
       uri: 'restaurants\/{restaurant}',
       methods: ['GET', 'HEAD'],

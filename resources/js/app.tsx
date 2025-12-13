@@ -1,10 +1,11 @@
 import './bootstrap';
 import '../css/main.scss';
-import React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { InertiaProgress } from '@inertiajs/progress';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import ErrorBoundary from '@/Components/UI/ErrorBoundary';
 import { CartProvider } from '@/Contexts/CartContext';
 import { Order } from '@/types/models';
 
@@ -23,11 +24,13 @@ createInertiaApp({
     const cart = (props.initialPage.props.cart as Order[]) || null;
 
     root.render(
-      <React.StrictMode>
-        <CartProvider initialCart={cart}>
-          <App {...props} />
-        </CartProvider>
-      </React.StrictMode>,
+      <StrictMode>
+        <ErrorBoundary>
+          <CartProvider initialCart={cart}>
+            <App {...props} />
+          </CartProvider>
+        </ErrorBoundary>
+      </StrictMode>,
     );
   },
   progress: {
