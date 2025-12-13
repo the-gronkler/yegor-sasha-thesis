@@ -1,5 +1,6 @@
 @use '../variables/layout';
 @use '../variables/main-colors';
+@use '../variables/exception-colors';
 
 .menu-item-card {
   display: flex;
@@ -83,9 +84,40 @@
     cursor: pointer;
     margin-left: 1rem;
     font-size: 1.2rem;
+    position: relative;
+    transition: all 0.2s ease;
 
-    &:hover {
+    .item-count {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      background-color: main-colors.$accent-warm;
+      color: white;
+      border-radius: 9px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      box-shadow: 0 2px 4px main-colors.$shadow-small;
+    }
+
+    &:hover:not(:disabled) {
       background-color: main-colors.$brand-primary-hover;
+      transform: scale(1.1);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 }

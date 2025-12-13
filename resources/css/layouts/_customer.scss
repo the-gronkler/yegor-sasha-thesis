@@ -55,11 +55,37 @@
       text-decoration: none; // Remove underline from Link
       transition: color 0.2s ease;
 
+      .nav-icon-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+      }
+
       .icon {
         width: 24px; // Explicit size for SVG
         height: 24px;
-        margin-bottom: 4px;
         stroke-width: 2; // Adjust icon thickness
+      }
+
+      .nav-badge {
+        position: absolute;
+        top: -6px;
+        right: -8px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        background-color: main-colors.$brand-primary;
+        color: white;
+        border-radius: 9px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        box-shadow: 0 2px 4px main-colors.$shadow-small;
       }
 
       &.active,

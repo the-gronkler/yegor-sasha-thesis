@@ -16,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
         Route::post('/add-item', [CartController::class, 'addItem'])->name('addItem');
+        Route::post('/update-quantity', [CartController::class, 'updateItemQuantity'])->name('updateItemQuantity');
         Route::delete('/remove-item', [CartController::class, 'removeItem'])->name('removeItem');
         Route::put('/add-note/{order}', [CartController::class, 'addNote'])->name('addNote');
     });

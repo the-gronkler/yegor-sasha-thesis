@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'exception-colors';
 
 // ======================================================================
 // CORE BRAND & ACCENT COLORS
@@ -18,7 +19,7 @@ $brand-primary-soft: rgba($brand-primary, 0.2);
 
 $accent-warm: #f59e0b;
 // Purpose: Highlight or supporting accent.
-// Use for: ratings stars, promotional tags (e.g. “50% OFF”).
+// Use for: ratings stars, promotional tags (e.g. "50% OFF").
 
 // ======================================================================
 // TEXT COLORS
@@ -32,6 +33,10 @@ $text-secondary: #896b61;
 // Purpose: Secondary / supportive text.
 // Use for: descriptions, prices, form hints, timestamps.
 
+$text-tertiary: #a8a29e;
+// Purpose: Tertiary / very subtle text.
+// Use for: placeholders, very low priority info, disabled text.
+
 $text-inverse: #ffffff;
 // Purpose: Text on dark or saturated backgrounds.
 // Use for: buttons on primary color, chips on dark mode.
@@ -43,6 +48,10 @@ $text-inverse: #ffffff;
 $bg-main: #f8f6f6;
 // Purpose: Main app background.
 // Use for: page background, container backgrounds.
+
+$bg-base: #fafafa;
+// Purpose: Base background for inputs and form elements.
+// Use for: input backgrounds, textarea backgrounds.
 
 $bg-surface: #ffffff;
 // Purpose: Elevated surfaces.
@@ -112,6 +121,15 @@ $shadow-color-medium: rgba(0, 0, 0, 0.06);
 
 $shadow-color-text: rgba(0, 0, 0, 0.2);
 // Purpose: Text shadow.
+
+$shadow-small: rgba(0, 0, 0, 0.2);
+// Purpose: Small shadows for badges and small elements.
+
+$shadow-focus: rgba(99, 102, 241, 0.3);
+// Purpose: Focus/hover shadow for interactive elements.
+
+$focus-ring: rgba(99, 102, 241, 0.1);
+// Purpose: Focus ring color for inputs and buttons.
 
 $overlay-light: rgba(0, 0, 0, 0.3);
 // Purpose: Light overlay.
