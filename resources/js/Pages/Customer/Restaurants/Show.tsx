@@ -1,10 +1,6 @@
 import { useMemo } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import {
-  ArrowLeftIcon,
-  HeartIcon,
-  ShoppingBagIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { IFuseOptions } from 'fuse.js';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';

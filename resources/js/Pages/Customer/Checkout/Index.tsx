@@ -49,7 +49,7 @@ export default function CheckoutIndex({
                       <span className="item-name">{item.name}</span>
                     </div>
                     <span className="item-price">
-                      €{(item.price * (item.pivot?.quantity || 1)).toFixed(2)}
+                      €{(item.price * (item.pivot?.quantity ?? 1)).toFixed(2)}
                     </span>
                   </div>
                 ))}

@@ -23,7 +23,7 @@ class CheckoutController extends Controller
 
         // Calculate totals
         $subtotal = $order->menuItems->sum(function ($item) {
-            return $item->price * $item->pivot->quantity;
+            return $item->price * ($item->pivot?->quantity ?? 0);
         });
 
         // No delivery fee for pickup/in-restaurant
@@ -44,6 +44,11 @@ class CheckoutController extends Controller
             return back()->with('error', 'Order is not in cart.');
         }
 
+        // Ensure the order has at least one menu item before processing
+        $order->loadMissing('menuItems');
+        if ($order->menuItems->isEmpty()) {
+            return back()->with('error', 'Cannot process an empty order. Please add items to your order before checking out.');
+        }
         // TODO: Implement actual payment processing here.
         // For now, we'll just simulate a successful payment.
 

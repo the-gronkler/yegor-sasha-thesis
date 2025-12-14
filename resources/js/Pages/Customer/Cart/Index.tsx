@@ -90,11 +90,6 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
     router.visit(route('checkout.show', { order: orderId }));
   };
 
-  const handleCheckout = () => {
-    // TODO: Implement checkout logic for all restaurants
-    window.alert('Checkout is not yet available. Please try again later.');
-  };
-
   if (items.length === 0) {
     return (
       <CustomerLayout>
