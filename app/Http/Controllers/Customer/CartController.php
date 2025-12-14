@@ -81,7 +81,7 @@ class CartController extends Controller
         $order->menuItems()->detach($data['menu_item_id']);
         $this->cleanupEmptyOrder($order);
 
-        return redirect()->route('cart.index')->with('success', 'Item removed from cart');
+        return back()->with('success', 'Item removed from cart');
     }
 
     public function addNote(Request $request, Order $order)

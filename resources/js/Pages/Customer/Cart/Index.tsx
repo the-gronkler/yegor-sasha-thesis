@@ -87,9 +87,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
   };
 
   const handleRestaurantCheckout = (orderId: number) => {
-    // TODO: Implement individual restaurant checkout logic
-    // For now, show a message indicating checkout is not available
-    window.alert('Checkout is not yet available. Please try again later.');
+    router.visit(route('checkout.show', { order: orderId }));
   };
 
   const handleCheckout = () => {
@@ -176,7 +174,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
         </div>
 
         {/* Footer with total and checkout */}
-        <div className="cart-footer">
+        {/* <div className="cart-footer">
           <div className="cart-total">
             <span className="total-label">Total</span>
             <span className="total-amount">€{totalPrice.toFixed(2)}</span>
@@ -184,7 +182,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
           <button onClick={handleCheckout} className="btn-checkout">
             Go to checkout
           </button>
-        </div>
+        </div> */}
       </div>
     </CustomerLayout>
   );
