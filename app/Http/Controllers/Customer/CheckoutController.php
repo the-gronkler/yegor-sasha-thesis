@@ -15,6 +15,7 @@ class CheckoutController extends Controller
         $this->authorize('view', $order);
 
         if ($order->order_status_id !== OrderStatus::InCart) {
+            // TODO: implement route and adjust where this redirects to
             return redirect()->route('customer.orders.show', $order)
                 ->with('info', 'This order has already been checked out.');
         }
@@ -57,6 +58,7 @@ class CheckoutController extends Controller
             'time_placed' => now(),
         ]);
 
+        // TODO: implement route and adjust where this redirects to
         return redirect()->route('customer.dashboard')->with('success', 'Order placed successfully!');
     }
 }

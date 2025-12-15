@@ -64,7 +64,7 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     ];
   }, [query, restaurant.food_types, filteredMenuItems]);
 
-  const { items, getOrderId } = useCart();
+  const { items } = useCart();
 
   const restaurantCartItems = useMemo(
     () => items.filter((item) => item.restaurant_id === restaurant.id),
@@ -81,16 +81,8 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     0,
   );
 
-  const handleGoToCheckout = () => {
-    const orderId = getOrderId(restaurant.id);
-    if (orderId) {
-      router.visit(route('checkout.show', { order: orderId }));
-    } else {
-      // Fallback if order ID is not yet available (e.g. optimistic update pending)
-      // In a real app, we might want to wait or show a loading state.
-      // For now, fallback to cart index which will have the order.
-      router.visit(route('cart.index'));
-    }
+  const handleGoToCart = () => {
+    router.visit(route('cart.index', { restaurant_id: restaurant.id }));
   };
 
   return (
@@ -178,7 +170,7 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
         {/* Floating Checkout Button */}
         {cartItemCount > 0 && (
           <div className="floating-checkout-container">
-            <button className="checkout-fab" onClick={handleGoToCheckout}>
+            <button className="checkout-fab" onClick={handleGoToCart}>
               <div className="fab-content">
                 <div className="count-badge">{cartItemCount}</div>
                 <span className="fab-label">View Order</span>

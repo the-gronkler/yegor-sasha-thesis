@@ -51,6 +51,20 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
     return {};
   });
 
+  const [items, setItems] = useState<CartItem[]>(() => {
+    // Initialize from server-provided cart data (multiple orders)
+    if (initialCart && Array.isArray(initialCart)) {
+      return initialCart.flatMap((order) =>
+        (order.menu_items || []).map((item) => ({
+          ...item,
+          quantity: item.pivot?.quantity || 1,
+          restaurant_id: order.restaurant_id,
+        })),
+      );
+    }
+    return [];
+  });
+
   // Sync state with Inertia page props on navigation
   useEffect(() => {
     const removeListener = router.on('success', (event) => {
@@ -88,20 +102,6 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
       removeListener();
     };
   }, []);
-
-  const [items, setItems] = useState<CartItem[]>(() => {
-    // Initialize from server-provided cart data (multiple orders)
-    if (initialCart && Array.isArray(initialCart)) {
-      return initialCart.flatMap((order) =>
-        (order.menu_items || []).map((item) => ({
-          ...item,
-          quantity: item.pivot?.quantity || 1,
-          restaurant_id: order.restaurant_id,
-        })),
-      );
-    }
-    return [];
-  });
 
   const [isLoading, setIsLoading] = useState(false);
 

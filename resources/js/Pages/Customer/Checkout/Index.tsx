@@ -18,6 +18,24 @@ export default function CheckoutIndex({
 
   const items = order.menu_items || [];
 
+  if (items.length === 0) {
+    return (
+      <CustomerLayout>
+        <Head title="Checkout" />
+        <div className="checkout-page">
+          <div className="checkout-container">
+            <div className="empty-checkout">
+              <p>This order has no items.</p>
+              <Link href={route('restaurants.index')} className="back-link">
+                Browse Restaurants
+              </Link>
+            </div>
+          </div>
+        </div>
+      </CustomerLayout>
+    );
+  }
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     post(route('checkout.process', { order: order.id }));

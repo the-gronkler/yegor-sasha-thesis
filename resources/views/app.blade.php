@@ -11,7 +11,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>PRO Thesis</title>
     <style>
-        #app-loading-error  {
+        #app-loading-error {
             display: none;
             position: fixed;
             top: 0;

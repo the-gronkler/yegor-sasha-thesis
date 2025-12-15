@@ -23,6 +23,35 @@
     gap: 2rem;
   }
 
+  .empty-checkout {
+    text-align: center;
+    padding: 3rem;
+    background: main-colors.$bg-surface;
+    border-radius: layout.$border-radius;
+    box-shadow: 0 2px 8px main-colors.$shadow-color;
+
+    p {
+      font-size: 1.1rem;
+      color: main-colors.$text-secondary;
+      margin-bottom: 1.5rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background-color: main-colors.$brand-primary;
+      color: main-colors.$text-inverse;
+      text-decoration: none;
+      border-radius: layout.$border-radius;
+      font-weight: 600;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: main-colors.$brand-primary-hover;
+      }
+    }
+  }
+
   .section-title {
     font-size: 1.2rem;
     font-weight: 600;

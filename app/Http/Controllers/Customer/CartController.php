@@ -15,10 +15,15 @@ class CartController extends Controller
         $customer = $request->user()->customer;
 
         // Get all cart orders (one per restaurant)
-        $cartOrders = Order::with(['menuItems.images', 'restaurant'])
+        $query = Order::with(['menuItems.images', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', OrderStatus::InCart)
-            ->get();
+            ->where('order_status_id', OrderStatus::InCart);
+
+        if ($request->has('restaurant_id')) {
+            $query->where('restaurant_id', $request->input('restaurant_id'));
+        }
+
+        $cartOrders = $query->get();
 
         return Inertia::render('Customer/Cart/Index', [
             'cartOrders' => $cartOrders,
