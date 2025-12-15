@@ -1,5 +1,10 @@
 import * as React from 'react';
-import Map, { Marker, Popup } from 'react-map-gl/mapbox';
+import Map, {
+  Marker,
+  Popup,
+  GeolocateControl,
+  NavigationControl,
+} from 'react-map-gl/mapbox';
 import { MapPinIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -16,6 +21,9 @@ interface Props {
   markers?: MapMarker[];
   className?: string;
   mapboxAccessToken: string;
+  onGeolocate?: (position: GeolocationPosition) => void;
+  enableGeolocation?: boolean;
+  trackUserLocation?: boolean;
 }
 
 export default function MapComponent({
@@ -24,8 +32,54 @@ export default function MapComponent({
   markers = [],
   className = '',
   mapboxAccessToken,
+  onGeolocate,
+  enableGeolocation = true,
+  trackUserLocation = false,
 }: Props) {
   const [popupId, setPopupId] = React.useState<number | null>(null);
+  const geolocateControlRef = React.useRef<any>(null);
+
+  // Handle geolocation events from Mapbox control
+  const handleGeolocate = React.useCallback(
+    (e: any) => {
+      if (onGeolocate && e.coords) {
+        // Convert Mapbox event to standard GeolocationPosition
+        const coords: GeolocationCoordinates = {
+          latitude: e.coords.latitude,
+          longitude: e.coords.longitude,
+          accuracy: e.coords.accuracy,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: e.coords.heading ?? null,
+          speed: null,
+          toJSON() {
+            return {
+              latitude: this.latitude,
+              longitude: this.longitude,
+              accuracy: this.accuracy,
+              altitude: this.altitude,
+              altitudeAccuracy: this.altitudeAccuracy,
+              heading: this.heading,
+              speed: this.speed,
+            };
+          },
+        };
+
+        const position: GeolocationPosition = {
+          coords,
+          timestamp: Date.now(),
+          toJSON() {
+            return {
+              coords: this.coords.toJSON(),
+              timestamp: this.timestamp,
+            };
+          },
+        };
+        onGeolocate(position);
+      }
+    },
+    [onGeolocate],
+  );
 
   // Validate API key
   if (!mapboxAccessToken) {
@@ -69,6 +123,27 @@ export default function MapComponent({
         style={{ height: '100%', width: '100%' }}
         onClick={() => setPopupId(null)}
       >
+        {/* Navigation Controls (Zoom +/-, Compass) */}
+        <NavigationControl position="top-right" />
+
+        {/* Geolocation Control - Native Mapbox UI for user location */}
+        {enableGeolocation && (
+          <GeolocateControl
+            ref={geolocateControlRef}
+            position="top-right"
+            positionOptions={{
+              enableHighAccuracy: true,
+              timeout: 6000,
+              maximumAge: 0,
+            }}
+            trackUserLocation={trackUserLocation}
+            showUserHeading={trackUserLocation}
+            showUserLocation={true}
+            onGeolocate={handleGeolocate}
+          />
+        )}
+
+        {/* Restaurant and User Markers */}
         {markers.map((marker) => {
           const isUserLocation = marker.id === -1;
           return (
@@ -90,6 +165,8 @@ export default function MapComponent({
             </Marker>
           );
         })}
+
+        {/* Marker Popups */}
         {markers.map((marker) =>
           popupId === marker.id ? (
             <Popup

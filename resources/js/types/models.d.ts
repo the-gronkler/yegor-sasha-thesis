@@ -92,6 +92,7 @@ export interface Restaurant {
   rating: number | null;
   opening_hours: string | null;
   rank?: number;
+  distance?: number | null; // Distance in kilometers when filtered by geolocation
   images?: Image[];
   food_types?: FoodType[];
   restaurant_images?: Image[];

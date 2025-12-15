@@ -5,6 +5,8 @@ import Map from '@/Components/Shared/Map';
 import SearchInput from '@/Components/UI/SearchInput';
 import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import { useSearch } from '@/Hooks/useSearch';
+import { useGeolocation } from '@/Hooks/useGeolocation';
+import { calculateDistance } from '@/Utils/distance';
 import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
 import type { IFuseOptions } from 'fuse.js';
@@ -47,10 +49,24 @@ export default function MapIndex({
     filteredItems: filteredRestaurants,
   } = useSearch(restaurants, EMPTY_KEYS, SEARCH_OPTIONS);
 
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(
-    null,
-  );
-  const [locationError, setLocationError] = useState<string | null>(null);
+  const {
+    location: userLocation,
+    error: locationError,
+    clearError: clearLocationError,
+  } = useGeolocation({
+    enableHighAccuracy: true,
+    timeout: 6000,
+    maximumAge: 0,
+    immediate: false, // Don't auto-trigger, let user click the Mapbox button
+  });
+
+  const [mapUserLocation, setMapUserLocation] = useState<
+    [number, number] | null
+  >(null);
+
+  // Use Mapbox geolocation or fallback to custom hook
+  const effectiveUserLocation = mapUserLocation || userLocation;
+
   // Default center coordinates correspond to Warsaw, Poland (longitude, latitude)
   const [center, setCenter] = useState<[number, number]>([21.0122, 52.2297]); // [lng, lat] for Mapbox
 
@@ -65,53 +81,26 @@ export default function MapIndex({
     }
   }, [mapboxPublicKey]);
 
+  // Handle geolocation from Mapbox native control
+  const handleMapGeolocate = (position: GeolocationPosition) => {
+    const { latitude, longitude } = position.coords;
+    setMapUserLocation([latitude, longitude]);
+    setCenter([longitude, latitude]); // Convert to [lng, lat] for Mapbox
+  };
+
+  // Set initial center based on first restaurant or user location
   useEffect(() => {
-    if (restaurants.length > 0) {
+    if (effectiveUserLocation) {
+      // Convert [lat, lng] to [lng, lat] for Mapbox
+      setCenter([effectiveUserLocation[1], effectiveUserLocation[0]]);
+    } else if (restaurants.length > 0) {
       const coords = getLatLng(restaurants[0]);
       if (coords) {
         // Convert [lat, lng] to [lng, lat] for Mapbox
         setCenter([coords[1], coords[0]]);
       }
     }
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation([latitude, longitude]);
-          // Convert [lat, lng] to [lng, lat] for Mapbox
-          setCenter([longitude, latitude]);
-          setLocationError(null);
-        },
-        (error) => {
-          let errorMessage = 'Unable to access your location';
-
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage =
-                'Location access denied. Enable location permissions to see nearby restaurants.';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage =
-                'Location information unavailable. Showing default map view.';
-              break;
-            case error.TIMEOUT:
-              errorMessage =
-                'Location request timed out. Showing default map view.';
-              break;
-          }
-
-          setLocationError(errorMessage);
-          console.warn('Geolocation error:', error.message);
-        },
-        {
-          timeout: 5000,
-          maximumAge: 60000,
-        },
-      );
-    } else {
-      setLocationError('Geolocation is not supported by your browser.');
-    }
-  }, [restaurants]);
+  }, [effectiveUserLocation, restaurants]);
 
   //   This code re-center the map on the first restaurant in the search results if user location is not available
   // whether or not it should be here is beyound the sope of the current task, leaving this here commented out for now
@@ -125,8 +114,30 @@ export default function MapIndex({
   //     }
   //   }, [filteredRestaurants, userLocation]);
 
+  // Calculate distances for all restaurants when user location is available
+  const restaurantsWithDistance = useMemo(() => {
+    if (!effectiveUserLocation) return filteredRestaurants;
+
+    return filteredRestaurants.map((restaurant) => {
+      const coords = getLatLng(restaurant);
+      if (!coords) return restaurant;
+
+      const distance = calculateDistance(
+        effectiveUserLocation[0],
+        effectiveUserLocation[1],
+        coords[0],
+        coords[1],
+      );
+
+      return {
+        ...restaurant,
+        distance,
+      };
+    });
+  }, [filteredRestaurants, effectiveUserLocation]);
+
   const mapMarkers = useMemo(() => {
-    const restaurantMarkers = filteredRestaurants
+    const restaurantMarkers = restaurantsWithDistance
       .map((restaurant) => {
         const coords = getLatLng(restaurant);
         if (!coords) return null;
@@ -144,19 +155,19 @@ export default function MapIndex({
       name: string;
     }[];
 
-    const userMarker = userLocation
+    const userMarker = effectiveUserLocation
       ? [
           {
             id: -1,
-            lat: userLocation[0],
-            lng: userLocation[1],
+            lat: effectiveUserLocation[0],
+            lng: effectiveUserLocation[1],
             name: 'You are here',
           },
         ]
       : [];
 
     return [...restaurantMarkers, ...userMarker];
-  }, [filteredRestaurants, userLocation]);
+  }, [restaurantsWithDistance, effectiveUserLocation]);
 
   return (
     <MapLayout>
@@ -167,7 +178,7 @@ export default function MapIndex({
             <p className="location-error-message">{locationError}</p>
             <button
               className="location-error-dismiss"
-              onClick={() => setLocationError(null)}
+              onClick={clearLocationError}
               aria-label="Dismiss location error"
             >
               ×
@@ -188,9 +199,12 @@ export default function MapIndex({
             zoom={13}
             markers={mapMarkers}
             mapboxAccessToken={mapboxPublicKey}
+            onGeolocate={handleMapGeolocate}
+            enableGeolocation={true}
+            trackUserLocation={false}
           />
           <div className="map-bottom-sheet">
-            {filteredRestaurants.map((restaurant) => (
+            {restaurantsWithDistance.map((restaurant) => (
               <RestaurantCard key={restaurant.id} restaurant={restaurant} />
             ))}
           </div>

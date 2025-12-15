@@ -10,6 +10,80 @@ This file stores technical documentation useful during development. If a PR intr
 - [TypeScript Guidelines](./ts-guidelines.md)
 - [CSS Documentation](./css-documentation.md)
 
+## Geolocation & Map Features
+
+### User Geolocation
+
+The application uses the browser's Geolocation API to determine the user's location for map-based features.
+
+#### Frontend Implementation
+
+We've implemented a custom `useGeolocation` hook located at `resources/js/Hooks/useGeolocation.ts` that provides:
+
+- **Automatic location detection** on component mount
+- **Error handling** with user-friendly messages for different error types (permission denied, unavailable, timeout)
+- **Loading states** to provide feedback during geolocation requests
+- **Manual retry** capability via `requestLocation()` function
+- **Error dismissal** via `clearError()` function
+
+**Usage Example:**
+
+```typescript
+import { useGeolocation } from '@/Hooks/useGeolocation';
+
+function MapComponent() {
+  const {
+    location, // [latitude, longitude] or null
+    error, // Error message string or null
+    errorType, // GeolocationErrorType enum or null
+    loading, // Boolean indicating if request is in progress
+    requestLocation, // Function to manually request location
+    clearError, // Function to clear error state
+  } = useGeolocation({
+    enableHighAccuracy: false,
+    timeout: 5000,
+    maximumAge: 60000,
+    immediate: true, // Auto-request on mount
+  });
+
+  // Use location data...
+}
+```
+
+#### Backend Implementation
+
+The `MapController` supports optional geolocation-based filtering:
+
+**Query Parameters:**
+
+- `lat` - User's latitude (-90 to 90)
+- `lng` - User's longitude (-180 to 180)
+- `radius` - Search radius in kilometers (0.1 to 100, default: 50)
+
+**Example Request:**
+
+```
+GET /map?lat=52.2297&lng=21.0122&radius=10
+```
+
+**Features:**
+
+- Uses **Haversine formula** to calculate distances
+- Returns restaurants within specified radius
+- Sorts results by distance when geolocation is provided
+- Falls back to rating-based sorting when no location is provided
+- Includes `distance` field (in km) in restaurant data when filtered by location
+
+**Controller Location:** `app/Http/Controllers/Customer/MapController.php`
+
+### Restaurant Distance Display
+
+The `RestaurantCard` component automatically displays distance information when available:
+
+- Distance is shown in the restaurant meta section (e.g., "5.2 km")
+- Only displayed when the `distance` property is present in restaurant data
+- Properly formatted to 2 decimal places
+
 ## Console commands
 
 Custom artisan commands, to use type:
