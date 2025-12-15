@@ -18,21 +18,27 @@ export default function OrdersIndex({ orders }: Props) {
   };
 
   const getStatusClass = (statusId: number) => {
+    let suffix: string;
     switch (statusId) {
       case OrderStatusEnum.Placed:
       case OrderStatusEnum.Accepted:
-        return 'order-card__status--pending';
+        suffix = 'pending';
+        break;
       case OrderStatusEnum.Preparing:
-        return 'order-card__status--preparing';
+        suffix = 'preparing';
+        break;
       case OrderStatusEnum.Ready:
       case OrderStatusEnum.Fulfilled:
-        return 'order-card__status--ready';
+        suffix = 'ready';
+        break;
       case OrderStatusEnum.Cancelled:
       case OrderStatusEnum.Declined:
-        return 'order-card__status--cancelled';
+        suffix = 'cancelled';
+        break;
       default:
-        return 'order-card__status--completed';
+        suffix = 'completed';
     }
+    return `order-card__status--${suffix}`;
   };
 
   const calculateTotal = (order: Order) => {
