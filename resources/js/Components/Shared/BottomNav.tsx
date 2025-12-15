@@ -48,6 +48,12 @@ export default function BottomNav() {
         label="Restaurants"
       />
       <NavLink
+        href={route('orders.index')}
+        active={route().current('orders.index')}
+        icon={ClipboardDocumentListIcon}
+        label="Orders"
+      />
+      <NavLink
         href={route('cart.index')}
         active={route().current('cart.index')}
         icon={ShoppingCartIcon}
