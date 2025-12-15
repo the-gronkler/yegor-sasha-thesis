@@ -35,7 +35,6 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
             <h3 className="restaurant-name">{restaurant.name}</h3>
             <StarRating rating={restaurant.rating || 0} />
           </div>
-          solve this 'Probl'{' '}
           {/* TODO: Use the restaurant's actual props here. */}
           <div className="restaurant-meta">
             {restaurant.opening_hours ? (

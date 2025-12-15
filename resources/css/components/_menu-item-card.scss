@@ -71,21 +71,55 @@
     }
   }
 
-  .add-button {
+  .menu-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+  }
+
+  .quantity-btn {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background-color: main-colors.$brand-primary;
-    color: main-colors.$text-inverse;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
     cursor: pointer;
-    margin-left: 1rem;
     font-size: 1.2rem;
-    position: relative;
     transition: all 0.2s ease;
+    color: main-colors.$text-inverse;
+    position: relative;
+
+    &.add-button {
+      background-color: main-colors.$brand-primary;
+
+      &:hover:not(:disabled) {
+        background-color: main-colors.$brand-primary-hover;
+        transform: scale(1.1);
+      }
+    }
+
+    &.remove-button {
+      background-color: main-colors.$bg-alt-2; // Or a secondary color
+      color: main-colors.$text-primary;
+      border: 1px solid main-colors.$border-light;
+
+      &:hover:not(:disabled) {
+        background-color: main-colors.$bg-alt-1;
+        transform: scale(1.1);
+      }
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     .item-count {
       position: absolute;
@@ -104,20 +138,6 @@
       justify-content: center;
       line-height: 1;
       box-shadow: 0 2px 4px main-colors.$shadow-small;
-    }
-
-    &:hover:not(:disabled) {
-      background-color: main-colors.$brand-primary-hover;
-      transform: scale(1.1);
-    }
-
-    &:active:not(:disabled) {
-      transform: scale(0.95);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
   }
 }
