@@ -17,7 +17,7 @@ export default function OrdersIndex({ orders }: Props) {
     });
   };
 
-  const getStatusClass = (statusId: number) => {
+  const getStatusClassName = (statusId: number) => {
     let suffix: string;
     switch (statusId) {
       case OrderStatusEnum.Placed:
@@ -86,7 +86,7 @@ export default function OrdersIndex({ orders }: Props) {
                     </span>
                   </div>
                   <span
-                    className={`order-card__status ${getStatusClass(
+                    className={`order-card__status ${getStatusClassName(
                       order.order_status_id,
                     )}`}
                   >
