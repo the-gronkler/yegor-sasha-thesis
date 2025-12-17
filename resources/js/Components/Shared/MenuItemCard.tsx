@@ -10,7 +10,7 @@ export default function MenuItemCard({
   item,
   restaurantId,
 }: MenuItemCardProps) {
-  const { addItem, items } = useCart();
+  const { addItem, updateQuantity, items } = useCart();
 
   // Check if item is already in cart and get quantity
   const cartItem = items.find((i) => i.id === item.id);
@@ -32,6 +32,12 @@ export default function MenuItemCard({
     }
   };
 
+  const handleRemoveFromCart = () => {
+    if (quantityInCart > 0) {
+      updateQuantity(item.id, quantityInCart - 1);
+    }
+  };
+
   return (
     <div className={`menu-item-card ${!isAvailable ? 'unavailable' : ''}`}>
       {imageUrl ? (
@@ -46,17 +52,29 @@ export default function MenuItemCard({
         <p className="menu-item-price">€{item.price.toFixed(2)}</p>
       </div>
 
-      <button
-        className="add-button"
-        disabled={!isAvailable}
-        onClick={handleAddToCart}
-        aria-label={`Add ${item.name} to cart`}
-      >
-        +
+      <div className="menu-item-actions">
         {quantityInCart > 0 && (
-          <span className="item-count">{quantityInCart}</span>
+          <button
+            className="quantity-btn remove-button"
+            onClick={handleRemoveFromCart}
+            aria-label={`Remove one ${item.name} from cart`}
+          >
+            -
+          </button>
         )}
-      </button>
+
+        <button
+          className="quantity-btn add-button"
+          disabled={!isAvailable}
+          onClick={handleAddToCart}
+          aria-label={`Add ${item.name} to cart`}
+        >
+          +
+          {quantityInCart > 0 && (
+            <span className="item-count">{quantityInCart}</span>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

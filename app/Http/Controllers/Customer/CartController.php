@@ -15,10 +15,15 @@ class CartController extends Controller
         $customer = $request->user()->customer;
 
         // Get all cart orders (one per restaurant)
-        $cartOrders = Order::with(['menuItems.images', 'restaurant'])
+        $query = Order::with(['menuItems.images', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
-            ->where('order_status_id', OrderStatus::InCart)
-            ->get();
+            ->where('order_status_id', OrderStatus::InCart);
+
+        if ($request->has('restaurant_id')) {
+            $query->where('restaurant_id', $request->input('restaurant_id'));
+        }
+
+        $cartOrders = $query->get();
 
         return Inertia::render('Customer/Cart/Index', [
             'cartOrders' => $cartOrders,
@@ -81,7 +86,7 @@ class CartController extends Controller
         $order->menuItems()->detach($data['menu_item_id']);
         $this->cleanupEmptyOrder($order);
 
-        return redirect()->route('cart.index')->with('success', 'Item removed from cart');
+        return back()->with('success', 'Item removed from cart');
     }
 
     public function addNote(Request $request, Order $order)

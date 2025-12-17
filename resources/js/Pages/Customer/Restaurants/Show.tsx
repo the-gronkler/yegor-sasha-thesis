@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { IFuseOptions } from 'fuse.js';
 import CustomerLayout from '@/Layouts/CustomerLayout';
@@ -9,6 +9,7 @@ import SearchInput from '@/Components/UI/SearchInput';
 import { useSearch } from '@/Hooks/useSearch';
 import { Restaurant, MenuItem } from '@/types/models';
 import { PageProps } from '@/types';
+import { useCart } from '@/Contexts/CartContext';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
@@ -62,6 +63,27 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
       },
     ];
   }, [query, restaurant.food_types, filteredMenuItems]);
+
+  const { items } = useCart();
+
+  const restaurantCartItems = useMemo(
+    () => items.filter((item) => item.restaurant_id === restaurant.id),
+    [items, restaurant.id],
+  );
+
+  const cartItemCount = restaurantCartItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+
+  const cartTotal = restaurantCartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
+  const handleGoToCart = () => {
+    router.visit(route('cart.index', { restaurant_id: restaurant.id }));
+  };
 
   return (
     <CustomerLayout>
@@ -144,6 +166,19 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
             <p>No menu items found matching "{query}".</p>
           </div>
         ) : null}
+
+        {/* Floating Checkout Button */}
+        {cartItemCount > 0 && (
+          <div className="floating-checkout-container">
+            <button className="checkout-fab" onClick={handleGoToCart}>
+              <div className="fab-content">
+                <div className="count-badge">{cartItemCount}</div>
+                <span className="fab-label">View Order</span>
+                <span className="fab-total">€{cartTotal.toFixed(2)}</span>
+              </div>
+            </button>
+          </div>
+        )}
       </div>
     </CustomerLayout>
   );

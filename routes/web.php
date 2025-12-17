@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\MapController;
 use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
@@ -21,6 +22,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/update-quantity', [CartController::class, 'updateItemQuantity'])->name('updateItemQuantity');
         Route::delete('/remove-item', [CartController::class, 'removeItem'])->name('removeItem');
         Route::put('/add-note/{order}', [CartController::class, 'addNote'])->name('addNote');
+    });
+
+    // Checkout
+    Route::prefix('checkout')->name('checkout.')->group(function () {
+        Route::get('/{order}', [CheckoutController::class, 'show'])->name('show');
+        Route::post('/{order}', [CheckoutController::class, 'process'])->name('process');
     });
 
     // Orders: finished / unfinished

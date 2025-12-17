@@ -1,11 +1,12 @@
 @use '../variables/main-colors';
+@use '../variables/layout';
 
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 70px;
+  height: layout.$bottom-nav-height;
   background-color: main-colors.$bg-surface;
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
