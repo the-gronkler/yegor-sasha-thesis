@@ -133,4 +133,74 @@
     margin: 0 1rem;
     border-radius: layout.$border-radius;
   }
+
+  .floating-checkout-container {
+    position: fixed;
+    bottom: calc(
+      layout.$bottom-nav-height + 10px
+    ); // Above bottom nav + 10px padding
+    left: 0;
+    width: 100%;
+    padding: 0 1rem;
+    z-index: 101; // Above bottom nav (100)
+    pointer-events: none; // Allow clicks through the container area
+
+    @media (min-width: 1024px) {
+      width: 768px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .checkout-fab {
+      width: 100%;
+      background-color: main-colors.$brand-primary;
+      color: main-colors.$text-inverse;
+      border: none;
+      border-radius: layout.$border-radius;
+      padding: 1rem;
+      box-shadow: 0 4px 12px rgba(main-colors.$brand-primary, 0.4);
+      cursor: pointer;
+      pointer-events: auto; // Re-enable clicks on the button itself
+      transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$brand-primary-hover;
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      .fab-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 1rem;
+
+        .count-badge {
+          background-color: rgba(255, 255, 255, 0.2);
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.9rem;
+        }
+
+        .fab-label {
+          flex: 1;
+          text-align: center;
+        }
+
+        .fab-total {
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    }
+  }
 }

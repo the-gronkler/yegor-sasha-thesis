@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   ReactNode,
+  useEffect,
 } from 'react';
 import { router } from '@inertiajs/react';
 import { MenuItem, Order } from '@/types/models';
@@ -24,6 +25,7 @@ interface CartContextType {
   updateQuantity: (menuItemId: number, quantity: number) => void;
   clearCart: () => void;
   isLoading: boolean;
+  getOrderId: (restaurantId: number) => number | undefined;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -34,6 +36,21 @@ interface CartProviderProps {
 }
 
 export function CartProvider({ children, initialCart }: CartProviderProps) {
+  const [restaurantOrderIds, setRestaurantOrderIds] = useState<
+    Record<number, number>
+  >(() => {
+    if (initialCart && Array.isArray(initialCart)) {
+      return initialCart.reduce(
+        (acc, order) => {
+          acc[order.restaurant_id] = order.id;
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
+    }
+    return {};
+  });
+
   const [items, setItems] = useState<CartItem[]>(() => {
     // Initialize from server-provided cart data (multiple orders)
     if (initialCart && Array.isArray(initialCart)) {
@@ -47,6 +64,44 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
     }
     return [];
   });
+
+  // Sync state with Inertia page props on navigation
+  useEffect(() => {
+    const removeListener = router.on('success', (event) => {
+      const cart = event.detail.page.props.cart as Order[] | null;
+
+      if (cart && Array.isArray(cart)) {
+        // Update items
+        setItems(
+          cart.flatMap((order) =>
+            (order.menu_items || []).map((item) => ({
+              ...item,
+              quantity: item.pivot?.quantity || 1,
+              restaurant_id: order.restaurant_id,
+            })),
+          ),
+        );
+
+        // Update order IDs
+        setRestaurantOrderIds(
+          cart.reduce(
+            (acc, order) => {
+              acc[order.restaurant_id] = order.id;
+              return acc;
+            },
+            {} as Record<number, number>,
+          ),
+        );
+      } else if (cart === null) {
+        setItems([]);
+        setRestaurantOrderIds({});
+      }
+    });
+
+    return () => {
+      removeListener();
+    };
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -188,6 +243,11 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
     setItems([]);
   }, []);
 
+  const getOrderId = useCallback(
+    (restaurantId: number) => restaurantOrderIds[restaurantId],
+    [restaurantOrderIds],
+  );
+
   return (
     <CartContext.Provider
       value={{
@@ -199,6 +259,7 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
         updateQuantity,
         clearCart,
         isLoading,
+        getOrderId,
       }}
     >
       {children}

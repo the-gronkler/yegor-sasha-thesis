@@ -54,6 +54,18 @@ const Ziggy = {
       parameters: ['order'],
       bindings: { order: 'id' },
     },
+    'checkout.show': {
+      uri: 'checkout\/{order}',
+      methods: ['GET', 'HEAD'],
+      parameters: ['order'],
+      bindings: { order: 'id' },
+    },
+    'checkout.process': {
+      uri: 'checkout\/{order}',
+      methods: ['POST'],
+      parameters: ['order'],
+      bindings: { order: 'id' },
+    },
     'orders.index': { uri: 'orders', methods: ['GET', 'HEAD'] },
     'orders.unfinished': {
       uri: 'orders\/unfinished',
