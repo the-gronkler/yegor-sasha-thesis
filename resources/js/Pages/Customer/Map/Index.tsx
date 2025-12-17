@@ -5,7 +5,7 @@ import Map from '@/Components/Shared/Map';
 import SearchInput from '@/Components/UI/SearchInput';
 import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import { useSearch } from '@/Hooks/useSearch';
-import { Restaurant } from '@/types/models';
+import { Restaurant, MapMarker } from '@/types/models';
 import { PageProps } from '@/types';
 import type { IFuseOptions } from 'fuse.js';
 
@@ -173,33 +173,32 @@ export default function MapIndex({
 
   const mapMarkers = useMemo(() => {
     const restaurantMarkers = filteredRestaurants
-      .map((restaurant) => {
-        const coords = getLatLng(restaurant);
+      .map((r) => {
+        const coords = getLatLng(r);
         if (!coords) return null;
+
+        const primaryImage =
+          r.images?.find((img) => img.is_primary_for_restaurant) ??
+          r.images?.[0];
+
         return {
-          id: restaurant.id,
+          id: r.id,
           lat: coords[0],
           lng: coords[1],
-          name: restaurant.name,
+          name: r.name,
+          address: r.address,
+          openingHours: r.opening_hours,
+          rating: r.rating,
+          distanceKm: r.distance ?? null,
+          imageUrl: primaryImage?.url ?? null,
         };
       })
-      .filter(Boolean) as {
-      id: number;
-      lat: number;
-      lng: number;
-      name: string;
-    }[];
+      .filter(Boolean) as MapMarker[];
 
+    // user marker unchanged
     const userMarker =
       filters.lat !== null && filters.lng !== null
-        ? [
-            {
-              id: -1,
-              lat: filters.lat,
-              lng: filters.lng,
-              name: 'You are here',
-            },
-          ]
+        ? [{ id: -1, lat: filters.lat, lng: filters.lng, name: 'You are here' }]
         : [];
 
     return [...restaurantMarkers, ...userMarker];

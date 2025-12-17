@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from '@inertiajs/react';
 import Map, {
   Marker,
   Popup,
@@ -8,13 +9,8 @@ import Map, {
 } from 'react-map-gl/mapbox';
 import { MapPinIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
-interface MapMarker {
-  id: number;
-  lat: number;
-  lng: number;
-  name: string;
-}
+import StarRating from '@/Components/Shared/StarRating';
+import { MapMarker } from '@/types/models';
 
 interface Props {
   viewState: {
@@ -157,6 +153,17 @@ export default function MapComponent({
         mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
         onClick={() => setPopupId(null)}
+        projection="globe"
+        onLoad={(e) => {
+          const map = e.target; // Mapbox GL JS map instance
+
+          map.setFog({
+            // make "space" opaque so DOM behind can't show through
+            'space-color': '#0b1020',
+            'star-intensity': 0.25,
+            'horizon-blend': 0.15,
+          });
+        }}
       >
         {/* Navigation Controls (Zoom +/-, Compass) */}
         <NavigationControl position="top-right" />
@@ -207,15 +214,69 @@ export default function MapComponent({
           popupId === marker.id ? (
             <Popup
               key={marker.id}
+              className="restaurant-popup"
               longitude={marker.lng}
               latitude={marker.lat}
               anchor="bottom"
-              offset={25}
+              offset={16}
+              closeButton={false} // we'll render our own
+              closeOnClick={false} // avoids "click marker closes popup immediately" edge cases
               onClose={() => setPopupId(null)}
-              closeButton={true}
-              closeOnClick={false}
+              maxWidth="360px"
+              focusAfterOpen={false}
             >
-              <div>{marker.name}</div>
+              <div
+                className="map-popup-card"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="map-popup-close"
+                  onClick={() => setPopupId(null)}
+                  aria-label="Close popup"
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+
+                {marker.imageUrl ? (
+                  <div className="map-popup-image">
+                    <img src={marker.imageUrl} alt={marker.name} />
+                  </div>
+                ) : null}
+
+                <div className="map-popup-header">
+                  <h3 className="map-popup-title">{marker.name}</h3>
+                  {typeof marker.rating === 'number' ? (
+                    <div className="map-popup-rating">
+                      <StarRating rating={marker.rating} />
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="map-popup-body">
+                  <div className="map-popup-meta">
+                    {marker.distanceKm != null ? (
+                      <span>{marker.distanceKm} km</span>
+                    ) : null}
+                    {marker.openingHours ? (
+                      <span>• {marker.openingHours}</span>
+                    ) : null}
+                  </div>
+
+                  {marker.address ? (
+                    <p className="map-popup-description">{marker.address}</p>
+                  ) : null}
+
+                  {marker.id !== -1 ? (
+                    <Link
+                      href={route('restaurants.show', marker.id)}
+                      className="map-popup-cta"
+                    >
+                      View details
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
             </Popup>
           ) : null,
         )}
