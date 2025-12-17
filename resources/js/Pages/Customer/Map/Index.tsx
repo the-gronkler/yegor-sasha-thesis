@@ -245,9 +245,9 @@ export default function MapIndex({
               <button
                 className="location-error-debug"
                 onClick={debugRequestLocation}
-                aria-label="Test native geolocation"
+                aria-label="Try requesting location again"
               >
-                Debug Location
+                Try Again
               </button>
               <button
                 className="location-error-dismiss"

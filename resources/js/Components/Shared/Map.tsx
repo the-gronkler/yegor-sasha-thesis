@@ -30,7 +30,7 @@ interface Props {
   markers?: MapMarker[];
   className?: string;
   mapboxAccessToken: string;
-  onGeolocate?: (latitude: number, longitude: number, accuracy: number) => void;
+  onGeolocate?: (latitude: number, longitude: number) => void;
   onGeolocateError?: (error: string) => void;
   enableGeolocation?: boolean;
   trackUserLocation?: boolean;
@@ -66,6 +66,7 @@ export default function MapComponent({
     if (!evt || typeof evt !== 'object') return {};
     const e = evt as MaybeErrorEvent;
 
+    // TODO: Extract code and message from the event, falling back to nested error if needed
     return {
       code: e.code ?? e.error?.code,
       message: e.message ?? e.error?.message,
@@ -76,8 +77,8 @@ export default function MapComponent({
   const handleGeolocate = React.useCallback(
     (evt: GeolocateResultEvent) => {
       if (onGeolocate && evt.coords) {
-        const { latitude, longitude, accuracy } = evt.coords;
-        onGeolocate(latitude, longitude, accuracy);
+        const { latitude, longitude } = evt.coords;
+        onGeolocate(latitude, longitude);
       }
     },
     [onGeolocate],
