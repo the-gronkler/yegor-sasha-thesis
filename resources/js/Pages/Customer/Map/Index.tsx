@@ -214,6 +214,35 @@ export default function MapIndex({
             <p className="location-error-message">{locationError}</p>
             <div className="location-error-actions">
               <button
+                className="location-error-native"
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        console.log('Native geolocation success:', pos);
+                        handleMapGeolocate(
+                          pos.coords.latitude,
+                          pos.coords.longitude,
+                        );
+                        setLocationError(null); // Clear error on success
+                      },
+                      (err) => {
+                        console.warn('Native geolocation error:', err);
+                        setLocationError(`Native: ${err.code}: ${err.message}`);
+                      },
+                      {
+                        enableHighAccuracy: true,
+                        timeout: 6000,
+                        maximumAge: 0,
+                      },
+                    );
+                  }
+                }}
+                aria-label="Try native geolocation"
+              >
+                Try Native GPS
+              </button>
+              <button
                 className="location-error-debug"
                 onClick={debugRequestLocation}
                 aria-label="Test native geolocation"

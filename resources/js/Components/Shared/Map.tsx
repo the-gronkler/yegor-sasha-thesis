@@ -48,7 +48,29 @@ export default function MapComponent({
   trackUserLocation = false,
 }: Props) {
   const [popupId, setPopupId] = React.useState<number | null>(null);
-  const geolocateControlRef = React.useRef<any>(null);
+  const geolocateControlRef = React.useRef<mapboxgl.GeolocateControl | null>(
+    null,
+  );
+
+  // Safe extraction helper for geolocation error events
+  type MaybeErrorEvent = {
+    code?: number;
+    message?: string;
+    error?: { code?: number; message?: string };
+  };
+
+  function extractGeolocateError(evt: unknown): {
+    code?: number;
+    message?: string;
+  } {
+    if (!evt || typeof evt !== 'object') return {};
+    const e = evt as MaybeErrorEvent;
+
+    return {
+      code: e.code ?? e.error?.code,
+      message: e.message ?? e.error?.message,
+    };
+  }
 
   // Handle geolocation success from Mapbox control
   const handleGeolocate = React.useCallback(
@@ -63,13 +85,9 @@ export default function MapComponent({
 
   // Handle geolocation errors from Mapbox control
   const handleGeolocateError = React.useCallback(
-    (evt: any) => {
+    (evt: unknown) => {
       if (onGeolocateError) {
-        // Mapbox GL JS 3.15+ can emit an "error" event missing code/message
-        const code: number | undefined = evt?.code ?? evt?.error?.code;
-        const message: string | undefined = evt?.message ?? evt?.error?.message;
-
-        console.warn('GeolocateControl error event:', evt);
+        const { code, message } = extractGeolocateError(evt);
 
         let errorMessage =
           message ||

@@ -47,9 +47,12 @@ class MapController extends Controller
         // Apply geolocation filtering if coordinates are provided
         // Uses Haversine formula to calculate distance
         if ($latitude !== null && $longitude !== null) {
+            // Clamp latitude to avoid pole issues (bounding box would explode)
+            $clampedLatitude = max(min($latitude, 85.0), -85.0);
+
             // Bounding box pre-filter (approximately 1 degree ≈ 111km)
             $latDelta = $radius / 111;
-            $lngDelta = $radius / (111 * cos(deg2rad($latitude)));
+            $lngDelta = $radius / (111 * cos(deg2rad($clampedLatitude)));
 
             $query->whereBetween('latitude', [$latitude - $latDelta, $latitude + $latDelta])
                 ->whereBetween('longitude', [$longitude - $lngDelta, $longitude + $lngDelta])

@@ -18,7 +18,11 @@ The application uses the browser's Geolocation API to determine the user's locat
 
 #### Frontend Implementation
 
-We've implemented a custom `useGeolocation` hook located at `resources/js/Hooks/useGeolocation.ts` that provides:
+**Primary Geolocation (Map Features):**
+The main map functionality uses Mapbox GL JS GeolocateControl directly for the best user experience and reliability. This provides native map integration and handles browser geolocation APIs internally.
+
+**Fallback Geolocation Hook:**
+A custom `useGeolocation` hook is available at `resources/js/Hooks/useGeolocation.ts` for non-map geolocation needs or as a fallback when Mapbox controls fail. It provides:
 
 - **Automatic location detection** on component mount
 - **Error handling** with user-friendly messages for different error types (permission denied, unavailable, timeout)
@@ -26,12 +30,12 @@ We've implemented a custom `useGeolocation` hook located at `resources/js/Hooks/
 - **Manual retry** capability via `requestLocation()` function
 - **Error dismissal** via `clearError()` function
 
-**Usage Example:**
+**Usage Example (Fallback only):**
 
 ```typescript
 import { useGeolocation } from '@/Hooks/useGeolocation';
 
-function MapComponent() {
+function NonMapComponent() {
   const {
     location, // [latitude, longitude] or null
     error, // Error message string or null
