@@ -47,10 +47,16 @@ class MapController extends Controller
         // Apply geolocation filtering if coordinates are provided
         // Uses Haversine formula to calculate distance
         if ($latitude !== null && $longitude !== null) {
-            $query->selectRaw(
-                '(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance',
-                [$latitude, $longitude, $latitude]
-            )
+            // Bounding box pre-filter (approximately 1 degree ≈ 111km)
+            $latDelta = $radius / 111;
+            $lngDelta = $radius / (111 * cos(deg2rad($latitude)));
+
+            $query->whereBetween('latitude', [$latitude - $latDelta, $latitude + $latDelta])
+                ->whereBetween('longitude', [$longitude - $lngDelta, $longitude + $lngDelta])
+                ->selectRaw(
+                    '(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance',
+                    [$latitude, $longitude, $latitude]
+                )
                 ->having('distance', '<=', $radius)
                 ->orderBy('distance');
         } else {
@@ -86,9 +92,10 @@ class MapController extends Controller
 
         return Inertia::render('Customer/Map/Index', [
             'restaurants' => $restaurants,
-            'userLocation' => [
+            'filters' => [
                 'lat' => $latitude,
                 'lng' => $longitude,
+                'radius' => $radius,
             ],
         ]);
     }

@@ -4,6 +4,7 @@ import Map, {
   Popup,
   GeolocateControl,
   NavigationControl,
+  type GeolocateResultEvent,
 } from 'react-map-gl/mapbox';
 import { MapPinIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -16,69 +17,83 @@ interface MapMarker {
 }
 
 interface Props {
-  center?: [number, number]; // [lng, lat]
-  zoom?: number;
+  viewState: {
+    longitude: number;
+    latitude: number;
+    zoom: number;
+  };
+  onMove: (viewState: {
+    longitude: number;
+    latitude: number;
+    zoom: number;
+  }) => void;
   markers?: MapMarker[];
   className?: string;
   mapboxAccessToken: string;
-  onGeolocate?: (position: GeolocationPosition) => void;
+  onGeolocate?: (latitude: number, longitude: number, accuracy: number) => void;
+  onGeolocateError?: (error: string) => void;
   enableGeolocation?: boolean;
   trackUserLocation?: boolean;
 }
 
 export default function MapComponent({
-  center = [-0.09, 51.505], // [lng, lat]
-  zoom = 13,
+  viewState,
+  onMove,
   markers = [],
   className = '',
   mapboxAccessToken,
   onGeolocate,
+  onGeolocateError,
   enableGeolocation = true,
   trackUserLocation = false,
 }: Props) {
   const [popupId, setPopupId] = React.useState<number | null>(null);
   const geolocateControlRef = React.useRef<any>(null);
 
-  // Handle geolocation events from Mapbox control
+  // Handle geolocation success from Mapbox control
   const handleGeolocate = React.useCallback(
-    (e: any) => {
-      if (onGeolocate && e.coords) {
-        // Convert Mapbox event to standard GeolocationPosition
-        const coords: GeolocationCoordinates = {
-          latitude: e.coords.latitude,
-          longitude: e.coords.longitude,
-          accuracy: e.coords.accuracy,
-          altitude: null,
-          altitudeAccuracy: null,
-          heading: e.coords.heading ?? null,
-          speed: null,
-          toJSON() {
-            return {
-              latitude: this.latitude,
-              longitude: this.longitude,
-              accuracy: this.accuracy,
-              altitude: this.altitude,
-              altitudeAccuracy: this.altitudeAccuracy,
-              heading: this.heading,
-              speed: this.speed,
-            };
-          },
-        };
-
-        const position: GeolocationPosition = {
-          coords,
-          timestamp: Date.now(),
-          toJSON() {
-            return {
-              coords: this.coords.toJSON(),
-              timestamp: this.timestamp,
-            };
-          },
-        };
-        onGeolocate(position);
+    (evt: GeolocateResultEvent) => {
+      if (onGeolocate && evt.coords) {
+        const { latitude, longitude, accuracy } = evt.coords;
+        onGeolocate(latitude, longitude, accuracy);
       }
     },
     [onGeolocate],
+  );
+
+  // Handle geolocation errors from Mapbox control
+  const handleGeolocateError = React.useCallback(
+    (evt: any) => {
+      if (onGeolocateError) {
+        // Mapbox GL JS 3.15+ can emit an "error" event missing code/message
+        const code: number | undefined = evt?.code ?? evt?.error?.code;
+        const message: string | undefined = evt?.message ?? evt?.error?.message;
+
+        console.warn('GeolocateControl error event:', evt);
+
+        let errorMessage =
+          message ||
+          'Unable to get your location. Please check browser/OS location permissions.';
+
+        switch (code) {
+          case 1:
+            errorMessage =
+              'Location access denied. Allow location permissions to see nearby restaurants.';
+            break;
+          case 2:
+            errorMessage =
+              'Location information unavailable. Check OS location services or try again.';
+            break;
+          case 3:
+            errorMessage =
+              'Location request timed out. Try again or disable high accuracy.';
+            break;
+        }
+
+        onGeolocateError(errorMessage);
+      }
+    },
+    [onGeolocateError],
   );
 
   // Validate API key
@@ -116,7 +131,8 @@ export default function MapComponent({
   return (
     <div className={`map-wrapper ${className}`}>
       <Map
-        initialViewState={{ longitude: center[0], latitude: center[1], zoom }}
+        {...viewState}
+        onMove={(evt) => onMove(evt.viewState)}
         // TODO: select style for the map in general, beyond the scope of the currnet pr since its big already
         mapStyle="mapbox://styles/mapbox/dark-v10"
         mapboxAccessToken={mapboxAccessToken}
@@ -140,6 +156,7 @@ export default function MapComponent({
             showUserHeading={trackUserLocation}
             showUserLocation={true}
             onGeolocate={handleGeolocate}
+            onError={handleGeolocateError}
           />
         )}
 

@@ -1,5 +1,5 @@
 const Ziggy = {
-  url: 'http:\/\/yegor-sasha-thesis.test',
+  url: 'https:\/\/yegor-sasha-thesis.test',
   port: null,
   defaults: {},
   routes: {
