@@ -28,6 +28,7 @@ export default function RestaurantCard({
       className={`restaurant-card ${selected ? 'is-selected' : ''}`}
       role="button"
       tabIndex={0}
+      aria-expanded={selected}
       onClick={() => onSelect?.()}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') onSelect?.();
@@ -62,17 +63,23 @@ export default function RestaurantCard({
               </>
             )}
         </div>
-        <p className="restaurant-description">
-          {restaurant.description || 'No description available'}
-        </p>
-        <div className="restaurant-actions">
-          <Link
-            href={route('restaurants.show', restaurant.id)}
-            className="restaurant-view-btn"
-            onClick={(e) => e.stopPropagation()}
-          >
-            View details
-          </Link>
+
+        {/* Collapsible details section */}
+        <div className="restaurant-details">
+          <div>
+            <p className="restaurant-description">
+              {restaurant.description || 'No description available'}
+            </p>
+            <div className="restaurant-actions">
+              <Link
+                href={route('restaurants.show', restaurant.id)}
+                className="restaurant-view-btn"
+                onClick={(e) => e.stopPropagation()}
+              >
+                View details
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

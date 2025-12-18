@@ -3,6 +3,9 @@
 @use '../variables/layout';
 
 .map-page {
+  height: 100%;
+  overflow: hidden;
+
   .page-title {
     font-size: 1.5rem;
     font-weight: bold;
@@ -44,7 +47,6 @@
   .map-bottom-sheet {
     position: fixed;
     left: 50%;
-    transform: translateX(-50%);
     width: min(var(--layout-max-width), 100vw);
 
     // Put it at the very bottom so the nav can overlap it
@@ -53,12 +55,13 @@
     // Below bottom nav (z=100), above map
     z-index: 50;
 
-    // Prevent content from being hidden under the nav
-    padding: 1rem 1.25rem;
-    padding-bottom: calc(
-      var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom, 0px)
-    );
+    // IMPORTANT: animate transform instead of height to avoid card resizing
+    transform: translateX(-50%) translateY(var(--sheet-offset, 0px));
+    transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
 
+    // Prevent content from being hidden under the nav
+    padding: 10px 12px 12px;
     border-radius: 16px 16px 0 0;
 
     // Make it feel "black" / solid
@@ -70,28 +73,89 @@
     );
     backdrop-filter: blur(10px);
 
-    max-height: 45vh;
+    display: grid;
+    grid-template-rows: auto 1fr; // handle + scroll area
+    gap: 10px;
+
+    overflow: hidden; // IMPORTANT: prevents sheet-content from painting over the handle
+
+    &.is-dragging {
+      transition: none; // follow finger/mouse
+    }
+  }
+
+  .sheet-handle {
+    height: 16px; // Smaller height for more compact handle area
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: grab;
+    position: relative;
+    z-index: 2; // IMPORTANT: keep handle above scrolling content
+    touch-action: none; // IMPORTANT: allow pointermove dragging on mobile
+    user-select: none;
+    -webkit-user-select: none;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:focus-visible {
+      outline: 2px solid main-colors.$overlay-white-medium;
+      outline-offset: 4px;
+      border-radius: 999px;
+    }
+  }
+
+  .sheet-handle-bar {
+    width: 126px; // 3x wider (42px * 3 = 126px)
+    height: 5px;
+    border-radius: 999px;
+    background: main-colors.$overlay-white-medium;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  // Scroll only here (so the handle stays fixed)
+  .sheet-content {
     overflow-y: auto;
     display: grid;
+    grid-auto-rows: max-content; // Prevent cards from shrinking
     gap: 0.75rem;
+    min-height: 0; // IMPORTANT: allows it to shrink inside grid and actually scroll
+    z-index: 1;
+
+    // Add top padding so hover animations don't overlap with handle
+    padding-top: 0.5rem;
+
+    // Add bottom padding so last card is fully visible above bottom nav
+    padding-bottom: calc(
+      var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 16px
+    );
+    scroll-padding-bottom: calc(
+      var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 16px
+    );
 
     // Prevents layout jump when scrollbar appears
     scrollbar-gutter: stable;
 
-    // Firefox (standard)
+    // Firefox (standards)
     scrollbar-width: thin;
     scrollbar-color: main-colors.$overlay-white-medium transparent;
 
-    // Chrome/Edge/Safari (WebKit pseudo-elements)
+    // WebKit/Blink (Chrome/Edge/Safari)
     &::-webkit-scrollbar {
       width: 6px;
       background: transparent;
     }
 
+    // Make the track transparent so the sheet background shows through
     &::-webkit-scrollbar-track {
-      background: transparent; // sheet background shows through
+      background: transparent;
     }
 
+    // Subtle thumb
     &::-webkit-scrollbar-thumb {
       background-color: main-colors.$overlay-white-light;
       border-radius: 999px;
@@ -111,6 +175,7 @@
       display: none;
     }
 
+    // Avoid any corner artifacts
     &::-webkit-scrollbar-corner {
       background: transparent;
     }
@@ -185,18 +250,31 @@
   }
 
   .restaurant-card {
+    // Compact defaults - minimal size
+    --card-img: 56px;
+    --card-pad: 0.6rem;
+
     display: grid;
-    grid-template-columns: 96px 1fr auto;
+    grid-template-columns: var(--card-img) 1fr;
     gap: 0.75rem;
+    padding: var(--card-pad);
+    align-items: center;
+    min-height: 72px; // Prevent shrinking
+
     background: main-colors.$bg-surface;
     border: 1px solid main-colors.$border-light;
     border-radius: 12px;
-    padding: 0.75rem;
     text-decoration: none;
     color: main-colors.$text-primary;
     box-shadow: 0 6px 12px main-colors.$shadow-color-strong;
     cursor: pointer;
-    transition: all 0.2s ease;
+
+    transition:
+      padding 250ms ease,
+      gap 250ms ease,
+      min-height 250ms ease,
+      box-shadow 250ms ease,
+      transform 250ms ease;
 
     &:hover {
       transform: translateY(-2px);
@@ -204,6 +282,13 @@
     }
 
     &.is-selected {
+      // Expanded values - full size
+      --card-img: 120px;
+      --card-pad: 1rem;
+      gap: 1rem;
+      min-height: auto;
+
+      align-items: start;
       border-color: main-colors.$brand-primary;
       box-shadow: 0 8px 16px rgba(main-colors.$brand-primary, 0.3);
       background: linear-gradient(
@@ -215,8 +300,8 @@
   }
 
   .restaurant-image-wrapper {
-    width: 96px;
-    height: 96px;
+    width: var(--card-img);
+    height: var(--card-img);
     border-radius: 10px;
     overflow: hidden;
   }
@@ -230,7 +315,12 @@
   .restaurant-info {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.25rem;
+    transition: gap 250ms ease;
+  }
+
+  .restaurant-card.is-selected .restaurant-info {
+    gap: 0.5rem;
   }
 
   .restaurant-header {
@@ -242,25 +332,90 @@
 
   .restaurant-name {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: main-colors.$text-primary;
+    line-height: 1.2;
+    transition:
+      font-size 250ms ease,
+      color 250ms ease;
+  }
+
+  .restaurant-card.is-selected .restaurant-name {
+    font-size: 1.15rem;
+    line-height: 1.3;
+    color: main-colors.$text-inverse; // White text on dark background
   }
 
   .restaurant-meta {
-    display: flex;
-    align-items: flex-start;
+    display: none; // Hide by default on compact cards
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.85rem;
     color: main-colors.$text-secondary;
-    white-space: nowrap;
-    padding-top: 0.15rem;
+    flex-wrap: wrap;
+    transition: font-size 250ms ease;
+  }
+
+  .restaurant-card.is-selected .restaurant-meta {
+    display: flex; // Show on expanded cards
+    font-size: 0.9rem;
+  }
+
+  .restaurant-card .star-rating {
+    transform: scale(0.9);
+    transform-origin: right center;
+    transition: transform 250ms ease;
+  }
+
+  .restaurant-card.is-selected .star-rating {
+    transform: scale(1.05);
+  }
+
+  .meta-item {
+    display: inline-block;
+  }
+
+  .meta-separator {
+    color: main-colors.$text-secondary;
+    opacity: 0.6;
+  }
+
+  // Collapsible details section (description + button)
+  .restaurant-details {
+    display: grid;
+    grid-template-rows: 0fr;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      grid-template-rows 250ms ease,
+      opacity 250ms ease;
+
+    > * {
+      min-height: 0;
+    }
+  }
+
+  .restaurant-card.is-selected .restaurant-details {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .restaurant-details > div {
+    margin-top: 0.35rem;
   }
 
   .restaurant-description {
-    margin: 0;
+    margin: 0 0 0.5rem 0;
     font-size: 0.9rem;
     color: main-colors.$text-secondary;
-    line-height: 1.3;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .restaurant-actions {
@@ -401,10 +556,9 @@
     }
 
     .map-bottom-sheet {
-      left: 50%;
-      transform: translateX(-50%);
       width: 768px;
       border-radius: 16px 16px 0 0;
+      // Don't override transform - it needs the translateY offset variable
     }
   }
 
@@ -524,5 +678,14 @@
     font-weight: 600;
     background: #2563eb;
     color: #fff;
+  }
+
+  // Respect user's reduced-motion preference
+  @media (prefers-reduced-motion: reduce) {
+    .restaurant-card,
+    .restaurant-details,
+    .map-bottom-sheet {
+      transition: none !important;
+    }
   }
 }

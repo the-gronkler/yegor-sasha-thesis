@@ -23,6 +23,10 @@ const EMPTY_KEYS: (keyof Restaurant)[] = [];
 const RADIUS_OPTIONS = [2, 5, 10, 25, 50] as const;
 const DEFAULT_RADIUS = 10;
 
+const COLLAPSED_PX = 105; // Minimal height - handle touches bottom nav
+const EXPANDED_MAX_PX = 520; // Max expanded height
+const EXPANDED_VH = 0.45; // 45vh
+
 interface MapIndexProps extends PageProps {
   restaurants: Restaurant[];
   filters: {
@@ -69,6 +73,17 @@ export default function MapIndex({
   // Store refs for scrolling list items into view
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
+  // Sheet collapsible state
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const [expandedPx, setExpandedPx] = useState(() =>
+    Math.min(Math.round(window.innerHeight * EXPANDED_VH), EXPANDED_MAX_PX),
+  );
+  const [sheetHeight, setSheetHeight] = useState<number>(COLLAPSED_PX);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Prevent click-toggle after a drag
+  const dragMovedRef = useRef(false);
+
   // Controlled viewState for the map
   const [viewState, setViewState] = useState({
     longitude: 21.0122, // Warsaw, Poland
@@ -106,6 +121,80 @@ export default function MapIndex({
       }
     }
   }, [filters.lat, filters.lng, restaurants]);
+
+  // Handle window resize for sheet height
+  useEffect(() => {
+    const onResize = () => {
+      const nextExpanded = Math.min(
+        Math.round(window.innerHeight * EXPANDED_VH),
+        EXPANDED_MAX_PX,
+      );
+      setExpandedPx(nextExpanded);
+
+      // Clamp current height into new bounds
+      setSheetHeight((h) => Math.max(COLLAPSED_PX, Math.min(h, nextExpanded)));
+    };
+
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const isExpanded = sheetHeight > (COLLAPSED_PX + expandedPx) / 2;
+
+  const toggleSheet = () => {
+    // Ignore click if we just dragged
+    if (dragMovedRef.current) {
+      dragMovedRef.current = false;
+      return;
+    }
+    setSheetHeight((h) => (h <= COLLAPSED_PX + 2 ? expandedPx : COLLAPSED_PX));
+  };
+
+  // Calculate offset for transform animation (keep cards at natural size)
+  const sheetOffsetPx = Math.max(0, expandedPx - sheetHeight);
+
+  const onHandlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // helps on some browsers to avoid accidental scroll/tap behaviors
+
+    const pointerId = e.pointerId;
+    e.currentTarget.setPointerCapture(pointerId); // keep receiving events
+
+    dragMovedRef.current = false;
+
+    const startY = e.clientY;
+    const startH = sheetHeight;
+
+    setIsDragging(true);
+
+    const onMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return; // IMPORTANT: only respond to the active pointer
+
+      const dy = ev.clientY - startY; // Dragging down => dy positive => height decreases
+      const next = Math.max(COLLAPSED_PX, Math.min(expandedPx, startH - dy));
+
+      if (Math.abs(dy) > 6) dragMovedRef.current = true;
+      setSheetHeight(next);
+    };
+
+    const onUp = (ev?: PointerEvent) => {
+      if (ev && ev.pointerId !== pointerId) return; // IMPORTANT: only respond to the active pointer
+
+      setIsDragging(false);
+
+      // Snap to nearest state
+      setSheetHeight((h) =>
+        h > (COLLAPSED_PX + expandedPx) / 2 ? expandedPx : COLLAPSED_PX,
+      );
+
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp as any);
+      window.removeEventListener('pointercancel', onUp as any);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp as any);
+    window.addEventListener('pointercancel', onUp as any);
+  };
 
   // Handle geolocation from Mapbox native control
   const handleMapGeolocate = (latitude: number, longitude: number) => {
@@ -317,18 +406,50 @@ export default function MapIndex({
             selectedRestaurantId={selectedRestaurantId}
             onSelectRestaurant={selectRestaurant}
           />
-          <div className="map-bottom-sheet">
-            {filteredRestaurants.map((restaurant) => (
-              <RestaurantCard
-                key={restaurant.id}
-                restaurant={restaurant}
-                selected={restaurant.id === selectedRestaurantId}
-                onSelect={() =>
-                  selectRestaurant(restaurant.id, { scroll: false })
-                }
-                containerRef={(el) => (cardRefs.current[restaurant.id] = el)}
-              />
-            ))}
+          <div
+            ref={sheetRef}
+            className={`map-bottom-sheet ${isDragging ? 'is-dragging' : ''} ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
+            style={
+              {
+                height: `${expandedPx}px`, // constant physical height
+                ['--sheet-offset' as any]: `${sheetOffsetPx}px`, // slide down to "collapse"
+              } as React.CSSProperties
+            }
+          >
+            <button
+              type="button"
+              className="sheet-handle"
+              aria-label={
+                isExpanded
+                  ? 'Collapse restaurant list'
+                  : 'Expand restaurant list'
+              }
+              aria-expanded={isExpanded}
+              aria-controls="restaurants-sheet"
+              onClick={toggleSheet}
+              onPointerDown={onHandlePointerDown}
+            >
+              <span className="sheet-handle-bar" aria-hidden="true" />
+            </button>
+
+            <div id="restaurants-sheet" className="sheet-content">
+              {filteredRestaurants.map((restaurant) => (
+                <RestaurantCard
+                  key={restaurant.id}
+                  restaurant={restaurant}
+                  selected={restaurant.id === selectedRestaurantId}
+                  onSelect={() =>
+                    selectRestaurant(
+                      restaurant.id === selectedRestaurantId
+                        ? null
+                        : restaurant.id,
+                      { scroll: false },
+                    )
+                  }
+                  containerRef={(el) => (cardRefs.current[restaurant.id] = el)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

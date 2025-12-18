@@ -8,12 +8,14 @@
 
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   padding-bottom: 0;
   background-color: #0b1020; // Dark background so nav floats above map
+  overflow: hidden; // Prevent page scrollbar
 
   .main-content {
     flex: 1;
+    overflow: hidden; // Prevent content from causing scrollbar
   }
 
   // Override bottom nav width to match the centered layout
