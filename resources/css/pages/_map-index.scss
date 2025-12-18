@@ -137,6 +137,8 @@
       var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 16px
     );
 
+    scroll-padding-top: 24px;
+
     // Prevents layout jump when scrollbar appears
     scrollbar-gutter: stable;
 

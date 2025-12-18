@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
@@ -75,6 +75,7 @@ export default function MapIndex({
 
   // Sheet collapsible state
   const sheetRef = useRef<HTMLDivElement | null>(null);
+  const sheetContentRef = useRef<HTMLDivElement | null>(null);
   const [expandedPx, setExpandedPx] = useState(() =>
     Math.min(Math.round(window.innerHeight * EXPANDED_VH), EXPANDED_MAX_PX),
   );
@@ -266,17 +267,65 @@ export default function MapIndex({
   };
 
   // Unified selection handler for map/list interaction
-  const selectRestaurant = (id: number | null, opts?: { scroll?: boolean }) => {
-    setSelectedRestaurantId(id);
-
-    if (id != null && (opts?.scroll ?? true)) {
-      // Scroll the bottom sheet to the selected restaurant card
-      cardRefs.current[id]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
+  const selectRestaurant = (id: number | null) => {
+    setSelectedRestaurantId((prev) => (prev === id ? null : id));
   };
+
+  const scrollCardToCenter = (
+    id: number,
+    behavior: ScrollBehavior = 'smooth',
+  ) => {
+    const container = sheetContentRef.current;
+    const el = cardRefs.current[id];
+
+    if (!container || !el) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+
+    const currentScrollTop = container.scrollTop;
+
+    // element’s top relative to the container’s viewport
+    const offsetTop = elRect.top - containerRect.top;
+
+    // target: move so element center aligns with container center
+    const target =
+      currentScrollTop +
+      offsetTop -
+      (containerRect.height / 2 - elRect.height / 2);
+
+    const max = container.scrollHeight - container.clientHeight;
+    const next = Math.max(0, Math.min(target, max));
+
+    container.scrollTo({ top: next, behavior });
+  };
+
+  useLayoutEffect(() => {
+    if (selectedRestaurantId == null) return;
+
+    // 1) Center immediately after DOM paints the selection class
+    let raf = requestAnimationFrame(() => {
+      scrollCardToCenter(selectedRestaurantId, 'smooth');
+    });
+
+    // 2) Keep it centered as it animates (height changes)
+    const el = cardRefs.current[selectedRestaurantId];
+    if (!el) return () => cancelAnimationFrame(raf);
+
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        scrollCardToCenter(selectedRestaurantId, 'smooth');
+      });
+    });
+
+    ro.observe(el);
+
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [selectedRestaurantId]);
 
   // Restaurants already have distance calculated by backend when filters.lat/lng are present
   // Just use filteredRestaurants directly (Fuse search on the already-nearby list)
@@ -432,20 +481,17 @@ export default function MapIndex({
               <span className="sheet-handle-bar" aria-hidden="true" />
             </button>
 
-            <div id="restaurants-sheet" className="sheet-content">
+            <div
+              id="restaurants-sheet"
+              className="sheet-content"
+              ref={sheetContentRef}
+            >
               {filteredRestaurants.map((restaurant) => (
                 <RestaurantCard
                   key={restaurant.id}
                   restaurant={restaurant}
                   selected={restaurant.id === selectedRestaurantId}
-                  onSelect={() =>
-                    selectRestaurant(
-                      restaurant.id === selectedRestaurantId
-                        ? null
-                        : restaurant.id,
-                      { scroll: false },
-                    )
-                  }
+                  onSelect={() => selectRestaurant(restaurant.id)}
                   containerRef={(el) => (cardRefs.current[restaurant.id] = el)}
                 />
               ))}
