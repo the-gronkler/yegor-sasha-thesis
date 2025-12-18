@@ -8,7 +8,8 @@
 
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100vh; // fallback
+  height: 100dvh; // correct on mobile (dynamic viewport)
   padding-bottom: 0;
   background-color: #0b1020; // Dark background so nav floats above map
   overflow: hidden; // Prevent page scrollbar

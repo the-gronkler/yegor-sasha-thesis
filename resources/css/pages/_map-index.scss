@@ -25,8 +25,8 @@
 
   .map-container-box {
     position: relative;
-    height: 100vh;
-    min-height: 480px;
+    height: 100%; // <- instead of 100vh
+    min-height: 0; // <- don’t force extra height
     border-radius: 0;
     overflow: hidden;
     box-shadow: none;
@@ -551,8 +551,8 @@
 
   @media (min-width: 1024px) {
     .map-container-box {
-      height: 100vh;
-      min-height: 600px;
+      height: 100%;
+      min-height: 0;
     }
 
     .map-bottom-sheet {
