@@ -271,60 +271,67 @@ export default function MapIndex({
     setSelectedRestaurantId((prev) => (prev === id ? null : id));
   };
 
-  const scrollCardToCenter = (
-    id: number,
-    behavior: ScrollBehavior = 'smooth',
-  ) => {
-    const container = sheetContentRef.current;
-    const el = cardRefs.current[id];
-
-    if (!container || !el) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-
-    const currentScrollTop = container.scrollTop;
-
-    // element’s top relative to the container’s viewport
-    const offsetTop = elRect.top - containerRect.top;
-
-    // target: move so element center aligns with container center
-    const target =
-      currentScrollTop +
-      offsetTop -
-      (containerRect.height / 2 - elRect.height / 2);
-
-    const max = container.scrollHeight - container.clientHeight;
-    const next = Math.max(0, Math.min(target, max));
-
-    container.scrollTo({ top: next, behavior });
-  };
-
   useLayoutEffect(() => {
     if (selectedRestaurantId == null) return;
 
-    // 1) Center immediately after DOM paints the selection class
-    let raf = requestAnimationFrame(() => {
-      scrollCardToCenter(selectedRestaurantId, 'smooth');
+    const id = selectedRestaurantId;
+    const el = cardRefs.current[id];
+    const container = sheetContentRef.current;
+
+    if (!el || !container) return;
+
+    // +-------------+
+    // | STEP 1: WAIT |
+    // +-------------+
+
+    // Promise that resolves after the CSS transition end
+    const waitForTransition = new Promise<void>((resolve) => {
+      const handler = (event: TransitionEvent) => {
+        // Only respond to padding/min-height/gap transitions
+        if (
+          event.propertyName === 'padding' ||
+          event.propertyName === 'min-height' ||
+          event.propertyName === 'gap'
+        ) {
+          el.removeEventListener('transitionend', handler);
+          resolve();
+        }
+      };
+      el.addEventListener('transitionend', handler);
+
+      // Fallback timeout (in case no transitionend fires for some reason)
+      setTimeout(() => {
+        el.removeEventListener('transitionend', handler);
+        resolve();
+      }, 300); // slightly longer than your CSS duration (250ms)
     });
 
-    // 2) Keep it centered as it animates (height changes)
-    const el = cardRefs.current[selectedRestaurantId];
-    if (!el) return () => cancelAnimationFrame(raf);
+    waitForTransition.then(() => {
+      // +------------------------+
+      // | STEP 2: SCROLL TO VIEW |
+      // +------------------------+
 
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        scrollCardToCenter(selectedRestaurantId, 'smooth');
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+
+      const currentScroll = container.scrollTop;
+      const offsetTop = elRect.top - containerRect.top;
+
+      const targetScroll =
+        currentScroll +
+        offsetTop -
+        (containerRect.height / 2 - elRect.height / 2);
+
+      const clamped = Math.max(
+        0,
+        Math.min(targetScroll, container.scrollHeight - container.clientHeight),
+      );
+
+      container.scrollTo({
+        top: clamped,
+        behavior: 'smooth',
       });
     });
-
-    ro.observe(el);
-
-    return () => {
-      ro.disconnect();
-      cancelAnimationFrame(raf);
-    };
   }, [selectedRestaurantId]);
 
   // Restaurants already have distance calculated by backend when filters.lat/lng are present

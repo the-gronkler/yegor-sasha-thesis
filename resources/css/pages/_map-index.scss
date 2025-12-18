@@ -304,6 +304,7 @@
   .restaurant-image-wrapper {
     width: var(--card-img);
     height: var(--card-img);
+    aspect-ratio: 1;
     border-radius: 10px;
     overflow: hidden;
   }
