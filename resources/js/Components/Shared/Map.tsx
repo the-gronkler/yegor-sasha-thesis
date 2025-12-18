@@ -5,9 +5,11 @@ import Map, {
   Popup,
   GeolocateControl,
   NavigationControl,
+  Source,
+  Layer,
   type GeolocateResultEvent,
 } from 'react-map-gl/mapbox';
-import { MapPinIcon, UserCircleIcon } from '@heroicons/react/24/solid';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import StarRating from '@/Components/Shared/StarRating';
 import { MapMarker } from '@/types/models';
@@ -30,6 +32,8 @@ interface Props {
   onGeolocateError?: (error: string) => void;
   enableGeolocation?: boolean;
   trackUserLocation?: boolean;
+  selectedRestaurantId?: number | null;
+  onSelectRestaurant?: (id: number | null, opts?: { scroll?: boolean }) => void;
 }
 
 export default function MapComponent({
@@ -42,11 +46,21 @@ export default function MapComponent({
   onGeolocateError,
   enableGeolocation = true,
   trackUserLocation = false,
+  selectedRestaurantId,
+  onSelectRestaurant,
 }: Props) {
-  const [popupId, setPopupId] = React.useState<number | null>(null);
   const geolocateControlRef = React.useRef<mapboxgl.GeolocateControl | null>(
     null,
   );
+  const mapRef = React.useRef<any>(null);
+
+  // Theme constants for consistent colors
+  const THEME = {
+    brandPrimary: '#ee5b2b',
+    brandPrimaryHover: '#d94f25',
+    accentWarm: '#f59e0b',
+    textInverse: '#ffffff',
+  };
 
   // Safe extraction helper for geolocation error events
   type MaybeErrorEvent = {
@@ -111,6 +125,105 @@ export default function MapComponent({
     [onGeolocateError],
   );
 
+  // Separate restaurant markers from user marker
+  const restaurantMarkers = markers.filter((m) => m.id !== -1);
+  const userMarker = markers.find((m) => m.id === -1);
+
+  // Create GeoJSON for clustering
+  const restaurantGeoJson = React.useMemo(
+    () => ({
+      type: 'FeatureCollection' as const,
+      features: restaurantMarkers.map((marker) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [marker.lng, marker.lat],
+        },
+        properties: {
+          id: marker.id,
+          name: marker.name,
+          address: marker.address,
+          openingHours: marker.openingHours,
+          rating: marker.rating,
+          distanceKm: marker.distanceKm,
+          imageUrl: marker.imageUrl,
+        },
+      })),
+    }),
+    [restaurantMarkers],
+  );
+
+  // Handle map click for clustering
+  const handleMapClick = React.useCallback((event: any) => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    const features = map.queryRenderedFeatures(event.point, {
+      layers: ['clusters', 'unclustered-point'],
+    });
+
+    if (features.length > 0) {
+      const feature = features[0];
+      if (feature.layer.id === 'clusters') {
+        // Zoom into cluster
+        const clusterId = feature.properties.cluster_id;
+        const source = map.getSource('restaurants');
+        if (source) {
+          source.getClusterExpansionZoom(
+            clusterId,
+            (err: any, zoom: number) => {
+              if (err) return;
+              map.easeTo({
+                center: feature.geometry.coordinates,
+                zoom: zoom,
+              });
+            },
+          );
+        }
+      } else if (feature.layer.id === 'unclustered-point') {
+        // Open popup for restaurant
+        const properties = feature.properties;
+        const restaurant: MapMarker = {
+          id: properties.id,
+          lat: feature.geometry.coordinates[1],
+          lng: feature.geometry.coordinates[0],
+          name: properties.name,
+          address: properties.address,
+          openingHours: properties.openingHours,
+          rating: properties.rating,
+          distanceKm: properties.distanceKm,
+          imageUrl: properties.imageUrl,
+        };
+        onSelectRestaurant?.(restaurant.id);
+      }
+    } else {
+      onSelectRestaurant?.(null);
+    }
+  }, []);
+
+  // Get selected restaurant from markers
+  const selectedRestaurant = React.useMemo(() => {
+    if (selectedRestaurantId == null) return null;
+    return restaurantMarkers.find((m) => m.id === selectedRestaurantId) ?? null;
+  }, [restaurantMarkers, selectedRestaurantId]);
+
+  // Animate to selected restaurant
+  React.useEffect(() => {
+    if (!selectedRestaurant) return;
+
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    // Smoothly center + zoom to selected restaurant
+    map.flyTo({
+      center: [selectedRestaurant.lng, selectedRestaurant.lat],
+      zoom: Math.max(viewState.zoom, 15),
+      duration: 900,
+      essential: true,
+      padding: { top: 120, bottom: 320, left: 40, right: 40 }, // tune bottom
+    });
+  }, [selectedRestaurant?.id]);
+
   // Validate API key
   if (!mapboxAccessToken) {
     return (
@@ -152,7 +265,6 @@ export default function MapComponent({
         mapStyle="mapbox://styles/mapbox/dark-v10"
         mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
-        onClick={() => setPopupId(null)}
         projection="globe"
         onLoad={(e) => {
           const map = e.target; // Mapbox GL JS map instance
@@ -164,6 +276,8 @@ export default function MapComponent({
             'horizon-blend': 0.15,
           });
         }}
+        ref={mapRef}
+        onClick={handleMapClick}
       >
         {/* Navigation Controls (Zoom +/-, Compass) */}
         <NavigationControl position="top-right" />
@@ -186,100 +300,166 @@ export default function MapComponent({
           />
         )}
 
-        {/* Restaurant and User Markers */}
-        {markers.map((marker) => {
-          const isUserLocation = marker.id === -1;
-          return (
-            <Marker
-              key={marker.id}
-              longitude={marker.lng}
-              latitude={marker.lat}
-              anchor="bottom"
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                setPopupId(marker.id);
-              }}
-            >
-              {isUserLocation ? (
-                <UserCircleIcon className="map-marker map-marker-user" />
-              ) : (
-                <MapPinIcon className="map-marker map-marker-restaurant" />
-              )}
-            </Marker>
-          );
-        })}
+        {/* User Marker */}
+        {userMarker && (
+          <Marker
+            key={userMarker.id}
+            longitude={userMarker.lng}
+            latitude={userMarker.lat}
+            anchor="bottom"
+          >
+            <UserCircleIcon className="map-marker map-marker-user" />
+          </Marker>
+        )}
 
-        {/* Marker Popups */}
-        {markers.map((marker) =>
-          popupId === marker.id ? (
-            <Popup
-              key={marker.id}
-              className="restaurant-popup"
-              longitude={marker.lng}
-              latitude={marker.lat}
-              anchor="bottom"
-              offset={16}
-              closeButton={false} // we'll render our own
-              closeOnClick={false} // avoids "click marker closes popup immediately" edge cases
-              onClose={() => setPopupId(null)}
-              maxWidth="360px"
-              focusAfterOpen={false}
+        {/* Restaurant Popup */}
+        {selectedRestaurant && (
+          <Popup
+            className="restaurant-popup"
+            longitude={selectedRestaurant.lng}
+            latitude={selectedRestaurant.lat}
+            anchor="bottom"
+            offset={16}
+            closeButton={false}
+            closeOnClick={false}
+            onClose={() => onSelectRestaurant?.(null)}
+            maxWidth="360px"
+            focusAfterOpen={false}
+          >
+            <div
+              className="map-popup-card"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div
-                className="map-popup-card"
-                onClick={(e) => e.stopPropagation()}
+              <button
+                type="button"
+                className="map-popup-close"
+                onClick={() => onSelectRestaurant?.(null)}
+                aria-label="Close popup"
               >
-                <button
-                  type="button"
-                  className="map-popup-close"
-                  onClick={() => setPopupId(null)}
-                  aria-label="Close popup"
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
+                <span aria-hidden="true">×</span>
+              </button>
 
-                {marker.imageUrl ? (
-                  <div className="map-popup-image">
-                    <img src={marker.imageUrl} alt={marker.name} />
+              {selectedRestaurant.imageUrl ? (
+                <div className="map-popup-image">
+                  <img
+                    src={selectedRestaurant.imageUrl}
+                    alt={selectedRestaurant.name}
+                  />
+                </div>
+              ) : null}
+
+              <div className="map-popup-header">
+                <h3 className="map-popup-title">{selectedRestaurant.name}</h3>
+                {typeof selectedRestaurant.rating === 'number' ? (
+                  <div className="map-popup-rating">
+                    <StarRating rating={selectedRestaurant.rating} />
                   </div>
                 ) : null}
-
-                <div className="map-popup-header">
-                  <h3 className="map-popup-title">{marker.name}</h3>
-                  {typeof marker.rating === 'number' ? (
-                    <div className="map-popup-rating">
-                      <StarRating rating={marker.rating} />
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="map-popup-body">
-                  <div className="map-popup-meta">
-                    {marker.distanceKm != null ? (
-                      <span>{marker.distanceKm} km</span>
-                    ) : null}
-                    {marker.openingHours ? (
-                      <span>• {marker.openingHours}</span>
-                    ) : null}
-                  </div>
-
-                  {marker.address ? (
-                    <p className="map-popup-description">{marker.address}</p>
-                  ) : null}
-
-                  {marker.id !== -1 ? (
-                    <Link
-                      href={route('restaurants.show', marker.id)}
-                      className="map-popup-cta"
-                    >
-                      View details
-                    </Link>
-                  ) : null}
-                </div>
               </div>
-            </Popup>
-          ) : null,
+
+              <div className="map-popup-body">
+                <div className="map-popup-meta">
+                  {selectedRestaurant.distanceKm != null ? (
+                    <span>{selectedRestaurant.distanceKm} km</span>
+                  ) : null}
+                  {selectedRestaurant.openingHours ? (
+                    <span>• {selectedRestaurant.openingHours}</span>
+                  ) : null}
+                </div>
+
+                {selectedRestaurant.address ? (
+                  <p className="map-popup-description">
+                    {selectedRestaurant.address}
+                  </p>
+                ) : null}
+
+                <Link
+                  href={route('restaurants.show', selectedRestaurant.id)}
+                  className="map-popup-cta"
+                  style={{ backgroundColor: THEME.brandPrimary }}
+                >
+                  View details
+                </Link>
+              </div>
+            </div>
+          </Popup>
         )}
+
+        {/* Clustering Layer - Restaurant markers */}
+        <Source
+          id="restaurants"
+          type="geojson"
+          data={restaurantGeoJson}
+          cluster={true}
+          clusterMaxZoom={14}
+          clusterRadius={50}
+        >
+          <Layer
+            id="clusters"
+            type="circle"
+            source="restaurants"
+            filter={['has', 'point_count']}
+            paint={{
+              'circle-color': [
+                'step',
+                ['get', 'point_count'],
+                THEME.accentWarm,
+                2,
+                THEME.brandPrimary,
+                10,
+                THEME.brandPrimaryHover,
+              ],
+              'circle-radius': [
+                'step',
+                ['get', 'point_count'],
+                20,
+                10,
+                30,
+                20,
+                40,
+              ],
+            }}
+          />
+
+          <Layer
+            id="cluster-count"
+            type="symbol"
+            source="restaurants"
+            filter={['has', 'point_count']}
+            layout={{
+              'text-field': '{point_count_abbreviated}',
+              'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+              'text-size': 12,
+            }}
+            paint={{
+              'text-color': '#ffffff',
+            }}
+          />
+
+          <Layer
+            id="selected-point"
+            type="circle"
+            source="restaurants"
+            filter={['==', ['get', 'id'], selectedRestaurantId || -999]}
+            paint={{
+              'circle-color': '#ffffff',
+              'circle-radius': 12,
+              'circle-stroke-color': THEME.brandPrimary,
+              'circle-stroke-width': 3,
+            }}
+          />
+
+          <Layer
+            id="unclustered-point"
+            type="circle"
+            source="restaurants"
+            filter={['!', ['has', 'point_count']]}
+            paint={{
+              'circle-color': '#11b4da',
+              'circle-radius': 8,
+            }}
+          />
+        </Source>
       </Map>
     </div>
   );

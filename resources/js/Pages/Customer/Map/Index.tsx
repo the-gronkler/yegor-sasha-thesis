@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
@@ -60,6 +60,14 @@ export default function MapIndex({
   const [selectedRadius, setSelectedRadius] = useState<number>(
     filters.radius || DEFAULT_RADIUS,
   );
+
+  // Selection state for unified map/list interaction
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<
+    number | null
+  >(null);
+
+  // Store refs for scrolling list items into view
+  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   // Controlled viewState for the map
   const [viewState, setViewState] = useState({
@@ -166,6 +174,19 @@ export default function MapIndex({
       },
       { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 },
     );
+  };
+
+  // Unified selection handler for map/list interaction
+  const selectRestaurant = (id: number | null, opts?: { scroll?: boolean }) => {
+    setSelectedRestaurantId(id);
+
+    if (id != null && (opts?.scroll ?? true)) {
+      // Scroll the bottom sheet to the selected restaurant card
+      cardRefs.current[id]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
   };
 
   // Restaurants already have distance calculated by backend when filters.lat/lng are present
@@ -293,10 +314,20 @@ export default function MapIndex({
             onGeolocateError={handleGeolocateError}
             enableGeolocation={true}
             trackUserLocation={false}
+            selectedRestaurantId={selectedRestaurantId}
+            onSelectRestaurant={selectRestaurant}
           />
           <div className="map-bottom-sheet">
             {filteredRestaurants.map((restaurant) => (
-              <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+              <RestaurantCard
+                key={restaurant.id}
+                restaurant={restaurant}
+                selected={restaurant.id === selectedRestaurantId}
+                onSelect={() =>
+                  selectRestaurant(restaurant.id, { scroll: false })
+                }
+                containerRef={(el) => (cardRefs.current[restaurant.id] = el)}
+              />
             ))}
           </div>
         </div>

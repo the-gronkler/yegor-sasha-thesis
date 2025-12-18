@@ -1,9 +1,11 @@
 @use '../variables/main-colors';
 @use '../variables/exception-colors';
+@use '../variables/layout';
 
 .map-page {
-  position: relative;
-  padding: 0;
+  // Shared layout vars (use the same values in your bottom nav styles too)
+  --layout-max-width: 768px;
+  --bottom-nav-height: #{layout.$bottom-nav-height}; // 70px
 
   .page-title {
     font-size: 1.5rem;
@@ -38,22 +40,60 @@
     background: #0b1020; // Ensure no DOM content shows through
   }
 
+  .map-wrapper {
+    position: relative;
+    z-index: 0;
+  }
+
   .map-bottom-sheet {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 80px; // sit above bottom nav
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(var(--layout-max-width), 100vw);
+    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+    z-index: 30;
+
     padding: 1rem 1.25rem;
+    border-radius: 16px 16px 0 0;
+
     background: linear-gradient(
       180deg,
       main-colors.$overlay-light 0%,
       main-colors.$overlay-dark 100%
     );
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
+
     max-height: 40vh;
     overflow-y: auto;
     display: grid;
     gap: 0.75rem;
+
+    // Avoid "layout shift" due to scrollbar appearing
+    scrollbar-gutter: stable;
+
+    // Firefox
+    scrollbar-width: thin;
+    scrollbar-color: rgba(main-colors.$text-inverse, 0.35) rgba(0, 0, 0, 0.15);
+
+    // Chrome/Safari/Edge
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 999px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(main-colors.$text-inverse, 0.28);
+      border-radius: 999px;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(main-colors.$text-inverse, 0.38);
+    }
   }
 
   .map-card {
@@ -124,55 +164,111 @@
     padding-top: 0.15rem;
   }
 
-  .map-overlay {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 10;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    max-width: min(360px, 80vw);
-    display: flex;
-    flex-direction: column;
+  .restaurant-card {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
     gap: 0.75rem;
-  }
-
-  .map-radius-selector {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
     background: main-colors.$bg-surface;
     border: 1px solid main-colors.$border-light;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px main-colors.$shadow-color;
+    border-radius: 12px;
+    padding: 0.75rem;
+    text-decoration: none;
+    color: main-colors.$text-primary;
+    box-shadow: 0 6px 12px main-colors.$shadow-color-strong;
+    cursor: pointer;
+    transition: all 0.2s ease;
 
-    label {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: main-colors.$text-primary;
-      margin: 0;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px main-colors.$shadow-color-strong;
     }
 
-    .radius-select {
-      flex: 1;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid main-colors.$border-light;
-      border-radius: 6px;
-      background: main-colors.$bg-base;
-      color: main-colors.$text-primary;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: border-color 0.2s ease;
+    &.is-selected {
+      border-color: main-colors.$brand-primary;
+      box-shadow: 0 8px 16px rgba(main-colors.$brand-primary, 0.3);
+      background: linear-gradient(
+        135deg,
+        rgba(main-colors.$brand-primary, 0.05),
+        rgba(main-colors.$brand-primary, 0.02)
+      );
+    }
+  }
 
-      &:hover {
-        border-color: main-colors.$text-secondary;
-      }
+  .restaurant-image-wrapper {
+    width: 96px;
+    height: 96px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
 
-      &:focus {
-        outline: none;
-        border-color: main-colors.$brand-primary;
-      }
+  .restaurant-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .restaurant-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .restaurant-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .restaurant-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: main-colors.$text-primary;
+  }
+
+  .restaurant-meta {
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.85rem;
+    color: main-colors.$text-secondary;
+    white-space: nowrap;
+    padding-top: 0.15rem;
+  }
+
+  .restaurant-description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: main-colors.$text-secondary;
+    line-height: 1.3;
+  }
+
+  .restaurant-actions {
+    margin-top: 0.5rem;
+  }
+
+  .restaurant-view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background: main-colors.$brand-primary;
+    color: main-colors.$text-inverse;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: main-colors.$brand-primary-hover;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 
