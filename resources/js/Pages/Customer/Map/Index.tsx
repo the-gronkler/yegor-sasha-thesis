@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
-import SearchInput from '@/Components/UI/SearchInput';
+import MapOverlay from '@/Components/Shared/MapOverlay';
 import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import { useSearch } from '@/Hooks/useSearch';
 import { Restaurant } from '@/types/models';
@@ -20,9 +20,16 @@ const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
 
 const EMPTY_KEYS: (keyof Restaurant)[] = [];
 
+const DEFAULT_RADIUS = 10;
+
 interface MapIndexProps extends PageProps {
   restaurants: Restaurant[];
-  mapboxPublicKey: string;
+  filters: {
+    lat: number | null;
+    lng: number | null;
+    radius: number;
+  };
+  mapboxPublicKey?: string;
 }
 
 const getLatLng = (restaurant: Restaurant): [number, number] | null => {
@@ -39,6 +46,7 @@ const getLatLng = (restaurant: Restaurant): [number, number] | null => {
 
 export default function MapIndex({
   restaurants,
+  filters,
   mapboxPublicKey,
 }: MapIndexProps) {
   const {
@@ -47,12 +55,17 @@ export default function MapIndex({
     filteredItems: filteredRestaurants,
   } = useSearch(restaurants, EMPTY_KEYS, SEARCH_OPTIONS);
 
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(
-    null,
-  );
   const [locationError, setLocationError] = useState<string | null>(null);
-  // Default center coordinates correspond to Warsaw, Poland (longitude, latitude)
-  const [center, setCenter] = useState<[number, number]>([21.0122, 52.2297]); // [lng, lat] for Mapbox
+  const [selectedRadius, setSelectedRadius] = useState<number>(
+    filters.radius || DEFAULT_RADIUS,
+  );
+
+  // Controlled viewState for the map
+  const [viewState, setViewState] = useState({
+    longitude: 21.0122, // Warsaw, Poland
+    latitude: 52.2297,
+    zoom: 13,
+  });
 
   // Validate API key on mount
   useEffect(() => {
@@ -65,65 +78,97 @@ export default function MapIndex({
     }
   }, [mapboxPublicKey]);
 
+  // Set initial center based on user location (from filters) or first restaurant
   useEffect(() => {
-    if (restaurants.length > 0) {
+    if (filters.lat !== null && filters.lng !== null) {
+      setViewState((prev) => ({
+        ...prev,
+        longitude: filters.lng!,
+        latitude: filters.lat!,
+      }));
+    } else if (restaurants.length > 0) {
       const coords = getLatLng(restaurants[0]);
       if (coords) {
-        // Convert [lat, lng] to [lng, lat] for Mapbox
-        setCenter([coords[1], coords[0]]);
+        setViewState((prev) => ({
+          ...prev,
+          longitude: coords[1],
+          latitude: coords[0],
+        }));
       }
     }
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation([latitude, longitude]);
-          // Convert [lat, lng] to [lng, lat] for Mapbox
-          setCenter([longitude, latitude]);
-          setLocationError(null);
-        },
-        (error) => {
-          let errorMessage = 'Unable to access your location';
+  }, [filters.lat, filters.lng, restaurants]);
 
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage =
-                'Location access denied. Enable location permissions to see nearby restaurants.';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage =
-                'Location information unavailable. Showing default map view.';
-              break;
-            case error.TIMEOUT:
-              errorMessage =
-                'Location request timed out. Showing default map view.';
-              break;
-          }
+  // Handle geolocation from Mapbox native control
+  const handleMapGeolocate = (latitude: number, longitude: number) => {
+    // Update map center immediately
+    setViewState((prev) => ({
+      ...prev,
+      longitude,
+      latitude,
+      zoom: 14, // Zoom in when user location is found
+    }));
 
-          setLocationError(errorMessage);
-          console.warn('Geolocation error:', error.message);
-        },
+    // Trigger Inertia reload with new location and radius
+    router.get(
+      route('map.index'),
+      { lat: latitude, lng: longitude, radius: selectedRadius },
+      {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        only: ['restaurants', 'filters'],
+      },
+    );
+  };
+
+  // Handle geolocation errors
+  const handleGeolocateError = (error: string) => {
+    setLocationError(error);
+  };
+
+  // Handle radius change
+  const handleRadiusChange = (newRadius: number) => {
+    setSelectedRadius(newRadius);
+
+    // If we have user location, reload with new radius
+    if (filters.lat !== null && filters.lng !== null) {
+      router.get(
+        route('map.index'),
+        { lat: filters.lat, lng: filters.lng, radius: newRadius },
         {
-          timeout: 5000,
-          maximumAge: 60000,
+          replace: true,
+          preserveState: true,
+          preserveScroll: true,
+          only: ['restaurants', 'filters'],
         },
       );
-    } else {
-      setLocationError('Geolocation is not supported by your browser.');
     }
-  }, [restaurants]);
+  };
 
-  //   This code re-center the map on the first restaurant in the search results if user location is not available
-  // whether or not it should be here is beyound the sope of the current task, leaving this here commented out for now
-  //   useEffect(() => {
-  //     if (!userLocation && filteredRestaurants.length > 0) {
-  //       const coords = getLatLng(filteredRestaurants[0]);
-  //       if (coords) {
-  //         // Convert [lat, lng] to [lng, lat] for Mapbox
-  //         setCenter([coords[1], coords[0]]);
-  //       }
-  //     }
-  //   }, [filteredRestaurants, userLocation]);
+  // Debug function to test native geolocation (for development only)
+  const debugRequestLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by this browser.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        console.log('Native geolocation success:', pos);
+        handleMapGeolocate(pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        console.warn('Native geolocation error:', err);
+        // err.code will be 1/2/3 with real message
+        let errorMessage = `${err.code}: ${err.message}`;
+        setLocationError(errorMessage);
+      },
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 },
+    );
+  };
+
+  // Restaurants already have distance calculated by backend when filters.lat/lng are present
+  // Just use filteredRestaurants directly (Fuse search on the already-nearby list)
 
   const mapMarkers = useMemo(() => {
     const restaurantMarkers = filteredRestaurants
@@ -144,19 +189,20 @@ export default function MapIndex({
       name: string;
     }[];
 
-    const userMarker = userLocation
-      ? [
-          {
-            id: -1,
-            lat: userLocation[0],
-            lng: userLocation[1],
-            name: 'You are here',
-          },
-        ]
-      : [];
+    const userMarker =
+      filters.lat !== null && filters.lng !== null
+        ? [
+            {
+              id: -1,
+              lat: filters.lat,
+              lng: filters.lng,
+              name: 'You are here',
+            },
+          ]
+        : [];
 
     return [...restaurantMarkers, ...userMarker];
-  }, [filteredRestaurants, userLocation]);
+  }, [filteredRestaurants, filters.lat, filters.lng]);
 
   return (
     <MapLayout>
@@ -165,29 +211,70 @@ export default function MapIndex({
         {locationError && (
           <div className="location-error-banner">
             <p className="location-error-message">{locationError}</p>
-            <button
-              className="location-error-dismiss"
-              onClick={() => setLocationError(null)}
-              aria-label="Dismiss location error"
-            >
-              ×
-            </button>
+            <div className="location-error-actions">
+              <button
+                className="location-error-native"
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        console.log('Native geolocation success:', pos);
+                        handleMapGeolocate(
+                          pos.coords.latitude,
+                          pos.coords.longitude,
+                        );
+                        setLocationError(null); // Clear error on success
+                      },
+                      (err) => {
+                        console.warn('Native geolocation error:', err);
+                        setLocationError(`Native: ${err.code}: ${err.message}`);
+                      },
+                      {
+                        enableHighAccuracy: true,
+                        timeout: 6000,
+                        maximumAge: 0,
+                      },
+                    );
+                  }
+                }}
+                aria-label="Try native geolocation"
+              >
+                Try Native GPS
+              </button>
+              <button
+                className="location-error-debug"
+                onClick={debugRequestLocation}
+                aria-label="Try requesting location again"
+              >
+                Try Again
+              </button>
+              <button
+                className="location-error-dismiss"
+                onClick={() => setLocationError(null)}
+                aria-label="Dismiss location error"
+              >
+                ×
+              </button>
+            </div>
           </div>
         )}
         <div className="map-container-box">
-          <div className="map-overlay">
-            <SearchInput
-              value={query}
-              onChange={setQuery}
-              placeholder="Search restaurants..."
-              className="map-search-input"
-            />
-          </div>
+          <MapOverlay
+            query={query}
+            onQueryChange={setQuery}
+            selectedRadius={selectedRadius}
+            onRadiusChange={handleRadiusChange}
+            filters={filters}
+          />
           <Map
-            center={center}
-            zoom={13}
+            viewState={viewState}
+            onMove={setViewState}
             markers={mapMarkers}
-            mapboxAccessToken={mapboxPublicKey}
+            mapboxAccessToken={mapboxPublicKey || ''}
+            onGeolocate={handleMapGeolocate}
+            onGeolocateError={handleGeolocateError}
+            enableGeolocation={true}
+            trackUserLocation={false}
           />
           <div className="map-bottom-sheet">
             {filteredRestaurants.map((restaurant) => (

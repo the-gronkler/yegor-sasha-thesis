@@ -125,6 +125,48 @@
     padding: 0.75rem 1rem;
     border-radius: 12px;
     max-width: min(360px, 80vw);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .map-radius-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: main-colors.$bg-surface;
+    border: 1px solid main-colors.$border-light;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px main-colors.$shadow-color;
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin: 0;
+    }
+
+    .radius-select {
+      flex: 1;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid main-colors.$border-light;
+      border-radius: 6px;
+      background: main-colors.$bg-base;
+      color: main-colors.$text-primary;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+
+      &:hover {
+        border-color: main-colors.$text-secondary;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: main-colors.$brand-primary;
+      }
+    }
   }
 
   .debug-text {
@@ -178,6 +220,54 @@
 
     &:active {
       background: main-colors.$overlay-white-medium;
+    }
+  }
+
+  .location-error-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .location-error-native {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: main-colors.$text-inverse;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(34, 197, 94, 0.3);
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    &:active {
+      background: rgba(34, 197, 94, 0.4);
+    }
+  }
+
+  .location-error-retry {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: main-colors.$text-inverse;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    &:active {
+      background: rgba(255, 255, 255, 0.4);
     }
   }
 

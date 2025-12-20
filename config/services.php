@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'mapbox' => [
+        'public_key' => env('MAPBOX_PUBLIC_KEY'),
+    ],
+
 ];

@@ -42,9 +42,13 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
             ) : (
               <span className="meta-item">Hours not available</span>
             )}
-            <span className="meta-separator">•</span>
-            {/* TODO: Calculate and display actual distance */}
-            <span className="meta-item">~3km</span>
+            {restaurant.distance !== undefined &&
+              restaurant.distance !== null && (
+                <>
+                  <span className="meta-separator">•</span>
+                  <span className="meta-item">{restaurant.distance} km</span>
+                </>
+              )}
           </div>
           <p className="restaurant-description">
             {restaurant.description || 'No description available'}

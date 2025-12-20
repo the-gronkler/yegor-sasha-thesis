@@ -1,5 +1,11 @@
 import * as React from 'react';
-import Map, { Marker, Popup } from 'react-map-gl/mapbox';
+import Map, {
+  Marker,
+  Popup,
+  GeolocateControl,
+  NavigationControl,
+  type GeolocateResultEvent,
+} from 'react-map-gl/mapbox';
 import { MapPinIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -11,21 +17,103 @@ interface MapMarker {
 }
 
 interface Props {
-  center?: [number, number]; // [lng, lat]
-  zoom?: number;
+  viewState: {
+    longitude: number;
+    latitude: number;
+    zoom: number;
+  };
+  onMove: (viewState: {
+    longitude: number;
+    latitude: number;
+    zoom: number;
+  }) => void;
   markers?: MapMarker[];
   className?: string;
   mapboxAccessToken: string;
+  onGeolocate?: (latitude: number, longitude: number) => void;
+  onGeolocateError?: (error: string) => void;
+  enableGeolocation?: boolean;
+  trackUserLocation?: boolean;
 }
 
 export default function MapComponent({
-  center = [-0.09, 51.505], // [lng, lat]
-  zoom = 13,
+  viewState,
+  onMove,
   markers = [],
   className = '',
   mapboxAccessToken,
+  onGeolocate,
+  onGeolocateError,
+  enableGeolocation = true,
+  trackUserLocation = false,
 }: Props) {
   const [popupId, setPopupId] = React.useState<number | null>(null);
+  const geolocateControlRef = React.useRef<mapboxgl.GeolocateControl | null>(
+    null,
+  );
+
+  // Safe extraction helper for geolocation error events
+  type MaybeErrorEvent = {
+    code?: number;
+    message?: string;
+    error?: { code?: number; message?: string };
+  };
+
+  function extractGeolocateError(evt: unknown): {
+    code?: number;
+    message?: string;
+  } {
+    if (!evt || typeof evt !== 'object') return {};
+    const e = evt as MaybeErrorEvent;
+
+    // TODO: Extract code and message from the event, falling back to nested error if needed
+    return {
+      code: e.code ?? e.error?.code,
+      message: e.message ?? e.error?.message,
+    };
+  }
+
+  // Handle geolocation success from Mapbox control
+  const handleGeolocate = React.useCallback(
+    (evt: GeolocateResultEvent) => {
+      if (onGeolocate && evt.coords) {
+        const { latitude, longitude } = evt.coords;
+        onGeolocate(latitude, longitude);
+      }
+    },
+    [onGeolocate],
+  );
+
+  // Handle geolocation errors from Mapbox control
+  const handleGeolocateError = React.useCallback(
+    (evt: unknown) => {
+      if (onGeolocateError) {
+        const { code, message } = extractGeolocateError(evt);
+
+        let errorMessage =
+          message ||
+          'Unable to get your location. Please check browser/OS location permissions.';
+
+        switch (code) {
+          case 1:
+            errorMessage =
+              'Location access denied. Allow location permissions to see nearby restaurants.';
+            break;
+          case 2:
+            errorMessage =
+              'Location information unavailable. Check OS location services or try again.';
+            break;
+          case 3:
+            errorMessage =
+              'Location request timed out. Try again or disable high accuracy.';
+            break;
+        }
+
+        onGeolocateError(errorMessage);
+      }
+    },
+    [onGeolocateError],
+  );
 
   // Validate API key
   if (!mapboxAccessToken) {
@@ -62,13 +150,36 @@ export default function MapComponent({
   return (
     <div className={`map-wrapper ${className}`}>
       <Map
-        initialViewState={{ longitude: center[0], latitude: center[1], zoom }}
+        {...viewState}
+        onMove={(evt) => onMove(evt.viewState)}
         // TODO: select style for the map in general, beyond the scope of the currnet pr since its big already
         mapStyle="mapbox://styles/mapbox/dark-v10"
         mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
         onClick={() => setPopupId(null)}
       >
+        {/* Navigation Controls (Zoom +/-, Compass) */}
+        <NavigationControl position="top-right" />
+
+        {/* Geolocation Control - Native Mapbox UI for user location */}
+        {enableGeolocation && (
+          <GeolocateControl
+            ref={geolocateControlRef}
+            position="top-right"
+            positionOptions={{
+              enableHighAccuracy: true,
+              timeout: 6000,
+              maximumAge: 0,
+            }}
+            trackUserLocation={trackUserLocation}
+            showUserHeading={trackUserLocation}
+            showUserLocation={true}
+            onGeolocate={handleGeolocate}
+            onError={handleGeolocateError}
+          />
+        )}
+
+        {/* Restaurant and User Markers */}
         {markers.map((marker) => {
           const isUserLocation = marker.id === -1;
           return (
@@ -90,6 +201,8 @@ export default function MapComponent({
             </Marker>
           );
         })}
+
+        {/* Marker Popups */}
         {markers.map((marker) =>
           popupId === marker.id ? (
             <Popup
