@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
-import SearchInput from '@/Components/UI/SearchInput';
+import MapOverlay from '@/Components/Shared/MapOverlay';
 import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import { useSearch } from '@/Hooks/useSearch';
 import { Restaurant } from '@/types/models';
@@ -20,7 +20,6 @@ const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
 
 const EMPTY_KEYS: (keyof Restaurant)[] = [];
 
-const RADIUS_OPTIONS = [2, 5, 10, 25, 50] as const;
 const DEFAULT_RADIUS = 10;
 
 interface MapIndexProps extends PageProps {
@@ -260,31 +259,13 @@ export default function MapIndex({
           </div>
         )}
         <div className="map-container-box">
-          <div className="map-overlay">
-            <SearchInput
-              value={query}
-              onChange={setQuery}
-              placeholder="Search restaurants..."
-              className="map-search-input"
-            />
-            {filters.lat !== null && filters.lng !== null && (
-              <div className="map-radius-selector">
-                <label htmlFor="radius-select">Radius:</label>
-                <select
-                  id="radius-select"
-                  value={selectedRadius}
-                  onChange={(e) => handleRadiusChange(Number(e.target.value))}
-                  className="radius-select"
-                >
-                  {RADIUS_OPTIONS.map((radius) => (
-                    <option key={radius} value={radius}>
-                      {radius} km
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
+          <MapOverlay
+            query={query}
+            onQueryChange={setQuery}
+            selectedRadius={selectedRadius}
+            onRadiusChange={handleRadiusChange}
+            filters={filters}
+          />
           <Map
             viewState={viewState}
             onMove={setViewState}
