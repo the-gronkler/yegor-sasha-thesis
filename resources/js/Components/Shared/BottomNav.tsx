@@ -55,6 +55,12 @@ export default function BottomNav() {
         badge={itemCount}
       />
       <NavLink
+        href={route('orders.index')}
+        active={route().current('orders.index')}
+        icon={ClipboardDocumentListIcon}
+        label="Orders"
+      />
+      <NavLink
         href={route('profile.show')}
         active={route().current('profile.show')}
         icon={UserIcon}
