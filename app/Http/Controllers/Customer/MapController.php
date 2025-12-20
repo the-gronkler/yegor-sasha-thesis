@@ -55,6 +55,7 @@ class MapController extends Controller
             ->whereNotNull('latitude')
             ->whereNotNull('longitude');
 
+        // TODO: move this to a seperate helper finction outside the controller scope
         // Apply geolocation filtering if coordinates are provided
         // Uses Haversine formula to calculate distance
         if ($latitude !== null && $longitude !== null) {
