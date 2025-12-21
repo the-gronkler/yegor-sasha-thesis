@@ -220,7 +220,7 @@ export default function MapComponent({
       zoom: Math.max(viewState.zoom, 15),
       duration: 900,
       essential: true,
-      padding: { top: 120, bottom: 320, left: 40, right: 40 }, // tune bottom
+      padding: { top: 180, bottom: 320, left: 40, right: 40 },
     });
   }, [selectedRestaurant?.id]);
 
@@ -442,9 +442,9 @@ export default function MapComponent({
             source="restaurants"
             filter={['==', ['get', 'id'], selectedRestaurantId || -999]}
             paint={{
-              'circle-color': '#ffffff',
-              'circle-radius': 12,
-              'circle-stroke-color': THEME.brandPrimary,
+              'circle-color': THEME.brandPrimary,
+              'circle-radius': 18,
+              'circle-stroke-color': THEME.brandPrimaryHover,
               'circle-stroke-width': 3,
             }}
           />
@@ -455,8 +455,8 @@ export default function MapComponent({
             source="restaurants"
             filter={['!', ['has', 'point_count']]}
             paint={{
-              'circle-color': '#11b4da',
-              'circle-radius': 8,
+              'circle-color': THEME.brandPrimary,
+              'circle-radius': 14,
             }}
           />
         </Source>
