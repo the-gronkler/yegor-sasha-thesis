@@ -34,12 +34,17 @@ class MapController extends Controller
         $validated = $request->validate([
             'lat' => 'nullable|numeric|between:-90,90',
             'lng' => 'nullable|numeric|between:-180,180',
-            'radius' => 'nullable|numeric|min:0.1|max:100', // Radius in kilometers
+            'radius' => 'nullable|numeric|min:0|max:100', // allow 0 == "no range"
         ]);
 
         $latitude = $validated['lat'] ?? null;
         $longitude = $validated['lng'] ?? null;
-        $radius = $validated['radius'] ?? 50; // Default 50km radius
+
+        // If radius is omitted -> keep your default.
+        // If radius is explicitly 0 -> interpret as "no range".
+        $radius = array_key_exists('radius', $validated)
+            ? (float) $validated['radius']
+            : 50.0;
 
         $query = Restaurant::with(['images', 'foodTypes.menuItems'])
             ->select([
@@ -55,29 +60,31 @@ class MapController extends Controller
             ->whereNotNull('latitude')
             ->whereNotNull('longitude');
 
+        $earthRadiusKm = 6371; // Earth's radius in kilometers
+
         // Apply geolocation filtering if coordinates are provided
         // Uses Haversine formula to calculate distance
         if ($latitude !== null && $longitude !== null) {
-            // Approximate kilometers per degree of latitude/longitude (used for bounding box pre-filter)
-            $kmPerDegree = 111;
+            // Always compute distance when we have coords so we can order by it
+            $query->selectRaw(
+                '(? * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance',
+                [$earthRadiusKm, $latitude, $longitude, $latitude]
+            );
 
-            // Clamp latitude to avoid pole issues (bounding box would explode)
-            $clampedLatitude = max(min($latitude, 85.0), -85.0);
+            if ($radius > 0) {
+                // Bounding box only when radius is limiting results
+                $kmPerDegree = 111;
+                $clampedLatitude = max(min($latitude, 85.0), -85.0);
 
-            // Bounding box pre-filter (approximately 1 degree ≈ 111km)
-            $latDelta = $radius / $kmPerDegree;
-            $lngDelta = $radius / ($kmPerDegree * cos(deg2rad($clampedLatitude)));
+                $latDelta = $radius / $kmPerDegree;
+                $lngDelta = $radius / ($kmPerDegree * cos(deg2rad($clampedLatitude)));
 
-            $earthRadiusKm = 6371; // Earth's radius in kilometers
+                $query->whereBetween('latitude', [$latitude - $latDelta, $latitude + $latDelta])
+                    ->whereBetween('longitude', [$longitude - $lngDelta, $longitude + $lngDelta])
+                    ->having('distance', '<=', $radius);
+            }
 
-            $query->whereBetween('latitude', [$latitude - $latDelta, $latitude + $latDelta])
-                ->whereBetween('longitude', [$longitude - $lngDelta, $longitude + $lngDelta])
-                ->selectRaw(
-                    '(? * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance',
-                    [$earthRadiusKm, $latitude, $longitude, $latitude]
-                )
-                ->having('distance', '<=', $radius)
-                ->orderBy('distance');
+            $query->orderBy('distance');
         } else {
             // Default sorting by rating if no geolocation
             $query->latest('rating');

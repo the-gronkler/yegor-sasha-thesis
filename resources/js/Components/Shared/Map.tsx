@@ -9,6 +9,7 @@ import Map, {
   Layer,
   type GeolocateResultEvent,
 } from 'react-map-gl/mapbox';
+import type mapboxgl from 'mapbox-gl';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import StarRating from '@/Components/Shared/StarRating';
@@ -34,6 +35,10 @@ interface Props {
   trackUserLocation?: boolean;
   selectedRestaurantId?: number | null;
   onSelectRestaurant?: (id: number | null, opts?: { scroll?: boolean }) => void;
+  registerGeolocateTrigger?: (fn: (() => boolean) | null) => void;
+  isPickingLocation?: boolean;
+  onPickLocation?: (lat: number, lng: number) => void;
+  showGeolocateControlUi?: boolean;
 }
 
 export default function MapComponent({
@@ -48,6 +53,10 @@ export default function MapComponent({
   trackUserLocation = false,
   selectedRestaurantId,
   onSelectRestaurant,
+  registerGeolocateTrigger,
+  isPickingLocation,
+  onPickLocation,
+  showGeolocateControlUi = true,
 }: Props) {
   const geolocateControlRef = React.useRef<mapboxgl.GeolocateControl | null>(
     null,
@@ -125,6 +134,19 @@ export default function MapComponent({
     [onGeolocateError],
   );
 
+  // Expose a single "trigger geolocation" function to the parent
+  React.useEffect(() => {
+    if (!registerGeolocateTrigger) return;
+
+    registerGeolocateTrigger(() => {
+      if (!geolocateControlRef.current) return false;
+      geolocateControlRef.current.trigger();
+      return true;
+    });
+
+    return () => registerGeolocateTrigger(null);
+  }, [registerGeolocateTrigger]);
+
   // Separate restaurant markers from user marker
   const restaurantMarkers = markers.filter((m) => m.id !== -1);
   const userMarker = markers.find((m) => m.id === -1);
@@ -153,53 +175,64 @@ export default function MapComponent({
     [restaurantMarkers],
   );
 
-  // Handle map click for clustering
-  const handleMapClick = React.useCallback((event: any) => {
-    const map = mapRef.current?.getMap();
-    if (!map) return;
-
-    const features = map.queryRenderedFeatures(event.point, {
-      layers: ['clusters', 'unclustered-point'],
-    });
-
-    if (features.length > 0) {
-      const feature = features[0];
-      if (feature.layer.id === 'clusters') {
-        // Zoom into cluster
-        const clusterId = feature.properties.cluster_id;
-        const source = map.getSource('restaurants');
-        if (source) {
-          source.getClusterExpansionZoom(
-            clusterId,
-            (err: any, zoom: number) => {
-              if (err) return;
-              map.easeTo({
-                center: feature.geometry.coordinates,
-                zoom: zoom,
-              });
-            },
-          );
-        }
-      } else if (feature.layer.id === 'unclustered-point') {
-        // Open popup for restaurant
-        const properties = feature.properties;
-        const restaurant: MapMarker = {
-          id: properties.id,
-          lat: feature.geometry.coordinates[1],
-          lng: feature.geometry.coordinates[0],
-          name: properties.name,
-          address: properties.address,
-          openingHours: properties.openingHours,
-          rating: properties.rating,
-          distanceKm: properties.distanceKm,
-          imageUrl: properties.imageUrl,
-        };
-        onSelectRestaurant?.(restaurant.id);
+  // Handle map click for clustering and location picking
+  const handleMapClick = React.useCallback(
+    (event: any) => {
+      // Manual pick mode: click anywhere to set user location
+      if (isPickingLocation) {
+        const { lng, lat } = event.lngLat;
+        onPickLocation?.(lat, lng);
+        return;
       }
-    } else {
-      onSelectRestaurant?.(null);
-    }
-  }, []);
+
+      // Existing clustering / restaurant selection logic
+      const map = mapRef.current?.getMap();
+      if (!map) return;
+
+      const features = map.queryRenderedFeatures(event.point, {
+        layers: ['clusters', 'unclustered-point'],
+      });
+
+      if (features.length > 0) {
+        const feature = features[0];
+        if (feature.layer.id === 'clusters') {
+          // Zoom into cluster
+          const clusterId = feature.properties.cluster_id;
+          const source = map.getSource('restaurants');
+          if (source) {
+            source.getClusterExpansionZoom(
+              clusterId,
+              (err: any, zoom: number) => {
+                if (err) return;
+                map.easeTo({
+                  center: feature.geometry.coordinates,
+                  zoom: zoom,
+                });
+              },
+            );
+          }
+        } else if (feature.layer.id === 'unclustered-point') {
+          // Open popup for restaurant
+          const properties = feature.properties;
+          const restaurant: MapMarker = {
+            id: properties.id,
+            lat: feature.geometry.coordinates[1],
+            lng: feature.geometry.coordinates[0],
+            name: properties.name,
+            address: properties.address,
+            openingHours: properties.openingHours,
+            rating: properties.rating,
+            distanceKm: properties.distanceKm,
+            imageUrl: properties.imageUrl,
+          };
+          onSelectRestaurant?.(restaurant.id);
+        }
+      } else {
+        onSelectRestaurant?.(null);
+      }
+    },
+    [isPickingLocation, onPickLocation, onSelectRestaurant],
+  );
 
   // Get selected restaurant from markers
   const selectedRestaurant = React.useMemo(() => {
@@ -223,6 +256,16 @@ export default function MapComponent({
       padding: { top: 180, bottom: 320, left: 40, right: 40 },
     });
   }, [selectedRestaurant?.id]);
+
+  // Handle map mouse move for cursor changes
+  const handleMapMouseMove = React.useCallback((event: any) => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    // When interactiveLayerIds is set, event.features contains hovered features
+    const hasFeatures = (event.features?.length ?? 0) > 0;
+    map.getCanvas().style.cursor = hasFeatures ? 'pointer' : '';
+  }, []);
 
   // Validate API key
   if (!mapboxAccessToken) {
@@ -266,6 +309,9 @@ export default function MapComponent({
         mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
         projection="globe"
+        interactiveLayerIds={
+          isPickingLocation ? undefined : ['clusters', 'unclustered-point']
+        }
         onLoad={(e) => {
           const map = e.target; // Mapbox GL JS map instance
 
@@ -278,6 +324,7 @@ export default function MapComponent({
         }}
         ref={mapRef}
         onClick={handleMapClick}
+        onMouseMove={handleMapMouseMove}
       >
         {/* Navigation Controls (Zoom +/-, Compass) */}
         <NavigationControl position="top-right" />
@@ -287,10 +334,12 @@ export default function MapComponent({
           <GeolocateControl
             ref={geolocateControlRef}
             position="top-right"
+            style={showGeolocateControlUi ? undefined : { display: 'none' }}
             positionOptions={{
-              enableHighAccuracy: true,
-              timeout: 6000,
-              maximumAge: 0,
+              // More forgiving defaults (timeouts are common on Windows laptops)
+              enableHighAccuracy: false,
+              timeout: 20000,
+              maximumAge: 600000, // 10 minutes
             }}
             trackUserLocation={trackUserLocation}
             showUserHeading={trackUserLocation}

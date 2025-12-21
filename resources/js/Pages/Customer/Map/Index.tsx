@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Head, router } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
@@ -20,12 +27,24 @@ const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
 
 const EMPTY_KEYS: (keyof Restaurant)[] = [];
 
-const RADIUS_OPTIONS = [2, 5, 10, 25, 50] as const;
-const DEFAULT_RADIUS = 10;
-
 const COLLAPSED_PX = 105; // Minimal height - handle touches bottom nav
 const EXPANDED_MAX_PX = 520; // Max expanded height
 const EXPANDED_VH = 0.45; // 45vh
+
+const MIN_RADIUS = 1;
+const MAX_RADIUS = 50;
+const NO_RANGE_SLIDER_VALUE = 51; // rightmost = "No range"
+
+// Convert backend radius -> slider value
+const radiusToSlider = (radius: number) => {
+  if (!radius || radius <= 0) return NO_RANGE_SLIDER_VALUE;
+  return Math.min(MAX_RADIUS, Math.max(MIN_RADIUS, radius));
+};
+
+// Convert slider value -> backend radius
+const sliderToRadius = (sliderValue: number) => {
+  return sliderValue === NO_RANGE_SLIDER_VALUE ? 0 : sliderValue;
+};
 
 interface MapIndexProps extends PageProps {
   restaurants: Restaurant[];
@@ -61,9 +80,28 @@ export default function MapIndex({
   } = useSearch(restaurants, EMPTY_KEYS, SEARCH_OPTIONS);
 
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [selectedRadius, setSelectedRadius] = useState<number>(
-    filters.radius || DEFAULT_RADIUS,
+
+  // Radius slider state (UI value that maps to backend radius)
+  const [radiusSliderValue, setRadiusSliderValue] = useState<number>(() =>
+    radiusToSlider(filters.radius ?? 50),
   );
+
+  // keep slider in sync if filters.radius changes after navigation
+  useEffect(() => {
+    setRadiusSliderValue(radiusToSlider(filters.radius ?? 50));
+  }, [filters.radius]);
+
+  // Derive radius for backend requests
+  const radiusKm = useMemo(
+    () => sliderToRadius(radiusSliderValue),
+    [radiusSliderValue],
+  );
+
+  // Computed values for slider
+  const radiusLabel =
+    radiusSliderValue === NO_RANGE_SLIDER_VALUE
+      ? 'No range'
+      : `${radiusSliderValue} km`;
 
   // Selection state for unified map/list interaction
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<
@@ -74,10 +112,11 @@ export default function MapIndex({
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   // Sheet collapsible state
-  const sheetRef = useRef<HTMLDivElement | null>(null);
   const sheetContentRef = useRef<HTMLDivElement | null>(null);
   const [expandedPx, setExpandedPx] = useState(() =>
-    Math.min(Math.round(window.innerHeight * EXPANDED_VH), EXPANDED_MAX_PX),
+    typeof window === 'undefined'
+      ? EXPANDED_MAX_PX
+      : Math.min(Math.round(window.innerHeight * EXPANDED_VH), EXPANDED_MAX_PX),
   );
   const [sheetHeight, setSheetHeight] = useState<number>(COLLAPSED_PX);
   const [isDragging, setIsDragging] = useState(false);
@@ -91,6 +130,57 @@ export default function MapIndex({
     latitude: 52.2297,
     zoom: 13,
   });
+
+  // Loading state for geolocation requests
+  const [isGeolocating, setIsGeolocating] = useState(false);
+
+  // Geolocation trigger from Mapbox control
+  const geolocateTriggerRef = useRef<null | (() => boolean)>(null);
+
+  // Stable callback for registering geolocate trigger
+  const registerGeolocateTrigger = useCallback((fn: (() => boolean) | null) => {
+    geolocateTriggerRef.current = fn;
+  }, []);
+
+  // Helper to reload map with new filters
+  const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
+    router.get(
+      route('map.index'),
+      { lat, lng, radius },
+      {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        only: ['restaurants', 'filters'],
+      },
+    );
+  }, []);
+
+  // Manual location picking state
+  const [isPickingLocation, setIsPickingLocation] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualLat, setManualLat] = useState<string>('');
+  const [manualLng, setManualLng] = useState<string>('');
+
+  // Collapsible overlay states (collapsed by default)
+  const [controlsOpen, setControlsOpen] = useState(false);
+  const [radiusOpen, setRadiusOpen] = useState(false);
+
+  // If the controls panel is closed, also close manual input + pick mode
+  useEffect(() => {
+    if (!controlsOpen) {
+      setManualOpen(false);
+      setIsPickingLocation(false);
+    }
+  }, [controlsOpen]);
+
+  const collapseAllOverlay = () => {
+    setControlsOpen(false);
+    setRadiusOpen(false);
+    setManualOpen(false);
+    setIsPickingLocation(false);
+    setLocationError(null);
+  };
 
   // Validate API key on mount
   useEffect(() => {
@@ -197,73 +287,75 @@ export default function MapIndex({
     window.addEventListener('pointercancel', onUp as any);
   };
 
-  // Handle geolocation from Mapbox native control
-  const handleMapGeolocate = (latitude: number, longitude: number) => {
-    // Update map center immediately
-    setViewState((prev) => ({
-      ...prev,
-      longitude,
-      latitude,
-      zoom: 14, // Zoom in when user location is found
-    }));
+  // Trigger geolocation via Mapbox control
+  const triggerGeolocate = () => {
+    const ok = geolocateTriggerRef.current?.();
+    if (!ok) {
+      setLocationError(
+        'Geolocation control not ready yet. Refresh and try again.',
+      );
+      return;
+    }
+    setIsGeolocating(true);
+  };
 
-    // Trigger Inertia reload with new location and radius
-    router.get(
-      route('map.index'),
-      { lat: latitude, lng: longitude, radius: selectedRadius },
-      {
-        replace: true,
-        preserveState: true,
-        preserveScroll: true,
-        only: ['restaurants', 'filters'],
-      },
-    );
+  // Commit radius change (called on pointer-up / key-up)
+  const commitRadius = useCallback(
+    (e: React.SyntheticEvent<HTMLInputElement>) => {
+      if (filters.lat == null || filters.lng == null) return;
+
+      const sliderValue = Number((e.currentTarget as HTMLInputElement).value);
+      const radius = sliderToRadius(sliderValue);
+
+      reloadMap(filters.lat, filters.lng, radius);
+    },
+    [filters.lat, filters.lng, reloadMap],
+  );
+
+  // Apply manual coordinates
+  const applyManualCoords = () => {
+    const lat = Number(manualLat);
+    const lng = Number(manualLng);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      setLocationError('Please enter valid numeric latitude/longitude.');
+      return;
+    }
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      setLocationError(
+        'Latitude must be -90..90 and longitude must be -180..180.',
+      );
+      return;
+    }
+
+    setManualOpen(false);
+    setIsPickingLocation(false);
+    setLocationError(null);
+    handleMapGeolocate(lat, lng);
+  };
+
+  // Handle geolocation success
+  const handleMapGeolocate = (latitude: number, longitude: number) => {
+    setLocationError(null);
+    setViewState((prev) => ({ ...prev, longitude, latitude, zoom: 14 }));
+
+    // Stop loading
+    setIsGeolocating(false);
+
+    reloadMap(latitude, longitude, radiusKm);
   };
 
   // Handle geolocation errors
   const handleGeolocateError = (error: string) => {
+    setIsGeolocating(false);
     setLocationError(error);
   };
 
-  // Handle radius change
-  const handleRadiusChange = (newRadius: number) => {
-    setSelectedRadius(newRadius);
-
-    // If we have user location, reload with new radius
-    if (filters.lat !== null && filters.lng !== null) {
-      router.get(
-        route('map.index'),
-        { lat: filters.lat, lng: filters.lng, radius: newRadius },
-        {
-          replace: true,
-          preserveState: true,
-          preserveScroll: true,
-          only: ['restaurants', 'filters'],
-        },
-      );
-    }
-  };
-
-  // Debug function to test native geolocation (for development only)
-  const debugRequestLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by this browser.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        console.log('Native geolocation success:', pos);
-        handleMapGeolocate(pos.coords.latitude, pos.coords.longitude);
-      },
-      (err) => {
-        console.warn('Native geolocation error:', err);
-        // err.code will be 1/2/3 with real message
-        let errorMessage = `${err.code}: ${err.message}`;
-        setLocationError(errorMessage);
-      },
-      { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 },
-    );
+  // When user picks on map
+  const handlePickLocation = (lat: number, lng: number) => {
+    setIsPickingLocation(false);
+    setLocationError(null);
+    handleMapGeolocate(lat, lng);
   };
 
   // Unified selection handler for map/list interaction
@@ -273,6 +365,8 @@ export default function MapIndex({
 
   useLayoutEffect(() => {
     if (selectedRestaurantId == null) return;
+
+    let cancelled = false;
 
     const id = selectedRestaurantId;
     const el = cardRefs.current[id];
@@ -289,24 +383,32 @@ export default function MapIndex({
       const handler = (event: TransitionEvent) => {
         // Only respond to padding/min-height/gap transitions
         if (
-          event.propertyName === 'padding' ||
+          event.propertyName.startsWith('padding') ||
           event.propertyName === 'min-height' ||
           event.propertyName === 'gap'
         ) {
           el.removeEventListener('transitionend', handler);
-          resolve();
+          if (!cancelled) resolve();
         }
       };
       el.addEventListener('transitionend', handler);
 
       // Fallback timeout (in case no transitionend fires for some reason)
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         el.removeEventListener('transitionend', handler);
-        resolve();
+        if (!cancelled) resolve();
       }, 300); // slightly longer than your CSS duration (250ms)
+
+      return () => {
+        cancelled = true;
+        clearTimeout(timeoutId);
+        el.removeEventListener('transitionend', handler);
+      };
     });
 
     waitForTransition.then(() => {
+      if (cancelled) return;
+
       // +------------------------+
       // | STEP 2: SCROLL TO VIEW |
       // +------------------------+
@@ -332,6 +434,10 @@ export default function MapIndex({
         behavior: 'smooth',
       });
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedRestaurantId]);
 
   // Restaurants already have distance calculated by backend when filters.lat/lng are present
@@ -376,47 +482,27 @@ export default function MapIndex({
       <div className="map-page">
         {locationError && (
           <div className="location-error-banner">
-            <p className="location-error-message">{locationError}</p>
+            <div style={{ flex: 1 }}>
+              <p className="location-error-message">{locationError}</p>
+            </div>
+
             <div className="location-error-actions">
               <button
                 className="location-error-native"
-                onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                      (pos) => {
-                        console.log('Native geolocation success:', pos);
-                        handleMapGeolocate(
-                          pos.coords.latitude,
-                          pos.coords.longitude,
-                        );
-                        setLocationError(null); // Clear error on success
-                      },
-                      (err) => {
-                        console.warn('Native geolocation error:', err);
-                        setLocationError(`Native: ${err.code}: ${err.message}`);
-                      },
-                      {
-                        enableHighAccuracy: true,
-                        timeout: 6000,
-                        maximumAge: 0,
-                      },
-                    );
-                  }
-                }}
-                aria-label="Try native geolocation"
+                disabled={isGeolocating}
+                onClick={triggerGeolocate}
+                aria-label="Try GPS"
               >
-                Try Native GPS
+                {isGeolocating ? 'Getting Location...' : 'Try GPS'}
               </button>
-              <button
-                className="location-error-debug"
-                onClick={debugRequestLocation}
-                aria-label="Try requesting location again"
-              >
-                Try Again
-              </button>
+
               <button
                 className="location-error-dismiss"
-                onClick={() => setLocationError(null)}
+                onClick={() => {
+                  setLocationError(null);
+                  setManualOpen(false);
+                  setIsPickingLocation(false);
+                }}
                 aria-label="Dismiss location error"
               >
                 ×
@@ -426,27 +512,194 @@ export default function MapIndex({
         )}
         <div className="map-container-box">
           <div className="map-overlay">
-            <SearchInput
-              value={query}
-              onChange={setQuery}
-              placeholder="Search restaurants..."
-              className="map-search-input"
-            />
+            <div className="map-controls-card">
+              <div className="map-controls-header">
+                <SearchInput
+                  value={query}
+                  onChange={setQuery}
+                  placeholder="Search restaurants..."
+                  className="map-search-input map-search-input--transparent"
+                />
+
+                <div className="map-controls-header-actions">
+                  {/* Radius toggle only makes sense when we actually have coords */}
+                  {filters.lat !== null && filters.lng !== null && (
+                    <button
+                      type="button"
+                      className={`map-overlay-toggle ${radiusOpen ? 'is-active' : ''}`}
+                      onClick={() => setRadiusOpen((v) => !v)}
+                      aria-label={
+                        radiusOpen
+                          ? 'Hide radius options'
+                          : 'Show radius options'
+                      }
+                      aria-expanded={radiusOpen}
+                      aria-controls="map-radius-panel"
+                    >
+                      📏
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    className={`map-overlay-toggle ${controlsOpen ? 'is-active' : ''}`}
+                    onClick={() => setControlsOpen((v) => !v)}
+                    aria-label={
+                      controlsOpen ? 'Hide map controls' : 'Show map controls'
+                    }
+                    aria-expanded={controlsOpen}
+                    aria-controls="map-controls-panel"
+                  >
+                    ⚙️
+                  </button>
+
+                  {(controlsOpen || radiusOpen) && (
+                    <button
+                      type="button"
+                      className="map-overlay-toggle map-overlay-toggle--close"
+                      onClick={collapseAllOverlay}
+                      aria-label="Collapse overlay"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Collapsible map controls panel */}
+              <div
+                id="map-controls-panel"
+                className={`map-collapsible ${controlsOpen ? 'is-open' : ''}`}
+              >
+                <div className="map-collapsible__inner">
+                  <div className="map-location-controls">
+                    <button
+                      className="location-control-btn"
+                      disabled={isGeolocating}
+                      onClick={triggerGeolocate}
+                      aria-label="Find my location"
+                    >
+                      {isGeolocating ? 'Locating...' : '📍 My Location'}
+                    </button>
+
+                    <button
+                      className="location-control-btn"
+                      onClick={() => {
+                        setManualOpen((v) => !v);
+                        setIsPickingLocation(false);
+                      }}
+                      aria-label="Enter coordinates"
+                    >
+                      📝 Enter Coords
+                    </button>
+
+                    <button
+                      className="location-control-btn"
+                      onClick={() => {
+                        setIsPickingLocation((v) => !v);
+                        setManualOpen(false);
+                      }}
+                      aria-label="Pick location on map"
+                    >
+                      🖱️ Pick on Map
+                    </button>
+                  </div>
+
+                  {manualOpen && (
+                    <div className="map-manual-input">
+                      <input
+                        type="number"
+                        step="0.000001"
+                        placeholder="Latitude (e.g. 52.2297)"
+                        value={manualLat}
+                        onChange={(e) => setManualLat(e.target.value)}
+                      />
+                      <input
+                        type="number"
+                        step="0.000001"
+                        placeholder="Longitude (e.g. 21.0122)"
+                        value={manualLng}
+                        onChange={(e) => setManualLng(e.target.value)}
+                      />
+                      <button onClick={applyManualCoords}>Apply</button>
+                      <button onClick={() => setManualOpen(false)}>×</button>
+                    </div>
+                  )}
+
+                  {isPickingLocation && (
+                    <div className="map-pick-instruction">
+                      <small>Click on the map to set your location</small>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Collapsible radius panel (separate from controls card) */}
             {filters.lat !== null && filters.lng !== null && (
-              <div className="map-radius-selector">
-                <label htmlFor="radius-select">Radius:</label>
-                <select
-                  id="radius-select"
-                  value={selectedRadius}
-                  onChange={(e) => handleRadiusChange(Number(e.target.value))}
-                  className="radius-select"
-                >
-                  {RADIUS_OPTIONS.map((radius) => (
-                    <option key={radius} value={radius}>
-                      {radius} km
-                    </option>
-                  ))}
-                </select>
+              <div
+                id="map-radius-panel"
+                className={`map-collapsible ${radiusOpen ? 'is-open' : ''}`}
+              >
+                <div className="map-collapsible__inner">
+                  <div className="map-radius">
+                    <div className="map-radius__top">
+                      <span className="map-radius__label">Radius</span>
+                      <span className="map-radius__value">{radiusLabel}</span>
+                    </div>
+
+                    <div className="map-radius__slider">
+                      <input
+                        className="radius-slider"
+                        type="range"
+                        min={MIN_RADIUS}
+                        max={NO_RANGE_SLIDER_VALUE}
+                        step={1}
+                        value={radiusSliderValue}
+                        onChange={(e) =>
+                          setRadiusSliderValue(Number(e.target.value))
+                        }
+                        onMouseUp={commitRadius}
+                        onTouchEnd={commitRadius}
+                        onKeyUp={(e) => {
+                          if (
+                            e.key === 'ArrowLeft' ||
+                            e.key === 'ArrowRight' ||
+                            e.key === 'ArrowUp' ||
+                            e.key === 'ArrowDown' ||
+                            e.key === 'Home' ||
+                            e.key === 'End'
+                          ) {
+                            commitRadius(e);
+                          }
+                        }}
+                        style={
+                          {
+                            ['--pct' as any]: `${
+                              ((radiusSliderValue - MIN_RADIUS) /
+                                (NO_RANGE_SLIDER_VALUE - MIN_RADIUS)) *
+                              100
+                            }%`,
+                          } as React.CSSProperties
+                        }
+                        aria-label="Radius"
+                        aria-valuetext={
+                          radiusSliderValue === NO_RANGE_SLIDER_VALUE
+                            ? 'No range'
+                            : `${radiusSliderValue} kilometers`
+                        }
+                      />
+
+                      <div className="radius-ruler" aria-hidden="true" />
+
+                      <div className="radius-ends" aria-hidden="true">
+                        <span>{MIN_RADIUS}</span>
+                        <span>25</span>
+                        <span>No range</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -461,9 +714,12 @@ export default function MapIndex({
             trackUserLocation={false}
             selectedRestaurantId={selectedRestaurantId}
             onSelectRestaurant={selectRestaurant}
+            registerGeolocateTrigger={registerGeolocateTrigger}
+            isPickingLocation={isPickingLocation}
+            onPickLocation={handlePickLocation}
+            showGeolocateControlUi={false}
           />
           <div
-            ref={sheetRef}
             className={`map-bottom-sheet ${isDragging ? 'is-dragging' : ''} ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
             style={
               {
