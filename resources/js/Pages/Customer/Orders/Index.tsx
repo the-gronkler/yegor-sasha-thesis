@@ -1,61 +1,18 @@
 import { Head, Link } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { Order, PaginatedResponse, OrderStatusEnum } from '@/types/models';
+import { Order, PaginatedResponse } from '@/types/models';
+import { formatDateTime, formatCurrency } from '@/Utils/formatters';
+import {
+  calculateOrderTotal,
+  calculateOrderItemCount,
+} from '@/Utils/orderHelpers';
+import OrderStatusBadge from '@/Components/Shared/OrderStatusBadge';
 
 interface Props {
   orders: PaginatedResponse<Order>;
 }
 
 export default function OrdersIndex({ orders }: Props) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  };
-
-  const getStatusClassName = (statusId: number) => {
-    let suffix: string;
-    switch (statusId) {
-      case OrderStatusEnum.Placed:
-      case OrderStatusEnum.Accepted:
-        suffix = 'pending';
-        break;
-      case OrderStatusEnum.Preparing:
-        suffix = 'preparing';
-        break;
-      case OrderStatusEnum.Ready:
-      case OrderStatusEnum.Fulfilled:
-        suffix = 'ready';
-        break;
-      case OrderStatusEnum.Cancelled:
-      case OrderStatusEnum.Declined:
-        suffix = 'cancelled';
-        break;
-      default:
-        suffix = 'completed';
-    }
-    return `order-card__status--${suffix}`;
-  };
-
-  const calculateTotal = (order: Order) => {
-    if (!order.menu_items) return 0;
-    return order.menu_items.reduce((sum, item) => {
-      const quantity = item.pivot?.quantity || 0;
-      return sum + item.price * quantity;
-    }, 0);
-  };
-
-  const calculateItemCount = (order: Order) => {
-    if (!order.menu_items) return 0;
-    return order.menu_items.reduce((sum, item) => {
-      return sum + (item.pivot?.quantity || 0);
-    }, 0);
-  };
-
   return (
     <CustomerLayout>
       <Head title="My Orders" />
@@ -75,41 +32,35 @@ export default function OrdersIndex({ orders }: Props) {
         ) : (
           <div className="orders-index__list">
             {orders.data.map((order) => (
-              <div key={order.id} className="order-card">
+              <Link
+                href={route('orders.show', order.id)}
+                key={order.id}
+                className="order-card"
+              >
                 <div className="order-card__header">
                   <div>
                     <h3 className="order-card__restaurant">
                       {order.restaurant?.name}
                     </h3>
                     <span className="order-card__date">
-                      {formatDate(order.created_at)}
+                      {formatDateTime(order.created_at)}
                     </span>
                   </div>
-                  <span
-                    className={`order-card__status ${getStatusClassName(
-                      order.order_status_id,
-                    )}`}
-                  >
-                    {order.status?.name}
-                  </span>
+                  <OrderStatusBadge
+                    statusId={order.order_status_id}
+                    statusName={order.status?.name}
+                  />
                 </div>
 
                 <div className="order-card__details">
                   <span className="order-card__items-count">
-                    {calculateItemCount(order)} items
+                    {calculateOrderItemCount(order.menu_items)} items
                   </span>
                   <span className="order-card__total">
-                    €{calculateTotal(order).toFixed(2)}
+                    {formatCurrency(calculateOrderTotal(order.menu_items))}
                   </span>
                 </div>
-
-                {/* Future feature: View Order Details */}
-                {/* <div className="order-card__actions">
-                    <Link href={route('orders.show', order.id)} className="order-card__view-btn">
-                        View Details
-                    </Link>
-                </div> */}
-              </div>
+              </Link>
             ))}
           </div>
         )}

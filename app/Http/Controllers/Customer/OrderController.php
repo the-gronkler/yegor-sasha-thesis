@@ -43,6 +43,17 @@ class OrderController extends Controller
         ]);
     }
 
+    public function show(Request $request, Order $order)
+    {
+        $this->authorize('view', $order);
+
+        $order->load(['restaurant', 'menuItems.images', 'status']);
+
+        return Inertia::render('Customer/Orders/Show', [
+            'order' => $order,
+        ]);
+    }
+
     public function destroyCart(Request $request, Order $order)
     {
         $this->authorize('delete', $order);
