@@ -75,46 +75,6 @@
     color: main-colors.$text-secondary;
   }
 
-  &__status {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: layout.$border-radius-pill;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-
-    &--pending {
-      background-color: color.change(main-colors.$accent-warm, $alpha: 0.1);
-      color: main-colors.$accent-warm;
-    }
-
-    &--preparing {
-      background-color: color.change(main-colors.$brand-primary, $alpha: 0.1);
-      color: main-colors.$brand-primary;
-    }
-
-    &--ready {
-      background-color: color.change(
-        exception-colors.$status-success,
-        $alpha: 0.1
-      );
-      color: exception-colors.$status-success;
-    }
-
-    &--completed {
-      background-color: main-colors.$bg-alt-1;
-      color: main-colors.$text-secondary;
-    }
-
-    &--cancelled {
-      background-color: color.change(
-        exception-colors.$status-error,
-        $alpha: 0.1
-      );
-      color: exception-colors.$status-error;
-    }
-  }
-
   &__details {
     border-top: 1px solid main-colors.$bg-alt-1;
     padding-top: 0.75rem;

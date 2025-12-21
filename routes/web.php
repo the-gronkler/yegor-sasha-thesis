@@ -33,9 +33,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Orders: finished / unfinished
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index'); // finished orders
-        Route::get('/unfinished', [OrderController::class, 'unfinished'])->name('unfinished'); // status == In Cart
-        Route::get('/old', [OrderController::class, 'old'])->name('old'); // unlimited older orders
+        // Route::get('/unfinished', [OrderController::class, 'unfinished'])->name('unfinished'); // status == In Cart
+        // Route::get('/old', [OrderController::class, 'old'])->name('old'); // unlimited older orders
         Route::delete('/cart/{order}', [OrderController::class, 'destroyCart'])->name('destroyCart');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
     });
 
     // Reviews for customer

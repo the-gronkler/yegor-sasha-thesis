@@ -1,0 +1,165 @@
+@use '../variables/main-colors' as colors;
+@use '../variables/layout' as layout;
+@use '../components/buttons';
+
+.order-show-page {
+  padding: 20px;
+  padding-bottom: 80px; // Space for bottom nav
+  max-width: 600px;
+  margin: 0 auto;
+
+  .page-header {
+    margin-bottom: 20px;
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: colors.$text-primary;
+      margin-bottom: 4px;
+    }
+
+    .order-date {
+      font-size: 0.875rem;
+      color: colors.$text-secondary;
+    }
+  }
+
+  .order-status-card {
+    background-color: colors.$bg-surface;
+    border-radius: layout.$border-radius;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: layout.$box-shadow;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .status-label {
+      font-weight: 600;
+      color: colors.$text-primary;
+    }
+  }
+
+  .restaurant-section {
+    margin-bottom: 24px;
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: colors.$text-primary;
+    }
+
+    .restaurant-card {
+      background-color: colors.$bg-surface;
+      border-radius: layout.$border-radius;
+      padding: 16px;
+      box-shadow: layout.$box-shadow;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+
+      .restaurant-info {
+        flex: 1;
+
+        .restaurant-name {
+          font-weight: 600;
+          color: colors.$text-primary;
+          margin-bottom: 4px;
+        }
+
+        .view-menu-link {
+          font-size: 0.875rem;
+          color: colors.$brand-primary;
+        }
+      }
+    }
+  }
+
+  .order-items-section {
+    margin-bottom: 24px;
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: colors.$text-primary;
+    }
+
+    .order-items-list {
+      background-color: colors.$bg-surface;
+      border-radius: layout.$border-radius;
+      box-shadow: layout.$box-shadow;
+      overflow: hidden;
+    }
+
+    .order-item {
+      display: flex;
+      padding: 16px;
+      border-bottom: 1px solid colors.$bg-alt-1;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .item-quantity {
+        font-weight: 600;
+        color: colors.$brand-primary;
+        margin-right: 12px;
+        min-width: 24px;
+      }
+
+      .item-details {
+        flex: 1;
+
+        .item-name {
+          font-weight: 500;
+          color: colors.$text-primary;
+          margin-bottom: 4px;
+        }
+
+        .item-price {
+          font-size: 0.875rem;
+          color: colors.$text-secondary;
+        }
+      }
+
+      .item-total {
+        font-weight: 600;
+        color: colors.$text-primary;
+      }
+    }
+  }
+
+  .order-summary-section {
+    background-color: colors.$bg-surface;
+    border-radius: layout.$border-radius;
+    padding: 16px;
+    box-shadow: layout.$box-shadow;
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+      color: colors.$text-secondary;
+
+      &.total {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid colors.$bg-alt-1;
+        font-weight: 700;
+        font-size: 1.125rem;
+        color: colors.$text-primary;
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .back-button-container {
+    margin-top: 24px;
+    text-align: center;
+  }
+}
