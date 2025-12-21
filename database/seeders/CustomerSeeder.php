@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use App\Models\Restaurant;
+use App\Models\Review;
 use Illuminate\Database\Seeder;
 
 class CustomerSeeder extends Seeder
@@ -13,7 +14,16 @@ class CustomerSeeder extends Seeder
         Customer::factory()
             ->count(5)
             ->hasOrders(4) // requires orders() on model and OrderFactory
-            ->hasReviews(2) // requires reviews() on model and ReviewFactory
+            ->afterCreating(function (Customer $customer) {
+                $restaurants = Restaurant::inRandomOrder()->take(2)->get();
+
+                foreach ($restaurants as $restaurant) {
+                    Review::factory()->create([
+                        'customer_user_id' => $customer->user_id,
+                        'restaurant_id' => $restaurant->id,
+                    ]);
+                }
+            })
             ->hasAttached(
                 Restaurant::inRandomOrder()->value('id'),  // requires favoriteRestaurants() on model
                 fn () => ['rank' => rand(1, 5)],

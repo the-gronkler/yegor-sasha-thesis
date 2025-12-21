@@ -41,8 +41,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Reviews for customer
     Route::resource('reviews', ReviewController::class)
-        ->only(['index', 'store'])
-        ->names(['index' => 'reviews.index', 'store' => 'reviews.store']);
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->names([
+            'index' => 'reviews.index',
+            'store' => 'reviews.store',
+            'update' => 'reviews.update',
+            'destroy' => 'reviews.destroy',
+        ]);
 
     // Profile
     Route::prefix('profile')->name('profile.')->group(function () {
