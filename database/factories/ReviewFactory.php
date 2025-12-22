@@ -52,10 +52,10 @@ class ReviewFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function (Review $review) {
-            // Create a review image
-            $review->images()->create([
-                'image' => $this->faker->imageUrl(),
-            ]);
+            // Optional: Create a review image if needed, but default to none to avoid broken R2 links
+            // $review->images()->create([
+            //     'image' => $this->faker->imageUrl(),
+            // ]);
         });
     }
 

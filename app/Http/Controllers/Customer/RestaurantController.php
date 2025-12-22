@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 
 class RestaurantController extends Controller
@@ -21,31 +22,7 @@ class RestaurantController extends Controller
             ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
             ->latest('rating')
             ->get()
-            ->map(function ($restaurant) {
-                return [
-                    'id' => $restaurant->id,
-                    'name' => $restaurant->name,
-                    'address' => $restaurant->address,
-                    'latitude' => $restaurant->latitude,
-                    'longitude' => $restaurant->longitude,
-                    'rating' => $restaurant->rating,
-                    'description' => $restaurant->description,
-                    'opening_hours' => $restaurant->opening_hours,
-                    'images' => $restaurant->images->map(fn ($img) => [
-                        'id' => $img->id,
-                        'url' => $img->image,
-                        'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
-                    ]),
-                    'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
-                        'id' => $ft->id,
-                        'name' => $ft->name,
-                        'menu_items' => $ft->menuItems->map(fn ($mi) => [
-                            'id' => $mi->id,
-                            'name' => $mi->name,
-                        ]),
-                    ]),
-                ];
-            });
+            ->map(fn ($restaurant) => $this->formatRestaurant($restaurant));
 
         return Inertia::render('Customer/Restaurants/Index', [
             'restaurants' => $restaurants,
@@ -65,54 +42,69 @@ class RestaurantController extends Controller
             'menuItems.allergens',                // all allergens of menu items
             'images',                              // restaurant images
             'reviews.customer.user',               // reviews with customer and user details
+            'reviews.images',                      // review images
         ]);
 
-        // Prepare data (you might map or slice properties)
         return Inertia::render('Customer/Restaurants/Show', [
-            'restaurant' => [
-                'id' => $restaurant->id,
-                'name' => $restaurant->name,
-                'address' => $restaurant->address,
-                'latitude' => $restaurant->latitude,
-                'longitude' => $restaurant->longitude,
-                'description' => $restaurant->description,
-                'rating' => $restaurant->rating,
-                'opening_hours' => $restaurant->opening_hours,
-                // relations:
-                'reviews' => $restaurant->reviews->map(fn ($review) => [
-                    'id' => $review->id,
-                    'rating' => $review->rating,
-                    'title' => $review->title,
-                    'content' => $review->content,
-                    'created_at' => $review->created_at->toIso8601String(),
-                    'user_name' => $review->customer?->user?->name ?? 'Anonymous',
-                    'customer_user_id' => $review->customer_user_id,
-                ]),
-                'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
-                    'id' => $ft->id,
-                    'name' => $ft->name,
-                    'menu_items' => $ft->menuItems->map(fn ($mi) => [
-                        'id' => $mi->id,
-                        'name' => $mi->name,
-                        'price' => $mi->price,
-                        'description' => $mi->description,
-                        'images' => $mi->images->map(fn ($img) => [
-                            'id' => $img->id,
-                            'url' => $img->image,   // make sure Model attribute
-                            'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
-                        ]),
-                        'allergens' => $mi->allergens->map(fn ($al) => [
-                            'id' => $al->id,
-                            'name' => $al->name,
-                        ]),
-                    ]),
-                ]),
-                'restaurant_images' => $restaurant->images->map(fn ($img) => [
-                    'id' => $img->id,
-                    'url' => $img->image,
-                    'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
-                ]),
-            ],
+            'restaurant' => $this->formatRestaurant($restaurant),
         ]);
+    }
+
+    private function formatRestaurant(Restaurant $restaurant): array
+    {
+        return [
+            'id' => $restaurant->id,
+            'name' => $restaurant->name,
+            'address' => $restaurant->address,
+            'latitude' => $restaurant->latitude,
+            'longitude' => $restaurant->longitude,
+            'rating' => $restaurant->rating,
+            'description' => $restaurant->description,
+            'opening_hours' => $restaurant->opening_hours,
+            'images' => $restaurant->images->map(fn ($img) => [
+                'id' => $img->id,
+                'url' => $img->url,
+                'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
+            ]),
+            'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
+                'id' => $ft->id,
+                'name' => $ft->name,
+                'menu_items' => $ft->menuItems->map(fn ($mi) => [
+                    'id' => $mi->id,
+                    'name' => $mi->name,
+                    'price' => $mi->price,
+                    'description' => $mi->description,
+                    'images' => $mi->relationLoaded('images') ? $mi->images->map(fn ($img) => [
+                        'id' => $img->id,
+                        'url' => $img->url,
+                        'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
+                    ]) : [],
+                    'allergens' => $mi->relationLoaded('allergens') ? $mi->allergens->map(fn ($al) => [
+                        'id' => $al->id,
+                        'name' => $al->name,
+                    ]) : [],
+                ]),
+            ]),
+            'reviews' => $restaurant->relationLoaded('reviews') ? $restaurant->reviews->map(fn ($review) => [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'title' => $review->title,
+                'content' => $review->content,
+                'created_at' => $review->created_at->toIso8601String(),
+                'user_name' => $review->customer?->user?->name ?? 'Anonymous',
+                'customer_user_id' => $review->customer_user_id,
+                'images' => $this->formatReviewImages($review->images),
+            ]) : [],
+        ];
+    }
+
+    private function formatReviewImages(Collection $images): Collection
+    {
+        return $images
+            ->filter(fn ($img) => ! empty($img->image))
+            ->map(fn ($img) => [
+                'id' => $img->id,
+                'url' => $img->url,
+            ])->values();
     }
 }
