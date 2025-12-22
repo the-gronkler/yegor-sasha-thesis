@@ -125,7 +125,7 @@
       border-radius: layout.$border-radius;
       overflow: hidden;
       border: 1px solid colors.$bg-alt-2;
-      cursor: pointer; // Hint that it might be clickable (even if not implemented yet)
+      cursor: pointer;
 
       .review-image {
         width: 100%;
