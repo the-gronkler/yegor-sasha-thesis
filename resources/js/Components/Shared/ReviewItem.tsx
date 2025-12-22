@@ -1,11 +1,12 @@
 import { Review } from '@/types/models';
 import StarRating from './StarRating';
+import { ReviewGallery } from './ReviewGallery';
 
 interface Props {
   review: Review;
 }
 
-export default function ReviewItem({ review }: Props) {
+export function ReviewItem({ review }: Props) {
   return (
     <div className="review-item">
       <div className="review-header">
@@ -20,20 +21,7 @@ export default function ReviewItem({ review }: Props) {
       <h4 className="review-title">{review.title}</h4>
       <p className="review-content">{review.content}</p>
 
-      {review.images && review.images.length > 0 && (
-        <div className="review-images">
-          {review.images.map((image) => (
-            <div key={image.id} className="review-image-wrapper">
-              <img
-                src={image.url}
-                alt={`Review by ${review.user_name || 'Anonymous'}`}
-                className="review-image"
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      <ReviewGallery images={review.images} userName={review.user_name} />
     </div>
   );
 }
