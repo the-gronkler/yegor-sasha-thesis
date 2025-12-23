@@ -13,6 +13,7 @@
 @use 'components/map';
 @use 'components/bottom-nav';
 @use 'components/error-boundary';
+@use 'components/order-status-badge';
 
 // Pages
 @use 'pages/restaurant-index';
@@ -23,3 +24,4 @@
 @use 'pages/cart';
 @use 'pages/checkout';
 @use 'pages/orders-index';
+@use 'pages/order-show';

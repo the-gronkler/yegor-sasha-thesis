@@ -78,6 +78,12 @@ const Ziggy = {
       parameters: ['order'],
       bindings: { order: 'id' },
     },
+    'orders.show': {
+      uri: 'orders\/{order}',
+      methods: ['GET', 'HEAD'],
+      parameters: ['order'],
+      bindings: { order: 'id' },
+    },
     'reviews.index': { uri: 'reviews', methods: ['GET', 'HEAD'] },
     'reviews.store': { uri: 'reviews', methods: ['POST'] },
     'profile.show': { uri: 'profile', methods: ['GET', 'HEAD'] },
