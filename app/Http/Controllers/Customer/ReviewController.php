@@ -50,7 +50,7 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'title' => 'required|string|max:255',
             'content' => 'nullable|string|max:1024',
-            'images' => 'nullable|array|max:5',
+            'images' => 'nullable|array|max:'.Review::MAX_IMAGES,
             'images.*' => 'image|max:5120', // 5MB max
         ]);
 
@@ -61,8 +61,8 @@ class ReviewController extends Controller
                 $request->file('images')
             );
 
-            if (! empty($result['upload_errors'])) {
-                return back()->with('success', 'Review submitted successfully, but some images failed to upload: '.implode(', ', $result['upload_errors']));
+            if (! empty($result->uploadErrors)) {
+                return back()->with('success', 'Review submitted successfully, but some images failed to upload: '.implode(', ', $result->uploadErrors));
             }
         } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
             return back()->withErrors(['general' => 'You have already reviewed this restaurant. Edit your existing review instead.']);
@@ -82,7 +82,7 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'title' => 'required|string|max:255',
             'content' => 'nullable|string|max:1024',
-            'images' => 'nullable|array|max:5',
+            'images' => 'nullable|array|max:'.Review::MAX_IMAGES,
             'images.*' => 'image|max:5120',
             'deleted_image_ids' => 'nullable|array',
             'deleted_image_ids.*' => 'integer|exists:review_images,id',
@@ -95,8 +95,8 @@ class ReviewController extends Controller
             $validated['deleted_image_ids'] ?? []
         );
 
-        if (! empty($result['upload_errors'])) {
-            return back()->with('success', 'Review updated successfully, but some images failed to upload: '.implode(', ', $result['upload_errors']));
+        if (! empty($result->uploadErrors)) {
+            return back()->with('success', 'Review updated successfully, but some images failed to upload: '.implode(', ', $result->uploadErrors));
         }
 
         return back()->with('success', 'Review updated successfully.');

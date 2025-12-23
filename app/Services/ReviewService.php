@@ -4,12 +4,13 @@ namespace App\Services;
 
 use App\Models\Review;
 use App\Models\ReviewImage;
+use App\Services\Results\ReviewOperationResult;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ReviewService
 {
-    public function createReview(array $data, int $userId, ?array $images = []): array
+    public function createReview(array $data, int $userId, ?array $images = []): ReviewOperationResult
     {
         $review = Review::create([
             'customer_user_id' => $userId,
@@ -24,10 +25,10 @@ class ReviewService
             $uploadErrors = $this->uploadImages($review, $images);
         }
 
-        return ['review' => $review, 'upload_errors' => $uploadErrors];
+        return new ReviewOperationResult($review, $uploadErrors);
     }
 
-    public function updateReview(Review $review, array $data, ?array $newImages = [], ?array $deletedImageIds = []): array
+    public function updateReview(Review $review, array $data, ?array $newImages = [], ?array $deletedImageIds = []): ReviewOperationResult
     {
         $review->update([
             'rating' => $data['rating'],
@@ -44,14 +45,25 @@ class ReviewService
             $uploadErrors = $this->uploadImages($review, $newImages);
         }
 
-        return ['review' => $review, 'upload_errors' => $uploadErrors];
+        return new ReviewOperationResult($review, $uploadErrors);
     }
 
     public function deleteReview(Review $review): void
     {
+        $failedDeletions = [];
+
         // Delete all associated images from storage
         foreach ($review->images as $image) {
-            $this->deleteImageFromStorage($image->image);
+            if (! $this->deleteImageFromStorage($image->image)) {
+                $failedDeletions[] = $image->image;
+            }
+        }
+
+        if (! empty($failedDeletions)) {
+            Log::warning("Review {$review->id} deleted, but some images could not be removed from storage.", [
+                'review_id' => $review->id,
+                'failed_images' => $failedDeletions,
+            ]);
         }
 
         $review->delete();
@@ -68,27 +80,21 @@ class ReviewService
             try {
                 $path = $image->store('reviews', 'r2');
             } catch (\Exception $e) {
-                Log::error(
-                    sprintf(
-                        'Failed to upload image for review %d%s due to exception: %s',
-                        $review->id,
-                        $originalName ? " (filename: {$originalName})" : '',
-                        $e->getMessage()
-                    )
-                );
+                Log::error("Failed to upload image for review {$review->id}.", [
+                    'review_id' => $review->id,
+                    'filename' => $originalName,
+                    'exception' => $e->getMessage(),
+                ]);
                 $failedUploads[] = $originalName ?? 'unknown file';
 
                 continue;
             }
 
             if (! $path) {
-                Log::error(
-                    sprintf(
-                        'Failed to upload image for review %d%s: storage returned empty path',
-                        $review->id,
-                        $originalName ? " (filename: {$originalName})" : ''
-                    )
-                );
+                Log::error("Failed to upload image for review {$review->id}: storage returned empty path.", [
+                    'review_id' => $review->id,
+                    'filename' => $originalName,
+                ]);
                 $failedUploads[] = $originalName ?? 'unknown file';
 
                 continue;
@@ -116,14 +122,18 @@ class ReviewService
         }
     }
 
-    protected function deleteImageFromStorage(string $path): void
+    protected function deleteImageFromStorage(string $path): bool
     {
         try {
             if ($path) {
-                Storage::disk('r2')->delete($path);
+                return Storage::disk('r2')->delete($path);
             }
+
+            return true;
         } catch (\Exception $e) {
             Log::error("Failed to delete review image from R2: {$path}. Error: ".$e->getMessage());
+
+            return false;
         }
     }
 }

@@ -5,6 +5,8 @@ import Button from '@/Components/UI/Button';
 import { Review } from '@/types/models';
 import ImageUploader from '@/Components/UI/ImageUploader';
 
+const MAX_IMAGES = 30;
+
 interface Props {
   restaurantId: number;
   review?: Review;
@@ -124,6 +126,7 @@ export default function ReviewForm({
             onAddFiles={handleAddFiles}
             onRemoveFile={handleRemoveFile}
             onRemoveExisting={handleRemoveExisting}
+            maxImages={MAX_IMAGES}
             error={errors.images}
           />
         </div>

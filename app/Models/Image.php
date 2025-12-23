@@ -32,6 +32,7 @@ class Image extends Model
 
     public function getUrlAttribute()
     {
+        // TODO: remvoe this logic after we put default images in the bucket too
         if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
             return $this->image;
         }

@@ -54,6 +54,7 @@ export default function Lightbox({
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
           onClose();
         }
       }}
