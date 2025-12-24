@@ -12,7 +12,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -245,7 +245,7 @@
       font-size: 1.125rem;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(main-colors.$brand-primary, 0.4);
+      box-shadow: 0 4px 12px main-colors.$brand-primary-soft;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
@@ -255,7 +255,7 @@
       &:hover {
         background-color: main-colors.$brand-primary-hover;
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(main-colors.$brand-primary, 0.5);
+        box-shadow: 0 6px 16px main-colors.$brand-primary-soft;
       }
 
       &:active {
@@ -263,7 +263,7 @@
       }
 
       .cart-badge {
-        background-color: rgba(255, 255, 255, 0.25);
+        background-color: main-colors.$overlay-white-medium;
         width: 28px;
         height: 28px;
         border-radius: 50%;
