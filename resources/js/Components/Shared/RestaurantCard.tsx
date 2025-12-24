@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, MouseEvent, KeyboardEvent } from 'react';
 import { router } from '@inertiajs/react';
 import StarRating from '@/Components/Shared/StarRating';
 import { Restaurant } from '@/types/models';
@@ -25,6 +25,27 @@ export default function RestaurantCard({
     ? primaryImage.url
     : '/images/placeholder-restaurant.jpg';
 
+  // --- Handlers (Extracted for Readability) ---
+
+  const handleCardClick = () => {
+    onSelect?.();
+  };
+
+  const handleViewDetails = (e: MouseEvent) => {
+    // Stop the click from bubbling up to the card's onSelect handler
+    e.stopPropagation();
+    router.visit(route('restaurants.show', restaurant.id));
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      router.visit(route('restaurants.show', restaurant.id));
+    } else if (e.key === ' ') {
+      e.preventDefault(); // Prevent page scroll
+      onSelect?.();
+    }
+  };
+
   return (
     <div
       ref={containerRef}
@@ -34,23 +55,10 @@ export default function RestaurantCard({
       role="button"
       tabIndex={0}
       aria-expanded={selected}
-      onClick={(e) => {
-        if ((e.target as Element).closest('.restaurant-view-btn')) {
-          router.visit(route('restaurants.show', restaurant.id));
-        } else {
-          onSelect?.();
-        }
-      }}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          router.visit(route('restaurants.show', restaurant.id));
-        } else if (e.key === ' ') {
-          e.preventDefault();
-          onSelect?.();
-        }
-      }}
     >
       <div className="restaurant-image-wrapper">
         <img
@@ -89,10 +97,12 @@ export default function RestaurantCard({
               {restaurant.description || 'No description available'}
             </p>
             <div className="restaurant-actions">
+              {/* Added onClick handler directly to the button */}
               <button
                 type="button"
                 className="restaurant-view-btn"
                 tabIndex={-1}
+                onClick={handleViewDetails}
               >
                 View details
               </button>
