@@ -28,30 +28,30 @@
   align-items: center;
   justify-content: center;
   background: main-colors.$bg-main;
-}
 
-.map-error-content {
-  text-align: center;
-  padding: 2rem;
-}
+  .map-error-content {
+    text-align: center;
+    padding: 2rem;
+  }
 
-.map-error-title {
-  color: exception-colors.$status-error;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-}
+  .map-error-title {
+    color: exception-colors.$status-error;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+  }
 
-.map-error-message {
-  color: exception-colors.$status-error;
-  font-size: 1rem;
-  margin: 0 0 0.5rem 0;
-}
+  .map-error-message {
+    color: exception-colors.$status-error;
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+  }
 
-.map-error-hint {
-  color: main-colors.$text-secondary;
-  font-size: 0.875rem;
-  margin: 0.5rem 0 0 0;
+  .map-error-hint {
+    color: main-colors.$text-secondary;
+    font-size: 0.875rem;
+    margin: 0.5rem 0 0 0;
+  }
 }
 
 .map-marker {
@@ -78,4 +78,27 @@
   width: 36px;
   height: 36px;
   color: main-colors.$accent-warm;
+}
+
+// Icon sizing and color fixes for SCSS-based project
+.location-control-btn,
+.map-overlay-toggle {
+  // Make sure icons inherit visible color
+  color: main-colors.$text-inverse;
+
+  .btn-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto; // don't shrink in flex
+    display: block; // avoid weird inline sizing
+    background: none; // reset any bg
+  }
+}
+
+.map-overlay-toggle {
+  .btn-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
 }

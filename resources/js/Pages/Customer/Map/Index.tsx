@@ -15,6 +15,14 @@ import { useSearch } from '@/Hooks/useSearch';
 import { Restaurant, MapMarker } from '@/types/models';
 import { PageProps } from '@/types';
 import type { IFuseOptions } from 'fuse.js';
+import {
+  Cog6ToothIcon,
+  XMarkIcon,
+  MapPinIcon,
+  PencilSquareIcon,
+  CursorArrowRaysIcon,
+  FunnelIcon,
+} from '@heroicons/react/24/outline';
 
 const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
   keys: [
@@ -538,7 +546,7 @@ export default function MapIndex({
                       aria-expanded={radiusOpen}
                       aria-controls="map-radius-panel"
                     >
-                      📏
+                      <FunnelIcon className="btn-icon" aria-hidden="true" />
                     </button>
                   )}
 
@@ -552,7 +560,7 @@ export default function MapIndex({
                     aria-expanded={controlsOpen}
                     aria-controls="map-controls-panel"
                   >
-                    ⚙️
+                    <Cog6ToothIcon className="btn-icon" aria-hidden="true" />
                   </button>
 
                   {(controlsOpen || radiusOpen) && (
@@ -562,7 +570,7 @@ export default function MapIndex({
                       onClick={collapseAllOverlay}
                       aria-label="Collapse overlay"
                     >
-                      ✕
+                      <XMarkIcon className="btn-icon" aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -581,7 +589,14 @@ export default function MapIndex({
                       onClick={triggerGeolocate}
                       aria-label="Find my location"
                     >
-                      {isGeolocating ? 'Locating...' : '📍 My Location'}
+                      {isGeolocating ? (
+                        'Locating...'
+                      ) : (
+                        <>
+                          <MapPinIcon className="btn-icon" aria-hidden="true" />
+                          My Location
+                        </>
+                      )}
                     </button>
 
                     <button
@@ -592,7 +607,11 @@ export default function MapIndex({
                       }}
                       aria-label="Enter coordinates"
                     >
-                      📝 Enter Coords
+                      <PencilSquareIcon
+                        className="btn-icon"
+                        aria-hidden="true"
+                      />
+                      Enter Coords
                     </button>
 
                     <button
@@ -603,7 +622,11 @@ export default function MapIndex({
                       }}
                       aria-label="Pick location on map"
                     >
-                      🖱️ Pick on Map
+                      <CursorArrowRaysIcon
+                        className="btn-icon"
+                        aria-hidden="true"
+                      />
+                      Pick on Map
                     </button>
                   </div>
 
@@ -624,7 +647,9 @@ export default function MapIndex({
                         onChange={(e) => setManualLng(e.target.value)}
                       />
                       <button onClick={applyManualCoords}>Apply</button>
-                      <button onClick={() => setManualOpen(false)}>×</button>
+                      <button onClick={() => setManualOpen(false)}>
+                        <XMarkIcon className="btn-icon" aria-hidden="true" />
+                      </button>
                     </div>
                   )}
 
