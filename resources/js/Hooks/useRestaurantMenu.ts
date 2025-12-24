@@ -15,6 +15,19 @@ const SEARCH_OPTIONS: IFuseOptions<MenuItemWithCategory> = {
 
 const EMPTY_KEYS: any[] = [];
 
+/**
+ * Custom hook to manage restaurant menu display and searching.
+ *
+ * This hook flattens the restaurant's menu items for efficient searching using Fuse.js.
+ * It returns either the original categorized menu or a flattened "Search Results" category
+ * based on the current search query.
+ *
+ * @param {Restaurant} restaurant - The restaurant object containing menu data.
+ * @returns {object} An object containing:
+ *   - query: The current search query string.
+ *   - setQuery: Function to update the search query.
+ *   - displayedCategories: The list of food categories to display (filtered or original).
+ */
 export function useRestaurantMenu(restaurant: Restaurant) {
   // Flatten menu items for searching
   const allMenuItems = useMemo(

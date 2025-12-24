@@ -1,4 +1,4 @@
-import { Order, MenuItem } from '@/types/models';
+import { MenuItem } from '@/types/models';
 
 export const calculateOrderTotal = (items: MenuItem[] | undefined): number => {
   if (!items) return 0;
