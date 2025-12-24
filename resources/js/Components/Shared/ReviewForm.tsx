@@ -81,7 +81,9 @@ export default function ReviewForm({
           <div className="form-error global-error">{errors.general}</div>
         )}
         <div className="form-group">
-          <label className="form-label">Rating</label>
+          <label className="form-label">
+            Rating <span className="required-asterisk">*</span>
+          </label>
           <InteractiveStarRating
             rating={data.rating}
             onRatingChange={(rating) => setData('rating', rating)}
@@ -91,11 +93,12 @@ export default function ReviewForm({
 
         <div className="form-group">
           <label htmlFor="title" className="form-label">
-            Title
+            Title <span className="required-asterisk">*</span>
           </label>
           <input
             id="title"
             type="text"
+            required
             value={data.title}
             onChange={(e) => setData('title', e.target.value)}
             className="form-input"

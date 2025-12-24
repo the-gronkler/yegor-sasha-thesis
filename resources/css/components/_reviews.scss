@@ -164,6 +164,11 @@
       font-weight: 700;
       color: colors.$text-primary;
       margin-bottom: 0.5rem;
+
+      .required-asterisk {
+        color: exception-colors.$status-error;
+        margin-left: 0.25rem;
+      }
     }
 
     .form-input,
