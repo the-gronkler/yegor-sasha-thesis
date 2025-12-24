@@ -15,7 +15,6 @@ interface RestaurantShowProps extends PageProps {
 }
 
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
-  const { auth } = usePage<PageProps>().props;
   const primaryImage =
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
     restaurant.images?.[0];
