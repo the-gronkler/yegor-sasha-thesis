@@ -79,6 +79,9 @@ class MapController extends Controller
                 $latDelta = $radius / $kmPerDegree;
                 $lngDelta = $radius / ($kmPerDegree * cos(deg2rad($clampedLatitude)));
 
+                // Bounding box filter for initial narrowing (requires full table scan within box).
+                // For better performance on large datasets, consider using MySQL's spatial data types
+                // and indexes (POINT, SPATIAL INDEX) instead of separate lat/lng columns.
                 $query->whereBetween('latitude', [$latitude - $latDelta, $latitude + $latDelta])
                     ->whereBetween('longitude', [$longitude - $lngDelta, $longitude + $lngDelta])
                     ->having('distance', '<=', $radius);

@@ -283,6 +283,18 @@
       box-shadow: 0 8px 16px main-colors.$shadow-color-strong;
     }
 
+    &:focus-visible {
+      outline: 2px solid main-colors.$focus-ring;
+      outline-offset: 2px;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px main-colors.$shadow-color-strong;
+    }
+
+    &.is-focused {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px main-colors.$shadow-color-strong;
+    }
+
     &.is-selected {
       // Expanded values - full size
       --card-img: 120px;

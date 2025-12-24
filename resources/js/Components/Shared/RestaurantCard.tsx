@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import StarRating from '@/Components/Shared/StarRating';
 import { Restaurant } from '@/types/models';
 
@@ -15,6 +16,8 @@ export default function RestaurantCard({
   onSelect,
   containerRef,
 }: RestaurantCardProps) {
+  const [focused, setFocused] = useState(false);
+
   const primaryImage =
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
     restaurant.images?.[0];
@@ -25,13 +28,20 @@ export default function RestaurantCard({
   return (
     <div
       ref={containerRef}
-      className={`restaurant-card ${selected ? 'is-selected' : ''}`}
+      className={`restaurant-card ${selected ? 'is-selected' : ''} ${
+        focused ? 'is-focused' : ''
+      }`}
       role="button"
       tabIndex={0}
       aria-expanded={selected}
       onClick={() => onSelect?.()}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onSelect?.();
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect?.();
+        }
       }}
     >
       <div className="restaurant-image-wrapper">

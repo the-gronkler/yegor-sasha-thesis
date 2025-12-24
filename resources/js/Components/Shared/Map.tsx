@@ -304,7 +304,7 @@ export default function MapComponent({
       <Map
         {...viewState}
         onMove={(evt) => onMove(evt.viewState)}
-        // TODO: select style for the map in general, beyond the scope of the currnet pr since its big already
+        // TODO: select style for the map in general, beyond the scope of the current PR since its big already
         mapStyle="mapbox://styles/mapbox/dark-v10"
         mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
@@ -425,7 +425,7 @@ export default function MapComponent({
                 <Link
                   href={route('restaurants.show', selectedRestaurant.id)}
                   className="map-popup-cta"
-                  style={{ backgroundColor: THEME.brandPrimary }}
+                  style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
                   View details
                 </Link>

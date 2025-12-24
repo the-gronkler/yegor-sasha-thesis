@@ -1,6 +1,9 @@
 import { PropsWithChildren, useEffect } from 'react';
 import BottomNav from '@/Components/Shared/BottomNav';
 
+// Global counter to handle multiple MapLayout instances
+let mapLayoutCount = 0;
+
 interface MapLayoutProps extends PropsWithChildren {}
 
 export default function MapLayout({ children }: MapLayoutProps) {
@@ -8,21 +11,34 @@ export default function MapLayout({ children }: MapLayoutProps) {
     const html = document.documentElement;
     const body = document.body;
 
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
+    mapLayoutCount++;
+    let prevHtmlOverflow = '';
+    let prevBodyOverflow = '';
+    let prevHtmlOverscroll = '';
+    let prevBodyOverscroll = '';
 
-    html.style.overflow = 'hidden';
-    body.style.overflow = 'hidden';
+    if (mapLayoutCount === 1) {
+      // Only modify styles when the first instance mounts
+      prevHtmlOverflow = html.style.overflow;
+      prevBodyOverflow = body.style.overflow;
+      prevHtmlOverscroll = html.style.overscrollBehavior;
+      prevBodyOverscroll = body.style.overscrollBehavior;
 
-    // optional but helps on mobile “bounce”
-    html.style.overscrollBehavior = 'none';
-    body.style.overscrollBehavior = 'none';
+      html.style.overflow = 'hidden';
+      body.style.overflow = 'hidden';
+      html.style.overscrollBehavior = 'none';
+      body.style.overscrollBehavior = 'none';
+    }
 
     return () => {
-      html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
-      html.style.overscrollBehavior = '';
-      body.style.overscrollBehavior = '';
+      mapLayoutCount--;
+      if (mapLayoutCount === 0) {
+        // Only restore styles when the last instance unmounts
+        html.style.overflow = prevHtmlOverflow;
+        body.style.overflow = prevBodyOverflow;
+        html.style.overscrollBehavior = prevHtmlOverscroll;
+        body.style.overscrollBehavior = prevBodyOverscroll;
+      }
     };
   }, []);
 

@@ -278,13 +278,13 @@ export default function MapIndex({
       );
 
       window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp as any);
-      window.removeEventListener('pointercancel', onUp as any);
+      window.removeEventListener('pointerup', onUp as EventListener);
+      window.removeEventListener('pointercancel', onUp as EventListener);
     };
 
     window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp as any);
-    window.addEventListener('pointercancel', onUp as any);
+    window.addEventListener('pointerup', onUp as EventListener);
+    window.addEventListener('pointercancel', onUp as EventListener);
   };
 
   // Trigger geolocation via Mapbox control
@@ -397,7 +397,7 @@ export default function MapIndex({
       const timeoutId = setTimeout(() => {
         el.removeEventListener('transitionend', handler);
         if (!cancelled) resolve();
-      }, 300); // slightly longer than your CSS duration (250ms)
+      }, 300); // slightly longer than our CSS duration (250ms)
 
       return () => {
         cancelled = true;
