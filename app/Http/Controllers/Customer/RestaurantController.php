@@ -15,12 +15,25 @@ class RestaurantController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Restaurant::class);
-        // TODO: limit selection of restaurants by user's geolocation, accept filtering/sorting? params
-        // Fetch restaurants with their images, food types, and menu items
-        $restaurants = Restaurant::with(['images', 'foodTypes.menuItems'])
+
+        // Try to get last known coordinates from session
+        $geo = $request->session()->get('geo.last');
+        $lat = isset($geo['lat']) ? (float) $geo['lat'] : null;
+        $lng = isset($geo['lng']) ? (float) $geo['lng'] : null;
+
+        // Ignore stale coordinates (older than 24 hours)
+        if (isset($geo['stored_at']) && (time() - (int) $geo['stored_at']) > 86400) {
+            $lat = $lng = null;
+        }
+
+        // Build query with optional distance calculation
+        $query = Restaurant::query()
             ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
-            ->latest('rating')
-            ->get()
+            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
+            ->with(['images', 'foodTypes.menuItems'])
+            ->latest('rating');
+
+        $restaurants = $query->get()
             ->map(function ($restaurant) {
                 return [
                     'id' => $restaurant->id,
@@ -31,6 +44,7 @@ class RestaurantController extends Controller
                     'rating' => $restaurant->rating,
                     'description' => $restaurant->description,
                     'opening_hours' => $restaurant->opening_hours,
+                    'distance' => isset($restaurant->distance) ? round((float) $restaurant->distance, 2) : null,
                     'images' => $restaurant->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->image,
@@ -59,14 +73,30 @@ class RestaurantController extends Controller
     {
         $this->authorize('view', $restaurant);
 
-        // Load related data
-        $restaurant->load([
-            'foodTypes.menuItems.images',         // food types → menu items → images
-            'menuItems.allergens',                // all allergens of menu items
-            'images',                              // restaurant images
-        ]);
+        // Try to get last known coordinates from session (set by MapController)
+        $geo = $request->session()->get('geo.last');
+        $lat = isset($geo['lat']) ? (float) $geo['lat'] : null;
+        $lng = isset($geo['lng']) ? (float) $geo['lng'] : null;
 
-        // Prepare data (you might map or slice properties)
+        // Optional: ignore very old stored coords (e.g. older than 24 hours)
+        // Prevents showing stale distance data from days/weeks ago
+        if (isset($geo['stored_at']) && (time() - (int) $geo['stored_at']) > 86400) {
+            $lat = $lng = null;
+        }
+
+        // Fetch restaurant with optional distance calculation in one query
+        // Uses when() for conditional scope application
+        $restaurant = Restaurant::query()
+            ->whereKey($restaurant->getKey())
+            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
+            ->with([
+                'foodTypes.menuItems.images',
+                'menuItems.allergens',
+                'images',
+            ])
+            ->firstOrFail();
+
+        // Prepare data for Inertia
         return Inertia::render('Customer/Restaurants/Show', [
             'restaurant' => [
                 'id' => $restaurant->id,
@@ -77,6 +107,7 @@ class RestaurantController extends Controller
                 'description' => $restaurant->description,
                 'rating' => $restaurant->rating,
                 'opening_hours' => $restaurant->opening_hours,
+                'distance' => isset($restaurant->distance) ? round((float) $restaurant->distance, 2) : null,
                 // relations:
                 'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
                     'id' => $ft->id,
