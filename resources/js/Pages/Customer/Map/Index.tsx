@@ -257,18 +257,20 @@ export default function MapIndex({
 
     setIsDragging(true);
 
-    const onMove = (ev: PointerEvent) => {
-      if (ev.pointerId !== pointerId) return; // IMPORTANT: only respond to the active pointer
+    const onMove = (ev: Event) => {
+      const pe = ev as PointerEvent;
+      if (pe.pointerId !== pointerId) return; // IMPORTANT: only respond to the active pointer
 
-      const dy = ev.clientY - startY; // Dragging down => dy positive => height decreases
+      const dy = pe.clientY - startY; // Dragging down => dy positive => height decreases
       const next = Math.max(COLLAPSED_PX, Math.min(expandedPx, startH - dy));
 
       if (Math.abs(dy) > 6) dragMovedRef.current = true;
       setSheetHeight(next);
     };
 
-    const onUp = (ev?: PointerEvent) => {
-      if (ev && ev.pointerId !== pointerId) return; // IMPORTANT: only respond to the active pointer
+    const onUp = (ev?: Event) => {
+      const pe = ev as PointerEvent | undefined;
+      if (pe && pe.pointerId !== pointerId) return; // IMPORTANT: only respond to the active pointer
 
       setIsDragging(false);
 
@@ -278,13 +280,13 @@ export default function MapIndex({
       );
 
       window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp as EventListener);
-      window.removeEventListener('pointercancel', onUp as EventListener);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
     };
 
     window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp as EventListener);
-    window.addEventListener('pointercancel', onUp as EventListener);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
   };
 
   // Trigger geolocation via Mapbox control
@@ -675,12 +677,12 @@ export default function MapIndex({
                         }}
                         style={
                           {
-                            ['--pct' as any]: `${
+                            '--pct': `${
                               ((radiusSliderValue - MIN_RADIUS) /
                                 (NO_RANGE_SLIDER_VALUE - MIN_RADIUS)) *
                               100
                             }%`,
-                          } as React.CSSProperties
+                          } as React.CSSProperties & { '--pct': string }
                         }
                         aria-label="Radius"
                         aria-valuetext={
@@ -724,8 +726,8 @@ export default function MapIndex({
             style={
               {
                 height: `${expandedPx}px`, // constant physical height
-                ['--sheet-offset' as any]: `${sheetOffsetPx}px`, // slide down to "collapse"
-              } as React.CSSProperties
+                '--sheet-offset': `${sheetOffsetPx}px`, // slide down to "collapse"
+              } as React.CSSProperties & { '--sheet-offset': string }
             }
           >
             <button

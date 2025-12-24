@@ -85,7 +85,6 @@ export default function MapComponent({
     if (!evt || typeof evt !== 'object') return {};
     const e = evt as MaybeErrorEvent;
 
-    // TODO: Extract code and message from the event, falling back to nested error if needed
     return {
       code: e.code ?? e.error?.code,
       message: e.message ?? e.error?.message,
@@ -424,8 +423,7 @@ export default function MapComponent({
 
                 <Link
                   href={route('restaurants.show', selectedRestaurant.id)}
-                  className="map-popup-cta"
-                  style={{ backgroundColor: 'var(--brand-primary)' }}
+                  className="restaurant-view-btn"
                 >
                   View details
                 </Link>

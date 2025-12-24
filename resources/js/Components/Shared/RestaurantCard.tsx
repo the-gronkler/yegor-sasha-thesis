@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
 import { useState } from 'react';
+import { router } from '@inertiajs/react';
 import StarRating from '@/Components/Shared/StarRating';
 import { Restaurant } from '@/types/models';
 
@@ -34,11 +34,19 @@ export default function RestaurantCard({
       role="button"
       tabIndex={0}
       aria-expanded={selected}
-      onClick={() => onSelect?.()}
+      onClick={(e) => {
+        if ((e.target as Element).closest('.restaurant-view-btn')) {
+          router.visit(route('restaurants.show', restaurant.id));
+        } else {
+          onSelect?.();
+        }
+      }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === 'Enter') {
+          router.visit(route('restaurants.show', restaurant.id));
+        } else if (e.key === ' ') {
           e.preventDefault();
           onSelect?.();
         }
@@ -81,13 +89,13 @@ export default function RestaurantCard({
               {restaurant.description || 'No description available'}
             </p>
             <div className="restaurant-actions">
-              <Link
-                href={route('restaurants.show', restaurant.id)}
+              <button
+                type="button"
                 className="restaurant-view-btn"
-                onClick={(e) => e.stopPropagation()}
+                tabIndex={-1}
               >
                 View details
-              </Link>
+              </button>
             </div>
           </div>
         </div>
