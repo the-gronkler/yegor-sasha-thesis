@@ -41,6 +41,12 @@ const Ziggy = {
       parameters: ['restaurant'],
       bindings: { restaurant: 'id' },
     },
+    'restaurants.menu-items.show': {
+      uri: 'restaurants\/{restaurant}\/menu-items\/{menuItem}',
+      methods: ['GET', 'HEAD'],
+      parameters: ['restaurant', 'menuItem'],
+      bindings: { restaurant: 'id', menuItem: 'id' },
+    },
     'cart.index': { uri: 'cart', methods: ['GET', 'HEAD'] },
     'cart.addItem': { uri: 'cart\/add-item', methods: ['POST'] },
     'cart.updateItemQuantity': {
@@ -67,11 +73,6 @@ const Ziggy = {
       bindings: { order: 'id' },
     },
     'orders.index': { uri: 'orders', methods: ['GET', 'HEAD'] },
-    'orders.unfinished': {
-      uri: 'orders\/unfinished',
-      methods: ['GET', 'HEAD'],
-    },
-    'orders.old': { uri: 'orders\/old', methods: ['GET', 'HEAD'] },
     'orders.destroyCart': {
       uri: 'orders\/cart\/{order}',
       methods: ['DELETE'],

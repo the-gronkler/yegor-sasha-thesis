@@ -1,5 +1,6 @@
 import { MenuItem } from '@/types/models';
 import { useCart } from '@/Contexts/CartContext';
+import { router } from '@inertiajs/react';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -38,18 +39,24 @@ export default function MenuItemCard({
     }
   };
 
+  const handleCardClick = () => {
+    router.visit(route('restaurants.menu-items.show', [restaurantId, item.id]));
+  };
+
   return (
     <div className={`menu-item-card ${!isAvailable ? 'unavailable' : ''}`}>
-      {imageUrl ? (
-        <img src={imageUrl} alt={item.name} className="menu-item-image" />
-      ) : (
-        <div className="menu-item-image" /> // Placeholder
-      )}
+      <div className="menu-item-content" onClick={handleCardClick}>
+        {imageUrl ? (
+          <img src={imageUrl} alt={item.name} className="menu-item-image" />
+        ) : (
+          <div className="menu-item-image" /> // Placeholder
+        )}
 
-      <div className="menu-item-details">
-        <h4 className="menu-item-name">{item.name}</h4>
-        <p className="menu-item-description">{item.description}</p>
-        <p className="menu-item-price">€{item.price.toFixed(2)}</p>
+        <div className="menu-item-details">
+          <h4 className="menu-item-name">{item.name}</h4>
+          <p className="menu-item-description">{item.description}</p>
+          <p className="menu-item-price">€{item.price.toFixed(2)}</p>
+        </div>
       </div>
 
       <div className="menu-item-actions">
