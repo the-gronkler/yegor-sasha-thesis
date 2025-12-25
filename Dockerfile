@@ -5,6 +5,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 # Force install of linux-specific rollup binary
+# TODO: add it to package.json it should be added to package.json as an optional dependency before building the image.
 RUN npm ci --include=optional && npm install @rollup/rollup-linux-x64-musl --save-optional
 
 COPY . .

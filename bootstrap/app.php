@@ -11,7 +11,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: '*');
+        if (env('APP_ENV') === 'production') {
+            // TODO: add these to .env file and configure properly
+            $trustedProxies = env('TRUSTED_PROXIES');
+            $trustedProxies = $trustedProxies !== null && $trustedProxies !== ''
+                ? array_map('trim', explode(',', $trustedProxies))
+                : null;
+
+            $middleware->trustProxies(at: $trustedProxies);
+        } else {
+            // generally not a big problem since we are using Caddy
+            $middleware->trustProxies(at: '*');
+        }
+
         $middleware->web(prepend: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
