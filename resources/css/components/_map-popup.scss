@@ -1,7 +1,6 @@
 @use '../variables/main-colors';
 @use '../variables/exception-colors';
 
-// Local variables for the dark theme popup
 $popup-bg: #111111;
 $popup-header-bg: rgba(0, 0, 0, 0.3);
 $popup-border-color: rgba(255, 255, 255, 0.1);
@@ -20,7 +19,7 @@ $popup-shadow: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
     box-shadow: none; // We use drop-shadow on the parent
   }
 
-  // Optional: make the little triangle match your dark card
+  // Match popup tip to card background
   &.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
     border-top-color: $popup-bg;
   }

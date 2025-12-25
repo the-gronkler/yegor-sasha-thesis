@@ -4,7 +4,6 @@
 $card-transition-duration: 250ms;
 
 .restaurant-card {
-  // Compact defaults - minimal size
   --card-img: 56px;
   --card-pad: 0.6rem;
 
@@ -48,7 +47,6 @@ $card-transition-duration: 250ms;
   }
 
   &.is-selected {
-    // Expanded values - full size
     --card-img: 120px;
     --card-pad: 1rem;
     gap: 1rem;
@@ -125,7 +123,7 @@ $card-transition-duration: 250ms;
 }
 
 .restaurant-card.is-selected .restaurant-meta {
-  display: flex; // Show on expanded cards
+  display: flex;
   font-size: 0.9rem;
 }
 
@@ -148,7 +146,6 @@ $card-transition-duration: 250ms;
   opacity: 0.6;
 }
 
-// Collapsible details section (description + button)
 .restaurant-details {
   display: grid;
   grid-template-rows: 0fr;

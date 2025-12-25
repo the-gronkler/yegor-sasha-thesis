@@ -22,7 +22,7 @@
   padding: 10px 12px 12px;
   border-radius: 16px 16px 0 0;
 
-  // Make it feel "black" / solid
+  // Sheet background
   background-color: map-colors.$map-sheet-bg;
   background-image: linear-gradient(
     180deg,
@@ -32,18 +32,18 @@
   backdrop-filter: blur(10px);
 
   display: grid;
-  grid-template-rows: auto 1fr; // handle + scroll area
+  grid-template-rows: auto 1fr;
   gap: 10px;
 
   overflow: hidden; // IMPORTANT: prevents sheet-content from painting over the handle
 
   &.is-dragging {
-    transition: none; // follow finger/mouse
+    transition: none;
   }
 }
 
 .sheet-handle {
-  height: 16px; // Smaller height for more compact handle area
+  height: 16px;
   display: grid;
   place-items: center;
   border: 0;
@@ -68,7 +68,7 @@
 }
 
 .sheet-handle-bar {
-  width: 126px; // 3x wider (42px * 3 = 126px)
+  width: 126px;
   height: 5px;
   border-radius: 999px;
   background: main-colors.$overlay-white-medium;
@@ -115,7 +115,6 @@
     background: transparent;
   }
 
-  // Subtle thumb
   &::-webkit-scrollbar-thumb {
     background-color: main-colors.$overlay-white-light;
     border-radius: 999px;
