@@ -14,6 +14,7 @@ import { UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import StarRating from '@/Components/Shared/StarRating';
 import { MapMarker } from '@/types/models';
+import { createTheme } from '@/Utils/css';
 
 interface Props {
   viewState: {
@@ -63,13 +64,22 @@ export default function MapComponent({
   );
   const mapRef = React.useRef<any>(null);
 
-  // Theme constants for consistent colors
-  const THEME = {
-    brandPrimary: '#ee5b2b',
-    brandPrimaryHover: '#d94f25',
-    accentWarm: '#f59e0b',
-    textInverse: '#ffffff',
-  };
+  // Theme constants for consistent colors (synced with CSS)
+  const THEME = React.useMemo(() => {
+    const themeVars = [
+      { key: 'brandPrimary', cssVar: '--brand-primary' },
+      { key: 'brandPrimaryHover', cssVar: '--brand-primary-hover' },
+      { key: 'accentWarm', cssVar: '--accent-warm' },
+      { key: 'textInverse', cssVar: '--text-inverse' },
+    ] as const;
+
+    return createTheme<{
+      brandPrimary: string;
+      brandPrimaryHover: string;
+      accentWarm: string;
+      textInverse: string;
+    }>(themeVars);
+  }, []);
 
   // Safe extraction helper for geolocation error events
   type MaybeErrorEvent = {
