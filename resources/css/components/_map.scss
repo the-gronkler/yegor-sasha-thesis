@@ -102,3 +102,9 @@
     display: block;
   }
 }
+
+body.is-map-active,
+html.is-map-active {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
