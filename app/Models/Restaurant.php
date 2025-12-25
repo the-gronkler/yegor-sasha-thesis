@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\GeoService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -110,7 +111,7 @@ class Restaurant extends Model
         } else {
             // Option B: Fallback Haversine formula (improved numerical stability)
             // Clamps acos() input to [-1, 1] to prevent NaN from float rounding
-            $earthRadiusKm = 6371;
+            $earthRadiusKm = GeoService::EARTH_RADIUS_KM;
 
             return $query->selectRaw(
                 '(? * acos(
@@ -143,17 +144,13 @@ class Restaurant extends Model
     public function scopeWithinRadiusKm($query, float $lat, float $lng, float $radiusKm)
     {
         // Bounding box approximation (cheap prefilter)
-        // ~111km per degree at equator; adjust for latitude
-        $kmPerDegree = 111;
-        $clampedLat = max(min($lat, 85.0), -85.0); // Avoid poles
-
-        $latDelta = $radiusKm / $kmPerDegree;
-        $lngDelta = $radiusKm / ($kmPerDegree * cos(deg2rad($clampedLat)));
+        // Use GeoService to calculate bounds
+        $bounds = app(GeoService::class)->getBoundingBox($lat, $lng, $radiusKm);
 
         // Apply bounding box using separate indexes
         // MariaDB may use index_merge to scan both indexes and intersect results
-        $query->whereBetween('latitude', [$lat - $latDelta, $lat + $latDelta])
-            ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta]);
+        $query->whereBetween('latitude', [$bounds['latMin'], $bounds['latMax']])
+            ->whereBetween('longitude', [$bounds['lngMin'], $bounds['lngMax']]);
 
         // Apply exact distance constraint
         // HAVING works after grouping/aggregation; here it filters the computed distance
