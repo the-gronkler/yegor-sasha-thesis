@@ -8,6 +8,9 @@ import Map, {
 } from 'react-map-gl/mapbox';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import type { MapRef } from 'react-map-gl/mapbox';
+import type { MapMouseEvent, GeoJSONSource } from 'mapbox-gl';
+import type { Point } from 'geojson';
 import { MapMarker } from '@/types/models';
 import { createTheme } from '@/Utils/css';
 import MapPopup from './MapPopup';
@@ -63,7 +66,7 @@ export default function MapComponent({
   onPickLocation,
   showGeolocateControlUi = true,
 }: Props) {
-  const mapRef = React.useRef<any>(null);
+  const mapRef = React.useRef<MapRef>(null);
 
   const { geolocateControlRef, handleGeolocate, handleGeolocateError } =
     useMapGeolocation({
@@ -81,7 +84,7 @@ export default function MapComponent({
       { key: 'textInverse', cssVar: '--text-inverse' },
     ] as const;
 
-    return createTheme<MapTheme>(themeVars);
+    return createTheme<any>(themeVars) as MapTheme;
   }, []);
 
   // Separate restaurant markers from user marker
@@ -114,7 +117,7 @@ export default function MapComponent({
 
   // Handle map click for clustering and location picking
   const handleMapClick = React.useCallback(
-    (event: any) => {
+    (event: MapMouseEvent) => {
       // Manual pick mode: click anywhere to set user location
       if (isPickingLocation) {
         const { lng, lat } = event.lngLat;
@@ -132,29 +135,34 @@ export default function MapComponent({
 
       if (features.length > 0) {
         const feature = features[0];
-        if (feature.layer.id === 'clusters') {
+        if (feature.layer?.id === 'clusters') {
           // Zoom into cluster
-          const clusterId = feature.properties.cluster_id;
-          const source = map.getSource('restaurants');
-          if (source) {
+          const clusterId = feature.properties?.cluster_id;
+          const source = map.getSource('restaurants') as GeoJSONSource;
+          if (source && clusterId) {
             source.getClusterExpansionZoom(
               clusterId,
-              (err: any, zoom: number) => {
-                if (err) return;
+              (err?: Error | null, zoom?: number | null) => {
+                if (err || zoom == null) return;
                 map.easeTo({
-                  center: feature.geometry.coordinates,
+                  center: (feature.geometry as Point).coordinates as [
+                    number,
+                    number,
+                  ],
                   zoom: zoom,
                 });
               },
             );
           }
-        } else if (feature.layer.id === 'unclustered-point') {
+        } else if (feature.layer?.id === 'unclustered-point') {
           // Open popup for restaurant
           const properties = feature.properties;
+          if (!properties || feature.geometry.type !== 'Point') return;
+          const coordinates = (feature.geometry as Point).coordinates;
           const restaurant: MapMarker = {
             id: properties.id,
-            lat: feature.geometry.coordinates[1],
-            lng: feature.geometry.coordinates[0],
+            lat: coordinates[1],
+            lng: coordinates[0],
             name: properties.name,
             address: properties.address,
             openingHours: properties.openingHours,
@@ -195,7 +203,7 @@ export default function MapComponent({
   }, [selectedRestaurant?.id]);
 
   // Handle map mouse move for cursor changes
-  const handleMapMouseMove = React.useCallback((event: any) => {
+  const handleMapMouseMove = React.useCallback((event: MapMouseEvent) => {
     const map = mapRef.current?.getMap();
     if (!map) return;
 
