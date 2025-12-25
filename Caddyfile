@@ -1,0 +1,17 @@
+{
+    # Use the environment variable for the domain, or default to localhost
+    # In production, set DOMAIN_NAME to your-azure-dns.cloudapp.azure.com
+    email {$ACME_EMAIL}
+    # Use internal CA for local development to avoid Let's Encrypt errors
+    local_certs
+}
+
+{$DOMAIN_NAME:localhost} {
+    # Proxy all traffic to the 'app' container on port 80
+    reverse_proxy app:80
+
+    # Enable compression
+    encode gzip
+
+    tls internal
+}

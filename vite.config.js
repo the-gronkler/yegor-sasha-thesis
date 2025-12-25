@@ -10,6 +10,12 @@ export default defineConfig({
     }),
     react(),
   ],
+  server: {
+    host: '0.0.0.0',
+    hmr: {
+      host: 'yegor-sasha-thesis.test',
+    },
+  },
   resolve: {
     alias: {
       '@': '/resources/js',

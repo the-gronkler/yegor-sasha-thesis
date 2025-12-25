@@ -4,7 +4,8 @@ FROM node:20-alpine as frontend
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# Force install of linux-specific rollup binary
+RUN npm ci --include=optional && npm install @rollup/rollup-linux-x64-musl --save-optional
 
 COPY . .
 RUN npm run build
@@ -40,11 +41,14 @@ WORKDIR /var/www
 # Copy composer files first to leverage cache
 COPY composer.json composer.lock ./
 
-# Install dependencies
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+# Install dependencies (skip scripts to avoid 'artisan not found' error)
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 # Copy application code
 COPY . .
+
+# Run post-autoload scripts now that artisan is present
+RUN composer dump-autoload --optimize
 
 # Copy built frontend assets from Stage 1
 COPY --from=frontend /app/public/build ./public/build

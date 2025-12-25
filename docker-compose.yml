@@ -7,8 +7,9 @@ services:
     container_name: thesis-app
     restart: unless-stopped
     working_dir: /var/www
-    ports:
-      - '8000:80'
+    # Ports are now handled by Caddy
+    expose:
+      - '80'
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -16,17 +17,46 @@ services:
       # Preserve vendor and build assets from the image
       - /var/www/vendor
       - /var/www/public/build
+    env_file:
+      - .env
     environment:
       APP_ENV: ${APP_ENV:-local}
       APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: https://${DOMAIN_NAME:-yegor-sasha-thesis.test}
+      ASSET_URL: https://${DOMAIN_NAME:-yegor-sasha-thesis.test}
+      VITE_APP_NAME: '${APP_NAME}'
       APP_KEY: ${APP_KEY}
+      # Force Ziggy to use the correct domain
+      ZIGGY_URL: https://${DOMAIN_NAME:-yegor-sasha-thesis.test}
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - '5173:5173'
     depends_on:
       - db
+    networks:
+      - thesis-network
+
+  caddy:
+    image: caddy:alpine
+    container_name: thesis-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME:-yegor-sasha-thesis.test}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    depends_on:
+      - app
     networks:
       - thesis-network
 
@@ -52,3 +82,5 @@ networks:
 
 volumes:
   db-data:
+  caddy_data:
+  caddy_config:
