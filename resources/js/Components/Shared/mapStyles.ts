@@ -1,6 +1,7 @@
 import type { LayerProps } from 'react-map-gl/mapbox';
 
 export interface MapTheme {
+  [key: string]: string;
   brandPrimary: string;
   brandPrimaryHover: string;
   accentWarm: string;

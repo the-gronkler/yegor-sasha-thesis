@@ -84,7 +84,7 @@ export default function MapComponent({
       { key: 'textInverse', cssVar: '--text-inverse' },
     ] as const;
 
-    return createTheme<any>(themeVars) as MapTheme;
+    return createTheme<MapTheme>(themeVars);
   }, []);
 
   // Separate restaurant markers from user marker

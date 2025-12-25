@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Link } from '@inertiajs/react';
 import { Popup } from 'react-map-gl/mapbox';
 import StarRating from '@/Components/Shared/StarRating';

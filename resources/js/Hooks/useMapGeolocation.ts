@@ -1,5 +1,4 @@
 import * as React from 'react';
-import type mapboxgl from 'mapbox-gl';
 import type { GeolocateResultEvent } from 'react-map-gl/mapbox';
 
 interface UseMapGeolocationProps {
