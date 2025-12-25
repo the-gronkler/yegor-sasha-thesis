@@ -1,0 +1,198 @@
+@use '../variables/main-colors';
+@use '../variables/exception-colors';
+
+$card-transition-duration: 250ms;
+
+.restaurant-card {
+  // Compact defaults - minimal size
+  --card-img: 56px;
+  --card-pad: 0.6rem;
+
+  display: grid;
+  grid-template-columns: var(--card-img) 1fr;
+  gap: 0.75rem;
+  padding: var(--card-pad);
+  align-items: center;
+  min-height: 72px; // Prevent shrinking
+
+  background: main-colors.$bg-surface;
+  border: 1px solid main-colors.$border-light;
+  border-radius: 12px;
+  text-decoration: none;
+  color: main-colors.$text-primary;
+  box-shadow: 0 6px 12px main-colors.$shadow-color-strong;
+  cursor: pointer;
+
+  transition:
+    padding $card-transition-duration ease,
+    gap $card-transition-duration ease,
+    min-height $card-transition-duration ease,
+    box-shadow $card-transition-duration ease,
+    transform $card-transition-duration ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px main-colors.$shadow-color-strong;
+  }
+
+  &:focus-visible {
+    outline: 2px solid main-colors.$focus-ring;
+    outline-offset: 2px;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px main-colors.$shadow-color-strong;
+  }
+
+  &.is-focused {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px main-colors.$shadow-color-strong;
+  }
+
+  &.is-selected {
+    // Expanded values - full size
+    --card-img: 120px;
+    --card-pad: 1rem;
+    gap: 1rem;
+    min-height: auto;
+
+    align-items: start;
+    border-color: main-colors.$brand-primary;
+    box-shadow: 0 8px 16px rgba(main-colors.$brand-primary, 0.3);
+    background: linear-gradient(
+      135deg,
+      rgba(main-colors.$brand-primary, 0.05),
+      rgba(main-colors.$brand-primary, 0.02)
+    );
+  }
+}
+
+.restaurant-image-wrapper {
+  width: var(--card-img);
+  height: var(--card-img);
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.restaurant-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.restaurant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: gap $card-transition-duration ease;
+}
+
+.restaurant-card.is-selected .restaurant-info {
+  gap: 0.5rem;
+}
+
+.restaurant-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.restaurant-name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: main-colors.$text-primary;
+  line-height: 1.2;
+  transition:
+    font-size $card-transition-duration ease,
+    color $card-transition-duration ease;
+}
+
+.restaurant-card.is-selected .restaurant-name {
+  font-size: 1.15rem;
+  line-height: 1.3;
+  color: main-colors.$text-inverse; // White text on dark background
+}
+
+.restaurant-meta {
+  display: none; // Hide by default on compact cards
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: main-colors.$text-secondary;
+  flex-wrap: wrap;
+  transition: font-size $card-transition-duration ease;
+}
+
+.restaurant-card.is-selected .restaurant-meta {
+  display: flex; // Show on expanded cards
+  font-size: 0.9rem;
+}
+
+.restaurant-card .star-rating {
+  transform: scale(0.9);
+  transform-origin: right center;
+  transition: transform $card-transition-duration ease;
+}
+
+.restaurant-card.is-selected .star-rating {
+  transform: scale(1.05);
+}
+
+.meta-item {
+  display: inline-block;
+}
+
+.meta-separator {
+  color: main-colors.$text-secondary;
+  opacity: 0.6;
+}
+
+// Collapsible details section (description + button)
+.restaurant-details {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    grid-template-rows $card-transition-duration ease,
+    opacity $card-transition-duration ease;
+
+  > * {
+    min-height: 0;
+  }
+}
+
+.restaurant-card.is-selected .restaurant-details {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.restaurant-details > div {
+  margin-top: 0.35rem;
+}
+
+.restaurant-description {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: main-colors.$text-secondary;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.restaurant-actions {
+  margin-top: 0.5rem;
+}
+
+// Respect user's reduced-motion preference
+@media (prefers-reduced-motion: reduce) {
+  .restaurant-card,
+  .restaurant-details {
+    transition: none !important;
+  }
+}

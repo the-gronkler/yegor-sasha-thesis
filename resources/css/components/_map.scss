@@ -9,11 +9,14 @@
   overflow: hidden;
   position: relative;
   z-index: 1;
+  background: #0b1020; // Ensure no DOM content shows through
 
   :global {
-    .mapboxgl-map {
+    .mapboxgl-map,
+    .mapboxgl-canvas {
       width: 100%;
       height: 100%;
+      background: #0b1020; // Ensure no DOM content shows through
     }
 
     .mapboxgl-ctrl-attrib {
@@ -78,29 +81,6 @@
   width: 36px;
   height: 36px;
   color: main-colors.$accent-warm;
-}
-
-// Icon sizing and color fixes for SCSS-based project
-.location-control-btn,
-.map-overlay-toggle {
-  // Make sure icons inherit visible color
-  color: main-colors.$text-inverse;
-
-  .btn-icon {
-    width: 18px;
-    height: 18px;
-    flex: 0 0 auto; // don't shrink in flex
-    display: block; // avoid weird inline sizing
-    background: none; // reset any bg
-  }
-}
-
-.map-overlay-toggle {
-  .btn-icon {
-    width: 18px;
-    height: 18px;
-    display: block;
-  }
 }
 
 body.is-map-active,

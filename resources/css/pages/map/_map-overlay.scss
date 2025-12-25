@@ -1,0 +1,373 @@
+@use '../../variables/main-colors';
+@use '../../variables/layout';
+
+.map-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 20;
+
+  display: grid;
+  gap: 10px;
+
+  @media (min-width: 1024px) {
+    left: 16px;
+    right: auto;
+    width: 420px;
+  }
+}
+
+.map-controls-card {
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.map-location-controls {
+  @extend .map-controls-card;
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.location-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px;
+  margin: 3px;
+  margin-top: 5px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: main-colors.$text-inverse;
+
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(main-colors.$brand-primary, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid main-colors.$overlay-white-medium;
+    outline-offset: 2px;
+  }
+
+  .btn-icon,
+  svg {
+    width: 18px;
+    height: 18px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: inherit;
+  }
+}
+
+.map-manual-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: main-colors.$bg-surface;
+  padding: 0.75rem;
+  margin-top: 0.4rem;
+  border-radius: 8px;
+  border: 1px solid main-colors.$border-light;
+
+  input {
+    flex: 1;
+    min-width: 120px;
+    background: main-colors.$bg-surface;
+    border: 1px solid main-colors.$border-light;
+    color: main-colors.$text-primary;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  button {
+    background: main-colors.$brand-primary;
+    border: none;
+    color: main-colors.$text-inverse;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+
+    &:hover {
+      background: main-colors.$brand-primary-hover;
+    }
+
+    &:last-child {
+      background: transparent;
+      border: 1px solid main-colors.$border-light;
+      color: main-colors.$text-primary;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+.map-pick-instruction {
+  background: main-colors.$bg-base;
+  color: main-colors.$text-primary;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid main-colors.$accent-warm;
+  font-size: 1rem;
+}
+
+/* Radius slider block */
+.map-radius {
+  @extend .map-controls-card;
+  padding: 10px 12px;
+}
+
+.map-radius__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.map-radius__label {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 650;
+  font-size: 0.85rem;
+}
+
+.map-radius__value {
+  padding: 4px 8px;
+  border-radius: 999px;
+
+  background: rgba(main-colors.$brand-primary, 0.2);
+  border: 1px solid rgba(main-colors.$brand-primary, 0.35);
+  color: main-colors.$text-inverse;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.radius-slider {
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  outline: none;
+
+  /* "filled" part + remaining part */
+  background:
+    linear-gradient(
+        90deg,
+        rgba(main-colors.$brand-primary, 0.9),
+        rgba(main-colors.$accent-warm, 0.9)
+      )
+      0 0 / var(--pct, 0%) 100% no-repeat,
+    rgba(255, 255, 255, 0.14);
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px main-colors.$focus-ring;
+  }
+
+  /* WebKit thumb */
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+
+    background: main-colors.$bg-surface;
+    border: 2px solid rgba(main-colors.$brand-primary, 0.95);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+  }
+
+  /* Firefox thumb */
+  &::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: main-colors.$bg-surface;
+    border: 2px solid rgba(main-colors.$brand-primary, 0.95);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+  }
+
+  /* Firefox track (so it doesn't override your background) */
+  &::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: transparent;
+  }
+}
+
+/* 51 ticks without 51 elements */
+.radius-ruler {
+  margin-top: 8px;
+  height: 10px;
+  border-radius: 999px;
+  opacity: 0.85;
+
+  /* one tick per step (50 intervals between 1..51) */
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.22) 0 1px,
+    transparent 1px 100%
+  );
+  background-size: calc(100% / 50) 100%;
+  background-repeat: repeat-x;
+}
+
+.radius-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.7);
+
+  span:last-child {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 650;
+  }
+}
+
+.map-controls-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.map-controls-header-actions {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.map-overlay-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+
+  display: grid;
+  place-items: center;
+
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: main-colors.$text-inverse;
+
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(main-colors.$brand-primary, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid main-colors.$overlay-white-medium;
+    outline-offset: 2px;
+  }
+
+  &.is-active {
+    background: rgba(main-colors.$brand-primary, 0.22);
+    border-color: rgba(main-colors.$brand-primary, 0.45);
+  }
+
+  .btn-icon,
+  svg {
+    background: transparent;
+  }
+}
+
+.map-overlay-toggle--close {
+  background: rgba(0, 0, 0, 0.25);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Collapsible container (works for both controls + radius blocks) */
+.map-collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition:
+    grid-template-rows 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease;
+
+  > .map-collapsible__inner {
+    min-height: 0;
+  }
+
+  &.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  /* Give some spacing when expanded (since overlay is a grid) */
+  &.is-open + .map-collapsible.is-open {
+    margin-top: 10px;
+  }
+}
+
+/* Make search background slightly transparent */
+.map-search-input--transparent {
+  .search-input-wrapper {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
