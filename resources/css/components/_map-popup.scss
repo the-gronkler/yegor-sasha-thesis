@@ -1,0 +1,132 @@
+@use '../variables/main-colors';
+@use '../variables/exception-colors';
+
+// Local variables for the dark theme popup
+$popup-bg: #111111;
+$popup-header-bg: rgba(0, 0, 0, 0.3);
+$popup-border-color: rgba(255, 255, 255, 0.1);
+$popup-close-bg: rgba(0, 0, 0, 0.65);
+$popup-shadow: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
+
+.mapboxgl-popup.restaurant-popup {
+  max-width: 360px;
+  filter: $popup-shadow;
+
+  .mapboxgl-popup-content {
+    padding: 0;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: none; // We use drop-shadow on the parent
+  }
+
+  // Optional: make the little triangle match your dark card
+  &.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+    border-top-color: $popup-bg;
+  }
+  &.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+    border-bottom-color: $popup-bg;
+  }
+  &.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+    border-right-color: $popup-bg;
+  }
+  &.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+    border-left-color: $popup-bg;
+  }
+}
+
+.map-popup-card {
+  position: relative;
+  width: min(320px, 75vw);
+  background: $popup-bg;
+  color: main-colors.$text-inverse;
+}
+
+.map-popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: $popup-close-bg;
+  color: main-colors.$text-inverse;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  z-index: 20;
+
+  &:hover {
+    background: main-colors.$brand-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid main-colors.$brand-primary;
+    outline-offset: 2px;
+  }
+}
+
+.map-popup-image img {
+  display: block;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.map-popup-header {
+  padding: 12px 14px;
+  background: $popup-header-bg;
+  border-bottom: 1px solid $popup-border-color;
+}
+
+.map-popup-title {
+  margin: 0 0 4px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.map-popup-rating {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.map-popup-body {
+  padding: 12px 14px 14px;
+}
+
+.map-popup-meta {
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  opacity: 0.85;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.map-popup-description {
+  margin: 8px 0 12px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.restaurant-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  background: main-colors.$brand-primary;
+  color: main-colors.$text-inverse;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: main-colors.$brand-primary-hover;
+  }
+}
