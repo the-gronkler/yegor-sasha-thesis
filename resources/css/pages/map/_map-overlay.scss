@@ -1,5 +1,7 @@
+@use 'sass:color';
 @use '../../variables/main-colors';
 @use '../../variables/layout';
+@use '../../variables/map-colors';
 
 .map-overlay {
   position: absolute;
@@ -19,12 +21,12 @@
 }
 
 .map-controls-card {
-  background: rgba(0, 0, 0, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: map-colors.$map-card-bg;
+  border: 1px solid map-colors.$map-control-border;
   backdrop-filter: blur(10px);
   border-radius: 14px;
   padding: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 25px map-colors.$map-shadow;
 }
 
 .map-location-controls {
@@ -46,8 +48,8 @@
   margin-top: 5px;
   border-radius: 12px;
 
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: map-colors.$map-control-bg;
+  border: 1px solid map-colors.$map-control-border;
   color: main-colors.$text-inverse;
 
   font-size: 0.8rem;
@@ -61,8 +63,8 @@
 
   &:hover {
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.09);
-    border-color: rgba(main-colors.$brand-primary, 0.45);
+    background: map-colors.$map-control-bg-hover;
+    border-color: color.change(main-colors.$brand-primary, $alpha: 0.45);
   }
 
   &:active {
@@ -133,7 +135,7 @@
       color: main-colors.$text-primary;
 
       &:hover {
-        background: rgba(0, 0, 0, 0.05);
+        background: color.change(main-colors.$text-primary, $alpha: 0.05);
       }
     }
   }
@@ -164,7 +166,7 @@
 }
 
 .map-radius__label {
-  color: rgba(255, 255, 255, 0.85);
+  color: map-colors.$map-text-primary;
   font-weight: 650;
   font-size: 0.85rem;
 }
@@ -173,8 +175,8 @@
   padding: 4px 8px;
   border-radius: 999px;
 
-  background: rgba(main-colors.$brand-primary, 0.2);
-  border: 1px solid rgba(main-colors.$brand-primary, 0.35);
+  background: color.change(main-colors.$brand-primary, $alpha: 0.2);
+  border: 1px solid color.change(main-colors.$brand-primary, $alpha: 0.35);
   color: main-colors.$text-inverse;
 
   font-size: 0.78rem;
@@ -193,11 +195,11 @@
   background:
     linear-gradient(
         90deg,
-        rgba(main-colors.$brand-primary, 0.9),
-        rgba(main-colors.$accent-warm, 0.9)
+        color.change(main-colors.$brand-primary, $alpha: 0.9),
+        color.change(main-colors.$accent-warm, $alpha: 0.9)
       )
       0 0 / var(--pct, 0%) 100% no-repeat,
-    rgba(255, 255, 255, 0.14);
+    color.change(main-colors.$text-inverse, $alpha: 0.14);
 
   &:focus-visible {
     box-shadow: 0 0 0 3px main-colors.$focus-ring;
@@ -211,8 +213,8 @@
     border-radius: 999px;
 
     background: main-colors.$bg-surface;
-    border: 2px solid rgba(main-colors.$brand-primary, 0.95);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+    border: 2px solid color.change(main-colors.$brand-primary, $alpha: 0.95);
+    box-shadow: 0 6px 14px color.change(main-colors.$text-primary, $alpha: 0.35);
     cursor: pointer;
   }
 
@@ -222,8 +224,8 @@
     height: 18px;
     border-radius: 999px;
     background: main-colors.$bg-surface;
-    border: 2px solid rgba(main-colors.$brand-primary, 0.95);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+    border: 2px solid color.change(main-colors.$brand-primary, $alpha: 0.95);
+    box-shadow: 0 6px 14px color.change(main-colors.$text-primary, $alpha: 0.35);
     cursor: pointer;
   }
 
@@ -245,7 +247,7 @@
   /* one tick per step (50 intervals between 1..51) */
   background-image: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.22) 0 1px,
+    color.change(main-colors.$text-inverse, $alpha: 0.22) 0 1px,
     transparent 1px 100%
   );
   background-size: calc(100% / 50) 100%;
@@ -258,10 +260,10 @@
   margin-top: 6px;
 
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: map-colors.$map-text-secondary;
 
   span:last-child {
-    color: rgba(255, 255, 255, 0.85);
+    color: map-colors.$map-text-primary;
     font-weight: 650;
   }
 }
@@ -289,7 +291,7 @@
   place-items: center;
 
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid map-colors.$map-control-border;
   color: main-colors.$text-inverse;
 
   cursor: pointer;
@@ -300,8 +302,8 @@
 
   &:hover {
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(main-colors.$brand-primary, 0.45);
+    background: color.change(main-colors.$text-inverse, $alpha: 0.05);
+    border-color: color.change(main-colors.$brand-primary, $alpha: 0.45);
   }
 
   &:active {
@@ -314,8 +316,8 @@
   }
 
   &.is-active {
-    background: rgba(main-colors.$brand-primary, 0.22);
-    border-color: rgba(main-colors.$brand-primary, 0.45);
+    background: color.change(main-colors.$brand-primary, $alpha: 0.22);
+    border-color: color.change(main-colors.$brand-primary, $alpha: 0.45);
   }
 
   .btn-icon,
@@ -325,11 +327,11 @@
 }
 
 .map-overlay-toggle--close {
-  background: rgba(0, 0, 0, 0.25);
+  background: map-colors.$map-shadow;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: color.change(main-colors.$text-primary, $alpha: 0.4);
+    border-color: main-colors.$overlay-white-light;
   }
 }
 
@@ -366,8 +368,8 @@
 /* Make search background slightly transparent */
 .map-search-input--transparent {
   .search-input-wrapper {
-    background: rgba(0, 0, 0, 0.4);
+    background: color.change(main-colors.$text-primary, $alpha: 0.4);
     backdrop-filter: blur(8px);
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: color.change(main-colors.$text-inverse, $alpha: 0.15);
   }
 }

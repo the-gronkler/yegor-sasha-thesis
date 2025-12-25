@@ -1,0 +1,32 @@
+// ======================================================================
+// MAP SPECIFIC COLORS (Dark Theme Context)
+// ======================================================================
+
+// TODO: deprcate all of these and use the main-colors
+
+$map-bg: #0b1020;
+// Purpose: Map background color (fog).
+
+$map-sheet-bg: rgba(0, 0, 0, 0.85);
+// Purpose: Bottom sheet background.
+
+$map-card-bg: rgba(0, 0, 0, 0.72);
+// Purpose: Map overlay card background.
+
+$map-control-bg: rgba(255, 255, 255, 0.06);
+// Purpose: Map control button background.
+
+$map-control-bg-hover: rgba(255, 255, 255, 0.09);
+// Purpose: Map control button hover background.
+
+$map-control-border: rgba(255, 255, 255, 0.12);
+// Purpose: Map control button border.
+
+$map-text-primary: rgba(255, 255, 255, 0.85);
+// Purpose: Primary text on map overlays.
+
+$map-text-secondary: rgba(255, 255, 255, 0.7);
+// Purpose: Secondary text on map overlays.
+
+$map-shadow: rgba(0, 0, 0, 0.25);
+// Purpose: Shadow for map elements.
