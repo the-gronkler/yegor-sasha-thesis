@@ -30,3 +30,9 @@ $map-text-secondary: rgba(255, 255, 255, 0.7);
 
 $map-shadow: rgba(0, 0, 0, 0.25);
 // Purpose: Shadow for map elements.
+
+$map-popup-bg: #111111;
+$map-popup-header-bg: rgba(0, 0, 0, 0.3);
+$map-popup-border-color: rgba(255, 255, 255, 0.1);
+$map-popup-close-bg: rgba(0, 0, 0, 0.65);
+$map-popup-shadow: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));

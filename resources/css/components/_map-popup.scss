@@ -1,15 +1,10 @@
 @use '../variables/main-colors';
 @use '../variables/exception-colors';
-
-$popup-bg: #111111;
-$popup-header-bg: rgba(0, 0, 0, 0.3);
-$popup-border-color: rgba(255, 255, 255, 0.1);
-$popup-close-bg: rgba(0, 0, 0, 0.65);
-$popup-shadow: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
+@use '../variables/map-colors';
 
 .mapboxgl-popup.restaurant-popup {
   max-width: 360px;
-  filter: $popup-shadow;
+  filter: map-colors.$map-popup-shadow;
 
   .mapboxgl-popup-content {
     padding: 0;
@@ -21,23 +16,23 @@ $popup-shadow: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
 
   // Match popup tip to card background
   &.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
-    border-top-color: $popup-bg;
+    border-top-color: map-colors.$map-popup-bg;
   }
   &.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
-    border-bottom-color: $popup-bg;
+    border-bottom-color: map-colors.$map-popup-bg;
   }
   &.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
-    border-right-color: $popup-bg;
+    border-right-color: map-colors.$map-popup-bg;
   }
   &.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
-    border-left-color: $popup-bg;
+    border-left-color: map-colors.$map-popup-bg;
   }
 }
 
 .map-popup-card {
   position: relative;
   width: min(320px, 75vw);
-  background: $popup-bg;
+  background: map-colors.$map-popup-bg;
   color: main-colors.$text-inverse;
 }
 
@@ -50,7 +45,7 @@ $popup-shadow: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
   border: 0;
   border-radius: 999px;
   cursor: pointer;
-  background: $popup-close-bg;
+  background: map-colors.$map-popup-close-bg;
   color: main-colors.$text-inverse;
   display: grid;
   place-items: center;
@@ -77,8 +72,8 @@ $popup-shadow: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
 
 .map-popup-header {
   padding: 12px 14px;
-  background: $popup-header-bg;
-  border-bottom: 1px solid $popup-border-color;
+  background: map-colors.$map-popup-header-bg;
+  border-bottom: 1px solid map-colors.$map-popup-border-color;
 }
 
 .map-popup-title {
