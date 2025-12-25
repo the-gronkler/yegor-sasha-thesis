@@ -4,12 +4,22 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
+use App\Services\GeoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class MapController extends Controller
 {
+    private const MAX_RESTAURANTS_LIMIT = 250;
+
+    protected GeoService $geoService;
+
+    public function __construct(GeoService $geoService)
+    {
+        $this->geoService = $geoService;
+    }
+
     /**
      * Display a map of restaurants.
      *
@@ -40,7 +50,7 @@ class MapController extends Controller
         $validated = $request->validate([
             'lat' => 'nullable|numeric|between:-90,90',
             'lng' => 'nullable|numeric|between:-180,180',
-            'radius' => 'nullable|numeric|min:0|max:100', // allow 0 == "no range"
+            'radius' => 'nullable|numeric|min:0|max:'.GeoService::MAX_RADIUS_KM, // allow 0 == "no range"
         ]);
 
         $latitude = $validated['lat'] ?? null;
@@ -49,14 +59,10 @@ class MapController extends Controller
         // If no coordinates provided in request, try to use persisted session coordinates
         // This allows showing distance even when user hasn't clicked "My Location" on this page
         if ($latitude === null && $longitude === null) {
-            $geo = $request->session()->get('geo.last');
-
-            // Check if coordinates are present and not too old (24 hours)
-            if ($geo && isset($geo['lat'], $geo['lng'])) {
-                if (! isset($geo['stored_at']) || (time() - (int) $geo['stored_at']) <= 86400) {
-                    $latitude = (float) $geo['lat'];
-                    $longitude = (float) $geo['lng'];
-                }
+            $geo = $this->geoService->getValidGeoFromSession($request);
+            if ($geo) {
+                $latitude = $geo['lat'];
+                $longitude = $geo['lng'];
             }
         }
 
@@ -64,7 +70,7 @@ class MapController extends Controller
         // If radius is explicitly 0 -> interpret as "no range"
         $radius = array_key_exists('radius', $validated)
             ? (float) $validated['radius']
-            : 50.0;
+            : GeoService::DEFAULT_RADIUS_KM;
 
         // CRITICAL OPTIMIZATION: Only load 'images', NOT 'foodTypes.menuItems'
         // Map page only needs images for markers/cards; menu data is HEAVY
@@ -83,18 +89,13 @@ class MapController extends Controller
             ])
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->limit(250); // Defensive limit: protects against huge payloads + Mapbox perf
+            ->limit(self::MAX_RESTAURANTS_LIMIT); // Defensive limit: protects against huge payloads + Mapbox perf
 
         // Apply geolocation filtering if coordinates are provided
         if ($latitude !== null && $longitude !== null) {
             // Persist coordinates in session for reuse on other pages (e.g., Restaurant Show)
             // Allows distance calculation to be consistent across the app
-            // Use time() to avoid timezone confusion
-            $request->session()->put('geo.last', [
-                'lat' => $latitude,
-                'lng' => $longitude,
-                'stored_at' => time(),
-            ]);
+            $this->geoService->storeGeoInSession($request, $latitude, $longitude);
 
             // Use model scope for distance calculation
             // (MariaDB ST_Distance_Sphere or Haversine fallback)
@@ -123,13 +124,12 @@ class MapController extends Controller
                 'rating' => $restaurant->rating,
                 'description' => $restaurant->description,
                 'opening_hours' => $restaurant->opening_hours,
-                'distance' => isset($restaurant->distance) ? round($restaurant->distance, 2) : null,
+                'distance' => $this->geoService->formatDistance($restaurant->distance),
                 'images' => $restaurant->images->map(fn ($img) => [
                     'id' => $img->id,
                     'url' => $img->image,
                     'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
                 ]),
-                // REMOVED: 'food_types' - not needed for map view
             ]);
 
         return Inertia::render('Customer/Map/Index', [
