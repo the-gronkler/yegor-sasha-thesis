@@ -41,10 +41,6 @@ export default function MenuItemShow({
     }
   };
 
-  const handleIncrease = () => {
-    addItem(menuItem, restaurantId);
-  };
-
   return (
     <CustomerLayout>
       <Head title={menuItem.name} />
@@ -117,23 +113,13 @@ export default function MenuItemShow({
 
               <button
                 className="quantity-btn increase-btn"
-                onClick={handleIncrease}
+                onClick={handleAddToCart}
                 aria-label="Increase quantity"
               >
                 <PlusIcon className="icon" />
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Add to Cart Button */}
-        <div className="add-to-cart-section">
-          <button className="add-to-cart-btn" onClick={handleAddToCart}>
-            <span>Add to Cart</span>
-            {quantityInCart > 0 && (
-              <span className="cart-badge">{quantityInCart}</span>
-            )}
-          </button>
         </div>
       </div>
     </CustomerLayout>

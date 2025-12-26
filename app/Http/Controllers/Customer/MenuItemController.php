@@ -15,6 +15,8 @@ class MenuItemController extends Controller
      */
     public function show(Request $request, Restaurant $restaurant, MenuItem $menuItem)
     {
+        $this->authorize('view', $menuItem);
+
         // Verify the menu item belongs to the restaurant
         abort_if($menuItem->restaurant_id !== $restaurant->id, 404);
 
