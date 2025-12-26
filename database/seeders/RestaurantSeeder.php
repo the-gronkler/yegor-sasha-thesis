@@ -10,7 +10,7 @@ class RestaurantSeeder extends Seeder
     public function run(): void
     {
         Restaurant::factory()
-            ->count(5)
+            ->count(10)
             ->create();
     }
 }

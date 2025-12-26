@@ -1,0 +1,38 @@
+@use 'sass:meta';
+@use 'main-colors' as main-colors;
+@use 'exception-colors' as exception-colors;
+
+// ======================================================================
+// CSS CUSTOM PROPERTIES GENERATOR
+// ======================================================================
+// This file automatically generates CSS custom properties (variables)
+// for all colors, numbers, and strings defined in _main-colors.scss
+// and _exception-colors.scss.
+//
+// This allows us to use the same variables in both Sass (compile-time)
+// and JavaScript (runtime) without manual duplication.
+
+// exports all SCSS variabels as CSS properties like:
+// :root {
+//   --brand-primary: #{$brand-primary};
+//   --accent-warm: #{$accent-warm};
+//   ...
+// }
+
+:root {
+  @each $module in 'main-colors', 'exception-colors' {
+    @each $name, $value in meta.module-variables($module) {
+      // Only export colors, numbers, and strings
+      // Skips functions, mixins, and nulls
+      @if meta.type-of($value) ==
+        'color' or
+        meta.type-of($value) ==
+        'number' or
+        meta.type-of($value) ==
+        'string'
+      {
+        --#{$name}: #{$value};
+      }
+    }
+  }
+}

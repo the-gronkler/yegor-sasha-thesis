@@ -20,6 +20,8 @@ yarn-error.log
 /.fleet
 /.idea
 /.nova
-/.vscode
 /.zed
 *.code-workspace
+
+# Ignore personal VS Code settings, but allow shared configs
+/.vscode/settings.json

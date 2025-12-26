@@ -2,3 +2,7 @@
 @use 'variables/main-colors';
 @use 'variables/layout';
 @use 'variables/exception-colors';
+@use 'variables/map-colors';
+
+// Generate CSS Custom Properties
+@use 'variables/css-vars';

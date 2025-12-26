@@ -4,23 +4,39 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
+use App\Services\GeoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class RestaurantController extends Controller
 {
+    protected GeoService $geoService;
+
+    public function __construct(GeoService $geoService)
+    {
+        $this->geoService = $geoService;
+    }
+
     /**
      * Display a listing of restaurants (e.g., the "main page").
      */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Restaurant::class);
-        // TODO: limit selection of restaurants by user's geolocation, accept filtering/sorting? params
-        // Fetch restaurants with their images, food types, and menu items
-        $restaurants = Restaurant::with(['images', 'foodTypes.menuItems'])
+
+        // Try to get last known coordinates from session
+        $geo = $this->geoService->getValidGeoFromSession($request);
+        $lat = $geo['lat'] ?? null;
+        $lng = $geo['lng'] ?? null;
+
+        // Build query with optional distance calculation
+        $query = Restaurant::query()
             ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
-            ->latest('rating')
-            ->get()
+            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
+            ->with(['images', 'foodTypes.menuItems'])
+            ->latest('rating');
+
+        $restaurants = $query->get()
             ->map(function ($restaurant) {
                 return [
                     'id' => $restaurant->id,
@@ -31,6 +47,7 @@ class RestaurantController extends Controller
                     'rating' => $restaurant->rating,
                     'description' => $restaurant->description,
                     'opening_hours' => $restaurant->opening_hours,
+                    'distance' => $this->geoService->formatDistance($restaurant->distance),
                     'images' => $restaurant->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->image,
@@ -59,15 +76,25 @@ class RestaurantController extends Controller
     {
         $this->authorize('view', $restaurant);
 
-        // Load related data
-        $restaurant->load([
-            'foodTypes.menuItems.images',         // food types → menu items → images
-            'menuItems.allergens',                // all allergens of menu items
-            'images',                              // restaurant images
-            'reviews.customer.user',               // reviews with customer and user details
-        ]);
+        // Try to get last known coordinates from session (set by MapController)
+        $geo = $this->geoService->getValidGeoFromSession($request);
+        $lat = $geo['lat'] ?? null;
+        $lng = $geo['lng'] ?? null;
 
-        // Prepare data (you might map or slice properties)
+        // Fetch restaurant with optional distance calculation in one query
+        // Uses when() for conditional scope application
+        $restaurant = Restaurant::query()
+            ->whereKey($restaurant->getKey())
+            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
+            ->with([
+                'foodTypes.menuItems.images',
+                'menuItems.allergens',
+                'images',
+                'reviews.customer.user',
+            ])
+            ->firstOrFail();
+
+        // Prepare data for Inertia
         return Inertia::render('Customer/Restaurants/Show', [
             'restaurant' => [
                 'id' => $restaurant->id,
@@ -78,6 +105,7 @@ class RestaurantController extends Controller
                 'description' => $restaurant->description,
                 'rating' => $restaurant->rating,
                 'opening_hours' => $restaurant->opening_hours,
+                'distance' => $this->geoService->formatDistance($restaurant->distance),
                 // relations:
                 'reviews' => $restaurant->reviews->map(fn ($review) => [
                     'id' => $review->id,
