@@ -39,13 +39,18 @@ jobs:
             git fetch --all
 
             # 3. Checkout target
+            TARGET_BRANCH="${{ inputs.branch }}"
+            if [ -z "$TARGET_BRANCH" ]; then
+              TARGET_BRANCH="${{ github.ref_name }}"
+            fi
+
             if [ -n "${{ inputs.commit }}" ]; then
               echo "Checking out specific commit: ${{ inputs.commit }}"
               git checkout "${{ inputs.commit }}"
             else
-              echo "Checking out branch: ${{ inputs.branch }}"
-              git checkout "${{ inputs.branch }}"
-              git pull origin "${{ inputs.branch }}"
+              echo "Checking out branch: $TARGET_BRANCH"
+              git checkout "$TARGET_BRANCH"
+              git pull origin "$TARGET_BRANCH"
             fi
 
             # 4. Update Environment (Optional: Ensure .env exists)
