@@ -25,3 +25,5 @@ yarn-error.log
 
 # Ignore personal VS Code settings, but allow shared configs
 /.vscode/settings.json
+
+env.production
