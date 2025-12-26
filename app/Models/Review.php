@@ -11,6 +11,8 @@ class Review extends Model
 {
     use HasFactory;
 
+    public const MAX_IMAGES = 30;
+
     protected $fillable = [
         'customer_user_id',
         'rating',

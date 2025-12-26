@@ -2,7 +2,7 @@ import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Review } from '@/types/models';
 import ReviewList from './ReviewList';
 import ReviewForm from './ReviewForm';
-import ReviewItem from './ReviewItem';
+import { ReviewItem } from './ReviewItem';
 import { useRestaurantReviews } from '@/Hooks/useRestaurantReviews';
 
 interface Props {
