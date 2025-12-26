@@ -136,3 +136,15 @@ To format both frontend and backend files in one go, run:
 ```powershell
 npm run format:all
 ```
+
+## Deployment
+
+### Resetting Production Database
+
+If you need to completely wipe and re-seed the production database (e.g., during initial setup or if the database state is corrupted), use the following command on the server:
+
+```bash
+docker compose run --rm --entrypoint="" app php artisan mfs --force
+```
+
+**Warning:** This will destroy all data in the production database.
