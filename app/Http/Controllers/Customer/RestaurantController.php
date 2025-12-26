@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
+use App\Services\GeoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class RestaurantController extends Controller
 {
+    protected GeoService $geoService;
+
+    public function __construct(GeoService $geoService)
+    {
+        $this->geoService = $geoService;
+    }
+
     /**
      * Display a listing of restaurants (e.g., the "main page").
      */
@@ -17,14 +25,9 @@ class RestaurantController extends Controller
         $this->authorize('viewAny', Restaurant::class);
 
         // Try to get last known coordinates from session
-        $geo = $request->session()->get('geo.last');
-        $lat = isset($geo['lat']) ? (float) $geo['lat'] : null;
-        $lng = isset($geo['lng']) ? (float) $geo['lng'] : null;
-
-        // Ignore stale coordinates (older than 24 hours)
-        if (isset($geo['stored_at']) && (time() - (int) $geo['stored_at']) > 86400) {
-            $lat = $lng = null;
-        }
+        $geo = $this->geoService->getValidGeoFromSession($request);
+        $lat = $geo['lat'] ?? null;
+        $lng = $geo['lng'] ?? null;
 
         // Build query with optional distance calculation
         $query = Restaurant::query()
@@ -44,7 +47,7 @@ class RestaurantController extends Controller
                     'rating' => $restaurant->rating,
                     'description' => $restaurant->description,
                     'opening_hours' => $restaurant->opening_hours,
-                    'distance' => isset($restaurant->distance) ? round((float) $restaurant->distance, 2) : null,
+                    'distance' => $this->geoService->formatDistance($restaurant->distance),
                     'images' => $restaurant->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->image,
@@ -74,15 +77,9 @@ class RestaurantController extends Controller
         $this->authorize('view', $restaurant);
 
         // Try to get last known coordinates from session (set by MapController)
-        $geo = $request->session()->get('geo.last');
-        $lat = isset($geo['lat']) ? (float) $geo['lat'] : null;
-        $lng = isset($geo['lng']) ? (float) $geo['lng'] : null;
-
-        // Optional: ignore very old stored coords (e.g. older than 24 hours)
-        // Prevents showing stale distance data from days/weeks ago
-        if (isset($geo['stored_at']) && (time() - (int) $geo['stored_at']) > 86400) {
-            $lat = $lng = null;
-        }
+        $geo = $this->geoService->getValidGeoFromSession($request);
+        $lat = $geo['lat'] ?? null;
+        $lng = $geo['lng'] ?? null;
 
         // Fetch restaurant with optional distance calculation in one query
         // Uses when() for conditional scope application
@@ -107,7 +104,7 @@ class RestaurantController extends Controller
                 'description' => $restaurant->description,
                 'rating' => $restaurant->rating,
                 'opening_hours' => $restaurant->opening_hours,
-                'distance' => isset($restaurant->distance) ? round((float) $restaurant->distance, 2) : null,
+                'distance' => $this->geoService->formatDistance($restaurant->distance),
                 // relations:
                 'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
                     'id' => $ft->id,

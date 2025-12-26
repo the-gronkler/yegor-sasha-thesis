@@ -1,20 +1,27 @@
 import * as React from 'react';
-import { Link } from '@inertiajs/react';
 import Map, {
   Marker,
-  Popup,
   GeolocateControl,
   NavigationControl,
   Source,
   Layer,
-  type GeolocateResultEvent,
 } from 'react-map-gl/mapbox';
-import type mapboxgl from 'mapbox-gl';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import StarRating from '@/Components/Shared/StarRating';
+import type { MapRef } from 'react-map-gl/mapbox';
+import type { MapMouseEvent, GeoJSONSource } from 'mapbox-gl';
+import type { Point } from 'geojson';
 import { MapMarker } from '@/types/models';
 import { createTheme } from '@/Utils/css';
+import MapPopup from './MapPopup';
+import {
+  getClusterLayer,
+  getClusterCountLayer,
+  getSelectedPointLayer,
+  getUnclusteredPointLayer,
+  MapTheme,
+} from './mapStyles';
+import { useMapGeolocation } from '@/Hooks/useMapGeolocation';
 
 interface Props {
   viewState: {
@@ -59,10 +66,14 @@ export default function MapComponent({
   onPickLocation,
   showGeolocateControlUi = true,
 }: Props) {
-  const geolocateControlRef = React.useRef<mapboxgl.GeolocateControl | null>(
-    null,
-  );
-  const mapRef = React.useRef<any>(null);
+  const mapRef = React.useRef<MapRef>(null);
+
+  const { geolocateControlRef, handleGeolocate, handleGeolocateError } =
+    useMapGeolocation({
+      onGeolocate,
+      onGeolocateError,
+      registerGeolocateTrigger,
+    });
 
   // Theme constants for consistent colors (synced with CSS)
   const THEME = React.useMemo(() => {
@@ -73,88 +84,8 @@ export default function MapComponent({
       { key: 'textInverse', cssVar: '--text-inverse' },
     ] as const;
 
-    return createTheme<{
-      brandPrimary: string;
-      brandPrimaryHover: string;
-      accentWarm: string;
-      textInverse: string;
-    }>(themeVars);
+    return createTheme<MapTheme>(themeVars);
   }, []);
-
-  // Safe extraction helper for geolocation error events
-  type MaybeErrorEvent = {
-    code?: number;
-    message?: string;
-    error?: { code?: number; message?: string };
-  };
-
-  function extractGeolocateError(evt: unknown): {
-    code?: number;
-    message?: string;
-  } {
-    if (!evt || typeof evt !== 'object') return {};
-    const e = evt as MaybeErrorEvent;
-
-    return {
-      code: e.code ?? e.error?.code,
-      message: e.message ?? e.error?.message,
-    };
-  }
-
-  // Handle geolocation success from Mapbox control
-  const handleGeolocate = React.useCallback(
-    (evt: GeolocateResultEvent) => {
-      if (onGeolocate && evt.coords) {
-        const { latitude, longitude } = evt.coords;
-        onGeolocate(latitude, longitude);
-      }
-    },
-    [onGeolocate],
-  );
-
-  // Handle geolocation errors from Mapbox control
-  const handleGeolocateError = React.useCallback(
-    (evt: unknown) => {
-      if (onGeolocateError) {
-        const { code, message } = extractGeolocateError(evt);
-
-        let errorMessage =
-          message ||
-          'Unable to get your location. Please check browser/OS location permissions.';
-
-        switch (code) {
-          case 1:
-            errorMessage =
-              'Location access denied. Allow location permissions to see nearby restaurants.';
-            break;
-          case 2:
-            errorMessage =
-              'Location information unavailable. Check OS location services or try again.';
-            break;
-          case 3:
-            errorMessage =
-              'Location request timed out. Try again or disable high accuracy.';
-            break;
-        }
-
-        onGeolocateError(errorMessage);
-      }
-    },
-    [onGeolocateError],
-  );
-
-  // Expose a single "trigger geolocation" function to the parent
-  React.useEffect(() => {
-    if (!registerGeolocateTrigger) return;
-
-    registerGeolocateTrigger(() => {
-      if (!geolocateControlRef.current) return false;
-      geolocateControlRef.current.trigger();
-      return true;
-    });
-
-    return () => registerGeolocateTrigger(null);
-  }, [registerGeolocateTrigger]);
 
   // Separate restaurant markers from user marker
   const restaurantMarkers = markers.filter((m) => m.id !== -1);
@@ -186,7 +117,7 @@ export default function MapComponent({
 
   // Handle map click for clustering and location picking
   const handleMapClick = React.useCallback(
-    (event: any) => {
+    (event: MapMouseEvent) => {
       // Manual pick mode: click anywhere to set user location
       if (isPickingLocation) {
         const { lng, lat } = event.lngLat;
@@ -204,29 +135,34 @@ export default function MapComponent({
 
       if (features.length > 0) {
         const feature = features[0];
-        if (feature.layer.id === 'clusters') {
+        if (feature.layer?.id === 'clusters') {
           // Zoom into cluster
-          const clusterId = feature.properties.cluster_id;
-          const source = map.getSource('restaurants');
-          if (source) {
+          const clusterId = feature.properties?.cluster_id;
+          const source = map.getSource('restaurants') as GeoJSONSource;
+          if (source && clusterId) {
             source.getClusterExpansionZoom(
               clusterId,
-              (err: any, zoom: number) => {
-                if (err) return;
+              (err?: Error | null, zoom?: number | null) => {
+                if (err || zoom == null) return;
                 map.easeTo({
-                  center: feature.geometry.coordinates,
+                  center: (feature.geometry as Point).coordinates as [
+                    number,
+                    number,
+                  ],
                   zoom: zoom,
                 });
               },
             );
           }
-        } else if (feature.layer.id === 'unclustered-point') {
+        } else if (feature.layer?.id === 'unclustered-point') {
           // Open popup for restaurant
           const properties = feature.properties;
+          if (!properties || feature.geometry.type !== 'Point') return;
+          const coordinates = (feature.geometry as Point).coordinates;
           const restaurant: MapMarker = {
             id: properties.id,
-            lat: feature.geometry.coordinates[1],
-            lng: feature.geometry.coordinates[0],
+            lat: coordinates[1],
+            lng: coordinates[0],
             name: properties.name,
             address: properties.address,
             openingHours: properties.openingHours,
@@ -267,7 +203,7 @@ export default function MapComponent({
   }, [selectedRestaurant?.id]);
 
   // Handle map mouse move for cursor changes
-  const handleMapMouseMove = React.useCallback((event: any) => {
+  const handleMapMouseMove = React.useCallback((event: MapMouseEvent) => {
     const map = mapRef.current?.getMap();
     if (!map) return;
 
@@ -372,74 +308,10 @@ export default function MapComponent({
 
         {/* Restaurant Popup */}
         {selectedRestaurant && (
-          <Popup
-            className="restaurant-popup"
-            longitude={selectedRestaurant.lng}
-            latitude={selectedRestaurant.lat}
-            anchor="bottom"
-            offset={16}
-            closeButton={false}
-            closeOnClick={false}
+          <MapPopup
+            restaurant={selectedRestaurant}
             onClose={() => onSelectRestaurant?.(null)}
-            maxWidth="360px"
-            focusAfterOpen={false}
-          >
-            <div
-              className="map-popup-card"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                type="button"
-                className="map-popup-close"
-                onClick={() => onSelectRestaurant?.(null)}
-                aria-label="Close popup"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-
-              {selectedRestaurant.imageUrl ? (
-                <div className="map-popup-image">
-                  <img
-                    src={selectedRestaurant.imageUrl}
-                    alt={selectedRestaurant.name}
-                  />
-                </div>
-              ) : null}
-
-              <div className="map-popup-header">
-                <h3 className="map-popup-title">{selectedRestaurant.name}</h3>
-                {typeof selectedRestaurant.rating === 'number' ? (
-                  <div className="map-popup-rating">
-                    <StarRating rating={selectedRestaurant.rating} />
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="map-popup-body">
-                <div className="map-popup-meta">
-                  {selectedRestaurant.distanceKm != null ? (
-                    <span>{selectedRestaurant.distanceKm} km</span>
-                  ) : null}
-                  {selectedRestaurant.openingHours ? (
-                    <span>• {selectedRestaurant.openingHours}</span>
-                  ) : null}
-                </div>
-
-                {selectedRestaurant.address ? (
-                  <p className="map-popup-description">
-                    {selectedRestaurant.address}
-                  </p>
-                ) : null}
-
-                <Link
-                  href={route('restaurants.show', selectedRestaurant.id)}
-                  className="restaurant-view-btn"
-                >
-                  View details
-                </Link>
-              </div>
-            </div>
-          </Popup>
+          />
         )}
 
         {/* Clustering Layer - Restaurant markers */}
@@ -451,71 +323,10 @@ export default function MapComponent({
           clusterMaxZoom={14}
           clusterRadius={50}
         >
-          <Layer
-            id="clusters"
-            type="circle"
-            source="restaurants"
-            filter={['has', 'point_count']}
-            paint={{
-              'circle-color': [
-                'step',
-                ['get', 'point_count'],
-                THEME.accentWarm,
-                2,
-                THEME.brandPrimary,
-                10,
-                THEME.brandPrimaryHover,
-              ],
-              'circle-radius': [
-                'step',
-                ['get', 'point_count'],
-                20,
-                10,
-                30,
-                20,
-                40,
-              ],
-            }}
-          />
-
-          <Layer
-            id="cluster-count"
-            type="symbol"
-            source="restaurants"
-            filter={['has', 'point_count']}
-            layout={{
-              'text-field': '{point_count_abbreviated}',
-              'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-              'text-size': 12,
-            }}
-            paint={{
-              'text-color': '#ffffff',
-            }}
-          />
-
-          <Layer
-            id="selected-point"
-            type="circle"
-            source="restaurants"
-            filter={['==', ['get', 'id'], selectedRestaurantId || -999]}
-            paint={{
-              'circle-color': THEME.brandPrimary,
-              'circle-radius': 18,
-              'circle-stroke-color': THEME.brandPrimaryHover,
-              'circle-stroke-width': 3,
-            }}
-          />
-
-          <Layer
-            id="unclustered-point"
-            type="circle"
-            source="restaurants"
-            filter={['!', ['has', 'point_count']]}
-            paint={{
-              'circle-color': THEME.brandPrimary,
-              'circle-radius': 14,
-            }}
-          />
+          <Layer {...getClusterLayer(THEME)} />
+          <Layer {...getClusterCountLayer()} />
+          <Layer {...getSelectedPointLayer(THEME, selectedRestaurantId)} />
+          <Layer {...getUnclusteredPointLayer(THEME)} />
         </Source>
       </Map>
     </div>
