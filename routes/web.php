@@ -3,6 +3,7 @@
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\MapController;
+use App\Http\Controllers\Customer\MenuItemController;
 use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\RestaurantController;
@@ -14,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [RestaurantController::class, 'index'])->name('restaurants.index');
     Route::get('/map', [MapController::class, 'index'])->name('map.index');
     Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
+    Route::get('/restaurants/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('restaurants.menu-items.show');
 
     // Cart (for current customer)
     Route::prefix('cart')->name('cart.')->group(function () {

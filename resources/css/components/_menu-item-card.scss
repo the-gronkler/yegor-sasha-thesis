@@ -35,6 +35,18 @@
     }
   }
 
+  .menu-item-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+    margin-right: 1rem;
+
+    &:active {
+      opacity: 0.8;
+    }
+  }
+
   .menu-item-image {
     width: 60px;
     height: 60px;
@@ -75,7 +87,6 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-left: 1rem;
   }
 
   .quantity-btn {
