@@ -90,6 +90,7 @@ class RestaurantController extends Controller
                 'foodTypes.menuItems.images',
                 'menuItems.allergens',
                 'images',
+                'reviews.customer.user',
             ])
             ->firstOrFail();
 
@@ -106,6 +107,15 @@ class RestaurantController extends Controller
                 'opening_hours' => $restaurant->opening_hours,
                 'distance' => $this->geoService->formatDistance($restaurant->distance),
                 // relations:
+                'reviews' => $restaurant->reviews->map(fn ($review) => [
+                    'id' => $review->id,
+                    'rating' => $review->rating,
+                    'title' => $review->title,
+                    'content' => $review->content,
+                    'created_at' => $review->created_at->toIso8601String(),
+                    'user_name' => $review->customer?->user?->name ?? 'Anonymous',
+                    'customer_user_id' => $review->customer_user_id,
+                ]),
                 'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
                     'id' => $ft->id,
                     'name' => $ft->name,

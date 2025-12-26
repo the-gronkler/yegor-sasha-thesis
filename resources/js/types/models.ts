@@ -96,6 +96,7 @@ export interface Restaurant {
   images?: Image[];
   food_types?: FoodType[];
   restaurant_images?: Image[];
+  reviews?: Review[];
   created_at: string;
   updated_at: string;
 }
@@ -131,6 +132,7 @@ export interface Review {
   customer?: Customer;
   restaurant?: Restaurant;
   images?: Image[];
+  user_name?: string;
 }
 
 export interface MapMarker {

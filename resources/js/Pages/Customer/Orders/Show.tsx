@@ -57,7 +57,7 @@ export default function OrderShow({ order }: OrderShowProps) {
                   <div className="item-price">{formatCurrency(item.price)}</div>
                 </div>
                 <div className="item-total">
-                  {formatCurrency(item.price * (item.pivot?.quantity || 0))}
+                  {formatCurrency(item.price * (item.pivot?.quantity || 1))}
                 </div>
               </div>
             ))}

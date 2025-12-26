@@ -86,6 +86,12 @@
       }
     }
 
+    .rating-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+    }
+
     .info-row {
       display: flex;
       justify-content: space-between;
@@ -126,12 +132,13 @@
 
   .no-results {
     text-align: center;
-    padding: 3rem 1rem;
+    padding: 2rem;
     color: main-colors.$text-secondary;
-    font-style: italic;
-    background-color: main-colors.$bg-surface;
-    margin: 0 1rem;
-    border-radius: layout.$border-radius;
+  }
+
+  .reviews-section-wrapper {
+    margin-top: 2rem;
+    padding: 0 1rem 5rem; // Bottom padding for floating checkout
   }
 
   .floating-checkout-container {
