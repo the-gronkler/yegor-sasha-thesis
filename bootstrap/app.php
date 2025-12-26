@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $middleware->trustProxies(at: '*');
         }
 
-        $middleware->web(prepend: [
+        $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
     })

@@ -1,31 +1,18 @@
-import { useMemo } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
-import { IFuseOptions } from 'fuse.js';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
 import SearchInput from '@/Components/UI/SearchInput';
-import { useSearch } from '@/Hooks/useSearch';
-import { Restaurant, MenuItem } from '@/types/models';
+import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
-import { useCart } from '@/Contexts/CartContext';
+import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
+import { useRestaurantMenu } from '@/Hooks/useRestaurantMenu';
+import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
 }
-
-type MenuItemWithCategory = MenuItem & { category_name: string };
-
-const SEARCH_OPTIONS: IFuseOptions<MenuItemWithCategory> = {
-  keys: [
-    { name: 'name', weight: 2 },
-    { name: 'description', weight: 1.5 },
-    { name: 'category_name', weight: 0.5 },
-  ],
-};
-
-const EMPTY_KEYS: any[] = [];
 
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const primaryImage =
@@ -34,56 +21,12 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     ) || restaurant.restaurant_images?.[0];
   const bannerUrl = primaryImage ? primaryImage.url : null;
 
-  // Flatten menu items for searching
-  const allMenuItems = useMemo(
-    () =>
-      restaurant.food_types?.flatMap((ft) =>
-        ft.menu_items.map((item) => ({ ...item, category_name: ft.name })),
-      ) || [],
-    [restaurant.food_types],
+  const { query, setQuery, displayedCategories } =
+    useRestaurantMenu(restaurant);
+
+  const { cartItemCount, cartTotal, handleGoToCart } = useRestaurantCart(
+    restaurant.id,
   );
-
-  const {
-    query,
-    setQuery,
-    filteredItems: filteredMenuItems,
-  } = useSearch<MenuItemWithCategory>(allMenuItems, EMPTY_KEYS, SEARCH_OPTIONS);
-
-  // Group filtered items back into categories
-  const displayedCategories = useMemo(() => {
-    if (!query) return restaurant.food_types;
-
-    if (filteredMenuItems.length === 0) return [];
-
-    return [
-      {
-        id: -1,
-        name: 'Search Results',
-        menu_items: filteredMenuItems,
-      },
-    ];
-  }, [query, restaurant.food_types, filteredMenuItems]);
-
-  const { items } = useCart();
-
-  const restaurantCartItems = useMemo(
-    () => items.filter((item) => item.restaurant_id === restaurant.id),
-    [items, restaurant.id],
-  );
-
-  const cartItemCount = restaurantCartItems.reduce(
-    (sum, item) => sum + item.quantity,
-    0,
-  );
-
-  const cartTotal = restaurantCartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-
-  const handleGoToCart = () => {
-    router.visit(route('cart.index', { restaurant_id: restaurant.id }));
-  };
 
   return (
     <CustomerLayout>
@@ -109,13 +52,7 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
             <HeartIcon className="icon" />
           </button>
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              marginBottom: '0.5rem',
-            }}
-          >
+          <div className="rating-container">
             <StarRating rating={restaurant.rating || 0} />
           </div>
 
@@ -125,7 +62,12 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
             ) : (
               <span>Hours not available</span>
             )}
-            <span>~3km</span> {/* Placeholder data */}
+            {restaurant.distance != null ? (
+              <>
+                <span className="meta-separator">•</span>
+                <span>{restaurant.distance.toFixed(2)} km</span>
+              </>
+            ) : null}
           </div>
 
           <p className="restaurant-description">
@@ -166,6 +108,12 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
             <p>No menu items found matching "{query}".</p>
           </div>
         ) : null}
+
+        {/* Reviews Section */}
+        <RestaurantReviews
+          restaurantId={restaurant.id}
+          reviews={restaurant.reviews || []}
+        />
 
         {/* Floating Checkout Button */}
         {cartItemCount > 0 && (

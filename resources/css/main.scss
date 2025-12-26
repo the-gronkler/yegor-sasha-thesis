@@ -11,9 +11,12 @@
 @use 'components/menu-item-card';
 @use 'components/search-input';
 @use 'components/map';
+@use 'components/map-popup';
 @use 'components/bottom-nav';
 @use 'components/error-boundary';
 @use 'components/order-status-badge';
+@use 'components/reviews';
+@use 'components/restaurant-card';
 
 // Pages
 @use 'pages/restaurant-index';

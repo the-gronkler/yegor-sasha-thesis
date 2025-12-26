@@ -42,15 +42,52 @@ class ReviewController extends Controller
             'content' => 'nullable|string|max:1024',
         ]);
 
-        Review::create([
-            'customer_user_id' => Auth::id(),
-            'restaurant_id' => $validated['restaurant_id'],
+        try {
+            Review::create([
+                'customer_user_id' => Auth::id(),
+                'restaurant_id' => $validated['restaurant_id'],
+                'rating' => $validated['rating'],
+                'title' => $validated['title'],
+                'content' => $validated['content'] ?? null,
+            ]);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            return back()->withErrors(['general' => 'You have already reviewed this restaurant. Edit your existing review instead.']);
+        }
+
+        return back()->with('success', 'Review submitted successfully.');
+    }
+
+    /**
+     * Update the specified review.
+     */
+    public function update(Request $request, Review $review)
+    {
+        $this->authorize('update', $review);
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string|max:1024',
+        ]);
+
+        $review->update([
             'rating' => $validated['rating'],
             'title' => $validated['title'],
             'content' => $validated['content'] ?? null,
         ]);
 
-        return redirect()->route('reviews.index')
-            ->with('success', 'Review submitted successfully.');
+        return back()->with('success', 'Review updated successfully.');
+    }
+
+    /**
+     * Remove the specified review.
+     */
+    public function destroy(Review $review)
+    {
+        $this->authorize('delete', $review);
+
+        $review->delete();
+
+        return back()->with('success', 'Review deleted successfully.');
     }
 }

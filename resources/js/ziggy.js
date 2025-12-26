@@ -67,11 +67,6 @@ const Ziggy = {
       bindings: { order: 'id' },
     },
     'orders.index': { uri: 'orders', methods: ['GET', 'HEAD'] },
-    'orders.unfinished': {
-      uri: 'orders\/unfinished',
-      methods: ['GET', 'HEAD'],
-    },
-    'orders.old': { uri: 'orders\/old', methods: ['GET', 'HEAD'] },
     'orders.destroyCart': {
       uri: 'orders\/cart\/{order}',
       methods: ['DELETE'],
@@ -86,6 +81,18 @@ const Ziggy = {
     },
     'reviews.index': { uri: 'reviews', methods: ['GET', 'HEAD'] },
     'reviews.store': { uri: 'reviews', methods: ['POST'] },
+    'reviews.update': {
+      uri: 'reviews\/{review}',
+      methods: ['PUT', 'PATCH'],
+      parameters: ['review'],
+      bindings: { review: 'id' },
+    },
+    'reviews.destroy': {
+      uri: 'reviews\/{review}',
+      methods: ['DELETE'],
+      parameters: ['review'],
+      bindings: { review: 'id' },
+    },
     'profile.show': { uri: 'profile', methods: ['GET', 'HEAD'] },
     'profile.update': { uri: 'profile', methods: ['PUT'] },
     'profile.destroy': { uri: 'profile', methods: ['DELETE'] },
