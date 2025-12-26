@@ -1,0 +1,180 @@
+@use 'sass:color';
+@use '../../variables/main-colors';
+@use '../../variables/layout';
+@use '../../variables/exception-colors';
+@use '../../variables/map-colors';
+
+.map-page {
+  height: 100%;
+  overflow: hidden;
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 0 0.25rem 0;
+    color: main-colors.$text-inverse;
+  }
+
+  .map-search-input {
+    border-radius: 4px;
+
+    .search-input-wrapper {
+      background: main-colors.$bg-surface;
+      border: 1px solid main-colors.$border-light;
+      box-shadow: 0 4px 10px main-colors.$shadow-color;
+    }
+  }
+
+  .map-container-box {
+    position: relative;
+    height: 100%;
+    min-height: 0;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+    background: map-colors.$map-bg;
+  }
+
+  .debug-text {
+    margin: 0;
+    color: main-colors.$text-inverse;
+    font-size: 0.85rem;
+  }
+
+  .location-error-banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: main-colors.$accent-warm;
+    color: main-colors.$text-primary;
+    box-shadow: 0 4px 12px main-colors.$shadow-color-strong;
+  }
+
+  .location-error-message {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .location-error-dismiss {
+    background: transparent;
+    border: none;
+    color: main-colors.$text-primary;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: main-colors.$overlay-white-light;
+    }
+
+    &:active {
+      background: main-colors.$overlay-white-medium;
+    }
+  }
+
+  .location-error-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .location-error-native {
+    background: color.change(exception-colors.$status-success, $alpha: 0.2);
+    border: 1px solid
+      color.change(exception-colors.$status-success, $alpha: 0.3);
+    color: main-colors.$text-primary;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: color.change(exception-colors.$status-success, $alpha: 0.3);
+      border-color: color.change(exception-colors.$status-success, $alpha: 0.5);
+    }
+
+    &:active {
+      background: color.change(exception-colors.$status-success, $alpha: 0.4);
+    }
+  }
+
+  .location-error-retry {
+    background: main-colors.$overlay-white-light;
+    border: 1px solid main-colors.$overlay-white-medium;
+    color: main-colors.$text-inverse;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: main-colors.$overlay-white-medium;
+      border-color: color.change(main-colors.$text-inverse, $alpha: 0.5);
+    }
+
+    &:active {
+      background: color.change(main-colors.$text-inverse, $alpha: 0.4);
+    }
+  }
+
+  .location-debug-info {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid main-colors.$overlay-white-light;
+
+    small {
+      font-size: 0.7rem;
+      opacity: 0.8;
+      font-family: monospace;
+    }
+  }
+
+  .location-error-manual {
+    background: color.change(main-colors.$brand-primary, $alpha: 0.2);
+    border: 1px solid color.change(main-colors.$brand-primary, $alpha: 0.3);
+    color: main-colors.$text-inverse;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: color.change(main-colors.$brand-primary, $alpha: 0.3);
+      border-color: color.change(main-colors.$brand-primary, $alpha: 0.5);
+    }
+
+    &:active {
+      background: color.change(main-colors.$brand-primary, $alpha: 0.4);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .map-container-box {
+      height: 100%;
+      min-height: 0;
+    }
+  }
+}

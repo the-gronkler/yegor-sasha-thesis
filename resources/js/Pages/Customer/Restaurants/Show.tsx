@@ -125,7 +125,12 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
             ) : (
               <span>Hours not available</span>
             )}
-            <span>~3km</span> {/* Placeholder data */}
+            {restaurant.distance != null ? (
+              <>
+                <span className="meta-separator">•</span>
+                <span>{restaurant.distance.toFixed(2)} km</span>
+              </>
+            ) : null}
           </div>
 
           <p className="restaurant-description">

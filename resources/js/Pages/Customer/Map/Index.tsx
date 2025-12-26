@@ -1,27 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
-import MapOverlay from '@/Components/Shared/MapOverlay';
-import RestaurantCard from '@/Components/Shared/RestaurantCard';
-import { useSearch } from '@/Hooks/useSearch';
+import BottomSheet from './Partials/BottomSheet';
+import MapOverlay from './Partials/MapOverlay';
+import { useMapPage } from '@/Hooks/useMapPage';
 import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
-import type { IFuseOptions } from 'fuse.js';
 
-const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
-  keys: [
-    { name: 'name', weight: 2 },
-    { name: 'description', weight: 1.5 },
-    { name: 'food_types.name', weight: 1 },
-    { name: 'food_types.menu_items.name', weight: 0.5 },
-  ],
-};
-
-const EMPTY_KEYS: (keyof Restaurant)[] = [];
-
-const DEFAULT_RADIUS = 10;
-
+/**
+ * MapIndex (Controller View)
+ *
+ * Responsibilities:
+ * - Acts as the main entry point for the Map page.
+ * - Orchestrates data flow by connecting the `useMapPage` hook to UI components.
+ * - Composes the layout: MapLayout > MapOverlay + Map + BottomSheet.
+ * - Does NOT contain complex logic (delegated to useMapPage) or complex UI (delegated to Partials).
+ */
 interface MapIndexProps extends PageProps {
   restaurants: Restaurant[];
   filters: {
@@ -32,18 +26,6 @@ interface MapIndexProps extends PageProps {
   mapboxPublicKey?: string;
 }
 
-const getLatLng = (restaurant: Restaurant): [number, number] | null => {
-  if (
-    restaurant.latitude === null ||
-    restaurant.longitude === null ||
-    restaurant.latitude === undefined ||
-    restaurant.longitude === undefined
-  ) {
-    return null;
-  }
-  return [restaurant.latitude, restaurant.longitude];
-};
-
 export default function MapIndex({
   restaurants,
   filters,
@@ -52,157 +34,24 @@ export default function MapIndex({
   const {
     query,
     setQuery,
-    filteredItems: filteredRestaurants,
-  } = useSearch(restaurants, EMPTY_KEYS, SEARCH_OPTIONS);
-
-  const [locationError, setLocationError] = useState<string | null>(null);
-  const [selectedRadius, setSelectedRadius] = useState<number>(
-    filters.radius || DEFAULT_RADIUS,
-  );
-
-  // Controlled viewState for the map
-  const [viewState, setViewState] = useState({
-    longitude: 21.0122, // Warsaw, Poland
-    latitude: 52.2297,
-    zoom: 13,
-  });
-
-  // Validate API key on mount
-  useEffect(() => {
-    if (!mapboxPublicKey) {
-      console.error('MAPBOX_PUBLIC_KEY is not configured in .env file');
-    } else if (!mapboxPublicKey.startsWith('pk.')) {
-      console.error(
-        'MAPBOX_PUBLIC_KEY must be a public key starting with "pk.", not a secret key starting with "sk."',
-      );
-    }
-  }, [mapboxPublicKey]);
-
-  // Set initial center based on user location (from filters) or first restaurant
-  useEffect(() => {
-    if (filters.lat !== null && filters.lng !== null) {
-      setViewState((prev) => ({
-        ...prev,
-        longitude: filters.lng!,
-        latitude: filters.lat!,
-      }));
-    } else if (restaurants.length > 0) {
-      const coords = getLatLng(restaurants[0]);
-      if (coords) {
-        setViewState((prev) => ({
-          ...prev,
-          longitude: coords[1],
-          latitude: coords[0],
-        }));
-      }
-    }
-  }, [filters.lat, filters.lng, restaurants]);
-
-  // Handle geolocation from Mapbox native control
-  const handleMapGeolocate = (latitude: number, longitude: number) => {
-    // Update map center immediately
-    setViewState((prev) => ({
-      ...prev,
-      longitude,
-      latitude,
-      zoom: 14, // Zoom in when user location is found
-    }));
-
-    // Trigger Inertia reload with new location and radius
-    router.get(
-      route('map.index'),
-      { lat: latitude, lng: longitude, radius: selectedRadius },
-      {
-        replace: true,
-        preserveState: true,
-        preserveScroll: true,
-        only: ['restaurants', 'filters'],
-      },
-    );
-  };
-
-  // Handle geolocation errors
-  const handleGeolocateError = (error: string) => {
-    setLocationError(error);
-  };
-
-  // Handle radius change
-  const handleRadiusChange = (newRadius: number) => {
-    setSelectedRadius(newRadius);
-
-    // If we have user location, reload with new radius
-    if (filters.lat !== null && filters.lng !== null) {
-      router.get(
-        route('map.index'),
-        { lat: filters.lat, lng: filters.lng, radius: newRadius },
-        {
-          replace: true,
-          preserveState: true,
-          preserveScroll: true,
-          only: ['restaurants', 'filters'],
-        },
-      );
-    }
-  };
-
-  // Debug function to test native geolocation (for development only)
-  const debugRequestLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by this browser.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        console.log('Native geolocation success:', pos);
-        handleMapGeolocate(pos.coords.latitude, pos.coords.longitude);
-      },
-      (err) => {
-        console.warn('Native geolocation error:', err);
-        // err.code will be 1/2/3 with real message
-        let errorMessage = `${err.code}: ${err.message}`;
-        setLocationError(errorMessage);
-      },
-      { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 },
-    );
-  };
-
-  // Restaurants already have distance calculated by backend when filters.lat/lng are present
-  // Just use filteredRestaurants directly (Fuse search on the already-nearby list)
-
-  const mapMarkers = useMemo(() => {
-    const restaurantMarkers = filteredRestaurants
-      .map((restaurant) => {
-        const coords = getLatLng(restaurant);
-        if (!coords) return null;
-        return {
-          id: restaurant.id,
-          lat: coords[0],
-          lng: coords[1],
-          name: restaurant.name,
-        };
-      })
-      .filter(Boolean) as {
-      id: number;
-      lat: number;
-      lng: number;
-      name: string;
-    }[];
-
-    const userMarker =
-      filters.lat !== null && filters.lng !== null
-        ? [
-            {
-              id: -1,
-              lat: filters.lat,
-              lng: filters.lng,
-              name: 'You are here',
-            },
-          ]
-        : [];
-
-    return [...restaurantMarkers, ...userMarker];
-  }, [filteredRestaurants, filters.lat, filters.lng]);
+    filteredRestaurants,
+    viewState,
+    setViewState,
+    selectedRestaurantId,
+    selectRestaurant,
+    locationError,
+    setLocationError,
+    isGeolocating,
+    triggerGeolocate,
+    registerGeolocateTrigger,
+    isPickingLocation,
+    setIsPickingLocation,
+    handleMapGeolocate,
+    handleGeolocateError,
+    handlePickLocation,
+    mapMarkers,
+    reloadMap,
+  } = useMapPage({ restaurants, filters, mapboxPublicKey });
 
   return (
     <MapLayout>
@@ -210,47 +59,26 @@ export default function MapIndex({
       <div className="map-page">
         {locationError && (
           <div className="location-error-banner">
-            <p className="location-error-message">{locationError}</p>
+            <div style={{ flex: 1 }}>
+              <p className="location-error-message">{locationError}</p>
+            </div>
+
             <div className="location-error-actions">
               <button
                 className="location-error-native"
-                onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                      (pos) => {
-                        console.log('Native geolocation success:', pos);
-                        handleMapGeolocate(
-                          pos.coords.latitude,
-                          pos.coords.longitude,
-                        );
-                        setLocationError(null); // Clear error on success
-                      },
-                      (err) => {
-                        console.warn('Native geolocation error:', err);
-                        setLocationError(`Native: ${err.code}: ${err.message}`);
-                      },
-                      {
-                        enableHighAccuracy: true,
-                        timeout: 6000,
-                        maximumAge: 0,
-                      },
-                    );
-                  }
-                }}
-                aria-label="Try native geolocation"
+                disabled={isGeolocating}
+                onClick={triggerGeolocate}
+                aria-label="Try GPS"
               >
-                Try Native GPS
+                {isGeolocating ? 'Getting Location...' : 'Try GPS'}
               </button>
-              <button
-                className="location-error-debug"
-                onClick={debugRequestLocation}
-                aria-label="Try requesting location again"
-              >
-                Try Again
-              </button>
+
               <button
                 className="location-error-dismiss"
-                onClick={() => setLocationError(null)}
+                onClick={() => {
+                  setLocationError(null);
+                  setIsPickingLocation(false);
+                }}
                 aria-label="Dismiss location error"
               >
                 ×
@@ -262,9 +90,19 @@ export default function MapIndex({
           <MapOverlay
             query={query}
             onQueryChange={setQuery}
-            selectedRadius={selectedRadius}
-            onRadiusChange={handleRadiusChange}
-            filters={filters}
+            hasLocation={filters.lat !== null && filters.lng !== null}
+            currentRadius={filters.radius ?? 50}
+            onRadiusChange={(r) => {
+              if (filters.lat !== null && filters.lng !== null) {
+                reloadMap(filters.lat, filters.lng, r);
+              }
+            }}
+            isGeolocating={isGeolocating}
+            onTriggerGeolocate={triggerGeolocate}
+            isPickingLocation={isPickingLocation}
+            setIsPickingLocation={setIsPickingLocation}
+            onManualLocation={handleMapGeolocate}
+            onError={setLocationError}
           />
           <Map
             viewState={viewState}
@@ -275,12 +113,18 @@ export default function MapIndex({
             onGeolocateError={handleGeolocateError}
             enableGeolocation={true}
             trackUserLocation={false}
+            selectedRestaurantId={selectedRestaurantId}
+            onSelectRestaurant={selectRestaurant}
+            registerGeolocateTrigger={registerGeolocateTrigger}
+            isPickingLocation={isPickingLocation}
+            onPickLocation={handlePickLocation}
+            showGeolocateControlUi={false}
           />
-          <div className="map-bottom-sheet">
-            {filteredRestaurants.map((restaurant) => (
-              <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-            ))}
-          </div>
+          <BottomSheet
+            restaurants={filteredRestaurants}
+            selectedRestaurantId={selectedRestaurantId}
+            onSelectRestaurant={selectRestaurant}
+          />
         </div>
       </div>
     </MapLayout>
