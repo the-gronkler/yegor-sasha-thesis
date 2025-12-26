@@ -3,7 +3,7 @@ name: Deploy to Azure VM
 on:
   push:
     branches:
-      - feat/deployment/docker-config
+      - master
   workflow_dispatch:
     inputs:
       branch:
