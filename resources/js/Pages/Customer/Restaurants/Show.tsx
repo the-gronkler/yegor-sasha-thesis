@@ -32,7 +32,6 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const handleFavoriteClick = () => {
     requireAuth(() => {
       // TODO: Implement favorite logic
-      console.log('Toggle favorite');
     });
   };
 

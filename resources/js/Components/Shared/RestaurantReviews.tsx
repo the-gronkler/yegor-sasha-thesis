@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function RestaurantReviews({ restaurantId, reviews }: Props) {
-  const { isAuthenticated, requireAuth } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const {
     userReview,
     otherReviews,
@@ -59,9 +59,7 @@ export default function RestaurantReviews({ restaurantId, reviews }: Props) {
       ) : (
         <div className="guest-review-prompt">
           <p>Have you eaten here? Share your experience!</p>
-          <Button onClick={() => requireAuth(() => {})}>
-            Login to Write a Review
-          </Button>
+          <Button onClick={login}>Login to Write a Review</Button>
         </div>
       )}
       <ReviewList reviews={otherReviews} />
