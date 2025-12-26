@@ -33,11 +33,13 @@ export default function Modal({
 
   // Lock body scroll when modal is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
 
@@ -99,7 +101,7 @@ export default function Modal({
       window.removeEventListener('keydown', handleKeyDown);
       clearTimeout(timer);
       // Restore focus to the previous element when modal closes
-      if (previousActiveElement) {
+      if (previousActiveElement && document.contains(previousActiveElement)) {
         previousActiveElement.focus();
       }
     };
@@ -108,19 +110,15 @@ export default function Modal({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={handleClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      aria-label="Close modal"
-    >
+    <div className="modal-overlay" onClick={handleClose}>
       <div
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
         tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
       >
         <div className="modal-header">
           {title && (

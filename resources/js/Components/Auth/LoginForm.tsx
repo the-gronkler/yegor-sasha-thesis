@@ -75,7 +75,7 @@ export default function LoginForm({
             checked={form.data.remember}
             onChange={(e) => form.setData('remember', e.target.checked)}
           />
-          <span className="ml-2">Remember me</span>
+          <span>Remember me</span>
         </label>
 
         {canResetPassword && (

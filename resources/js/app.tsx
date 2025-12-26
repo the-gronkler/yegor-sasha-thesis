@@ -1,6 +1,6 @@
 import './bootstrap';
 import '../css/main.scss';
-import { StrictMode, ReactNode } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { InertiaProgress } from '@inertiajs/progress';
