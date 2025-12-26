@@ -55,7 +55,7 @@ jobs:
             echo "Rebuilding and restarting containers..."
             docker compose down
             docker compose up -d --build --remove-orphans --renew-anon-volumes
-            
+
             # 6. Prune unused images to save space
             docker system prune -f
 
