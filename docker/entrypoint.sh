@@ -25,7 +25,7 @@ php artisan storage:link || true
 
 # Run migrations
 echo "Running migrations..."
-php artisan mfs
+php artisan migrate --force
 
 # Cache config/routes/views for production
 echo "Caching configuration..."
