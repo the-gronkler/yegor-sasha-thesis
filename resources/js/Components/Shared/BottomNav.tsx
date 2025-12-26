@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import {
   MapPinIcon,
   ShoppingCartIcon,
@@ -7,6 +7,7 @@ import {
   ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '@/Contexts/CartContext';
+import { useAuth } from '@/Hooks/useAuth';
 
 interface NavLinkProps {
   href: string;
@@ -14,11 +15,23 @@ interface NavLinkProps {
   icon: React.ElementType;
   label: string;
   badge?: number;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-function NavLink({ href, active, icon: Icon, label, badge }: NavLinkProps) {
+function NavLink({
+  href,
+  active,
+  icon: Icon,
+  label,
+  badge,
+  onClick,
+}: NavLinkProps) {
   return (
-    <Link href={href} className={`nav-item ${active ? 'active' : ''}`}>
+    <Link
+      href={href}
+      className={`nav-item ${active ? 'active' : ''}`}
+      onClick={onClick}
+    >
       <div className="nav-icon-wrapper">
         <Icon className="icon" aria-hidden="true" />
         {badge !== undefined && badge > 0 && (
@@ -32,6 +45,14 @@ function NavLink({ href, active, icon: Icon, label, badge }: NavLinkProps) {
 
 export default function BottomNav() {
   const { itemCount } = useCart();
+  const { requireAuth } = useAuth();
+
+  const handleProtectedLink = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    requireAuth(() => {
+      router.visit(href);
+    });
+  };
 
   return (
     <nav className="bottom-nav">
@@ -53,18 +74,21 @@ export default function BottomNav() {
         icon={ShoppingCartIcon}
         label="Cart"
         badge={itemCount}
+        onClick={(e) => handleProtectedLink(e, route('cart.index'))}
       />
       <NavLink
         href={route('orders.index')}
         active={route().current('orders.index')}
         icon={ClipboardDocumentListIcon}
         label="Orders"
+        onClick={(e) => handleProtectedLink(e, route('orders.index'))}
       />
       <NavLink
         href={route('profile.show')}
         active={route().current('profile.show')}
         icon={UserIcon}
         label="Profile"
+        onClick={(e) => handleProtectedLink(e, route('profile.show'))}
       />
     </nav>
   );

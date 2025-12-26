@@ -4,6 +4,8 @@ import ReviewList from './ReviewList';
 import ReviewForm from './ReviewForm';
 import { ReviewItem } from './ReviewItem';
 import { useRestaurantReviews } from '@/Hooks/useRestaurantReviews';
+import { useAuth } from '@/Hooks/useAuth';
+import Button from '@/Components/UI/Button';
 
 interface Props {
   restaurantId: number;
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export default function RestaurantReviews({ restaurantId, reviews }: Props) {
+  const { isAuthenticated, requireAuth } = useAuth();
   const {
     userReview,
     otherReviews,
@@ -51,8 +54,15 @@ export default function RestaurantReviews({ restaurantId, reviews }: Props) {
           onCancel={() => setIsEditingReview(false)}
           onSuccess={() => setIsEditingReview(false)}
         />
-      ) : (
+      ) : isAuthenticated ? (
         <ReviewForm restaurantId={restaurantId} />
+      ) : (
+        <div className="guest-review-prompt">
+          <p>Have you eaten here? Share your experience!</p>
+          <Button onClick={() => requireAuth(() => {})}>
+            Login to Write a Review
+          </Button>
+        </div>
       )}
       <ReviewList reviews={otherReviews} />
     </div>
