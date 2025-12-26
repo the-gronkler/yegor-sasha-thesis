@@ -6,12 +6,8 @@ on:
       - master
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch to deploy'
-        required: true
-        default: 'master'
       commit:
-        description: 'Commit SHA (optional, defaults to latest on branch)'
+        description: 'Commit SHA (optional, defaults to latest)'
         required: false
 
 jobs:
@@ -39,10 +35,8 @@ jobs:
             git fetch --all
 
             # 3. Checkout target
-            TARGET_BRANCH="${{ inputs.branch }}"
-            if [ -z "$TARGET_BRANCH" ]; then
-              TARGET_BRANCH="${{ github.ref_name }}"
-            fi
+            # Use the branch selected in the "Use workflow from" dropdown
+            TARGET_BRANCH="${{ github.ref_name }}"
 
             if [ -n "${{ inputs.commit }}" ]; then
               echo "Checking out specific commit: ${{ inputs.commit }}"
