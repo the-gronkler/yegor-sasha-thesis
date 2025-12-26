@@ -9,10 +9,11 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command(
-    'mfs',
+    'mfs {--force : Force the operation to run when in production}',
     fn () => Artisan::call('migrate:fresh', [
         '--path' => 'database/migrations/*',
         '--seed' => true,
+        '--force' => $this->option('force'),
         '--no-interaction' => true,
     ], new ConsoleOutput
     )
