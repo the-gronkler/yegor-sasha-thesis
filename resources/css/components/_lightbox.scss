@@ -1,0 +1,123 @@
+@use 'sass:color';
+@use '../variables/main-colors';
+
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: color.change(main-colors.$overlay-dark, $alpha: 0.9);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: main-colors.$text-inverse;
+  cursor: pointer;
+  z-index: 1001;
+  padding: 10px;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  .icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px main-colors.$overlay-dark;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: color.change(main-colors.$text-inverse, $alpha: 0.1);
+  border: none;
+  color: main-colors.$text-inverse;
+  cursor: pointer;
+  padding: 15px;
+  border-radius: 50%;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: main-colors.$overlay-white-medium;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  &.prev {
+    left: -60px;
+  }
+
+  &.next {
+    right: -60px;
+  }
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: main-colors.$text-inverse;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 768px) {
+  .lightbox-nav {
+    background: main-colors.$overlay-dark;
+
+    &.prev {
+      left: 10px;
+    }
+
+    &.next {
+      right: 10px;
+    }
+  }
+}

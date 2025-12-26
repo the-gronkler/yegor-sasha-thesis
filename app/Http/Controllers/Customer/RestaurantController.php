@@ -4,48 +4,40 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
+use App\Services\GeoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 
 class RestaurantController extends Controller
 {
+    protected GeoService $geoService;
+
+    public function __construct(GeoService $geoService)
+    {
+        $this->geoService = $geoService;
+    }
+
     /**
      * Display a listing of restaurants (e.g., the "main page").
      */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Restaurant::class);
-        // TODO: limit selection of restaurants by user's geolocation, accept filtering/sorting? params
-        // Fetch restaurants with their images, food types, and menu items
-        $restaurants = Restaurant::with(['images', 'foodTypes.menuItems'])
+
+        // Try to get last known coordinates from session
+        $geo = $this->geoService->getValidGeoFromSession($request);
+        $lat = $geo['lat'] ?? null;
+        $lng = $geo['lng'] ?? null;
+
+        // Build query with optional distance calculation
+        $restaurants = Restaurant::query()
             ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
+            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
+            ->with(['images', 'foodTypes.menuItems'])
             ->latest('rating')
             ->get()
-            ->map(function ($restaurant) {
-                return [
-                    'id' => $restaurant->id,
-                    'name' => $restaurant->name,
-                    'address' => $restaurant->address,
-                    'latitude' => $restaurant->latitude,
-                    'longitude' => $restaurant->longitude,
-                    'rating' => $restaurant->rating,
-                    'description' => $restaurant->description,
-                    'opening_hours' => $restaurant->opening_hours,
-                    'images' => $restaurant->images->map(fn ($img) => [
-                        'id' => $img->id,
-                        'url' => $img->image,
-                        'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
-                    ]),
-                    'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
-                        'id' => $ft->id,
-                        'name' => $ft->name,
-                        'menu_items' => $ft->menuItems->map(fn ($mi) => [
-                            'id' => $mi->id,
-                            'name' => $mi->name,
-                        ]),
-                    ]),
-                ];
-            });
+            ->map(fn ($restaurant) => $this->formatRestaurant($restaurant));
 
         return Inertia::render('Customer/Restaurants/Index', [
             'restaurants' => $restaurants,
@@ -59,50 +51,85 @@ class RestaurantController extends Controller
     {
         $this->authorize('view', $restaurant);
 
-        // Load related data
-        $restaurant->load([
-            'foodTypes.menuItems.images',         // food types → menu items → images
-            'menuItems.allergens',                // all allergens of menu items
-            'images',                              // restaurant images
-        ]);
+        // Try to get last known coordinates from session (set by MapController)
+        $geo = $this->geoService->getValidGeoFromSession($request);
+        $lat = $geo['lat'] ?? null;
+        $lng = $geo['lng'] ?? null;
 
-        // Prepare data (you might map or slice properties)
+        // Fetch restaurant with optional distance calculation in one query
+        $restaurant = Restaurant::query()
+            ->whereKey($restaurant->getKey())
+            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
+            ->with([
+                'foodTypes.menuItems.images',
+                'menuItems.allergens',
+                'images',
+                'reviews.customer.user',
+                'reviews.images',
+            ])
+            ->firstOrFail();
+
         return Inertia::render('Customer/Restaurants/Show', [
-            'restaurant' => [
-                'id' => $restaurant->id,
-                'name' => $restaurant->name,
-                'address' => $restaurant->address,
-                'latitude' => $restaurant->latitude,
-                'longitude' => $restaurant->longitude,
-                'description' => $restaurant->description,
-                'rating' => $restaurant->rating,
-                'opening_hours' => $restaurant->opening_hours,
-                // relations:
-                'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
-                    'id' => $ft->id,
-                    'name' => $ft->name,
-                    'menu_items' => $ft->menuItems->map(fn ($mi) => [
-                        'id' => $mi->id,
-                        'name' => $mi->name,
-                        'price' => $mi->price,
-                        'description' => $mi->description,
-                        'images' => $mi->images->map(fn ($img) => [
-                            'id' => $img->id,
-                            'url' => $img->image,   // make sure Model attribute
-                            'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
-                        ]),
-                        'allergens' => $mi->allergens->map(fn ($al) => [
-                            'id' => $al->id,
-                            'name' => $al->name,
-                        ]),
-                    ]),
-                ]),
-                'restaurant_images' => $restaurant->images->map(fn ($img) => [
-                    'id' => $img->id,
-                    'url' => $img->image,
-                    'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
-                ]),
-            ],
+            'restaurant' => $this->formatRestaurant($restaurant),
         ]);
+    }
+
+    private function formatRestaurant(Restaurant $restaurant): array
+    {
+        return [
+            'id' => $restaurant->id,
+            'name' => $restaurant->name,
+            'address' => $restaurant->address,
+            'latitude' => $restaurant->latitude,
+            'longitude' => $restaurant->longitude,
+            'rating' => $restaurant->rating,
+            'description' => $restaurant->description,
+            'opening_hours' => $restaurant->opening_hours,
+            'distance' => isset($restaurant->distance) ? $this->geoService->formatDistance($restaurant->distance) : null,
+            'images' => $restaurant->images->map(fn ($img) => [
+                'id' => $img->id,
+                'url' => $img->url,
+                'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
+            ]),
+            'food_types' => $restaurant->foodTypes->map(fn ($ft) => [
+                'id' => $ft->id,
+                'name' => $ft->name,
+                'menu_items' => $ft->menuItems->map(fn ($mi) => [
+                    'id' => $mi->id,
+                    'name' => $mi->name,
+                    'price' => $mi->price,
+                    'description' => $mi->description,
+                    'images' => $mi->relationLoaded('images') ? $mi->images->map(fn ($img) => [
+                        'id' => $img->id,
+                        'url' => $img->url,
+                        'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
+                    ]) : [],
+                    'allergens' => $mi->relationLoaded('allergens') ? $mi->allergens->map(fn ($al) => [
+                        'id' => $al->id,
+                        'name' => $al->name,
+                    ]) : [],
+                ]),
+            ]),
+            'reviews' => $restaurant->relationLoaded('reviews') ? $restaurant->reviews->map(fn ($review) => [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'title' => $review->title,
+                'content' => $review->content,
+                'created_at' => $review->created_at->toIso8601String(),
+                'user_name' => $review->customer?->user?->name ?? 'Anonymous',
+                'customer_user_id' => $review->customer_user_id,
+                'images' => $this->formatReviewImages($review->images),
+            ]) : [],
+        ];
+    }
+
+    private function formatReviewImages(Collection $images): Collection
+    {
+        return $images
+            ->filter(fn ($img) => ! empty($img->image))
+            ->map(fn ($img) => [
+                'id' => $img->id,
+                'url' => $img->url,
+            ])->values();
     }
 }

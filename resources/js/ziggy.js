@@ -87,6 +87,18 @@ const Ziggy = {
     },
     'reviews.index': { uri: 'reviews', methods: ['GET', 'HEAD'] },
     'reviews.store': { uri: 'reviews', methods: ['POST'] },
+    'reviews.update': {
+      uri: 'reviews\/{review}',
+      methods: ['PUT', 'PATCH'],
+      parameters: ['review'],
+      bindings: { review: 'id' },
+    },
+    'reviews.destroy': {
+      uri: 'reviews\/{review}',
+      methods: ['DELETE'],
+      parameters: ['review'],
+      bindings: { review: 'id' },
+    },
     'profile.show': { uri: 'profile', methods: ['GET', 'HEAD'] },
     'profile.update': { uri: 'profile', methods: ['PUT'] },
     'profile.destroy': { uri: 'profile', methods: ['DELETE'] },

@@ -37,6 +37,9 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'auth' => [
+                'user' => $request->user(),
+            ],
             // Expose other keys as needed below:
             // TODO: check if we should not expose this if request is not a map related request
             'mapboxPublicKey' => config('services.mapbox.public_key'),

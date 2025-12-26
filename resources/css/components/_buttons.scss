@@ -1,5 +1,5 @@
-@use '../variables/layout';
 @use '../variables/main-colors';
+@use '../variables/layout';
 
 .btn-primary {
   display: inline-flex;
@@ -38,5 +38,31 @@
 
   &:hover {
     background-color: main-colors.$bg-alt-2;
+  }
+}
+
+.restaurant-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: main-colors.$brand-primary;
+  color: main-colors.$text-inverse;
+  border: none;
+  border-radius: layout.$border-radius;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: main-colors.$brand-primary-hover;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }

@@ -1,0 +1,321 @@
+@use '../variables/main-colors' as colors;
+@use '../variables/exception-colors';
+@use '../variables/layout' as layout;
+
+.review-list-container {
+  background-color: colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  padding: 1.5rem;
+  box-shadow: layout.$box-shadow;
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: colors.$text-primary;
+  }
+
+  .no-reviews {
+    color: colors.$text-secondary;
+    padding: 1rem 0;
+    text-align: center;
+  }
+
+  .reviews-divider {
+    & > * + * {
+      border-top: 1px solid colors.$bg-alt-1;
+    }
+  }
+
+  &.user-review {
+    margin-bottom: 1.5rem;
+
+    .user-review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .section-title {
+        margin-bottom: 0;
+      }
+
+      .review-actions {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .edit-review-btn,
+      .delete-review-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: colors.$text-secondary;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        transition: color 0.2s;
+
+        .icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+
+      .edit-review-btn:hover {
+        color: colors.$brand-primary;
+      }
+
+      .delete-review-btn:hover {
+        color: exception-colors.$status-error;
+      }
+    }
+  }
+}
+
+.review-item {
+  padding: 1rem 0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+
+    .review-author {
+      font-weight: 600;
+      color: colors.$text-primary;
+    }
+
+    .review-date {
+      font-size: 0.875rem;
+      color: colors.$text-secondary;
+    }
+  }
+
+  .review-rating {
+    margin-bottom: 0.5rem;
+  }
+
+  .review-title {
+    font-weight: 700;
+    color: colors.$text-primary;
+    margin-bottom: 0.25rem;
+  }
+
+  .review-content {
+    color: colors.$text-secondary;
+    line-height: 1.5;
+  }
+
+  .review-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+
+    .review-image-wrapper {
+      width: 5rem;
+      height: 5rem;
+      border-radius: layout.$border-radius;
+      overflow: hidden;
+      border: 1px solid colors.$bg-alt-2;
+      cursor: pointer;
+
+      .review-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.2s;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+}
+
+.review-form-container {
+  background-color: colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  padding: 1.5rem;
+  box-shadow: layout.$box-shadow;
+  margin-bottom: 1.5rem;
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: colors.$text-primary;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: colors.$text-primary;
+      margin-bottom: 0.5rem;
+
+      .required-asterisk {
+        color: exception-colors.$status-error;
+        margin-left: 0.25rem;
+      }
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid colors.$bg-alt-2;
+      border-radius: layout.$border-radius;
+      color: colors.$text-primary;
+      background-color: colors.$bg-main;
+
+      &:focus {
+        outline: none;
+        border-color: colors.$brand-primary;
+        box-shadow: 0 0 0 3px rgba(colors.$brand-primary, 0.1);
+      }
+    }
+
+    .form-textarea {
+      height: 8rem;
+      resize: vertical;
+    }
+  }
+
+  .form-error {
+    color: colors.$accent-warm;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+
+    &.global-error {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background-color: colors.$brand-primary-soft;
+      border-radius: layout.$border-radius;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+}
+
+.interactive-star-rating {
+  display: flex;
+  gap: 0.25rem;
+
+  .star-btn {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: colors.$bg-alt-2; // Inactive color
+    transition: color 0.2s;
+
+    &.active {
+      color: colors.$accent-warm;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.image-upload-container {
+  margin-top: 0.5rem;
+
+  .image-preview-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .image-preview-item {
+    position: relative;
+    width: 5rem;
+    height: 5rem;
+    border-radius: layout.$border-radius;
+    overflow: hidden;
+    border: 1px solid colors.$bg-alt-2;
+
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-image-btn {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: colors.$text-inverse;
+      border: none;
+      border-radius: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+
+      .icon {
+        width: 0.75rem;
+        height: 0.75rem;
+      }
+
+      &:hover {
+        background-color: colors.$accent-warm;
+      }
+    }
+  }
+
+  .add-image-btn {
+    width: 5rem;
+    height: 5rem;
+    border: 1px dashed colors.$bg-alt-2;
+    border-radius: layout.$border-radius;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: colors.$text-secondary;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: colors.$brand-primary;
+      color: colors.$brand-primary;
+      background-color: colors.$brand-primary-soft;
+    }
+
+    .icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    span {
+      font-size: 0.75rem;
+    }
+
+    .hidden-input {
+      display: none;
+    }
+  }
+}

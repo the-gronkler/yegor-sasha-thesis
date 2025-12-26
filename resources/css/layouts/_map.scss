@@ -1,13 +1,28 @@
 @use '../variables/main-colors';
+@use '../variables/layout';
 
 .map-layout {
+  // Shared layout vars for map page and bottom nav
+  --layout-max-width: 768px;
+  --bottom-nav-h: #{layout.$bottom-nav-height};
+
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh; // fallback
+  height: 100dvh; // correct on mobile (dynamic viewport)
   padding-bottom: 0;
-  background-color: main-colors.$bg-surface;
+  background-color: #0b1020; // Dark background so nav floats above map
+  overflow: hidden; // Prevent page scrollbar
 
   .main-content {
     flex: 1;
+    overflow: hidden; // Prevent content from causing scrollbar
+  }
+
+  // Override bottom nav width to match the centered layout
+  .bottom-nav {
+    width: min(var(--layout-max-width), 100vw);
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
