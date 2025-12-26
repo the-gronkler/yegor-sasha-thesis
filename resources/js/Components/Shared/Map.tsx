@@ -1,20 +1,27 @@
 import * as React from 'react';
 import Map, {
   Marker,
-  Popup,
   GeolocateControl,
   NavigationControl,
-  type GeolocateResultEvent,
+  Source,
+  Layer,
 } from 'react-map-gl/mapbox';
-import { MapPinIcon, UserCircleIcon } from '@heroicons/react/24/solid';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
-interface MapMarker {
-  id: number;
-  lat: number;
-  lng: number;
-  name: string;
-}
+import type { MapRef } from 'react-map-gl/mapbox';
+import type { MapMouseEvent, GeoJSONSource } from 'mapbox-gl';
+import type { Point } from 'geojson';
+import { MapMarker } from '@/types/models';
+import { createTheme } from '@/Utils/css';
+import MapPopup from './MapPopup';
+import {
+  getClusterLayer,
+  getClusterCountLayer,
+  getSelectedPointLayer,
+  getUnclusteredPointLayer,
+  MapTheme,
+} from './mapStyles';
+import { useMapGeolocation } from '@/Hooks/useMapGeolocation';
 
 interface Props {
   viewState: {
@@ -34,6 +41,12 @@ interface Props {
   onGeolocateError?: (error: string) => void;
   enableGeolocation?: boolean;
   trackUserLocation?: boolean;
+  selectedRestaurantId?: number | null;
+  onSelectRestaurant?: (id: number | null, opts?: { scroll?: boolean }) => void;
+  registerGeolocateTrigger?: (fn: (() => boolean) | null) => void;
+  isPickingLocation?: boolean;
+  onPickLocation?: (lat: number, lng: number) => void;
+  showGeolocateControlUi?: boolean;
 }
 
 export default function MapComponent({
@@ -46,74 +59,158 @@ export default function MapComponent({
   onGeolocateError,
   enableGeolocation = true,
   trackUserLocation = false,
+  selectedRestaurantId,
+  onSelectRestaurant,
+  registerGeolocateTrigger,
+  isPickingLocation,
+  onPickLocation,
+  showGeolocateControlUi = true,
 }: Props) {
-  const [popupId, setPopupId] = React.useState<number | null>(null);
-  const geolocateControlRef = React.useRef<mapboxgl.GeolocateControl | null>(
-    null,
+  const mapRef = React.useRef<MapRef>(null);
+
+  const { geolocateControlRef, handleGeolocate, handleGeolocateError } =
+    useMapGeolocation({
+      onGeolocate,
+      onGeolocateError,
+      registerGeolocateTrigger,
+    });
+
+  // Theme constants for consistent colors (synced with CSS)
+  const THEME = React.useMemo(() => {
+    const themeVars = [
+      { key: 'brandPrimary', cssVar: '--brand-primary' },
+      { key: 'brandPrimaryHover', cssVar: '--brand-primary-hover' },
+      { key: 'accentWarm', cssVar: '--accent-warm' },
+      { key: 'textInverse', cssVar: '--text-inverse' },
+    ] as const;
+
+    return createTheme<MapTheme>(themeVars);
+  }, []);
+
+  // Separate restaurant markers from user marker
+  const restaurantMarkers = markers.filter((m) => m.id !== -1);
+  const userMarker = markers.find((m) => m.id === -1);
+
+  // Create GeoJSON for clustering
+  const restaurantGeoJson = React.useMemo(
+    () => ({
+      type: 'FeatureCollection' as const,
+      features: restaurantMarkers.map((marker) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [marker.lng, marker.lat],
+        },
+        properties: {
+          id: marker.id,
+          name: marker.name,
+          address: marker.address,
+          openingHours: marker.openingHours,
+          rating: marker.rating,
+          distanceKm: marker.distanceKm,
+          imageUrl: marker.imageUrl,
+        },
+      })),
+    }),
+    [restaurantMarkers],
   );
 
-  // Safe extraction helper for geolocation error events
-  type MaybeErrorEvent = {
-    code?: number;
-    message?: string;
-    error?: { code?: number; message?: string };
-  };
-
-  function extractGeolocateError(evt: unknown): {
-    code?: number;
-    message?: string;
-  } {
-    if (!evt || typeof evt !== 'object') return {};
-    const e = evt as MaybeErrorEvent;
-
-    // TODO: Extract code and message from the event, falling back to nested error if needed
-    return {
-      code: e.code ?? e.error?.code,
-      message: e.message ?? e.error?.message,
-    };
-  }
-
-  // Handle geolocation success from Mapbox control
-  const handleGeolocate = React.useCallback(
-    (evt: GeolocateResultEvent) => {
-      if (onGeolocate && evt.coords) {
-        const { latitude, longitude } = evt.coords;
-        onGeolocate(latitude, longitude);
+  // Handle map click for clustering and location picking
+  const handleMapClick = React.useCallback(
+    (event: MapMouseEvent) => {
+      // Manual pick mode: click anywhere to set user location
+      if (isPickingLocation) {
+        const { lng, lat } = event.lngLat;
+        onPickLocation?.(lat, lng);
+        return;
       }
-    },
-    [onGeolocate],
-  );
 
-  // Handle geolocation errors from Mapbox control
-  const handleGeolocateError = React.useCallback(
-    (evt: unknown) => {
-      if (onGeolocateError) {
-        const { code, message } = extractGeolocateError(evt);
+      // Existing clustering / restaurant selection logic
+      const map = mapRef.current?.getMap();
+      if (!map) return;
 
-        let errorMessage =
-          message ||
-          'Unable to get your location. Please check browser/OS location permissions.';
+      const features = map.queryRenderedFeatures(event.point, {
+        layers: ['clusters', 'unclustered-point'],
+      });
 
-        switch (code) {
-          case 1:
-            errorMessage =
-              'Location access denied. Allow location permissions to see nearby restaurants.';
-            break;
-          case 2:
-            errorMessage =
-              'Location information unavailable. Check OS location services or try again.';
-            break;
-          case 3:
-            errorMessage =
-              'Location request timed out. Try again or disable high accuracy.';
-            break;
+      if (features.length > 0) {
+        const feature = features[0];
+        if (feature.layer?.id === 'clusters') {
+          // Zoom into cluster
+          const clusterId = feature.properties?.cluster_id;
+          const source = map.getSource('restaurants') as GeoJSONSource;
+          if (source && clusterId) {
+            source.getClusterExpansionZoom(
+              clusterId,
+              (err?: Error | null, zoom?: number | null) => {
+                if (err || zoom == null) return;
+                map.easeTo({
+                  center: (feature.geometry as Point).coordinates as [
+                    number,
+                    number,
+                  ],
+                  zoom: zoom,
+                });
+              },
+            );
+          }
+        } else if (feature.layer?.id === 'unclustered-point') {
+          // Open popup for restaurant
+          const properties = feature.properties;
+          if (!properties || feature.geometry.type !== 'Point') return;
+          const coordinates = (feature.geometry as Point).coordinates;
+          const restaurant: MapMarker = {
+            id: properties.id,
+            lat: coordinates[1],
+            lng: coordinates[0],
+            name: properties.name,
+            address: properties.address,
+            openingHours: properties.openingHours,
+            rating: properties.rating,
+            distanceKm: properties.distanceKm,
+            imageUrl: properties.imageUrl,
+          };
+          onSelectRestaurant?.(restaurant.id);
         }
-
-        onGeolocateError(errorMessage);
+      } else {
+        onSelectRestaurant?.(null);
       }
     },
-    [onGeolocateError],
+    [isPickingLocation, onPickLocation, onSelectRestaurant],
   );
+
+  // Get selected restaurant from markers
+  const selectedRestaurant = React.useMemo(() => {
+    if (selectedRestaurantId == null) return null;
+    return restaurantMarkers.find((m) => m.id === selectedRestaurantId) ?? null;
+  }, [restaurantMarkers, selectedRestaurantId]);
+
+  // Animate to selected restaurant
+  React.useEffect(() => {
+    if (!selectedRestaurant) return;
+
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    // Smoothly center + zoom to selected restaurant
+    map.flyTo({
+      center: [selectedRestaurant.lng, selectedRestaurant.lat],
+      zoom: Math.max(viewState.zoom, 10),
+      duration: 900,
+      essential: true,
+      padding: { top: 240, bottom: 280, left: 40, right: 40 },
+    });
+  }, [selectedRestaurant?.id]);
+
+  // Handle map mouse move for cursor changes
+  const handleMapMouseMove = React.useCallback((event: MapMouseEvent) => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    // When interactiveLayerIds is set, event.features contains hovered features
+    const hasFeatures = (event.features?.length ?? 0) > 0;
+    map.getCanvas().style.cursor = hasFeatures ? 'pointer' : '';
+  }, []);
 
   // Validate API key
   if (!mapboxAccessToken) {
@@ -152,11 +249,27 @@ export default function MapComponent({
       <Map
         {...viewState}
         onMove={(evt) => onMove(evt.viewState)}
-        // TODO: select style for the map in general, beyond the scope of the currnet pr since its big already
+        // TODO: select style for the map in general, beyond the scope of the current PR since its big already
         mapStyle="mapbox://styles/mapbox/dark-v10"
         mapboxAccessToken={mapboxAccessToken}
         style={{ height: '100%', width: '100%' }}
-        onClick={() => setPopupId(null)}
+        projection="globe"
+        interactiveLayerIds={
+          isPickingLocation ? undefined : ['clusters', 'unclustered-point']
+        }
+        onLoad={(e) => {
+          const map = e.target; // Mapbox GL JS map instance
+
+          map.setFog({
+            // make "space" opaque so DOM behind can't show through
+            'space-color': '#0b1020',
+            'star-intensity': 0.25,
+            'horizon-blend': 0.15,
+          });
+        }}
+        ref={mapRef}
+        onClick={handleMapClick}
+        onMouseMove={handleMapMouseMove}
       >
         {/* Navigation Controls (Zoom +/-, Compass) */}
         <NavigationControl position="top-right" />
@@ -166,10 +279,12 @@ export default function MapComponent({
           <GeolocateControl
             ref={geolocateControlRef}
             position="top-right"
+            style={showGeolocateControlUi ? undefined : { display: 'none' }}
             positionOptions={{
-              enableHighAccuracy: true,
-              timeout: 6000,
-              maximumAge: 0,
+              // More forgiving defaults (timeouts are common on Windows laptops)
+              enableHighAccuracy: false,
+              timeout: 20000,
+              maximumAge: 600000, // 10 minutes
             }}
             trackUserLocation={trackUserLocation}
             showUserHeading={trackUserLocation}
@@ -179,46 +294,40 @@ export default function MapComponent({
           />
         )}
 
-        {/* Restaurant and User Markers */}
-        {markers.map((marker) => {
-          const isUserLocation = marker.id === -1;
-          return (
-            <Marker
-              key={marker.id}
-              longitude={marker.lng}
-              latitude={marker.lat}
-              anchor="bottom"
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                setPopupId(marker.id);
-              }}
-            >
-              {isUserLocation ? (
-                <UserCircleIcon className="map-marker map-marker-user" />
-              ) : (
-                <MapPinIcon className="map-marker map-marker-restaurant" />
-              )}
-            </Marker>
-          );
-        })}
-
-        {/* Marker Popups */}
-        {markers.map((marker) =>
-          popupId === marker.id ? (
-            <Popup
-              key={marker.id}
-              longitude={marker.lng}
-              latitude={marker.lat}
-              anchor="bottom"
-              offset={25}
-              onClose={() => setPopupId(null)}
-              closeButton={true}
-              closeOnClick={false}
-            >
-              <div>{marker.name}</div>
-            </Popup>
-          ) : null,
+        {/* User Marker */}
+        {userMarker && (
+          <Marker
+            key={userMarker.id}
+            longitude={userMarker.lng}
+            latitude={userMarker.lat}
+            anchor="bottom"
+          >
+            <UserCircleIcon className="map-marker map-marker-user" />
+          </Marker>
         )}
+
+        {/* Restaurant Popup */}
+        {selectedRestaurant && (
+          <MapPopup
+            restaurant={selectedRestaurant}
+            onClose={() => onSelectRestaurant?.(null)}
+          />
+        )}
+
+        {/* Clustering Layer - Restaurant markers */}
+        <Source
+          id="restaurants"
+          type="geojson"
+          data={restaurantGeoJson}
+          cluster={true}
+          clusterMaxZoom={14}
+          clusterRadius={50}
+        >
+          <Layer {...getClusterLayer(THEME)} />
+          <Layer {...getClusterCountLayer()} />
+          <Layer {...getSelectedPointLayer(THEME, selectedRestaurantId)} />
+          <Layer {...getUnclusteredPointLayer(THEME)} />
+        </Source>
       </Map>
     </div>
   );

@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Branch, Commit, Push & PR",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-Command",
+        // Get the current branch name to use as base for PR
+        "$base = git symbolic-ref --short HEAD;",
+        // Get the remote repository URL
+        "$remoteUrl = git config --get remote.origin.url;",
+        // Parse the repo owner/name from GitHub URL (supports HTTPS/SSH with/without .git)
+        "if ($remoteUrl -match '^https://github\\.com/(.+?)(\\.git)?$') { $repo = $matches[1] } elseif ($remoteUrl -match '^git@github\\.com:(.+?)(\\.git)?$') { $repo = $matches[1] } else { throw 'Unsupported remote URL format. Only HTTPS and SSH GitHub URLs supported.' };",
+        // Check if branch already exists
+        "if (git branch --list ${input:branchName} | Select-String ${input:branchName}) { Write-Host \"Branch '${input:branchName}' already exists.\"; exit 1 };",
+        // Create and switch to new branch
+        "git checkout -b ${input:branchName}; if ($LASTEXITCODE -ne 0) { Write-Host 'Failed to create branch.'; exit 1 };",
+        // Check for staged changes and commit only if present
+        "if (git diff --cached --quiet) { Write-Host 'No staged changes to commit. Please stage your changes first.'; exit 1 } else { git commit -m '${input:branchName}'; };",
+        ,
+        // Push new branch to remote
+        "git push -u origin ${input:branchName};",
+        // Open GitHub compare page for PR creation
+        "Start-Process \"https://github.com/$repo/compare/$base...${input:branchName}?expand=1\""
+      ],
+      "problemMatcher": [],
+      "group": "none",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "branchName",
+      "type": "promptString",
+      "description": "Enter the branch name (e.g., feat/scope/title) - will be used for both branch and commit message"
+    }
+  ]
+}

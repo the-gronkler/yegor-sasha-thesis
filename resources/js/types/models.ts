@@ -134,3 +134,17 @@ export interface Review {
   images?: Image[];
   user_name?: string;
 }
+
+export interface MapMarker {
+  id: number;
+  lat: number;
+  lng: number;
+  name: string;
+
+  // Popup data (optional for user marker)
+  address?: string | null;
+  openingHours?: string | null;
+  rating?: number | null;
+  distanceKm?: number | null;
+  imageUrl?: string | null;
+}
