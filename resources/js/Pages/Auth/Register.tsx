@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import AuthFooter from '@/Components/Auth/AuthFooter';
 
 // TODO: Add reset pwd functionality
 // TODO: Add client side validation
@@ -136,12 +137,7 @@ export default function Register() {
             </div>
           </form>
 
-          <div className="auth-footer">
-            Already have an account?{' '}
-            <Link href={window.route('login')} className="auth-link">
-              Sign In
-            </Link>
-          </div>
+          <AuthFooter target="login" />
         </div>
       </div>
     </>

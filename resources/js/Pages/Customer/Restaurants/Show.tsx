@@ -9,12 +9,14 @@ import { PageProps } from '@/types';
 import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
 import { useRestaurantMenu } from '@/Hooks/useRestaurantMenu';
 import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
+import { useAuth } from '@/Hooks/useAuth';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
 }
 
 export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
+  const { requireAuth } = useAuth();
   const primaryImage =
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
     restaurant.images?.[0];
@@ -26,6 +28,12 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const { cartItemCount, cartTotal, handleGoToCart } = useRestaurantCart(
     restaurant.id,
   );
+
+  const handleFavoriteClick = () => {
+    requireAuth(() => {
+      // TODO: Implement favorite logic
+    });
+  };
 
   return (
     <CustomerLayout>
@@ -47,7 +55,11 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
         {/* Info Card */}
         <div className="restaurant-info-card">
           <h1 className="restaurant-name">{restaurant.name}</h1>
-          <button className="favorite-button" aria-label="Add to favorites">
+          <button
+            className="favorite-button"
+            aria-label="Add to favorites"
+            onClick={handleFavoriteClick}
+          >
             <HeartIcon className="icon" />
           </button>
 

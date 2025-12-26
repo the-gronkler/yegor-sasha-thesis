@@ -1,6 +1,7 @@
 import { MenuItem } from '@/types/models';
 import { useCart } from '@/Contexts/CartContext';
 import { router } from '@inertiajs/react';
+import { useAuth } from '@/Hooks/useAuth';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -12,6 +13,7 @@ export default function MenuItemCard({
   restaurantId,
 }: MenuItemCardProps) {
   const { addItem, updateQuantity, items } = useCart();
+  const { requireAuth } = useAuth();
 
   // Check if item is already in cart and get quantity
   const cartItem = items.find((i) => i.id === item.id);
@@ -28,15 +30,19 @@ export default function MenuItemCard({
   const imageUrl = primaryImage ? primaryImage.url : null;
 
   const handleAddToCart = () => {
-    if (isAvailable) {
-      addItem(item, restaurantId);
-    }
+    requireAuth(() => {
+      if (isAvailable) {
+        addItem(item, restaurantId);
+      }
+    });
   };
 
   const handleRemoveFromCart = () => {
-    if (quantityInCart > 0) {
-      updateQuantity(item.id, quantityInCart - 1);
-    }
+    requireAuth(() => {
+      if (quantityInCart > 0) {
+        updateQuantity(item.id, quantityInCart - 1);
+      }
+    });
   };
 
   const handleCardClick = () => {

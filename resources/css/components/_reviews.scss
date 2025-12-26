@@ -319,3 +319,23 @@
     }
   }
 }
+
+.guest-review-prompt {
+  background-color: colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: layout.$box-shadow;
+  margin-bottom: 1.5rem;
+
+  p {
+    color: colors.$text-secondary;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  button {
+    width: auto;
+    padding: 0.75rem 1.5rem;
+  }
+}

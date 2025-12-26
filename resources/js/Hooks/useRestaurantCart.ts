@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { router } from '@inertiajs/react';
 import { useCart } from '@/Contexts/CartContext';
+import { useAuth } from '@/Hooks/useAuth';
 
 /**
  * Custom hook to manage cart state for a specific restaurant.
@@ -17,6 +18,7 @@ import { useCart } from '@/Contexts/CartContext';
  */
 export function useRestaurantCart(restaurantId: number) {
   const { items } = useCart();
+  const { requireAuth } = useAuth();
 
   const restaurantCartItems = useMemo(
     () => items.filter((item) => item.restaurant_id === restaurantId),
@@ -34,7 +36,9 @@ export function useRestaurantCart(restaurantId: number) {
   );
 
   const handleGoToCart = () => {
-    router.visit(route('cart.index', { restaurant_id: restaurantId }));
+    requireAuth(() => {
+      router.visit(route('cart.index', { restaurant_id: restaurantId }));
+    });
   };
 
   return {
