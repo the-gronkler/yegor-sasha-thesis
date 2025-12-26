@@ -12,7 +12,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         if (env('APP_ENV') === 'production') {
-            // TODO: add these to .env file and configure properly
             $trustedProxies = env('TRUSTED_PROXIES');
             $trustedProxies = $trustedProxies !== null && $trustedProxies !== ''
                 ? array_map('trim', explode(',', $trustedProxies))

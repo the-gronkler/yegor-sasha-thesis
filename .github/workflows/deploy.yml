@@ -1,0 +1,62 @@
+name: Deploy to Azure VM
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'master'
+      commit:
+        description: 'Commit SHA (optional, defaults to latest on branch)'
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          port: 22
+          script: |
+            # Stop script on error
+            set -e
+
+            # 1. Navigate to project directory
+            # TODO: Change this path to where you cloned the repo on your VM
+            cd ~/yegor-sasha-thesis
+
+            # 2. Fetch latest code
+            echo "Fetching latest changes..."
+            git fetch --all
+
+            # 3. Checkout target
+            if [ -n "${{ inputs.commit }}" ]; then
+              echo "Checking out specific commit: ${{ inputs.commit }}"
+              git checkout "${{ inputs.commit }}"
+            else
+              echo "Checking out branch: ${{ inputs.branch }}"
+              git checkout "${{ inputs.branch }}"
+              git pull origin "${{ inputs.branch }}"
+            fi
+
+            # 4. Update Environment (Optional: Ensure .env exists)
+            if [ ! -f .env ]; then
+              echo "ERROR: .env file not found! Please upload your env.production as .env to the server."
+              exit 1
+            fi
+
+            # 5. Restart Containers
+            echo "Rebuilding and restarting containers..."
+            docker compose down
+            docker compose up -d --build --remove-orphans
+            
+            # 6. Prune unused images to save space
+            docker system prune -f
+
+            echo "Deployment successful! 🚀"
