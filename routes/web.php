@@ -11,10 +11,13 @@ use App\Http\Controllers\Customer\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 // Customer-side: Restaurants (Public)
-Route::get('/', [RestaurantController::class, 'index'])->name('restaurants.index');
-Route::get('/map', [MapController::class, 'index'])->name('map.index');
-Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
-Route::get('/restaurants/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('restaurants.menu-items.show');
+Route::get('/', [MapController::class, 'index'])->name('map.index');
+
+Route::prefix('restaurants')->name('restaurants.')->group(function () {
+    Route::get('/', [RestaurantController::class, 'index'])->name('index');
+    Route::get('/{restaurant}', [RestaurantController::class, 'show'])->name('show');
+    Route::get('/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('menu-items.show');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Cart (for current customer)
