@@ -195,10 +195,10 @@ export default function MapComponent({
     // Smoothly center + zoom to selected restaurant
     map.flyTo({
       center: [selectedRestaurant.lng, selectedRestaurant.lat],
-      zoom: Math.max(viewState.zoom, 15),
+      zoom: Math.max(viewState.zoom, 10),
       duration: 900,
       essential: true,
-      padding: { top: 180, bottom: 320, left: 40, right: 40 },
+      padding: { top: 240, bottom: 280, left: 40, right: 40 },
     });
   }, [selectedRestaurant?.id]);
 
