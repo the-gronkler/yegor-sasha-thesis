@@ -1,0 +1,57 @@
+@use '../variables/main-colors';
+
+.icon-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: main-colors.$text-secondary;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none; // Remove underline from Link
+  transition: color 0.2s ease;
+
+  // Button reset styles
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+
+  .nav-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+
+  .icon {
+    width: 24px; // Explicit size for SVG
+    height: 24px;
+    stroke-width: 2; // thickness
+  }
+
+  .nav-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background-color: main-colors.$brand-primary;
+    border-radius: 9px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 2px 4px main-colors.$shadow-small;
+  }
+
+  &.active,
+  &:hover {
+    color: main-colors.$brand-primary;
+  }
+}
