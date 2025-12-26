@@ -1,11 +1,12 @@
 import { Review } from '@/types/models';
 import StarRating from './StarRating';
+import { ReviewGallery } from './ReviewGallery';
 
 interface Props {
   review: Review;
 }
 
-export default function ReviewItem({ review }: Props) {
+export function ReviewItem({ review }: Props) {
   return (
     <div className="review-item">
       <div className="review-header">
@@ -19,6 +20,8 @@ export default function ReviewItem({ review }: Props) {
       </div>
       <h4 className="review-title">{review.title}</h4>
       <p className="review-content">{review.content}</p>
+
+      <ReviewGallery images={review.images} userName={review.user_name} />
     </div>
   );
 }

@@ -112,6 +112,33 @@
     color: colors.$text-secondary;
     line-height: 1.5;
   }
+
+  .review-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+
+    .review-image-wrapper {
+      width: 5rem;
+      height: 5rem;
+      border-radius: layout.$border-radius;
+      overflow: hidden;
+      border: 1px solid colors.$bg-alt-2;
+      cursor: pointer;
+
+      .review-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.2s;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
 }
 
 .review-form-container {
@@ -137,6 +164,11 @@
       font-weight: 700;
       color: colors.$text-primary;
       margin-bottom: 0.5rem;
+
+      .required-asterisk {
+        color: exception-colors.$status-error;
+        margin-left: 0.25rem;
+      }
     }
 
     .form-input,
@@ -199,6 +231,91 @@
 
     &:focus {
       outline: none;
+    }
+  }
+}
+
+.image-upload-container {
+  margin-top: 0.5rem;
+
+  .image-preview-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .image-preview-item {
+    position: relative;
+    width: 5rem;
+    height: 5rem;
+    border-radius: layout.$border-radius;
+    overflow: hidden;
+    border: 1px solid colors.$bg-alt-2;
+
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-image-btn {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: colors.$text-inverse;
+      border: none;
+      border-radius: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+
+      .icon {
+        width: 0.75rem;
+        height: 0.75rem;
+      }
+
+      &:hover {
+        background-color: colors.$accent-warm;
+      }
+    }
+  }
+
+  .add-image-btn {
+    width: 5rem;
+    height: 5rem;
+    border: 1px dashed colors.$bg-alt-2;
+    border-radius: layout.$border-radius;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: colors.$text-secondary;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: colors.$brand-primary;
+      color: colors.$brand-primary;
+      background-color: colors.$brand-primary-soft;
+    }
+
+    .icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    span {
+      font-size: 0.75rem;
+    }
+
+    .hidden-input {
+      display: none;
     }
   }
 }

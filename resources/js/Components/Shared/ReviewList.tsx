@@ -1,5 +1,5 @@
 import { Review } from '@/types/models';
-import ReviewItem from './ReviewItem';
+import { ReviewItem } from './ReviewItem';
 
 interface Props {
   reviews: Review[];

@@ -3,6 +3,9 @@ import { FormEventHandler } from 'react';
 import InteractiveStarRating from './InteractiveStarRating';
 import Button from '@/Components/UI/Button';
 import { Review } from '@/types/models';
+import ImageUploader from '@/Components/UI/ImageUploader';
+
+const MAX_IMAGES = 30;
 
 interface Props {
   restaurantId: number;
@@ -11,28 +14,34 @@ interface Props {
   onSuccess?: () => void;
 }
 
-// TODO: add support for uploading images
 export default function ReviewForm({
   restaurantId,
   review,
   onCancel,
   onSuccess,
 }: Props) {
-  const { data, setData, post, put, processing, errors, reset } = useForm({
+  const { data, setData, post, processing, errors, reset } = useForm({
     restaurant_id: restaurantId,
     rating: review?.rating || 0,
     title: review?.title || '',
     content: review?.content || '',
+    images: [] as File[],
+    deleted_image_ids: [] as number[],
+    // Method spoofing is required for file uploads via PUT/PATCH in Laravel
+    // because PHP only parses multipart/form-data for POST requests.
+    _method: review ? 'put' : undefined,
   });
 
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
     if (review) {
-      put(route('reviews.update', review.id), {
+      post(route('reviews.update', review.id), {
         onSuccess: () => {
           reset();
           onSuccess?.();
         },
+        // Force Inertia to submit the request as FormData because this form includes file uploads (images)
+        forceFormData: true,
       });
     } else {
       post(route('reviews.store'), {
@@ -44,6 +53,24 @@ export default function ReviewForm({
     }
   };
 
+  const handleAddFiles = (newFiles: File[]) => {
+    setData('images', [...data.images, ...newFiles]);
+  };
+
+  const handleRemoveFile = (index: number) => {
+    const newImages = [...data.images];
+    newImages.splice(index, 1);
+    setData('images', newImages);
+  };
+
+  const handleRemoveExisting = (imageId: number) => {
+    setData('deleted_image_ids', [...data.deleted_image_ids, imageId]);
+  };
+
+  const existingImages =
+    review?.images?.filter((img) => !data.deleted_image_ids.includes(img.id)) ||
+    [];
+
   return (
     <div className="review-form-container">
       <h3 className="section-title">
@@ -54,7 +81,9 @@ export default function ReviewForm({
           <div className="form-error global-error">{errors.general}</div>
         )}
         <div className="form-group">
-          <label className="form-label">Rating</label>
+          <label className="form-label">
+            Rating <span className="required-asterisk">*</span>
+          </label>
           <InteractiveStarRating
             rating={data.rating}
             onRatingChange={(rating) => setData('rating', rating)}
@@ -64,11 +93,12 @@ export default function ReviewForm({
 
         <div className="form-group">
           <label htmlFor="title" className="form-label">
-            Title
+            Title <span className="required-asterisk">*</span>
           </label>
           <input
             id="title"
             type="text"
+            required
             value={data.title}
             onChange={(e) => setData('title', e.target.value)}
             className="form-input"
@@ -89,6 +119,19 @@ export default function ReviewForm({
             placeholder="Tell us more about your visit"
           />
           {errors.content && <div className="form-error">{errors.content}</div>}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Photos</label>
+          <ImageUploader
+            files={data.images}
+            existingImages={existingImages}
+            onAddFiles={handleAddFiles}
+            onRemoveFile={handleRemoveFile}
+            onRemoveExisting={handleRemoveExisting}
+            maxImages={MAX_IMAGES}
+            error={errors.images}
+          />
         </div>
 
         <div className="form-actions">
