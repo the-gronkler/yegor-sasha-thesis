@@ -11,6 +11,26 @@ Welcome to the repository for our thesis! Below are the key resources to help yo
 - 🔌 [**Endpoints**](https://docs.google.com/document/d/1E955BQFnevlgxs8YLM71R924gzzgWy1Xd2LhYZYi-ic/edit?usp=sharing)
 - 🗺️ [**Lucdichart**](https://lucid.app/lucidchart/598bdabb-3a0e-4ad1-8daf-9b95e059ef49/edit?viewport_loc=-7883%2C-1292%2C3068%2C1420%2C0_0&invitationId=inv_233120c5-a944-4b79-8ae4-d14f9602685f)
 
+## ✍️ **Thesis Writing (Typst)**
+
+We use [Typst](https://typst.app/) for writing our thesis. It's a modern, fast, and easy-to-use alternative to LaTeX.
+
+### **Prerequisites**
+
+1.  **Install Typst CLI**:
+    ```powershell
+    winget install --id Typst.Typst
+    ```
+2.  **VS Code Extension**: Install the **Tinymist** extension for syntax highlighting and preview.
+
+### **Compiling**
+
+To compile the thesis, run:
+
+```powershell
+typst compile typst/main.typ
+```
+
 ## 📄 **Abstract**
 
 Our thesis is a mobile app/website for restaurants with 2 main functions:

@@ -18,7 +18,7 @@
     number-align: right,
   )
   // Use a modern, professional sans-serif font for the whole document
-  set text(font: ("Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"), lang: "en", size: 11pt)
+  set text(font: ("Segoe UI", "Arial", "Calibri"), lang: "en", size: 11pt)
 
   // Title page.
   page(
@@ -96,8 +96,7 @@
   pagebreak()
 
   // Main body.
-  set par(justify: true, leading: 0.8em)
-  show par: set block(spacing: 1.2em)
+  set par(justify: true, leading: 0.8em, spacing: 1.2em)
 
   // Headings
   set heading(numbering: "1.1")

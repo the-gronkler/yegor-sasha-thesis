@@ -71,10 +71,7 @@ Use the raw block ` ```` ```lang ... ``` ```` ` to introduce code listings. Refe
 To insert an image, place it in the `resources/images/` directory and use the `image` function inside a `figure`.
 
 #figure(
-  rect(width: 80%, height: 5cm, fill: luma(240))[
-    *Place image here*
-  ],
-  // image("resources/images/example.png", width: 80%),
+  image("../resources/er-diagram.png", width: 100%),
   caption: [An example figure caption.],
 ) <fig:example>
 
