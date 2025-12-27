@@ -41,8 +41,8 @@
 \newcommand{\pjfaculty}{
 \ifthenelse
     {\equal{\pjlanguage}{english}}
-    {Name of the faculty (e.g., Faculty of Information Technology)}
-    {Nazwa wydziału (np. Wydział Informatyki)}
+    {Faculty of Information Technology}
+    {Wydział Informatyki}
 }
 
 \newcommand{\pjdepartment}{
@@ -55,15 +55,15 @@
 \newcommand{\pjspecialization}{
 \ifthenelse
     {\equal{\pjlanguage}{english}}
-    {Name of the specialization (e.g., Software and Database Engineering)}
-    {Nazwa specjalizacji (np. Inżynieria Oprogramowania i Baz Danych)}
+    {Software and Database Engineering}
+    {Inżynieria Oprogramowania i Baz Danych}
 }
 
 \newcommand{\pjauthors}{
 \ifthenelse
     {\equal{\pjlanguage}{english}}
-    {Your name and surname, s\#\#\#\#\#}
-    {Twoje imię i nazwisko, s\#\#\#\#\#}
+    {Oleksandr Svirin, s28259\\ Yegor Burykin, s26904}
+    {Oleksandr Svirin, s28259\\ Yegor Burykin, s26904}
 }
 
 \newcommand{\pjtitle}{
@@ -76,7 +76,8 @@
 \newcommand{\pjsupervisor}{
 \ifthenelse
     {\equal{\pjlanguage}{english}}
-    {Name of your supervisor (and their academic title)}
+    % ?????
+    {Krzysztof Bajszczak, Prof. PJATK}
     {Imię i nazwisko promotora (wraz z tytułem / stopniem)}
 }
 
@@ -90,15 +91,15 @@
 \newcommand{\pjdefencedateandloc}{
 \ifthenelse
     {\equal{\pjlanguage}{english}}
-    {Warsaw, February 2030}
-    {Warszawa, luty 2023}
+    {Warsaw, February 2025}
+    {Warszawa, luty 2025}
 }
 
 \newcommand{\pjthesistypeandsupervisortext}{
     \ifthenelse
     {\equal{\pjlanguage}{english}}
-    {\raggedright Master's degree / Bachelor's degree thesis written under the supervision of:} 
-    {\raggedright Praca magisterska / Praca inżynierska napisana pod kierunkiem:} 
+    {\raggedright Bachelor's degree thesis written under the supervision of:} 
+    {\raggedright Praca inżynierska napisana pod kierunkiem:} 
 }
 
 \setmonofont{JetBrainsMono}[
