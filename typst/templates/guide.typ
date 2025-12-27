@@ -1,4 +1,4 @@
-= Content
+= Content Guide
 
 Be direct. The thesis should be _as short as possible, but not shorter than that_. Meaning that if you can be more concise without sacrificing readability or quality, you should be.
 
@@ -77,6 +77,6 @@ To insert an image, place it in the `resources/images/` directory and use the `i
 #figure(
   image("../resources/er-diagram.png", width: 100%),
   caption: [An example figure caption.],
-) <fig:example>
+) <fig:er-diagram>
 
-Refer to the figure using @fig:example.
+Refer to the figure using @fig:er-diagram.
