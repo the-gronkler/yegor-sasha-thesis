@@ -1,0 +1,92 @@
+\documentclass[12pt,a4paper,twoside]{book}
+
+% ==========
+% WARNING: Use LuaLaTeX engine to render this document.
+% ==========
+
+\usepackage[T1]{fontenc}
+\usepackage[lutf8]{luainputenc}
+\usepackage{fullpage}
+\usepackage{ifthen}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage[x11names]{xcolor}
+\usepackage{parskip}
+\usepackage{transparent}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{dirtree}
+\usepackage{float}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage{relsize}
+\usepackage{geometry}
+\usepackage{ocgx2}
+\usepackage[lining]{ebgaramond}
+\usepackage{lipsum}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tocloft}
+\usepackage{csquotes}
+\usepackage{microtype}
+\usepackage{resources/pjconfig} % must be loaded last / musi być ładowany jako ostatni
+
+\newtheorem{definition}{Definition}
+
+\ifthenelse{\equal{\pjlanguage}{polish}}{
+    \usepackage[polish]{babel}
+    \selectlanguage{polish}
+}{
+    \usepackage[english]{babel}
+    \selectlanguage{english}
+}
+
+\addto\captionsenglish{\renewcommand{\contentsname}{\hfill Table of Contents\hfill}}
+\addto\captionspolish{\renewcommand{\contentsname}{\hfill Spis Treści\hfill}}
+
+\lhead{}
+
+\begin{document}
+
+\input{contents/pre-content/Titlepage.tex}
+
+\newpage
+
+\
+
+\newpage
+
+\input{contents/pre-content/abstract}
+
+\vfill
+
+\input{contents/pre-content/acknowledgements}
+
+\newpage
+
+\ifthenelse
+    {\equal{\pjlanguage}{english}}
+    {\newpage\input{contents/pre-content/polish-abstract-for-english-theses}}
+    {}
+
+\newpage
+
+\tableofcontents
+
+% ====================================================================================================
+%
+% Here you can start inputting your contents.
+%
+% ====================================================================================================
+
+\input{contents/Introduction}
+
+\input{contents/Content}
+
+\bibliographystyle{IEEEtran}
+
+\bibliography{resources/references}
+
+\lstlistoflistings
+
+\end{document}

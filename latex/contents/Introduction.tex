@@ -1,0 +1,100 @@
+\chapter{Introduction} \label{introduction}
+
+In \pjref{introduction} you should explain the motivation behind your work, broad context of the work, and your inspirations. Explain the problem and how the path that you took deals with it.
+
+A good introduction is usually written quite late in the thesis development, because throughout your work some important details may be subject to change.
+
+Between chapters and sections (or subsections or subsubsections) always introduce few lines worth of a paragraph to introduce the topic. Avoid ``gluing'' higher- and lower-level sections. Always separate them using some text.
+
+\section{Goals}
+
+Introduce the goals of the work. What kind of research and/or tool this work is supposed to produce.
+
+\section{Conventions}
+
+Explain the conventions used in your work. For example, how do you deal with inline code or with code listings that contain lines which are too long to be rendered as a single one in this document.
+
+\section{Results}
+
+Briefly introduce results of your work.
+
+\section{Document structure}
+
+Explain how is your document structured by briefly summarizing all the chapters. This sections is usually filled in last.
+
+\section{Example: Chapters, sections, subsections, and subsubsections} \label{chapters}
+
+Use appropriate commands to introduce chapters. Use enumerations or itemizations when it makes sense---it elevates the readability of your work. For example, here is how we introduce specific types of sections:
+\begin{enumerate}
+    \item Top-level --- \emph{chapters}. Use \lstinline|\chapter{...}| to introduce them.
+    \item Lower-level --- \emph{sections}. Use \lstinline|\section{...}| to introduce them. For example, this very paragraph is a part of a section. Namely---\pjref{chapters}.
+    \item Lowest-level --- \emph{subsections}. Use \lstinline|\subsection{...}| to introduce them.
+\end{enumerate}
+
+\section{Styling}
+
+Here we will briefly explain the appropriate styling for theses. For starters, let us explain the difference between different dashes:
+
+\begin{itemize}
+    \item Hyphens (-) are inputted by using a single ``\lstinline{-}'' character. They are used to form interconnected words such as \emph{low-level} or \emph{first-person}.
+    \item En dashes (--) are inputted by using (``\lstinline{--}''). They are very rarely used. Mainly for specifying ranges, e.g.:
+    \begin{itemize}
+        \item \emph{pages 10--26}
+        \item \emph{we are open 6:00 a.m.--9:00 p.m.}
+        \item \emph{saying those things was illegal in 1670--1680}
+    \end{itemize}
+    \item Em dashes (---) are inputted by using (``\lstinline{---}''). They sometimes replace commas or changes of text direction, e.g.:
+    \begin{itemize}
+        \item \emph{This is very difficult---we are going to need to step down.}
+        \item \emph{My good friend---John Doe---turned out very successful.}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Form} \label{Form}
+
+It is best to use infinitives for describing the work done. For example:
+
+\begin{displayquote}
+    \color{Chartreuse3}
+    Sample \LaTeX template has been prepared in order to make it easier for \pj's students to write their theses documentations.
+\end{displayquote}
+
+First-person pronouns should be avoided:
+
+\begin{displayquote}
+    \color{Firebrick3}
+    I created a simple \LaTeX template in order to make it easier for \pj's students to write their theses documentations.
+\end{displayquote}
+
+In rare occasions, it might be the case that the author of the work wants to introduce a personal opinion. In those cases, a third-person form should be used:
+
+\begin{displayquote}
+    \color{Chartreuse3}
+    Author of this \LaTeX template is certain that this document will be of much help for \pj's students.
+\end{displayquote}
+
+\subsection{Quoting}
+
+In \pjref{Form}, the colored sections were \emph{quoted}. Styles of such quotations are automatically handled by using the appropriate \lstinline|\begin{displayquote} [contents...] \end{displayquote}| environment.
+
+\subsection{Colors}
+
+The usage of colored text should usually be avoided (except for code listings) unless there is a very strong reason to make an exception. Consistency matters and it is usually better to use {\itshape \lstinline[style=inline]|\emph{the standard tool for emphasis}|} rather than colors.
+
+\subsection{Blocks of text}
+
+Do not introduce overly lengthy paragraphs. If it exceeds a third of a page, break it down. Use enumerations, itemizations, figures, inline code, code listings, etc., which make the text more attractive. Do not overdo it though.
+
+If a given chapter or (sub(sub))section takes more than 3 pages, it is appropriate to divide into couple of lower-level sections. Each chapter (top-level) starts on a new page. This does not concern lower-level sections. An exception can be made if a significant number of figures, listings, etc. are present.
+
+\subsection{Typos}
+
+Pay attention to the quality of your text---both in terms of substantive value and form of the text. Use correct punctuation and a spell checker to detect typos.
+
+\subsection{Bibliography details}
+
+Bibliography items must be correctly referenced. Use the appropriate template and \lstinline{.bib} file from \lstinline{resources} directory.
+
+Use a standardized package for bibliography and cite when appropriate \cite{LatexDocs}. Each bibliography position must be referenced in the text. It is unacceptable to list works in the bibliography that are not mentioned in your work. You must show how exactly the given cited position was impactful for this work.
+
+Notice that both the first citation and the chapter reference are clickable and automatically generated. We use {\scriptsize\texttt{\textbackslash cite\{...\}}}\footnote{Standard {\LaTeX} command.} and {\scriptsize\texttt{\textbackslash pjref\{...\}}}\footnote{Custom command created for this template's purpose.} for that.
