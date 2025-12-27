@@ -41,6 +41,12 @@ const Ziggy = {
       parameters: ['restaurant'],
       bindings: { restaurant: 'id' },
     },
+    'restaurants.toggleFavorite': {
+      uri: 'restaurants\/{restaurant}\/favorite',
+      methods: ['POST'],
+      parameters: ['restaurant'],
+      bindings: { restaurant: 'id' },
+    },
     'restaurants.menu-items.show': {
       uri: 'restaurants\/{restaurant}\/menu-items\/{menuItem}',
       methods: ['GET', 'HEAD'],

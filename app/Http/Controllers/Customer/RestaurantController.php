@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
+use App\Models\User;
 use App\Services\GeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -71,7 +72,56 @@ class RestaurantController extends Controller
 
         return Inertia::render('Customer/Restaurants/Show', [
             'restaurant' => $this->formatRestaurant($restaurant),
+            'isFavorited' => $this->isRestaurantFavorited($restaurant, $request->user()),
         ]);
+    }
+
+    /**
+     * Toggle favorite status for a restaurant.
+     */
+    public function toggleFavorite(Request $request, Restaurant $restaurant)
+    {
+        $this->authorize('view', $restaurant);
+
+        $user = $request->user();
+        $customer = $user->customer;
+
+        if (! $customer) {
+            return back()->with('error', 'Only customers can favorite restaurants.');
+        }
+
+        // Check if already favorited
+        $isFavorited = $customer->favoriteRestaurants()->where('restaurant_id', $restaurant->id)->exists();
+
+        if ($isFavorited) {
+            // Remove from favorites
+            $customer->favoriteRestaurants()->detach($restaurant->id);
+            $message = 'Restaurant removed from favorites.';
+        } else {
+            // Add to favorites with auto-assigned rank
+            // Get the current maximum rank and add 1 (lower priority = higher number)
+            $maxRank = $customer->favoriteRestaurants()->max('rank') ?? 0;
+            $customer->favoriteRestaurants()->attach($restaurant->id, [
+                'rank' => $maxRank + 1,
+            ]);
+            $message = 'Restaurant added to favorites!';
+        }
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Check if a restaurant is favorited by the current user.
+     */
+    private function isRestaurantFavorited(Restaurant $restaurant, ?User $user): bool
+    {
+        if (! $user || ! $user->customer) {
+            return false;
+        }
+
+        return $user->customer->favoriteRestaurants()
+            ->where('restaurant_id', $restaurant->id)
+            ->exists();
     }
 
     private function formatRestaurant(Restaurant $restaurant): array

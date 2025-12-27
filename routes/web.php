@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [RestaurantController::class, 'index'])->name('restaurants.index');
     Route::get('/map', [MapController::class, 'index'])->name('map.index');
     Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
+    Route::post('/restaurants/{restaurant}/favorite', [RestaurantController::class, 'toggleFavorite'])->name('restaurants.toggleFavorite');
     Route::get('/restaurants/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('restaurants.menu-items.show');
 
     // Cart (for current customer)
