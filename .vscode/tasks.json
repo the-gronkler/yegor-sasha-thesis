@@ -35,6 +35,24 @@
         "showReuseMessage": true,
         "clear": false
       }
+    },
+    {
+      "label": "LaTeX: Build",
+      "type": "shell",
+      "command": "cd latex && latexmk -lualatex main.tex",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "LaTeX: Watch Mode",
+      "type": "shell",
+      "command": "cd latex && latexmk -pvc -lualatex main.tex",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build"
     }
   ],
   "inputs": [
