@@ -33,16 +33,10 @@
 
 \newtheorem{definition}{Definition}
 
-\ifthenelse{\equal{\pjlanguage}{polish}}{
-    \usepackage[polish]{babel}
-    \selectlanguage{polish}
-}{
-    \usepackage[english]{babel}
-    \selectlanguage{english}
-}
+\usepackage[english]{babel}
+\selectlanguage{english}
 
 \addto\captionsenglish{\renewcommand{\contentsname}{\hfill Table of Contents\hfill}}
-\addto\captionspolish{\renewcommand{\contentsname}{\hfill Spis Treści\hfill}}
 
 \lhead{}
 
@@ -61,13 +55,6 @@
 \vfill
 
 \input{contents/pre-content/acknowledgements}
-
-\newpage
-
-\ifthenelse
-    {\equal{\pjlanguage}{english}}
-    {\newpage\input{contents/pre-content/polish-abstract-for-english-theses}}
-    {}
 
 \newpage
 
