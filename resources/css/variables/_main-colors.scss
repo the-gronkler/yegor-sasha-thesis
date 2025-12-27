@@ -13,6 +13,10 @@ $brand-primary-hover: color.adjust($brand-primary, $lightness: -8%);
 // Purpose: Hover state for primary elements.
 // Use for: button:hover, active icon states.
 
+$brand-primary-light: rgba($brand-primary, 0.1);
+// Purpose: Very light tint for backgrounds.
+// Use for: icon backgrounds, subtle emphasis areas.
+
 $brand-primary-soft: rgba($brand-primary, 0.2);
 // Purpose: Subtle emphasis.
 // Use for: tag backgrounds, "Popular" chip BGs, soft highlight zones.

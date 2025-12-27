@@ -1,5 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
@@ -9,12 +10,18 @@ import { PageProps } from '@/types';
 import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
 import { useRestaurantMenu } from '@/Hooks/useRestaurantMenu';
 import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
+import { useState } from 'react';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
+  isFavorited: boolean;
 }
 
-export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
+export default function RestaurantShow({
+  restaurant,
+  isFavorited,
+}: RestaurantShowProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const primaryImage =
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
     restaurant.images?.[0];
@@ -26,6 +33,20 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
   const { cartItemCount, cartTotal, handleGoToCart } = useRestaurantCart(
     restaurant.id,
   );
+
+  const handleToggleFavorite = () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    router.post(
+      route('restaurants.toggleFavorite', restaurant.id),
+      {},
+      {
+        preserveScroll: true,
+        onFinish: () => setIsSubmitting(false),
+      },
+    );
+  };
 
   return (
     <CustomerLayout>
@@ -47,8 +68,19 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
         {/* Info Card */}
         <div className="restaurant-info-card">
           <h1 className="restaurant-name">{restaurant.name}</h1>
-          <button className="favorite-button" aria-label="Add to favorites">
-            <HeartIcon className="icon" />
+          <button
+            className="favorite-button"
+            onClick={handleToggleFavorite}
+            disabled={isSubmitting}
+            aria-label={
+              isFavorited ? 'Remove from favorites' : 'Add to favorites'
+            }
+          >
+            {isFavorited ? (
+              <HeartIconSolid className="icon" />
+            ) : (
+              <HeartIcon className="icon" />
+            )}
           </button>
 
           <div className="rating-container">
