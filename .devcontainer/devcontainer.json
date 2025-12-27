@@ -48,7 +48,11 @@
             "name": "latexmk 🔃",
             "tools": ["latexmk"]
           }
-        ]
+        ],
+        "[latex]": {
+          "editor.wordWrap": "wordWrapColumn",
+          "editor.wordWrapColumn": 80
+        }
       }
     }
   }
