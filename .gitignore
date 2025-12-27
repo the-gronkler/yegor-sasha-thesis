@@ -30,3 +30,16 @@ env.production
 
 *.crt
 /resources/js/ziggy.js
+
+# LaTeX Build Artifacts
+/latex/*.aux
+/latex/*.bbl
+/latex/*.blg
+/latex/*.fdb_latexmk
+/latex/*.fls
+/latex/*.lol
+/latex/*.log
+/latex/*.out
+/latex/*.pdf
+/latex/*.toc
+/latex/*.synctex.gz
