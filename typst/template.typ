@@ -14,6 +14,7 @@
   set document(author: authors.map(a => a.name), title: title)
   set page(
     paper: "a4",
+    margin: 2cm,
     numbering: "1",
     number-align: right,
   )
