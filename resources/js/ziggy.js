@@ -106,11 +106,16 @@ const Ziggy = {
       bindings: { review: 'id' },
     },
     'profile.show': { uri: 'profile', methods: ['GET', 'HEAD'] },
+    'profile.edit': { uri: 'profile\/edit', methods: ['GET', 'HEAD'] },
     'profile.update': { uri: 'profile', methods: ['PUT'] },
     'profile.destroy': { uri: 'profile', methods: ['DELETE'] },
     'profile.favorites': {
       uri: 'profile\/favorites',
       methods: ['GET', 'HEAD'],
+    },
+    'profile.favorites.updateRanks': {
+      uri: 'profile\/favorites\/ranks',
+      methods: ['PUT'],
     },
     'restaurant.menu-categories.index': {
       uri: 'restaurant\/menu-categories',
