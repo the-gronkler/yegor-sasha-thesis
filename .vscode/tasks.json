@@ -49,7 +49,7 @@
     {
       "label": "LaTeX: Watch Mode",
       "type": "shell",
-      "command": "cd latex && latexmk -pvc -lualatex main.tex",
+      "command": "cd latex && latexmk -pvc -lualatex -interaction=nonstopmode main.tex",
       "isBackground": true,
       "problemMatcher": [],
       "group": "build"
