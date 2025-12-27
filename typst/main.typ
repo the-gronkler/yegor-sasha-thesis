@@ -16,5 +16,9 @@
 
 #bibliography("resources/references.bib", style: "ieee")
 
-#include "chapters/introduction.typ"
-#include "chapters/content.typ"
+#include "templates/guide.typ"
+#include "chapters/00-glossary.typ"
+#include "chapters/01-introduction.typ"
+#include "chapters/02-context.typ"
+#include "chapters/03-functional-requirements.typ"
+#include "chapters/04-non-functional-requirements.typ"
