@@ -42,7 +42,9 @@ Let us inspect couple of examples for them:
 
 === Code listings
 
-Use the raw block ` ```` ```lang ... ``` ```` ` to introduce code listings. Refer to @ListingsDocs for details. Provide caption text to every non-inline listing. For example:
+Use the raw block ` ```` ```lang ... ``` ```` ` to introduce code listings. Provide caption text to every non-inline listing.
+
+For example:
 
 #figure(
   caption: [Kotlin nullability handling example],
@@ -53,7 +55,7 @@ Use the raw block ` ```` ```lang ... ``` ```` ` to introduce code listings. Refe
       println(text?.length ?: "nothing")
   }
   ```,
-)
+) <lst:kotlin>
 
 #figure(
   caption: [Java nullability handling example],
@@ -64,7 +66,9 @@ Use the raw block ` ```` ```lang ... ``` ```` ` to introduce code listings. Refe
       System.out.println(text != null ? text.length() : "nothing");
   }
   ```,
-)
+) <lst:java>
+
+You can now reference the code listings: @lst:kotlin and @lst:java.
 
 === Figures
 

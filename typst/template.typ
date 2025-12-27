@@ -41,7 +41,7 @@
 
     #v(1cm)
 
-    #text(weight: "bold")[Department of Software Engineering] \
+    #text(weight: "bold")[Department of ???] \
     Software and Database Engineering
 
     #v(1cm)
@@ -105,6 +105,30 @@
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
     it
+  }
+
+  // Code blocks
+  show raw.where(block: true): it => {
+    set text(size: 0.9em)
+
+    // Enable line numbering
+    show raw.line: l => {
+      box(stack(
+        dir: ltr,
+        spacing: 1em,
+        text(fill: luma(150), str(l.number)),
+        l.body,
+      ))
+    }
+
+    block(
+      fill: rgb("#f5f7f9"),
+      inset: 12pt,
+      radius: 5pt,
+      stroke: rgb("#e0e0e0"),
+      width: 100%,
+      align(left, it),
+    )
   }
 
   body
