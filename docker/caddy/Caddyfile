@@ -1,0 +1,15 @@
+{
+    # Global options
+    email {$ACME_EMAIL}
+}
+
+{$DOMAIN_NAME} {
+    # Import environment-specific TLS settings (internal vs production)
+    import /etc/caddy/tls_config
+
+    # Proxy to the app
+    reverse_proxy app:80
+
+    # Enable compression
+    encode gzip
+}

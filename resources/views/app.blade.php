@@ -4,7 +4,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    @routes
+    {{-- Pass the APP_URL to Ziggy --}}
+    <script>
+        var Ziggy = @json(array_merge((new Tighten\Ziggy\Ziggy())->toArray(), ['url' => config('app.url')]));
+    </script>
     @viteReactRefresh
     @vite('resources/js/app.tsx')
     @inertiaHead

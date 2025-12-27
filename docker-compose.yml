@@ -1,0 +1,87 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: yegor-sasha-thesis-app
+    container_name: thesis-app
+    restart: unless-stopped
+    working_dir: /var/www
+    # Ports are now handled by Caddy
+    expose:
+      - '80'
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      # Preserve vendor and build assets from the image
+      - /var/www/vendor
+      - /var/www/public/build
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: https://${DOMAIN_NAME:-yegor-sasha-thesis.test}
+      ASSET_URL: https://${DOMAIN_NAME:-yegor-sasha-thesis.test}
+      VITE_APP_NAME: '${APP_NAME}'
+      APP_KEY: ${APP_KEY}
+      # Force Ziggy to use the correct domain
+      ZIGGY_URL: https://${DOMAIN_NAME:-yegor-sasha-thesis.test}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - '5173:5173'
+    depends_on:
+      - db
+    networks:
+      - thesis-network
+
+  caddy:
+    image: caddy:alpine
+    container_name: thesis-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./docker/caddy/tls.${APP_ENV:-local}:/etc/caddy/tls_config
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME:-yegor-sasha-thesis.test}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    depends_on:
+      - app
+    networks:
+      - thesis-network
+
+  db:
+    image: mariadb:10.11
+    container_name: thesis-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-${DB_PASSWORD}}
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    networks:
+      - thesis-network
+
+networks:
+  thesis-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  caddy_data:
+  caddy_config:
