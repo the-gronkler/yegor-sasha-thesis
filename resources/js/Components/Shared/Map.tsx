@@ -19,6 +19,7 @@ import {
   getClusterCountLayer,
   getSelectedPointLayer,
   getUnclusteredPointLayer,
+  getHeatmapLayer,
   MapTheme,
 } from './mapStyles';
 import { useMapGeolocation } from '@/Hooks/useMapGeolocation';
@@ -47,6 +48,7 @@ interface Props {
   isPickingLocation?: boolean;
   onPickLocation?: (lat: number, lng: number) => void;
   showGeolocateControlUi?: boolean;
+  showHeatmap?: boolean;
 }
 
 export default function MapComponent({
@@ -65,6 +67,7 @@ export default function MapComponent({
   isPickingLocation,
   onPickLocation,
   showGeolocateControlUi = true,
+  showHeatmap = false,
 }: Props) {
   const mapRef = React.useRef<MapRef>(null);
 
@@ -323,6 +326,7 @@ export default function MapComponent({
           clusterMaxZoom={14}
           clusterRadius={50}
         >
+          {showHeatmap && <Layer {...getHeatmapLayer()} />}
           <Layer {...getClusterLayer(THEME)} />
           <Layer {...getClusterCountLayer()} />
           <Layer {...getSelectedPointLayer(THEME, selectedRestaurantId)} />

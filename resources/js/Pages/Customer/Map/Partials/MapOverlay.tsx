@@ -45,6 +45,8 @@ interface MapOverlayProps {
   setIsPickingLocation: (isPicking: boolean) => void;
   onManualLocation: (lat: number, lng: number) => void;
   onError: (error: string | null) => void;
+  showHeatmap: boolean;
+  onToggleHeatmap: (show: boolean) => void;
 }
 
 export default function MapOverlay({
@@ -59,6 +61,8 @@ export default function MapOverlay({
   setIsPickingLocation,
   onManualLocation,
   onError,
+  showHeatmap,
+  onToggleHeatmap,
 }: MapOverlayProps) {
   // Collapsible overlay states
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -229,6 +233,17 @@ export default function MapOverlay({
                 <CursorArrowRaysIcon className="btn-icon" aria-hidden="true" />
                 Pick on Map
               </button>
+            </div>
+
+            <div className="map-layer-controls">
+              <label className="map-toggle-label">
+                <input
+                  type="checkbox"
+                  checked={showHeatmap}
+                  onChange={(e) => onToggleHeatmap(e.target.checked)}
+                />
+                Heatmap
+              </label>
             </div>
 
             {manualOpen && (
