@@ -1,0 +1,10 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "tinymist.rootPath": "${workspaceFolder}/typst"
+  }
+}

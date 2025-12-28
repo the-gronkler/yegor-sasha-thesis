@@ -11,6 +11,7 @@ import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
 import { useRestaurantMenu } from '@/Hooks/useRestaurantMenu';
 import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
 import { useState } from 'react';
+import { useAuth } from '@/Hooks/useAuth';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
@@ -21,6 +22,7 @@ export default function RestaurantShow({
   restaurant,
   isFavorited,
 }: RestaurantShowProps) {
+  const { requireAuth } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const primaryImage =
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
@@ -35,17 +37,19 @@ export default function RestaurantShow({
   );
 
   const handleToggleFavorite = () => {
-    if (isSubmitting) return;
+    requireAuth(() => {
+      if (isSubmitting) return;
 
-    setIsSubmitting(true);
-    router.post(
-      route('restaurants.toggleFavorite', restaurant.id),
-      {},
-      {
-        preserveScroll: true,
-        onFinish: () => setIsSubmitting(false),
-      },
-    );
+      setIsSubmitting(true);
+      router.post(
+        route('restaurants.toggleFavorite', restaurant.id),
+        {},
+        {
+          preserveScroll: true,
+          onFinish: () => setIsSubmitting(false),
+        },
+      );
+    });
   };
 
   return (

@@ -1,0 +1,4 @@
+[package]
+name = "thesis"
+version = "0.1.0"
+entrypoint = "main.typ"

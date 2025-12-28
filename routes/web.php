@@ -10,14 +10,17 @@ use App\Http\Controllers\Customer\RestaurantController;
 use App\Http\Controllers\Customer\ReviewController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    // Customer-side: Restaurants
-    Route::get('/', [RestaurantController::class, 'index'])->name('restaurants.index');
-    Route::get('/map', [MapController::class, 'index'])->name('map.index');
-    Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
-    Route::post('/restaurants/{restaurant}/favorite', [RestaurantController::class, 'toggleFavorite'])->name('restaurants.toggleFavorite');
-    Route::get('/restaurants/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('restaurants.menu-items.show');
+// Customer-side: Restaurants (Public)
+Route::get('/', [MapController::class, 'index'])->name('map.index');
 
+Route::prefix('restaurants')->name('restaurants.')->group(function () {
+    Route::get('/', [RestaurantController::class, 'index'])->name('index');
+    Route::get('/{restaurant}', [RestaurantController::class, 'show'])->name('show');
+    Route::post('/restaurants/{restaurant}/favorite', [RestaurantController::class, 'toggleFavorite'])->name('restaurants.toggleFavorite');
+    Route::get('/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('menu-items.show');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
     // Cart (for current customer)
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');

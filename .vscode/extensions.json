@@ -1,3 +1,10 @@
 {
-  "recommendations": ["esbenp.prettier-vscode", "open-southeners.laravel-pint"]
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "open-southeners.laravel-pint",
+    "myriad-dreamin.tinymist",
+
+    "github.copilot",
+    "github.copilot-chat"
+  ]
 }
