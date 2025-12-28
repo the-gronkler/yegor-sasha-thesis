@@ -660,7 +660,7 @@ _When placing an order, the user has the option to select an additional shipping
 This type of order requires providing an additional address and selecting gift wrapping._
 
 Then add second requirement:
-_Po złożeniu zamówienia i jego otrzymaniu przez klienta, ma on 30 dni na złożenie reklamacji._
+_After placing an order and receiving it, the customer has 30 days to submit a complaint._
 
 ## 15. Use case scenarios
 

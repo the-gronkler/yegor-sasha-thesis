@@ -2,12 +2,12 @@
 
 This project uses [Typst](https://typst.app/), a modern and fast alternative to LaTeX, to generate the thesis PDF.
 
-## �️ Setup & Requirements
+## Setup & Requirements
 
 1.  **VS Code**: Recommended editor.
 2.  **Extension**: Install [Tinymist Typst](https://marketplace.visualstudio.com/items?itemName=myriad-dreamin.tinymist) (ID: `myriad-dreamin.tinymist`) for syntax highlighting and instant preview.
 
-## �📂 Project Structure
+## 📂 Project Structure
 
 - **`main.typ`**: The entry point. This file orchestrates the document order.
 - **`template.typ`**: Defines the visual styling, title page, and layout rules.

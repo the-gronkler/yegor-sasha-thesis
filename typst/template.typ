@@ -6,6 +6,9 @@
   aux_supervisor: "",
   date: "",
   logo: none,
+  faculty: "",
+  department: "",
+  specialization: "",
   abstract: [],
   acknowledgements: [],
   body,
@@ -29,7 +32,6 @@
     #set align(center)
 
     #if logo != none {
-      // Note: Typst supports PNG, JPEG, GIF, SVG. PDF images are not supported directly.
       image(logo, width: 100%)
     } else {
       v(2cm)
@@ -38,12 +40,12 @@
 
     #v(2cm)
 
-    #text(weight: "bold")[Faculty of Information Technology]
+    #text(weight: "bold")[#faculty]
 
     #v(1cm)
 
-    #text(weight: "bold")[Department of ???] \
-    Software and Database Engineering
+    #text(weight: "bold")[#department] \
+    #specialization
 
     #v(1cm)
 

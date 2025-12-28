@@ -1,5 +1,6 @@
 #import "template.typ": *
 
+// Project settings, title page and other pre-content.
 #show: project.with(
   title: "Your thesis title",
   authors: (
@@ -10,11 +11,15 @@
   aux_supervisor: "Name of your auxiliary supervisor",
   date: "Warsaw, February 2025",
   logo: "resources/logo.png",
+  faculty: "Faculty of Information Technology",
+  department: "Department of ??",
+  specialization: "Software and Database Engineering",
   abstract: include "pre-content/abstract.typ",
   acknowledgements: include "pre-content/acknowledgements.typ",
 )
 
-#bibliography("resources/references.bib", style: "ieee")
+// Main content of the thesis.
+
 
 #include "templates/guide.typ"
 #include "chapters/00-glossary.typ"
@@ -22,3 +27,5 @@
 #include "chapters/02-context.typ"
 #include "chapters/03-functional-requirements.typ"
 #include "chapters/04-non-functional-requirements.typ"
+
+#bibliography("resources/references.bib", style: "ieee")

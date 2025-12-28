@@ -27,7 +27,7 @@ And:
 
 == How to structure my work?
 
-It is best to split your chapters into separate files. Notice how this project consists of `contents` directory with `Introduction.tex` and `Content.tex` inside, which are then `\input{...}`-ed in the `main.tex` file. This makes it very easy to change the ordering, separate different topics and collaborate.
+It is best to split your chapters into separate files. Notice how this project consists of a `contents` directory with files like `introduction.typ` and `content.typ` inside, which are then `#include`-d in the `main.typ` file. This makes it very easy to change the ordering, separate different topics and collaborate.
 
 == How to introduce other media content?
 
