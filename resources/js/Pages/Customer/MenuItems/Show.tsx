@@ -8,6 +8,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 import { MenuItem } from '@/types/models';
 import { PageProps } from '@/types';
 import { useCart } from '@/Contexts/CartContext';
+import { useAuth } from '@/Hooks/useAuth';
 
 interface MenuItemShowProps extends PageProps {
   menuItem: MenuItem;
@@ -21,6 +22,7 @@ export default function MenuItemShow({
   restaurantName,
 }: MenuItemShowProps) {
   const { addItem, updateQuantity, items } = useCart();
+  const { requireAuth } = useAuth();
 
   // Check if item is already in cart and get quantity
   const cartItem = items.find((i) => i.id === menuItem.id);
@@ -32,13 +34,17 @@ export default function MenuItemShow({
   const imageUrl = primaryImage ? primaryImage.url : null;
 
   const handleAddToCart = () => {
-    addItem(menuItem, restaurantId);
+    requireAuth(() => {
+      addItem(menuItem, restaurantId);
+    });
   };
 
   const handleRemoveFromCart = () => {
-    if (quantityInCart > 0) {
-      updateQuantity(menuItem.id, quantityInCart - 1);
-    }
+    requireAuth(() => {
+      if (quantityInCart > 0) {
+        updateQuantity(menuItem.id, quantityInCart - 1);
+      }
+    });
   };
 
   return (

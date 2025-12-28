@@ -30,3 +30,5 @@ env.production
 
 *.crt
 /resources/js/ziggy.js
+
+/typst/*.pdf
