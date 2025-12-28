@@ -1,4 +1,19 @@
 
+/// The main project template for the thesis.
+///
+/// - title: The title of the thesis.
+/// - authors: An array of author dictionaries (name, index).
+/// - supervisor: The name of the supervisor.
+/// - aux_supervisor: The name of the auxiliary supervisor (optional).
+/// - date: The submission date and location. like "Warsaw, February 2025".
+/// - logo: The path to the university logo
+/// - faculty: The faculty name.
+/// - department: The department name.
+/// - specialization: The specialization/major.
+/// - abstract: The content of the abstract.
+/// - acknowledgements: Here include your thanks to people who helped you in the journey of implementing and preparing this thesis.
+/// - keywords: Keywords can be both single- or multiple-word phrases. At least 3 keywords are necessary. Treat them as tags. Your thesis must be searchable using them.
+/// - body: The main content of the thesis.
 #let project(
   title: "",
   authors: (),
