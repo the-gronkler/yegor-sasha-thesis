@@ -9,7 +9,7 @@ Here you should explain in detail the context of your work, state-of-the-art of 
 It is impossible to answer this question precisely. A rule of thumb presents itself as follows:
 
 - Copy-pasting an entire page of academic work without any citations is a *crime* (copyright).
-- Each important aspect of your work that is not directly created by you, should be backed by citations @LatexDocs.
+- Each important aspect of your work that is not directly created by you, should be backed by citations @BibtexDocs.
 - In the section dedicated to alternative sources / state-of-the-art, it is permitted to introduce grouped citations, e.g., by introducing a short summary and them providing many references at the same time.
 - It is permitted to omit the citation of Internet webpages if authors of referenced texts are unknown. In such situations you should reference the source broadly, e.g., "On IBM's website it can be seen that [...]."
 
