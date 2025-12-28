@@ -38,7 +38,7 @@ Follow **Conventional Commits 1.0.0**.
 
 - **Format**: `type(scope): description`
 - **Types**: `feat`, `fix`, `chore`, `refactor`, `docs`, `style`, `test`, `perf`, `ci`, `build`, `revert`.
-- **Scope**: `FE` (Frontend), `BE` (Backend), `API`, `Auth`, `devtools` or specific feature name. define subscopes if appliccable. `FE/fe-specific-feature`
+- **Scope**: `FE` (Frontend), `BE` (Backend), `API`, `Auth`, `devtools`, `thesis` (for Typst content) or specific feature name. define subscopes if appliccable. `FE/fe-specific-feature`
 - **Example**: `feat(FE): implement restaurant menu card component`
 
 ---
