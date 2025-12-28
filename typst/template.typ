@@ -11,6 +11,7 @@
   specialization: "",
   abstract: [],
   acknowledgements: [],
+  keywords: (),
   body,
 ) = {
   // Set the document's basic properties.
@@ -80,6 +81,10 @@
       #v(1fr)
       #align(center)[#heading(outlined: false)[Abstract]]
       #abstract
+      #if keywords.len() > 0 [
+        #v(1em)
+        *Keywords:* #keywords.join([ $dot$ ])
+      ]
       #v(1fr)
     ]
   }

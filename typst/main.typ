@@ -1,5 +1,7 @@
 #import "template.typ": *
 
+// TODO: replace example content with our own thesis content
+
 // Project settings, title page and other pre-content.
 #show: project.with(
   title: "Your thesis title",
@@ -14,18 +16,22 @@
   faculty: "Faculty of Information Technology",
   department: "Department of ??",
   specialization: "Software and Database Engineering",
-  abstract: include "pre-content/abstract.typ",
-  acknowledgements: include "pre-content/acknowledgements.typ",
+//   abstract: include "pre-content/abstract.typ",
+//   acknowledgements: include "pre-content/acknowledgements.typ",
+  abstract: include "examples/abstract-example.typ",
+  acknowledgements: include "examples/acknowledgements-example.typ",
+  keywords: ("Keyword 1", "Keyword 2", "Keyword 3"),
 )
 
 // Main content of the thesis.
 
 
-#include "templates/guide.typ"
-#include "chapters/00-glossary.typ"
-#include "chapters/01-introduction.typ"
-#include "chapters/02-context.typ"
-#include "chapters/03-functional-requirements.typ"
-#include "chapters/04-non-functional-requirements.typ"
+#include "examples/content-example.typ"
+
+// #include "chapters/00-glossary.typ"
+// #include "chapters/01-introduction.typ"
+// #include "chapters/02-context.typ"
+// #include "chapters/03-functional-requirements.typ"
+// #include "chapters/04-non-functional-requirements.typ"
 
 #bibliography("resources/references.bib", style: "ieee")
