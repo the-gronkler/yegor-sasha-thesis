@@ -3,13 +3,20 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
+use App\Services\GeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
+    protected GeoService $geoService;
+
+    public function __construct(GeoService $geoService)
+    {
+        $this->geoService = $geoService;
+    }
+
     /**
      * Show the profile overview page with navigation menu.
      */
@@ -119,7 +126,7 @@ class ProfileController extends Controller
         $customer = $user->customer;
 
         // Try to get last known coordinates from session for distance calculation
-        $geo = app(\App\Services\GeoService::class)->getValidGeoFromSession($request);
+        $geo = $this->geoService->getValidGeoFromSession($request);
         $lat = $geo['lat'] ?? null;
         $lng = $geo['lng'] ?? null;
 
@@ -155,7 +162,7 @@ class ProfileController extends Controller
                 'opening_hours' => $restaurant->opening_hours,
                 'rank' => $restaurant->pivot->rank,
                 'distance' => isset($restaurant->distance)
-                    ? app(\App\Services\GeoService::class)->formatDistance($restaurant->distance)
+                    ? $this->geoService->formatDistance($restaurant->distance)
                     : null,
                 'images' => $restaurant->images->map(fn ($img) => [
                     'id' => $img->id,
@@ -180,8 +187,17 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'ranks' => 'required|array',
-            'ranks.*.restaurant_id' => 'required|integer|exists:restaurants,id',
-            'ranks.*.rank' => 'required|integer|min:1',
+            'ranks.*.restaurant_id' => [
+                'required',
+                'integer',
+                'exists:restaurants,id',
+                function ($attribute, $value, $fail) use ($customer) {
+                    if (! $customer->favoriteRestaurants()->where('restaurant_id', $value)->exists()) {
+                        $fail('The selected restaurant is not in your favorites.');
+                    }
+                },
+            ],
+            'ranks.*.rank' => 'required|integer|min:1|distinct',
         ]);
 
         foreach ($validated['ranks'] as $item) {

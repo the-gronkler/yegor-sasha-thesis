@@ -71,8 +71,10 @@ class RestaurantController extends Controller
             ->firstOrFail();
 
         return Inertia::render('Customer/Restaurants/Show', [
-            'restaurant' => $this->formatRestaurant($restaurant),
-            'isFavorited' => $this->isRestaurantFavorited($restaurant, $request->user()),
+            'restaurant' => array_merge(
+                $this->formatRestaurant($restaurant),
+                ['is_favorited' => $this->isRestaurantFavorited($restaurant, $request->user())]
+            ),
         ]);
     }
 
