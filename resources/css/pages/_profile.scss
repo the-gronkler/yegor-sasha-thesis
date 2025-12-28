@@ -397,6 +397,10 @@
 }
 
 .favorite-restaurant-card {
+  --fav-btn-size: 2.5rem; // button diameter
+  --fav-btn-gap: 0.75rem; // your current top/right offset
+  --fav-btn-space: calc(var(--fav-btn-size) + var(--fav-btn-gap) + 0.5rem);
+
   position: relative;
   display: flex;
   align-items: stretch;
@@ -502,29 +506,27 @@
 
   .restaurant-header {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+
+    // KEY: prevent any header content from going under the absolute heart button
+    padding-right: var(--fav-btn-space);
   }
 
   .restaurant-name {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: main-colors.$text-primary;
-    margin: 0;
     flex: 1;
-    min-width: 0; // Allow text truncation
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    min-width: 0; // important for flex truncation
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; //
+    margin: 0;
   }
 
   .rating-badge {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    flex-shrink: 0;
-    margin-left: 0.5rem;
 
     .star-icon {
       width: 1rem;
@@ -580,6 +582,10 @@
 
   // Remove Button
   .remove-favorite-btn {
+    width: var(--fav-btn-size);
+    height: var(--fav-btn-size);
+    display: grid;
+    place-items: center;
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;

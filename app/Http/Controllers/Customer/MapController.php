@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
-use App\Models\User;
 use App\Services\GeoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -115,6 +114,13 @@ class MapController extends Controller
             $query->latest('rating');
         }
 
+        $user = $request->user();
+
+        $favoriteIds = [];
+        if ($user && $user->customer) {
+            $favoriteIds = $user->customer->favoriteRestaurants()->pluck('restaurants.id')->toArray();
+        }
+
         $restaurants = $query->get()
             ->map(fn (Restaurant $restaurant) => [
                 'id' => $restaurant->id,
@@ -126,7 +132,7 @@ class MapController extends Controller
                 'description' => $restaurant->description,
                 'opening_hours' => $restaurant->opening_hours,
                 'distance' => $this->geoService->formatDistance($restaurant->distance),
-                'is_favorited' => $this->isRestaurantFavorited($restaurant, $request->user()),
+                'is_favorited' => in_array($restaurant->id, $favoriteIds),
                 'images' => $restaurant->images->map(fn ($img) => [
                     'id' => $img->id,
                     'url' => $img->image,
@@ -142,19 +148,5 @@ class MapController extends Controller
                 'radius' => $radius,
             ],
         ]);
-    }
-
-    /**
-     * Check if a restaurant is favorited by the current user.
-     */
-    private function isRestaurantFavorited(Restaurant $restaurant, ?User $user): bool
-    {
-        if (! $user || ! $user->customer) {
-            return false;
-        }
-
-        return $user->customer->favoriteRestaurants()
-            ->where('restaurant_id', $restaurant->id)
-            ->exists();
     }
 }

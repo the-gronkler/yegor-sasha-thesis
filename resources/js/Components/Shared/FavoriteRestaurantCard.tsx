@@ -15,6 +15,7 @@ interface FavoriteRestaurantCardProps {
   onDragOver: (e: DragEvent<HTMLDivElement>) => void;
   onDrop: (e: DragEvent<HTMLDivElement>, id: number) => void;
   isDragging: boolean;
+  isSavingOrder?: boolean;
 }
 
 export default function FavoriteRestaurantCard({
@@ -25,6 +26,7 @@ export default function FavoriteRestaurantCard({
   onDragOver,
   onDrop,
   isDragging,
+  isSavingOrder,
 }: FavoriteRestaurantCardProps) {
   const primaryImage =
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
@@ -45,7 +47,7 @@ export default function FavoriteRestaurantCard({
   return (
     <div
       className={`favorite-restaurant-card ${isDragging ? 'is-dragging' : ''}`}
-      draggable
+      draggable={!isSavingOrder}
       onDragStart={(e) => onDragStart(e, restaurant.id)}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, restaurant.id)}
@@ -72,17 +74,16 @@ export default function FavoriteRestaurantCard({
         {/* Info */}
         <div className="restaurant-info">
           <div className="restaurant-header">
-            <h3 className="restaurant-name">
-              {restaurant.name}
-              {restaurant.rating && (
-                <span className="rating-badge">
-                  <StarIcon className="star-icon" />
-                  <span className="rating-text">
-                    {restaurant.rating.toFixed(1)}
-                  </span>
+            <h3 className="restaurant-name">{restaurant.name}</h3>
+
+            {restaurant.rating && (
+              <span className="rating-badge">
+                <StarIcon className="star-icon" />
+                <span className="rating-text">
+                  {restaurant.rating.toFixed(1)}
                 </span>
-              )}
-            </h3>
+              </span>
+            )}
           </div>
 
           <div className="restaurant-meta">
@@ -107,7 +108,7 @@ export default function FavoriteRestaurantCard({
       <button
         className="remove-favorite-btn"
         onClick={handleRemoveClick}
-        disabled={isRemoving}
+        disabled={isRemoving || isSavingOrder}
         aria-label="Remove from favorites"
         title="Remove from favorites"
       >

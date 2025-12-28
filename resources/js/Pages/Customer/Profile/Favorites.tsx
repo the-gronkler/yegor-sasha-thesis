@@ -26,16 +26,14 @@ export default function Favorites({
       {},
       {
         preserveScroll: true,
-        onSuccess: () => {
-          // Remove from local state
-          setFavorites((prev) => prev.filter((r) => r.id !== restaurantId));
-        },
+        preserveState: false, // Let updated props re-init the component
         onFinish: () => setRemovingId(null),
       },
     );
   };
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: number) => {
+    if (isSavingOrder) return;
     setDraggedId(id);
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -47,6 +45,11 @@ export default function Favorites({
 
   const handleDrop = (e: DragEvent<HTMLDivElement>, targetId: number) => {
     e.preventDefault();
+
+    if (isSavingOrder) {
+      setDraggedId(null);
+      return;
+    }
 
     if (draggedId === null || draggedId === targetId) {
       setDraggedId(null);
@@ -128,6 +131,7 @@ export default function Favorites({
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 isDragging={draggedId === restaurant.id}
+                isSavingOrder={isSavingOrder}
               />
             ))}
           </div>
