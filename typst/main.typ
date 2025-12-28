@@ -22,7 +22,7 @@
   acknowledgements: include "examples/acknowledgements-example.typ",
   keywords: ("Keyword 1", "Keyword 2", "Keyword 3"),
 )
-
+  
 // Main content of the thesis.
 #include "examples/content-example.typ"
 

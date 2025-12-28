@@ -186,7 +186,9 @@ When working in the `typst/` directory, you **MUST** adhere to the guidelines de
 2.  **No Second-Person Pronouns**: NEVER address the reader as "you".
     - _Bad_: "You can see the results in Figure 1."
     - _Good_: "The results are presented in Figure 1."
-3.  **No Contractions**: NEVER use "can't", "don't", "it's", "won't". Use "cannot", "do not", "it is", "will not".
+3.  **No Contractions**: NEVER use contracted forms.
+    - _Bad_: "can't", "don't", "it's", "won't"
+    - _Good_: "cannot", "do not", "it is", "will not"
 4.  **No Slang or Colloquialisms**: Avoid informal words like "guys", "huge", "okay", "a lot". Use precise vocabulary.
 5.  **Objective Tone**: Avoid emotional or subjective language. Present facts and evidence.
 
