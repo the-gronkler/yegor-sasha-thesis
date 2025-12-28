@@ -587,11 +587,14 @@
     display: grid;
     place-items: center;
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: var(--fav-btn-offset);
+    right: var(--fav-btn-offset);
+
+    box-sizing: border-box; /* padding won’t increase size */
+    padding: 0; /* OR keep padding but then you must increase --fav-btn-size */
+
     background: main-colors.$bg-surface;
     border: none;
-    padding: 0.5rem;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -617,6 +620,31 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+  }
+
+  &.is-drop-target {
+    outline: 2px dashed main-colors.$brand-primary;
+    outline-offset: -2px;
+  }
+
+  &.drop-before::before,
+  &.drop-after::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 3px;
+    background: main-colors.$brand-primary;
+    border-radius: 999px;
+    z-index: 20;
+  }
+
+  &.drop-before::before {
+    top: 0.5rem;
+  }
+
+  &.drop-after::after {
+    bottom: 0.5rem;
   }
 }
 

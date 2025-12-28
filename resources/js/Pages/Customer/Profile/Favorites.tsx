@@ -15,6 +15,10 @@ export default function Favorites({
   const [favorites, setFavorites] = useState(initialFavorites);
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [draggedId, setDraggedId] = useState<number | null>(null);
+  const [dragOverId, setDragOverId] = useState<number | null>(null);
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(
+    null,
+  );
   const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   const handleRemoveFavorite = (restaurantId: number) => {
@@ -38,9 +42,34 @@ export default function Favorites({
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>, targetId: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+
+    if (isSavingOrder || draggedId === null || draggedId === targetId) {
+      if (dragOverId !== null) setDragOverId(null);
+      if (dropPosition !== null) setDropPosition(null);
+      return;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isBefore = e.clientY < rect.top + rect.height / 2;
+    const nextPos: 'before' | 'after' = isBefore ? 'before' : 'after';
+
+    // Avoid extra re-renders while dragover fires repeatedly
+    if (dragOverId !== targetId) setDragOverId(targetId);
+    if (dropPosition !== nextPos) setDropPosition(nextPos);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>, targetId: number) => {
+    // If we moved into a child element, ignore (common with dragleave)
+    const related = e.relatedTarget as Node | null;
+    if (related && e.currentTarget.contains(related)) return;
+
+    if (dragOverId === targetId) {
+      setDragOverId(null);
+      setDropPosition(null);
+    }
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>, targetId: number) => {
@@ -48,28 +77,42 @@ export default function Favorites({
 
     if (isSavingOrder) {
       setDraggedId(null);
+      setDragOverId(null);
+      setDropPosition(null);
       return;
     }
 
     if (draggedId === null || draggedId === targetId) {
       setDraggedId(null);
+      setDragOverId(null);
+      setDropPosition(null);
       return;
     }
 
-    // Reorder the favorites array
     const draggedIndex = favorites.findIndex((r) => r.id === draggedId);
     const targetIndex = favorites.findIndex((r) => r.id === targetId);
 
     if (draggedIndex === -1 || targetIndex === -1) {
       setDraggedId(null);
+      setDragOverId(null);
+      setDropPosition(null);
       return;
     }
 
     const newFavorites = [...favorites];
     const [removed] = newFavorites.splice(draggedIndex, 1);
-    newFavorites.splice(targetIndex, 0, removed);
 
-    // Update ranks based on new order
+    // compute insertion index depending on before/after
+    const targetIndexAfterRemoval = newFavorites.findIndex(
+      (r) => r.id === targetId,
+    );
+    const insertAt =
+      dropPosition === 'after'
+        ? targetIndexAfterRemoval + 1
+        : targetIndexAfterRemoval;
+
+    newFavorites.splice(insertAt, 0, removed);
+
     const updatedFavorites = newFavorites.map((restaurant, index) => ({
       ...restaurant,
       rank: index + 1,
@@ -77,8 +120,9 @@ export default function Favorites({
 
     setFavorites(updatedFavorites);
     setDraggedId(null);
+    setDragOverId(null);
+    setDropPosition(null);
 
-    // Save the new order to the backend
     saveRanks(updatedFavorites);
   };
 
@@ -129,8 +173,13 @@ export default function Favorites({
                 isRemoving={removingId === restaurant.id}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 isDragging={draggedId === restaurant.id}
+                isDropTarget={dragOverId === restaurant.id}
+                dropPosition={
+                  dragOverId === restaurant.id ? dropPosition : null
+                }
                 isSavingOrder={isSavingOrder}
               />
             ))}

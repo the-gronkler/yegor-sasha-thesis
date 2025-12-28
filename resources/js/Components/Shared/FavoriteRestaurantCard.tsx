@@ -12,9 +12,12 @@ interface FavoriteRestaurantCardProps {
   onRemove: (id: number) => void;
   isRemoving: boolean;
   onDragStart: (e: DragEvent<HTMLDivElement>, id: number) => void;
-  onDragOver: (e: DragEvent<HTMLDivElement>) => void;
+  onDragOver: (e: DragEvent<HTMLDivElement>, id: number) => void;
+  onDragLeave: (e: DragEvent<HTMLDivElement>, id: number) => void;
   onDrop: (e: DragEvent<HTMLDivElement>, id: number) => void;
   isDragging: boolean;
+  isDropTarget: boolean;
+  dropPosition: 'before' | 'after' | null;
   isSavingOrder?: boolean;
 }
 
@@ -24,8 +27,11 @@ export default function FavoriteRestaurantCard({
   isRemoving,
   onDragStart,
   onDragOver,
+  onDragLeave,
   onDrop,
   isDragging,
+  isDropTarget,
+  dropPosition,
   isSavingOrder,
 }: FavoriteRestaurantCardProps) {
   const primaryImage =
@@ -46,10 +52,15 @@ export default function FavoriteRestaurantCard({
 
   return (
     <div
-      className={`favorite-restaurant-card ${isDragging ? 'is-dragging' : ''}`}
+      className={`favorite-restaurant-card ${isDragging ? 'is-dragging' : ''} ${
+        isDropTarget ? 'is-drop-target' : ''
+      } ${dropPosition === 'before' ? 'drop-before' : ''} ${
+        dropPosition === 'after' ? 'drop-after' : ''
+      }`}
       draggable={!isSavingOrder}
       onDragStart={(e) => onDragStart(e, restaurant.id)}
-      onDragOver={onDragOver}
+      onDragOver={(e) => onDragOver(e, restaurant.id)}
+      onDragLeave={(e) => onDragLeave(e, restaurant.id)}
       onDrop={(e) => onDrop(e, restaurant.id)}
     >
       {/* Drag Handle */}
