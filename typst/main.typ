@@ -23,26 +23,22 @@
   keywords: ("Keyword 1", "Keyword 2", "Keyword 3"),
 )
 
-// Main content of the thesis.
+// Main content of the thesis: 
 #include "examples/content-example.typ"
 
-// #include "chapters/glossary.typ"
-
-
 // Project overview:
-// #include "chapters/glossary.typ"
+#include "chapters/glossary.typ"
 #include "chapters/introduction.typ"
 #include "chapters/aims-and-objectives.typ"
 #include "chapters/context.typ"
-// #include "chapters/functional-requirements.typ"
+#include "chapters/functional-requirements.typ"
 // Use Case Diagram
 // Use Case Scenarios
-// #include "chapters/non-functional-requirements.typ"
+#include "chapters/non-functional-requirements.typ"
 
 // Technical chapters:
-// chapter - Technologies used (for the app, not in development process)
-// #include "chapters/technologies.typ"
-// #include "chapters/development-process/main.typ"
+#include "chapters/technologies.typ"  //Technologies used (for the app, not in development process)
+#include "chapters/development-process/main.typ"
 
 
 

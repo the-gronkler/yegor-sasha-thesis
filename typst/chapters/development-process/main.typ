@@ -13,6 +13,9 @@ Github
 Trunk based
 required pull requests and code review
 
+== Documentation
+...
+
 == deployment
 Azure vm
 ssh, docker compose
