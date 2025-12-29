@@ -75,6 +75,7 @@ class RestaurantController extends Controller
                 $this->formatRestaurant($restaurant),
                 ['is_favorited' => $this->isRestaurantFavorited($restaurant, $request->user())]
             ),
+            'isFavorited' => $this->isRestaurantFavorited($restaurant, $request->user()),
         ]);
     }
 
@@ -105,8 +106,6 @@ class RestaurantController extends Controller
             $remainingFavorites->each(function ($favRestaurant, $index) use ($customer) {
                 $customer->favoriteRestaurants()->updateExistingPivot($favRestaurant->id, ['rank' => $index + 1]);
             });
-
-            return redirect()->route('profile.favorites')->with('success', $message);
         } else {
             // Add to favorites with auto-assigned rank
             // Get the current maximum rank and add 1 (lower priority = higher number)
@@ -115,9 +114,9 @@ class RestaurantController extends Controller
                 'rank' => $maxRank + 1,
             ]);
             $message = 'Restaurant added to favorites!';
-
-            return back()->with('success', $message);
         }
+
+        return back()->with('success', $message);
     }
 
     /**
