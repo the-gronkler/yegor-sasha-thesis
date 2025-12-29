@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import { Order, PaginatedResponse } from '@/types/models';
 import { formatDateTime, formatCurrency } from '@/Utils/formatters';
@@ -19,13 +20,17 @@ export default function OrdersIndex({ orders }: Props) {
 
       <div className="orders-index">
         <div className="orders-index__header">
+          <Link href={route('profile.show')} className="back-button-link">
+            <ArrowLeftIcon className="icon" />
+            <span>Back</span>
+          </Link>
           <h1>My Orders</h1>
         </div>
 
         {orders.data.length === 0 ? (
           <div className="orders-index__empty">
             <p>You haven't placed any orders yet.</p>
-            <Link href={route('restaurants.index')} className="btn-primary">
+            <Link href={route('map.index')} className="btn-primary">
               Browse Restaurants
             </Link>
           </div>

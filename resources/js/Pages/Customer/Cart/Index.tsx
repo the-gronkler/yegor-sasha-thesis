@@ -100,7 +100,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
           </div>
           <div className="empty-cart">
             <p>Your cart is empty</p>
-            <Link href={route('restaurants.index')} className="btn-primary">
+            <Link href={route('map.index')} className="btn-primary">
               Browse Restaurants
             </Link>
           </div>

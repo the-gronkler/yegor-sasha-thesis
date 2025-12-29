@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [MapController::class, 'index'])->name('map.index');
 
 Route::prefix('restaurants')->name('restaurants.')->group(function () {
-    Route::get('/', [RestaurantController::class, 'index'])->name('index');
+    // Redirect to map page instead of showing separate restaurants index
+    Route::get('/', fn () => redirect()->route('map.index'))->name('index');
     Route::get('/{restaurant}', [RestaurantController::class, 'show'])->name('show');
     Route::post('/{restaurant}/favorite', [RestaurantController::class, 'toggleFavorite'])->name('toggleFavorite')->middleware('auth');
     Route::get('/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('menu-items.show');

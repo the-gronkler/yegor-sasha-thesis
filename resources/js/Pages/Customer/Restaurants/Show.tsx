@@ -63,7 +63,7 @@ export default function RestaurantShow({
           style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
         >
           <div className="banner-actions">
-            <Link href={route('restaurants.index')} className="back-button">
+            <Link href={route('map.index')} className="back-button">
               <ArrowLeftIcon className="icon" />
             </Link>
           </div>

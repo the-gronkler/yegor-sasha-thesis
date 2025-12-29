@@ -2,8 +2,6 @@ import {
   MapPinIcon,
   ShoppingCartIcon,
   UserIcon,
-  BuildingStorefrontIcon,
-  ClipboardDocumentListIcon,
   ArrowRightEndOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '@/Contexts/CartContext';
@@ -22,12 +20,6 @@ export default function BottomNav() {
         icon={MapPinIcon}
         label="Explore"
       />
-      <IconNavItem
-        href={route('restaurants.index')}
-        active={route().current('restaurants.index')}
-        icon={BuildingStorefrontIcon}
-        label="Restaurants"
-      />
       {isAuthenticated && (
         <>
           <IconNavItem
@@ -36,12 +28,6 @@ export default function BottomNav() {
             icon={ShoppingCartIcon}
             label="Cart"
             badge={itemCount}
-          />
-          <IconNavItem
-            href={route('orders.index')}
-            active={route().current('orders.index')}
-            icon={ClipboardDocumentListIcon}
-            label="Orders"
           />
           <IconNavItem
             href={route('profile.show')}
