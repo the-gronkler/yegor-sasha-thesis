@@ -68,13 +68,11 @@ export default function FavoriteRestaurantCard({
         <Bars3Icon className="drag-icon" />
       </div>
 
-      {/* Rank Badge */}
-      <div className="rank-badge">#{restaurant.rank}</div>
-
       {/* Restaurant Content - Clickable */}
       <div className="restaurant-card-content" onClick={handleCardClick}>
-        {/* Image */}
+        {/* Image with rank badge overlay */}
         <div className="restaurant-image-wrapper">
+          <div className="rank-badge">#{restaurant.rank}</div>
           <img
             src={imageUrl}
             alt={restaurant.name}
@@ -87,23 +85,35 @@ export default function FavoriteRestaurantCard({
           <div className="restaurant-header">
             <h3 className="restaurant-name">{restaurant.name}</h3>
 
-            {restaurant.rating && (
-              <span className="rating-badge">
-                <StarIcon className="star-icon" />
-                <span className="rating-text">
-                  {restaurant.rating.toFixed(1)}
-                </span>
-              </span>
-            )}
+            <button
+              className="remove-favorite-btn"
+              onClick={handleRemoveClick}
+              disabled={isRemoving || isSavingOrder}
+              aria-label="Remove from favorites"
+              title="Remove from favorites"
+              draggable={false}
+            >
+              <HeartIconSolid className="heart-icon" />
+            </button>
           </div>
 
-          <div className="restaurant-meta">
-            {restaurant.opening_hours ? (
-              <span className="meta-item">{restaurant.opening_hours}</span>
-            ) : (
-              <span className="meta-item">Hours not available</span>
-            )}
-          </div>
+          {/* rating moved BELOW the name */}
+          {(restaurant.rating || restaurant.opening_hours) && (
+            <div className="restaurant-subheader">
+              {restaurant.rating && (
+                <span className="rating-badge">
+                  <StarIcon className="star-icon" />
+                  <span className="rating-text">
+                    {restaurant.rating.toFixed(1)}
+                  </span>
+                </span>
+              )}
+
+              <span className="meta-item">
+                {restaurant.opening_hours ?? 'Hours not available'}
+              </span>
+            </div>
+          )}
 
           {restaurant.description && (
             <p className="restaurant-description">{restaurant.description}</p>
@@ -114,17 +124,6 @@ export default function FavoriteRestaurantCard({
           )}
         </div>
       </div>
-
-      {/* Remove Button */}
-      <button
-        className="remove-favorite-btn"
-        onClick={handleRemoveClick}
-        disabled={isRemoving || isSavingOrder}
-        aria-label="Remove from favorites"
-        title="Remove from favorites"
-      >
-        <HeartIconSolid className="heart-icon" />
-      </button>
     </div>
   );
 }

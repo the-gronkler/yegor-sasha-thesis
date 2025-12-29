@@ -31,6 +31,14 @@ export default function Favorites({
       {
         preserveScroll: true,
         preserveState: false, // Let updated props re-init the component
+        onSuccess: () => {
+          // Update local state + re-rank immediately for better UX
+          setFavorites((prev) =>
+            prev
+              .filter((r) => r.id !== restaurantId)
+              .map((r, i) => ({ ...r, rank: i + 1 })),
+          );
+        },
         onFinish: () => setRemovingId(null),
       },
     );

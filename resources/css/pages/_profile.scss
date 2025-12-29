@@ -397,9 +397,7 @@
 }
 
 .favorite-restaurant-card {
-  --fav-btn-size: 2.5rem; // button diameter
-  --fav-btn-gap: 0.75rem; // your current top/right offset
-  --fav-btn-space: calc(var(--fav-btn-size) + var(--fav-btn-gap) + 0.5rem);
+  --action-size: 2.5rem;
 
   position: relative;
   display: flex;
@@ -451,21 +449,6 @@
     }
   }
 
-  // Rank Badge
-  .rank-badge {
-    position: absolute;
-    top: 0.75rem;
-    left: 4rem;
-    background-color: main-colors.$brand-primary;
-    color: main-colors.$text-inverse;
-    font-size: 0.875rem;
-    font-weight: 700;
-    padding: 0.25rem 0.75rem;
-    border-radius: layout.$border-radius;
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-
   // Restaurant Content
   .restaurant-card-content {
     flex: 1;
@@ -483,6 +466,7 @@
   }
 
   .restaurant-image-wrapper {
+    position: relative; // anchor for rank badge
     flex-shrink: 0;
     width: 140px;
     height: 140px;
@@ -496,6 +480,22 @@
     }
   }
 
+  // Rank Badge (positioned inside image wrapper)
+  .rank-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background-color: main-colors.$brand-primary;
+    color: main-colors.$text-inverse;
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: layout.$border-radius;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+  }
+
   .restaurant-info {
     flex: 1;
     display: flex;
@@ -505,28 +505,71 @@
   }
 
   .restaurant-header {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--action-size);
     gap: 0.5rem;
-
-    // KEY: prevent any header content from going under the absolute heart button
-    padding-right: var(--fav-btn-space);
+    align-items: center;
   }
 
   .restaurant-name {
-    flex: 1;
-    min-width: 0; // important for flex truncation
-    white-space: nowrap;
+    min-width: 0; // important so the grid item can shrink
     overflow: hidden;
-    text-overflow: ellipsis; //
+    white-space: nowrap;
+    text-overflow: ellipsis; // shows …
     margin: 0;
   }
 
+  .remove-favorite-btn {
+    width: var(--action-size);
+    height: var(--action-size);
+    box-sizing: border-box;
+    padding: 0; // avoid "secretly bigger" button size
+    display: grid;
+    place-items: center;
+    justify-self: end;
+
+    background: main-colors.$bg-surface;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    .heart-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: main-colors.$brand-primary;
+      transition: color 0.2s ease;
+    }
+
+    &:hover {
+      background-color: rgba(exception-colors.$status-error, 0.1);
+
+      .heart-icon {
+        color: exception-colors.$status-error;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .restaurant-subheader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: main-colors.$text-secondary;
+  }
+
   .rating-badge {
-    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    flex-shrink: 0;
 
     .star-icon {
       width: 1rem;
@@ -541,20 +584,8 @@
     }
   }
 
-  .restaurant-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: main-colors.$text-secondary;
-
-    .meta-item {
-      display: inline-block;
-    }
-
-    .meta-separator {
-      color: main-colors.$text-tertiary;
-    }
+  .meta-item {
+    display: inline-block;
   }
 
   .restaurant-description {
@@ -578,48 +609,6 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     word-break: break-word;
-  }
-
-  // Remove Button
-  .remove-favorite-btn {
-    width: var(--fav-btn-size);
-    height: var(--fav-btn-size);
-    display: grid;
-    place-items: center;
-    position: absolute;
-    top: var(--fav-btn-offset);
-    right: var(--fav-btn-offset);
-
-    box-sizing: border-box; /* padding won’t increase size */
-    padding: 0; /* OR keep padding but then you must increase --fav-btn-size */
-
-    background: main-colors.$bg-surface;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-    .heart-icon {
-      width: 1.5rem;
-      height: 1.5rem;
-      color: main-colors.$brand-primary;
-      transition: color 0.2s ease;
-    }
-
-    &:hover {
-      background-color: rgba(exception-colors.$status-error, 0.1);
-
-      .heart-icon {
-        color: exception-colors.$status-error;
-      }
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   }
 
   &.is-drop-target {
@@ -651,6 +640,8 @@
 // Responsive adjustments
 @media (max-width: 768px) {
   .favorite-restaurant-card {
+    --action-size: 2.25rem;
+
     .restaurant-card-content {
       flex-direction: column;
     }
@@ -658,10 +649,6 @@
     .restaurant-image-wrapper {
       width: 100%;
       height: 180px;
-    }
-
-    .rank-badge {
-      left: 0.75rem;
     }
   }
 }
