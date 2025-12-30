@@ -93,9 +93,11 @@ class RestaurantFactory extends Factory
     private function gaussianRandom(float $mean, float $stddev): float
     {
         // Box-Muller transform for normal distribution
-        // Use (mt_rand() + 1) / (mt_getrandmax() + 1) to ensure values are in (0, 1), never exactly 0.
-        $u1 = (mt_rand() + 1) / (mt_getrandmax() + 1);
-        $u2 = (mt_rand() + 1) / (mt_getrandmax() + 1);
+        // Use mt_rand() / mt_getrandmax() and ensure u1 is in (0, 1) so log(u1) is well-defined.
+        do {
+            $u1 = mt_rand() / mt_getrandmax();
+        } while ($u1 <= 0.0 || $u1 >= 1.0);
+        $u2 = mt_rand() / mt_getrandmax();
         $z0 = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
 
         return $z0 * $stddev + $mean;
@@ -109,7 +111,10 @@ class RestaurantFactory extends Factory
 
         // Calculate offsets using Gaussian distribution
         $latOffset = $this->gaussianRandom(0, $radiusKm / 111); // Approx 111 km per degree latitude
-        $lonOffset = $this->gaussianRandom(0, $radiusKm / (111 * cos(deg2rad($centerLat)))); // Adjust for longitude
+        $cosLat = cos(deg2rad($centerLat));
+        // Prevent division by a very small cosine near the poles, which would create huge longitude offsets
+        $cosLat = max($cosLat, 0.01);
+        $lonOffset = $this->gaussianRandom(0, $radiusKm / (111 * $cosLat)); // Adjust for longitude
 
         return [
             'name' => $this->faker->company(),
