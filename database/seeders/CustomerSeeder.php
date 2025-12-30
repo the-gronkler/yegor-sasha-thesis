@@ -15,11 +15,19 @@ class CustomerSeeder extends Seeder
         $reviewsPerCustomer ??= config('seeding.reviews_per_customer');
         $ordersPerCustomer ??= config('seeding.orders_per_customer');
 
+        $restaurantCount = Restaurant::count();
+
         Customer::factory()
             ->count($count)
             ->hasOrders($ordersPerCustomer) // requires orders() on model and OrderFactory
-            ->afterCreating(function (Customer $customer) use ($reviewsPerCustomer) {
-                $restaurants = Restaurant::inRandomOrder()->take($reviewsPerCustomer)->get();
+            ->afterCreating(function (Customer $customer) use ($reviewsPerCustomer, $restaurantCount) {
+                if ($restaurantCount <= 0 || $reviewsPerCustomer <= 0) {
+                    return;
+                }
+
+                $reviewsToCreate = min($reviewsPerCustomer, $restaurantCount);
+
+                $restaurants = Restaurant::inRandomOrder()->take($reviewsToCreate)->get();
 
                 foreach ($restaurants as $restaurant) {
                     Review::factory()->create([
