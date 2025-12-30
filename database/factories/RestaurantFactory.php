@@ -13,6 +13,12 @@ class RestaurantFactory extends Factory
 {
     protected $model = Restaurant::class;
 
+    protected float $centerLat = 52.2297;
+
+    protected float $centerLon = 21.0122;
+
+    protected float $radiusKm = 10;
+
     /**
      * Predefined restaurant descriptions.
      */
@@ -69,14 +75,43 @@ class RestaurantFactory extends Factory
         'A Lebanese restaurant with mezze and shawarma.',
     ];
 
+    public function center(float $lat, float $lon): self
+    {
+        $this->centerLat = $lat;
+        $this->centerLon = $lon;
+
+        return $this;
+    }
+
+    public function radius(float $km): self
+    {
+        $this->radiusKm = $km;
+
+        return $this;
+    }
+
+    private function gaussianRandom(float $mean, float $stddev): float
+    {
+        // Box-Muller transform for normal distribution
+        // Use (mt_rand() + 1) / (mt_getrandmax() + 1) to ensure values are in (0, 1), never exactly 0.
+        $u1 = (mt_rand() + 1) / (mt_getrandmax() + 1);
+        $u2 = (mt_rand() + 1) / (mt_getrandmax() + 1);
+        $z0 = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
+
+        return $z0 * $stddev + $mean;
+    }
+
     public function definition(): array
     {
+        // Calculate offsets using Gaussian distribution
+        $latOffset = $this->gaussianRandom(0, $this->radiusKm / 111); // Approx 111 km per degree latitude
+        $lonOffset = $this->gaussianRandom(0, $this->radiusKm / (111 * cos(deg2rad($this->centerLat)))); // Adjust for longitude
+
         return [
             'name' => $this->faker->company(),
             'address' => $this->faker->address(),
-            // Vaguely in Warsaw area
-            'latitude' => $this->faker->latitude(52.08426, 52.18424),
-            'longitude' => $this->faker->longitude(20.54515, 21.06191),
+            'latitude' => $this->centerLat + $latOffset,
+            'longitude' => $this->centerLon + $lonOffset,
             'description' => self::$restaurantDescriptions[array_rand(self::$restaurantDescriptions)],
             'rating' => $this->faker->randomFloat(2, 1, 5),
             'opening_hours' => $this->faker->randomElement([
