@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\DatabaseSeederService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Validator;
 
 class SeedRestaurants extends Command
 {
@@ -25,6 +26,27 @@ class SeedRestaurants extends Command
         $displayLat = $lat ?? config('seeding.center_lat');
         $displayLon = $lon ?? config('seeding.center_lon');
         $displayRadius = $radius ?? config('seeding.radius');
+
+        // Validate options
+        $validator = Validator::make([
+            'count' => $count,
+            'lat' => $displayLat,
+            'lon' => $displayLon,
+            'radius' => $displayRadius,
+        ], [
+            'count' => 'integer|min:1',
+            'lat' => 'numeric|between:-90,90',
+            'lon' => 'numeric|between:-180,180',
+            'radius' => 'numeric|gt:0',
+        ]);
+
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
+                $this->error($error);
+            }
+
+            return;
+        }
 
         $this->info("Seeding {$count} restaurants around ({$displayLat}, {$displayLon}) with {$displayRadius}km radius...");
 
