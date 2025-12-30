@@ -13,11 +13,11 @@ class RestaurantFactory extends Factory
 {
     protected $model = Restaurant::class;
 
-    protected float $centerLat = 52.2297;
+    protected ?float $centerLat = null;
 
-    protected float $centerLon = 21.0122;
+    protected ?float $centerLon = null;
 
-    protected float $radiusKm = 10;
+    protected ?float $radiusKm = null;
 
     /**
      * Predefined restaurant descriptions.
@@ -103,15 +103,19 @@ class RestaurantFactory extends Factory
 
     public function definition(): array
     {
+        $centerLat = $this->centerLat ?? config('seeding.center_lat', 52.2297);
+        $centerLon = $this->centerLon ?? config('seeding.center_lon', 21.0122);
+        $radiusKm = $this->radiusKm ?? config('seeding.radius', 10);
+
         // Calculate offsets using Gaussian distribution
-        $latOffset = $this->gaussianRandom(0, $this->radiusKm / 111); // Approx 111 km per degree latitude
-        $lonOffset = $this->gaussianRandom(0, $this->radiusKm / (111 * cos(deg2rad($this->centerLat)))); // Adjust for longitude
+        $latOffset = $this->gaussianRandom(0, $radiusKm / 111); // Approx 111 km per degree latitude
+        $lonOffset = $this->gaussianRandom(0, $radiusKm / (111 * cos(deg2rad($centerLat)))); // Adjust for longitude
 
         return [
             'name' => $this->faker->company(),
             'address' => $this->faker->address(),
-            'latitude' => $this->centerLat + $latOffset,
-            'longitude' => $this->centerLon + $lonOffset,
+            'latitude' => $centerLat + $latOffset,
+            'longitude' => $centerLon + $lonOffset,
             'description' => self::$restaurantDescriptions[array_rand(self::$restaurantDescriptions)],
             'rating' => $this->faker->randomFloat(2, 1, 5),
             'opening_hours' => $this->faker->randomElement([
