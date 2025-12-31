@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use App\Models\Employee;
+use App\Models\Restaurant;
 use App\Models\User;
 use Database\Seeders\CustomerSeeder;
 use Database\Seeders\EmployeeSeeder;
@@ -58,5 +60,32 @@ class DatabaseSeederService
         ]);
 
         return $adminUser;
+    }
+
+    // Adds a default employee for testing purposes
+    // is admin for restaurant 1
+    public function createDefaultEmployee(): ?User
+    {
+        $restaurant = Restaurant::first();
+
+        if (! $restaurant) {
+            return null;
+        }
+
+        $employeeUser = User::factory()->create([
+            'name' => 'Default',
+            'surname' => 'Employee',
+            'email' => 'employee@example.com',
+            'password' => bcrypt('admin'),
+        ]);
+
+        Employee::factory()
+            ->admin()
+            ->forRestaurant($restaurant)
+            ->create([
+                'user_id' => $employeeUser->id,
+            ]);
+
+        return $employeeUser;
     }
 }
