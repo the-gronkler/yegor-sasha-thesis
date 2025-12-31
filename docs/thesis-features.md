@@ -229,13 +229,13 @@ We implemented an optimized solution using Laravel's `upsert` method, which comp
 - **Round-trips:** Reduced from $O(N)$ to $O(1)$.
 - **Atomicity:** The entire batch is processed as a single atomic operation, ensuring data consistency without needing an explicit application-level transaction wrapper for the write itself.
 - **Locking:** Reduces lock contention on the table compared to multiple sequential updates.
-  a
-  **Implementation:**
+
+**Implementation:**
 
 ```php
 \DB::table('favorite_restaurants')->upsert(
-    $upsertData,
-    ['customer_user_id', 'restaurant_id'], // Unique keys identifying the record
-    ['rank', 'updated_at']                 // Columns to update on collision
+$upsertData,
+['customer_user_id', 'restaurant_id'], // Unique keys identifying the record
+['rank', 'updated_at'] // Columns to update on collision
 );
 ```

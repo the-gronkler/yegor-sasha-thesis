@@ -223,7 +223,7 @@ class ProfileController extends Controller
         \DB::table('favorite_restaurants')->upsert(
             $upsertData,
             // 1. The "Matcher": Unique columns used to identify if a record already exists.
-            // If a row with this specific customer_id AND restaurant_id is found...
+            // If a row with this specific customer_user_id AND restaurant_id is found...
             ['customer_user_id', 'restaurant_id'],
 
             // 2. The "Updater": Columns to update if a match is found.
