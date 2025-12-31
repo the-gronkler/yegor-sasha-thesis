@@ -53,7 +53,13 @@ export default function Error({ status }: Props) {
 
         <div className="error-page__actions">
           <button
-            onClick={() => window.history.back()}
+            onClick={() => {
+              if (window.history.length > 1) {
+                window.history.back();
+              } else {
+                window.location.href = route(homeRoute);
+              }
+            }}
             className="error-page__btn-back"
           >
             <ArrowLeftIcon className="error-page__btn-icon" />
