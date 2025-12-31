@@ -8,14 +8,11 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\RestaurantController;
 use App\Http\Controllers\Customer\ReviewController;
-use App\Http\Controllers\Employee\EmployeeController;
+use App\Http\Controllers\Employee\EmployeeMenuItemController;
+use App\Http\Controllers\Employee\EmployeeOrderController;
 use App\Http\Controllers\Employee\EstablishmentController;
+use App\Http\Controllers\Employee\MenuCategoryController;
 use App\Http\Controllers\Employee\MenuController;
-use App\Http\Controllers\Employee\OrderController as EmployeeOrderController;
-use App\Http\Controllers\Restaurant\Admin\MenuCategoryController;
-use App\Http\Controllers\Restaurant\Admin\MenuItemController as AdminMenuItemController;
-use App\Http\Controllers\Restaurant\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Restaurant\Admin\WorkerController;
 use App\Http\Middleware\BlockEmployees;
 use App\Http\Middleware\EnsureUserIsCustomer;
 use App\Http\Middleware\EnsureUserIsEmployee;
@@ -81,8 +78,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsCustomer::class])->group(func
 
 // Employee routes
 Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])->group(function () {
-    // Dashboard (redirects to orders for now, or keeps as separate dashboard)
-    Route::get('/employee', [EmployeeController::class, 'index'])->name('employee.index');
+    // Redirect /employee to the first tab (Orders)
+    Route::get('/employee', function () {
+        return redirect()->route('employee.orders.index');
+    })->name('employee.index');
 
     Route::prefix('employee')->name('employee.')->group(function () {
         // Orders
@@ -100,17 +99,17 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])->group(func
     // Shared Restaurant Management (All Employees)
     Route::prefix('restaurant')->name('restaurant.')->group(function () {
         Route::resource('menu-categories', MenuCategoryController::class);
-        Route::resource('menu-items', AdminMenuItemController::class);
+        Route::resource('menu-items', EmployeeMenuItemController::class);
 
-        Route::put('/menu-items/{item}/status', [AdminMenuItemController::class, 'updateStatus'])
+        Route::put('/menu-items/{item}/status', [EmployeeMenuItemController::class, 'updateStatus'])
             ->name('menu-items.updateStatus');
 
-        Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
+        Route::put('/orders/{order}/status', [EmployeeOrderController::class, 'updateStatus'])
             ->name('orders.updateStatus');
     });
 });
 
 // Restaurant Admin Routes (Admins Only)
 Route::middleware(['auth', 'can:manage-restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    Route::resource('workers', WorkerController::class);
+    Route::resource('workers', EstablishmentController::class);
 });
