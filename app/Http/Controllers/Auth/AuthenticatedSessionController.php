@@ -30,6 +30,11 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
+        $user = auth()->user();
+        if ($user->isEmployee()) {
+            return redirect('/employee');
+        }
+
         return redirect('/');
     }
 
