@@ -185,8 +185,9 @@ class ProfileController extends Controller
         $user = $request->user();
         $customer = $user->customer;
 
-        // Get total number of favorites to set max rank constraint
-        $totalFavorites = $customer->favoriteRestaurants()->count();
+        // Get all favorite restaurant IDs once to avoid N+1 queries in validation
+        $favoriteRestaurantIds = $customer->favoriteRestaurants()->pluck('restaurants.id')->toArray();
+        $totalFavorites = count($favoriteRestaurantIds);
 
         $validated = $request->validate([
             'ranks' => 'required|array',
@@ -194,8 +195,8 @@ class ProfileController extends Controller
                 'required',
                 'integer',
                 'exists:restaurants,id',
-                function ($attribute, $value, $fail) use ($customer) {
-                    if (! $customer->favoriteRestaurants()->where('restaurant_id', $value)->exists()) {
+                function ($attribute, $value, $fail) use ($favoriteRestaurantIds) {
+                    if (! in_array($value, $favoriteRestaurantIds, true)) {
                         $fail('The selected restaurant is not in your favorites.');
                     }
                 },
@@ -203,12 +204,14 @@ class ProfileController extends Controller
             'ranks.*.rank' => "required|integer|min:1|max:{$totalFavorites}|distinct",
         ]);
 
-        foreach ($validated['ranks'] as $item) {
-            $customer->favoriteRestaurants()->updateExistingPivot(
-                $item['restaurant_id'],
-                ['rank' => $item['rank']]
-            );
-        }
+        \DB::transaction(function () use ($customer, $validated) {
+            foreach ($validated['ranks'] as $item) {
+                $customer->favoriteRestaurants()->updateExistingPivot(
+                    $item['restaurant_id'],
+                    ['rank' => $item['rank']]
+                );
+            }
+        });
 
         return back()->with('success', 'Favorites order updated!');
     }
