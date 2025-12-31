@@ -8,13 +8,13 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command(
-    'mfs {--force : Force the operation to run when in production}',
-    fn () => Artisan::call('migrate:fresh', [
-        '--path' => 'database/migrations/*',
-        '--seed' => true,
-        '--force' => $this->option('force'),
-        '--no-interaction' => true,
-    ], new ConsoleOutput
-    )
-)->describe('Runs migrate:fresh with seed, including migrations from all subdirectories');
+// Artisan::command(
+//     'mfs {--force : Force the operation to run when in production}',
+//     fn () => Artisan::call('migrate:fresh', [
+//         '--path' => 'database/migrations/*',
+//         '--seed' => true,
+//         '--force' => $this->option('force'),
+//         '--no-interaction' => true,
+//     ], new ConsoleOutput
+//     )
+// )->describe('Runs migrate:fresh with seed, including migrations from all subdirectories');
