@@ -1,0 +1,107 @@
+@use '../variables/main-colors' as colors;
+@use '../variables/layout';
+@use '../variables/exception-colors';
+@use 'sass:color';
+
+.error-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: colors.$bg-main;
+  color: colors.$text-primary;
+  padding: 2rem;
+
+  &__container {
+    width: 100%;
+    max-width: 32rem; // approx 512px
+    padding: 3rem;
+    background-color: colors.$bg-surface;
+    border-radius: layout.$border-radius;
+    box-shadow: layout.$box-shadow;
+    text-align: center;
+  }
+
+  &__icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  &__icon-bg {
+    padding: 1rem;
+    background-color: color.change(exception-colors.$status-error, $alpha: 0.1);
+    border-radius: 50%;
+  }
+
+  &__icon {
+    width: 3rem;
+    height: 3rem;
+    color: exception-colors.$status-error;
+  }
+
+  &__code {
+    font-size: 2.25rem; // 4xl
+    font-weight: 700;
+    color: colors.$text-primary;
+    margin-bottom: 0.5rem;
+  }
+
+  &__title {
+    font-size: 1.25rem; // xl
+    font-weight: 600;
+    color: colors.$text-secondary;
+    margin-bottom: 1rem;
+  }
+
+  &__description {
+    color: colors.$text-tertiary;
+    margin-bottom: 3rem;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  &__btn-back {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: colors.$bg-alt-1;
+    color: colors.$text-primary;
+    border-radius: layout.$border-radius;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: colors.$bg-alt-2;
+    }
+  }
+
+  &__btn-home {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: colors.$btn-primary-bg;
+    color: colors.$btn-primary-text;
+    border-radius: layout.$border-radius;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: colors.$btn-primary-hover-bg;
+    }
+  }
+
+  &__btn-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+  }
+}
