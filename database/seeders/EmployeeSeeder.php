@@ -11,9 +11,16 @@ class EmployeeSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(?int $minPerRestaurant = null, ?int $maxPerRestaurant = null): void
     {
-        Restaurant::all()->each(function ($restaurant) {
+        $minPerRestaurant ??= config('seeding.employees_min');
+        $maxPerRestaurant ??= config('seeding.employees_max');
+
+        // Ensure min <= max to prevent rand() failure
+        $min = min($minPerRestaurant, $maxPerRestaurant);
+        $max = max($minPerRestaurant, $maxPerRestaurant);
+
+        Restaurant::all()->each(function ($restaurant) use ($min, $max) {
             // One admin per restaurant
             Employee::factory()
                 ->admin()
@@ -22,7 +29,7 @@ class EmployeeSeeder extends Seeder
 
             // Regular employees
             Employee::factory()
-                ->count(rand(2, 14))
+                ->count(rand($min, $max))
                 ->forRestaurant($restaurant)
                 ->create();
         });

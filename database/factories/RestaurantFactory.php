@@ -13,6 +13,12 @@ class RestaurantFactory extends Factory
 {
     protected $model = Restaurant::class;
 
+    protected ?float $centerLat = null;
+
+    protected ?float $centerLon = null;
+
+    protected ?float $radiusKm = null;
+
     /**
      * Predefined restaurant descriptions.
      */
@@ -69,14 +75,52 @@ class RestaurantFactory extends Factory
         'A Lebanese restaurant with mezze and shawarma.',
     ];
 
+    public function center(float $lat, float $lon): self
+    {
+        $this->centerLat = $lat;
+        $this->centerLon = $lon;
+
+        return $this;
+    }
+
+    public function radius(float $km): self
+    {
+        $this->radiusKm = $km;
+
+        return $this;
+    }
+
+    private function gaussianRandom(float $mean, float $stddev): float
+    {
+        // Box-Muller transform for normal distribution
+        // Use mt_rand() / mt_getrandmax() and ensure u1 is in (0, 1) so log(u1) is well-defined.
+        do {
+            $u1 = mt_rand() / mt_getrandmax();
+        } while ($u1 <= 0.0 || $u1 >= 1.0);
+        $u2 = mt_rand() / mt_getrandmax();
+        $z0 = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
+
+        return $z0 * $stddev + $mean;
+    }
+
     public function definition(): array
     {
+        $centerLat = $this->centerLat ?? config('seeding.center_lat', 52.2297);
+        $centerLon = $this->centerLon ?? config('seeding.center_lon', 21.0122);
+        $radiusKm = $this->radiusKm ?? config('seeding.radius', 10);
+
+        // Calculate offsets using Gaussian distribution
+        $latOffset = $this->gaussianRandom(0, $radiusKm / 111); // Approx 111 km per degree latitude
+        $cosLat = cos(deg2rad($centerLat));
+        // Prevent division by a very small cosine near the poles, which would create huge longitude offsets
+        $cosLat = max($cosLat, 0.01);
+        $lonOffset = $this->gaussianRandom(0, $radiusKm / (111 * $cosLat)); // Adjust for longitude
+
         return [
             'name' => $this->faker->company(),
             'address' => $this->faker->address(),
-            // Vaguely in Warsaw area
-            'latitude' => $this->faker->latitude(52.08426, 52.18424),
-            'longitude' => $this->faker->longitude(20.54515, 21.06191),
+            'latitude' => $centerLat + $latOffset,
+            'longitude' => $centerLon + $lonOffset,
             'description' => self::$restaurantDescriptions[array_rand(self::$restaurantDescriptions)],
             'rating' => $this->faker->randomFloat(2, 1, 5),
             'opening_hours' => $this->faker->randomElement([
