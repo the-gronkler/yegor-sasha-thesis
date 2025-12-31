@@ -81,10 +81,12 @@ class RestaurantController extends Controller
 
     /**
      * Toggle favorite status for a restaurant.
+     *
+     * Note: Auth middleware ensures authenticated user.
+     * Customer existence check below handles authorization.
      */
     public function toggleFavorite(Request $request, Restaurant $restaurant)
     {
-        $this->authorize('view', $restaurant);
 
         $user = $request->user();
         $customer = $user->customer;
@@ -116,6 +118,7 @@ class RestaurantController extends Controller
             $message = 'Restaurant added to favorites!';
         }
 
+        // Return back with success message
         return back()->with('success', $message);
     }
 

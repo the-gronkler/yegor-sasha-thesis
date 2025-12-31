@@ -185,6 +185,9 @@ class ProfileController extends Controller
         $user = $request->user();
         $customer = $user->customer;
 
+        // Get total number of favorites to set max rank constraint
+        $totalFavorites = $customer->favoriteRestaurants()->count();
+
         $validated = $request->validate([
             'ranks' => 'required|array',
             'ranks.*.restaurant_id' => [
@@ -197,7 +200,7 @@ class ProfileController extends Controller
                     }
                 },
             ],
-            'ranks.*.rank' => 'required|integer|min:1|distinct',
+            'ranks.*.rank' => "required|integer|min:1|max:{$totalFavorites}|distinct",
         ]);
 
         foreach ($validated['ranks'] as $item) {

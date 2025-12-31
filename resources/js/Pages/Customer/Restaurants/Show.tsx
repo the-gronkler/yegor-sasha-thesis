@@ -46,6 +46,7 @@ export default function RestaurantShow({
         {},
         {
           preserveScroll: true,
+          preserveState: false, // Force props refresh to update isFavorited
           onFinish: () => setIsSubmitting(false),
         },
       );
