@@ -13,6 +13,6 @@ class MenuController extends Controller
      */
     public function index(): Response
     {
-        return Inertia::render('Employee/Menu/Index');
+        return Inertia::render('Employee/Menu');
     }
 }

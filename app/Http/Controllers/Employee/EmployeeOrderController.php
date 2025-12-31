@@ -15,7 +15,7 @@ class EmployeeOrderController extends Controller
      */
     public function index(): Response
     {
-        return Inertia::render('Employee/Orders/Index');
+        return Inertia::render('Employee/Orders');
     }
 
     public function updateStatus(Request $request, Order $order)

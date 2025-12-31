@@ -13,6 +13,6 @@ class EstablishmentController extends Controller
      */
     public function index(): Response
     {
-        return Inertia::render('Employee/Establishment/Index');
+        return Inertia::render('Employee/Establishment');
     }
 }
