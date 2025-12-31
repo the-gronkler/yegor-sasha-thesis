@@ -21,37 +21,30 @@ export default function BottomNav() {
     return (
       <nav className="bottom-nav">
         <IconNavItem
-          href={route('employee.index')}
-          active={route().current('employee.index')}
-          icon={HomeIcon}
-          label="Dashboard"
+          href={route('employee.orders.index')}
+          active={route().current('employee.orders.*')}
+          icon={ClipboardDocumentListIcon}
+          label="Orders"
+        />
+        <IconNavItem
+          href={route('employee.menu.index')}
+          active={route().current('employee.menu.*')}
+          icon={QueueListIcon}
+          label="Menu"
         />
         {isAdmin && (
-          <>
-            <IconNavItem
-              href={route('restaurant.menu-items.index')}
-              active={route().current('restaurant.menu-items.*')}
-              icon={QueueListIcon}
-              label="Menu"
-            />
-            <IconNavItem
-              href={route('restaurant.workers.index')}
-              active={route().current('restaurant.workers.*')}
-              icon={UserGroupIcon}
-              label="Team"
-            />
-          </>
+          <IconNavItem
+            href={route('employee.establishment.index')}
+            active={route().current('employee.establishment.*')}
+            icon={BuildingStorefrontIcon}
+            label="Establishment"
+          />
         )}
-        <IconNavItem
-          href={route('profile.show')}
-          active={route().current('profile.show')}
-          icon={UserIcon}
-          label="Profile"
-        />
       </nav>
     );
   }
 
+  //Customer
   return (
     <nav className="bottom-nav">
       <IconNavItem

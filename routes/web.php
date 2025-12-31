@@ -9,6 +9,9 @@ use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\RestaurantController;
 use App\Http\Controllers\Customer\ReviewController;
 use App\Http\Controllers\Employee\EmployeeController;
+use App\Http\Controllers\Employee\EstablishmentController;
+use App\Http\Controllers\Employee\MenuController;
+use App\Http\Controllers\Employee\OrderController as EmployeeOrderController;
 use App\Http\Controllers\Restaurant\Admin\MenuCategoryController;
 use App\Http\Controllers\Restaurant\Admin\MenuItemController as AdminMenuItemController;
 use App\Http\Controllers\Restaurant\Admin\OrderController as AdminOrderController;
@@ -78,18 +81,36 @@ Route::middleware(['auth', 'verified', EnsureUserIsCustomer::class])->group(func
 
 // Employee routes
 Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])->group(function () {
+    // Dashboard (redirects to orders for now, or keeps as separate dashboard)
     Route::get('/employee', [EmployeeController::class, 'index'])->name('employee.index');
+
+    Route::prefix('employee')->name('employee.')->group(function () {
+        // Orders
+        Route::get('/orders', [EmployeeOrderController::class, 'index'])->name('orders.index');
+
+        // Menu
+        Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
+
+        // Establishment (Admins only)
+        Route::middleware(['can:manage-restaurant'])->group(function () {
+            Route::get('/establishment', [EstablishmentController::class, 'index'])->name('establishment.index');
+        });
+    });
+
+    // Shared Restaurant Management (All Employees)
+    Route::prefix('restaurant')->name('restaurant.')->group(function () {
+        Route::resource('menu-categories', MenuCategoryController::class);
+        Route::resource('menu-items', AdminMenuItemController::class);
+
+        Route::put('/menu-items/{item}/status', [AdminMenuItemController::class, 'updateStatus'])
+            ->name('menu-items.updateStatus');
+
+        Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
+            ->name('orders.updateStatus');
+    });
 });
 
-// Admin / Restaurant management
+// Restaurant Admin Routes (Admins Only)
 Route::middleware(['auth', 'can:manage-restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    Route::resource('menu-categories', MenuCategoryController::class);
-    Route::resource('menu-items', AdminMenuItemController::class);
     Route::resource('workers', WorkerController::class);
-
-    Route::put('/menu-items/{item}/status', [AdminMenuItemController::class, 'updateStatus'])
-        ->name('menu-items.updateStatus');
-
-    Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
-        ->name('orders.updateStatus');
 });
