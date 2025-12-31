@@ -204,14 +204,33 @@ class ProfileController extends Controller
             'ranks.*.rank' => "required|integer|min:1|max:{$totalFavorites}|distinct",
         ]);
 
-        \DB::transaction(function () use ($customer, $validated) {
-            foreach ($validated['ranks'] as $item) {
-                $customer->favoriteRestaurants()->updateExistingPivot(
-                    $item['restaurant_id'],
-                    ['rank' => $item['rank']]
-                );
-            }
-        });
+        // Capture current time once so all records in this batch have the exact same timestamp
+        $now = now();
+
+        // Prepare the dataset for the bulk operation.
+        // We map the validated input to the database column structure.
+        $upsertData = collect($validated['ranks'])->map(fn ($item) => [
+            'customer_user_id' => $customer->user_id,
+            'restaurant_id' => $item['restaurant_id'],
+            'rank' => $item['rank'],
+            // These timestamps are used if a NEW record is inserted
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->toArray();
+
+        // Execute a single "INSERT ... ON DUPLICATE KEY UPDATE" query.
+        // This is much more performant than looping through and updating individually.
+        \DB::table('favorite_restaurants')->upsert(
+            $upsertData,
+            // 1. The "Matcher": Unique columns used to identify if a record already exists.
+            // If a row with this specific customer_id AND restaurant_id is found...
+            ['customer_user_id', 'restaurant_id'],
+
+            // 2. The "Updater": Columns to update if a match is found.
+            // We update the rank and the updated_at timestamp.
+            // Crucially, 'created_at' is omitted here, so original favoriting times are preserved.
+            ['rank', 'updated_at']
+        );
 
         return back()->with('success', 'Favorites order updated!');
     }
