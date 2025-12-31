@@ -5,6 +5,9 @@ import {
   BuildingStorefrontIcon,
   ClipboardDocumentListIcon,
   ArrowRightEndOnRectangleIcon,
+  HomeIcon,
+  UserGroupIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
@@ -12,7 +15,42 @@ import IconNavItem from '@/Components/UI/IconNavItem';
 
 export default function BottomNav() {
   const { itemCount } = useCart();
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, isEmployee, isAdmin, login } = useAuth();
+
+  if (isEmployee) {
+    return (
+      <nav className="bottom-nav">
+        <IconNavItem
+          href={route('employee.index')}
+          active={route().current('employee.index')}
+          icon={HomeIcon}
+          label="Dashboard"
+        />
+        {isAdmin && (
+          <>
+            <IconNavItem
+              href={route('restaurant.menu-items.index')}
+              active={route().current('restaurant.menu-items.*')}
+              icon={QueueListIcon}
+              label="Menu"
+            />
+            <IconNavItem
+              href={route('restaurant.workers.index')}
+              active={route().current('restaurant.workers.*')}
+              icon={UserGroupIcon}
+              label="Team"
+            />
+          </>
+        )}
+        <IconNavItem
+          href={route('profile.show')}
+          active={route().current('profile.show')}
+          icon={UserIcon}
+          label="Profile"
+        />
+      </nav>
+    );
+  }
 
   return (
     <nav className="bottom-nav">
