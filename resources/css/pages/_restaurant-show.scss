@@ -72,16 +72,30 @@
       background: none;
       border: none;
       padding: 0;
-      transition: transform 0.2s;
+      transition:
+        transform 0.2s,
+        color 0.2s;
 
       .icon {
         width: 28px;
         height: 28px;
         stroke-width: 1.5;
+        fill: none;
       }
 
       &:hover {
         transform: scale(1.1);
+        color: main-colors.$brand-primary;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      // When favorited (solid heart icon)
+      svg[fill]:not([fill='none']) {
+        fill: main-colors.$brand-primary;
         color: main-colors.$brand-primary;
       }
     }

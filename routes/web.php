@@ -16,6 +16,7 @@ Route::get('/', [MapController::class, 'index'])->name('map.index');
 Route::prefix('restaurants')->name('restaurants.')->group(function () {
     Route::get('/', [RestaurantController::class, 'index'])->name('index');
     Route::get('/{restaurant}', [RestaurantController::class, 'show'])->name('show');
+    Route::post('/{restaurant}/favorite', [RestaurantController::class, 'toggleFavorite'])->name('toggleFavorite')->middleware('auth');
     Route::get('/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('menu-items.show');
 });
 
@@ -57,9 +58,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Profile
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
         Route::put('/', [ProfileController::class, 'update'])->name('update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
         Route::get('/favorites', [ProfileController::class, 'favorites'])->name('favorites');
+        Route::put('/favorites/ranks', [ProfileController::class, 'updateFavoriteRanks'])->name('favorites.updateRanks');
     });
 });
 
