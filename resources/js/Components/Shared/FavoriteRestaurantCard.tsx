@@ -15,6 +15,7 @@ interface FavoriteRestaurantCardProps {
   onDragOver: (e: DragEvent<HTMLDivElement>, id: number) => void;
   onDragLeave: (e: DragEvent<HTMLDivElement>, id: number) => void;
   onDrop: (e: DragEvent<HTMLDivElement>, id: number) => void;
+  onDragEnd: (e: DragEvent<HTMLDivElement>) => void;
   isDragging: boolean;
   isDropTarget: boolean;
   dropPosition: 'before' | 'after' | null;
@@ -29,6 +30,7 @@ export default function FavoriteRestaurantCard({
   onDragOver,
   onDragLeave,
   onDrop,
+  onDragEnd,
   isDragging,
   isDropTarget,
   dropPosition,
@@ -62,6 +64,7 @@ export default function FavoriteRestaurantCard({
       onDragOver={(e) => onDragOver(e, restaurant.id)}
       onDragLeave={(e) => onDragLeave(e, restaurant.id)}
       onDrop={(e) => onDrop(e, restaurant.id)}
+      onDragEnd={onDragEnd}
     >
       {/* Drag Handle */}
       <div className="drag-handle" title="Drag to reorder">

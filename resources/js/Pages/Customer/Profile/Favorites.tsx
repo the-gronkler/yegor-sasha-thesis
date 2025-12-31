@@ -134,6 +134,12 @@ export default function Favorites({
     saveRanks(updatedFavorites);
   };
 
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
+    setDropPosition(null);
+  };
+
   const saveRanks = (updatedFavorites: Restaurant[]) => {
     setIsSavingOrder(true);
 
@@ -166,10 +172,6 @@ export default function Favorites({
           <h1 className="profile-title">My Favorites</h1>
         </div>
 
-        {isSavingOrder && (
-          <div className="saving-indicator">Saving order...</div>
-        )}
-
         {/* Favorites List */}
         {favorites && favorites.length > 0 ? (
           <div className="favorites-grid">
@@ -183,6 +185,7 @@ export default function Favorites({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onDragEnd={handleDragEnd}
                 isDragging={draggedId === restaurant.id}
                 isDropTarget={dragOverId === restaurant.id}
                 dropPosition={
