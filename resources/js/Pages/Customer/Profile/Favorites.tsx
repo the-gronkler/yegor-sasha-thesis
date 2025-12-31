@@ -134,7 +134,8 @@ export default function Favorites({
     saveRanks(updatedFavorites);
   };
 
-  const handleDragEnd = () => {
+  // _e is unused but is there to match the FavoriteRestaurantCard interface signature, standard practice :P
+  const handleDragEnd = (_e: DragEvent<HTMLDivElement>) => {
     setDraggedId(null);
     setDragOverId(null);
     setDropPosition(null);
