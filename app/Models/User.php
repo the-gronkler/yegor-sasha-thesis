@@ -59,7 +59,7 @@ class User extends Authenticatable
      */
     public function isCustomer(): bool
     {
-        return $this->customer()->exists();
+        return $this->customer !== null;
     }
 
     /**
@@ -67,6 +67,6 @@ class User extends Authenticatable
      */
     public function isEmployee(): bool
     {
-        return $this->employee()->exists();
+        return $this->employee !== null;
     }
 }
