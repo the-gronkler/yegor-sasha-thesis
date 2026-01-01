@@ -5,7 +5,7 @@ import {
   ShoppingBagIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { User } from '@/types/models';
 import { router } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -25,7 +25,7 @@ export default function ProfileIndex({ user, stats }: ProfileIndexProps) {
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Profile" />
 
       <div className="profile-page">
@@ -93,6 +93,6 @@ export default function ProfileIndex({ user, stats }: ProfileIndexProps) {
           </Link>
         </div>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

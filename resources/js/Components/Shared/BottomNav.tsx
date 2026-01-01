@@ -5,6 +5,7 @@ import {
   BuildingStorefrontIcon,
   ClipboardDocumentListIcon,
   ArrowRightEndOnRectangleIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
@@ -12,8 +13,36 @@ import IconNavItem from '@/Components/UI/IconNavItem';
 
 export default function BottomNav() {
   const { itemCount } = useCart();
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, isEmployee, isRestaurantAdmin, login } = useAuth();
 
+  if (isEmployee) {
+    return (
+      <nav className="bottom-nav">
+        <IconNavItem
+          href={route('employee.orders.index')}
+          active={route().current('employee.orders.*')}
+          icon={ClipboardDocumentListIcon}
+          label="Orders"
+        />
+        <IconNavItem
+          href={route('employee.menu.index')}
+          active={route().current('employee.menu.*')}
+          icon={QueueListIcon}
+          label="Menu"
+        />
+        {isRestaurantAdmin && (
+          <IconNavItem
+            href={route('employee.establishment.index')}
+            active={route().current('employee.establishment.*')}
+            icon={BuildingStorefrontIcon}
+            label="Establishment"
+          />
+        )}
+      </nav>
+    );
+  }
+
+  // Customer
   return (
     <nav className="bottom-nav">
       <IconNavItem

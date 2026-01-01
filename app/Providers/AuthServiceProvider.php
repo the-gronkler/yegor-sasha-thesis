@@ -71,5 +71,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->is_admin === true ? true : null;
         });
+
+        Gate::define('manage-restaurant', function (User $user) {
+            return $user->isEmployee() && ($user->employee?->is_admin === true);
+        });
     }
 }

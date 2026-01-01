@@ -25,6 +25,7 @@
 // Pages
 @use 'pages/restaurant-index';
 @use 'pages/restaurant-show';
+@use 'pages/employee';
 @use 'pages/menu-item-show';
 @use 'pages/map-index';
 @use 'pages/profile';
@@ -33,3 +34,4 @@
 @use 'pages/checkout';
 @use 'pages/orders-index';
 @use 'pages/order-show';
+@use 'pages/error';

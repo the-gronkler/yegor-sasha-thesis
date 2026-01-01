@@ -79,6 +79,7 @@ class Mfs extends Command
         $service->createAdminUser();
         $service->seedCustomers($customers, $reviewsPerCustomer, $ordersPerCustomer);
         $service->seedEmployees($employeesMin, $employeesMax);
+        $service->createDefaultEmployee();
 
         $this->info("Seeded {$restaurants} restaurants and {$customers} customers.");
     }

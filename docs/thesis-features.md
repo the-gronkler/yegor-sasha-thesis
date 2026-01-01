@@ -189,6 +189,31 @@ DISTANCE_FORMULA=st_distance_sphere  # or 'haversine' for fallback
 
 **Detailed Documentation:** See `docs/mariadb-geospatial-implementation.md` for complete implementation guide.
 
+### User Model Inheritance with Eager Loading
+
+**Description:**
+The `User` model implements an inheritance-like pattern where users can have optional `Customer` or `Employee` profiles. To optimize performance and prevent N+1 query issues in role-checking methods, a global scope automatically eager-loads these relationships on every User query.
+
+**Technical Implementation:**
+
+- **Inheritance Pattern:** Uses `hasOne` relationships (`customer()` and `employee()`) to extend user functionality without a dedicated `type` column.
+- **Global Scope:** Added in the `boot()` method to ensure `customer` and `employee` are always loaded, avoiding lazy loading in `isCustomer()` and `isEmployee()` methods.
+- **Performance:** Eliminates potential N+1 queries in middleware, policies, and shared Inertia props where user roles are frequently checked and profile data accessed.
+
+**Usage:**
+
+- Role checks (`$user->isCustomer()`, `$user->isEmployee()`) now use pre-loaded data without triggering queries.
+- Profile access (e.g., `$user->employee?->restaurant_id`) is immediate after loading.
+- Opt-out available for bulk operations: `User::withoutGlobalScope('withRelations')->get()`.
+
+**Code Reference:**
+
+- Model: `app/Models/User.php`
+- Relationships: `customer()` and `employee()` methods
+- Global Scope: `withRelations` in `boot()` method
+
+---
+
 ### Restaurant Distance Display
 
 The `RestaurantCard` component automatically displays distance information when available:
