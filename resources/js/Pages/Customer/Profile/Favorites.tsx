@@ -134,6 +134,13 @@ export default function Favorites({
     saveRanks(updatedFavorites);
   };
 
+  // _e is unused but is there to match the FavoriteRestaurantCard interface signature, standard practice :P
+  const handleDragEnd = (_e: DragEvent<HTMLDivElement>) => {
+    setDraggedId(null);
+    setDragOverId(null);
+    setDropPosition(null);
+  };
+
   const saveRanks = (updatedFavorites: Restaurant[]) => {
     setIsSavingOrder(true);
 
@@ -166,10 +173,6 @@ export default function Favorites({
           <h1 className="profile-title">My Favorites</h1>
         </div>
 
-        {isSavingOrder && (
-          <div className="saving-indicator">Saving order...</div>
-        )}
-
         {/* Favorites List */}
         {favorites && favorites.length > 0 ? (
           <div className="favorites-grid">
@@ -183,6 +186,7 @@ export default function Favorites({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onDragEnd={handleDragEnd}
                 isDragging={draggedId === restaurant.id}
                 isDropTarget={dragOverId === restaurant.id}
                 dropPosition={

@@ -196,3 +196,46 @@ The `RestaurantCard` component automatically displays distance information when 
 - Distance is shown in the restaurant meta section (e.g., "5.2 km")
 - Only displayed when the `distance` property is present in restaurant data
 - Properly formatted to 2 decimal places
+
+### Favorite Restaurants System: Bulk Reordering Optimization
+
+**Problem:**
+Reordering a list of favorite restaurants requires updating the `rank` column for multiple rows simultaneously. A naive approach would iterate through the list and execute an `UPDATE` query for each item:
+
+```php
+foreach ($ranks as $rank) {
+    // N+1 Problem: Executes one query per item
+    $user->favorites()->updateExistingPivot($rank['id'], ['rank' => $rank['value']]);
+}
+```
+
+For a list of 50 favorites, this results in 50 separate database round-trips, causing significant latency and potential deadlocks under load.
+
+**Solution: Atomic Upsert Operation**
+We implemented an optimized solution using Laravel's `upsert` method, which compiles down to a single native SQL statement.
+
+**Technical Details:**
+
+1.  **Mechanism:** The operation leverages the database's native "Insert or Update" capability (e.g., `INSERT ... ON DUPLICATE KEY UPDATE` in MariaDB/MySQL).
+2.  **Composite Key:** The `favorite_restaurants` table uses a composite primary key `(customer_user_id, restaurant_id)`. The database engine uses this unique constraint to detect collisions.
+3.  **Execution Flow:**
+    - The system constructs a single bulk payload containing all new ranks.
+    - The database attempts to insert these rows.
+    - Upon encountering a duplicate key (which is guaranteed for existing favorites), it triggers the `UPDATE` clause instead of failing.
+    - Only the specified columns (`rank`, `updated_at`) are modified; other columns like `created_at` remain untouched.
+
+**Performance Impact:**
+
+- **Round-trips:** Reduced from $O(N)$ to $O(1)$.
+- **Atomicity:** The entire batch is processed as a single atomic operation, ensuring data consistency without needing an explicit application-level transaction wrapper for the write itself.
+- **Locking:** Reduces lock contention on the table compared to multiple sequential updates.
+
+**Implementation:**
+
+```php
+\DB::table('favorite_restaurants')->upsert(
+$upsertData,
+['customer_user_id', 'restaurant_id'], // Unique keys identifying the record
+['rank', 'updated_at'] // Columns to update on collision
+);
+```

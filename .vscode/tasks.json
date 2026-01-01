@@ -13,13 +13,14 @@
         "$remoteUrl = git config --get remote.origin.url;",
         // Parse the repo owner/name from GitHub URL (supports HTTPS/SSH with/without .git)
         "if ($remoteUrl -match '^https://github\\.com/(.+?)(\\.git)?$') { $repo = $matches[1] } elseif ($remoteUrl -match '^git@github\\.com:(.+?)(\\.git)?$') { $repo = $matches[1] } else { throw 'Unsupported remote URL format. Only HTTPS and SSH GitHub URLs supported.' };",
+        // Check for staged changes first
+        "git diff --cached --quiet; if ($LASTEXITCODE -eq 0) { Write-Host 'No staged changes to commit. Please stage your changes first.' -ForegroundColor Red; exit 1 };",
         // Check if branch already exists
-        "if (git branch --list ${input:branchName} | Select-String ${input:branchName}) { Write-Host \"Branch '${input:branchName}' already exists.\"; exit 1 };",
+        "if (git branch --list ${input:branchName} | Select-String ${input:branchName}) { Write-Host \"Branch '${input:branchName}' already exists.\" -ForegroundColor Red; exit 1 };",
         // Create and switch to new branch
-        "git checkout -b ${input:branchName}; if ($LASTEXITCODE -ne 0) { Write-Host 'Failed to create branch.'; exit 1 };",
-        // Check for staged changes and commit only if present
-        "if (git diff --cached --quiet) { Write-Host 'No staged changes to commit. Please stage your changes first.'; exit 1 } else { git commit -m '${input:branchName}'; };",
-        ,
+        "git checkout -b ${input:branchName}; if ($LASTEXITCODE -ne 0) { Write-Host 'Failed to create branch.' -ForegroundColor Red; exit 1 };",
+        // Commit
+        "git commit -m '${input:branchName}';",
         // Push new branch to remote
         "git push -u origin ${input:branchName};",
         // Open GitHub compare page for PR creation
@@ -28,7 +29,7 @@
       "problemMatcher": [],
       "group": "none",
       "presentation": {
-        "echo": true,
+        "echo": false,
         "reveal": "always",
         "focus": false,
         "panel": "shared",
