@@ -7,7 +7,7 @@ export type PageProps<
   auth: {
     user: User;
     restaurant_id?: number | null;
-    isAdmin?: boolean;
+    isRestaurantAdmin?: boolean;
   };
   errors: Record<string, string>;
   flash: {

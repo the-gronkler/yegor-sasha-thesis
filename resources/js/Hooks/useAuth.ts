@@ -7,7 +7,7 @@ export function useAuth() {
   const auth = props.auth || {};
   const user = auth.user;
   const restaurantId = auth.restaurant_id;
-  const isAdmin = auth.isAdmin;
+  const isRestaurantAdmin = auth.isRestaurantAdmin;
   const { openLoginModal } = useLoginModal();
 
   const isAuthenticated = !!user;
@@ -34,7 +34,7 @@ export function useAuth() {
     isAuthenticated,
     isEmployee,
     restaurantId,
-    isAdmin,
+    isRestaurantAdmin,
     requireAuth,
     login,
   };

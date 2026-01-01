@@ -13,7 +13,7 @@ import IconNavItem from '@/Components/UI/IconNavItem';
 
 export default function BottomNav() {
   const { itemCount } = useCart();
-  const { isAuthenticated, isEmployee, isAdmin, login } = useAuth();
+  const { isAuthenticated, isEmployee, isRestaurantAdmin, login } = useAuth();
 
   if (isEmployee) {
     return (
@@ -30,7 +30,7 @@ export default function BottomNav() {
           icon={QueueListIcon}
           label="Menu"
         />
-        {isAdmin && (
+        {isRestaurantAdmin && (
           <IconNavItem
             href={route('employee.establishment.index')}
             active={route().current('employee.establishment.*')}

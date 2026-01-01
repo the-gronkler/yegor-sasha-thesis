@@ -40,7 +40,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
                 'restaurant_id' => $request->user()?->employee?->restaurant_id,
-                'isAdmin' => $request->user()?->employee?->is_admin ?? false,
+                'isRestaurantAdmin' => $request->user()?->employee?->is_admin ?? false,
             ],
             // Expose other keys as needed below:
             // TODO: check if we should not expose this if request is not a map related request
