@@ -38,6 +38,15 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('withRelations', function ($builder) {
+            $builder->with(['customer', 'employee']);
+        });
+    }
+
     /**
      * Get the customer profile for this user (if applicable).
      */
@@ -67,6 +76,7 @@ class User extends Authenticatable
      */
     public function isEmployee(): bool
     {
+
         return $this->employee !== null;
     }
 }
