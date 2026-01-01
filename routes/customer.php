@@ -8,14 +8,8 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\RestaurantController;
 use App\Http\Controllers\Customer\ReviewController;
-use App\Http\Controllers\Employee\EmployeeMenuItemController;
-use App\Http\Controllers\Employee\EmployeeOrderController;
-use App\Http\Controllers\Employee\EstablishmentController;
-use App\Http\Controllers\Employee\MenuCategoryController;
-use App\Http\Controllers\Employee\MenuController;
 use App\Http\Middleware\BlockEmployees;
 use App\Http\Middleware\EnsureUserIsCustomer;
-use App\Http\Middleware\EnsureUserIsEmployee;
 use Illuminate\Support\Facades\Route;
 
 // Customer-side: Restaurants (Public)
@@ -74,42 +68,4 @@ Route::middleware(['auth', 'verified', EnsureUserIsCustomer::class])->group(func
         Route::get('/favorites', [ProfileController::class, 'favorites'])->name('favorites');
         Route::put('/favorites/ranks', [ProfileController::class, 'updateFavoriteRanks'])->name('favorites.updateRanks');
     });
-});
-
-// Employee routes
-Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])->group(function () {
-    // Redirect /employee to the first tab (Orders)
-    Route::get('/employee', function () {
-        return redirect()->route('employee.orders.index');
-    })->name('employee.index');
-
-    Route::prefix('employee')->name('employee.')->group(function () {
-        // Orders
-        Route::get('/orders', [EmployeeOrderController::class, 'index'])->name('orders.index');
-
-        // Menu
-        Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-
-        // Establishment (Admins only)
-        Route::middleware(['can:manage-restaurant'])->group(function () {
-            Route::get('/establishment', [EstablishmentController::class, 'index'])->name('establishment.index');
-        });
-    });
-
-    // Shared Restaurant Management (All Employees)
-    Route::prefix('restaurant')->name('restaurant.')->group(function () {
-        Route::resource('menu-categories', MenuCategoryController::class);
-        Route::resource('menu-items', EmployeeMenuItemController::class);
-
-        Route::put('/menu-items/{item}/status', [EmployeeMenuItemController::class, 'updateStatus'])
-            ->name('menu-items.updateStatus');
-
-        Route::put('/orders/{order}/status', [EmployeeOrderController::class, 'updateStatus'])
-            ->name('orders.updateStatus');
-    });
-});
-
-// Restaurant Admin Routes (Admins Only)
-Route::middleware(['auth', 'can:manage-restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    Route::resource('workers', EstablishmentController::class);
 });
