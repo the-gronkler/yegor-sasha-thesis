@@ -46,6 +46,7 @@ export default function RestaurantShow({
         {},
         {
           preserveScroll: true,
+          preserveState: false, // Force props refresh to update isFavorited
           onFinish: () => setIsSubmitting(false),
         },
       );
@@ -63,7 +64,7 @@ export default function RestaurantShow({
           style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
         >
           <div className="banner-actions">
-            <Link href={route('map.index')} className="back-button">
+            <Link href={route('restaurants.index')} className="back-button">
               <ArrowLeftIcon className="icon" />
             </Link>
           </div>

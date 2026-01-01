@@ -76,20 +76,35 @@ class MapController extends Controller
         // Map page only needs images for markers/cards; menu data is HEAVY
         // Reduces DB query cost and JSON payload size by ~80%
         // Also restrict image columns to only what's needed
+
+        $user = $request->user();
+        $customerId = $user?->customer?->user_id;
+
         $query = Restaurant::with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
             ->select([
-                'id',
-                'name',
-                'address',
-                'latitude',
-                'longitude',
-                'rating',
-                'description',
-                'opening_hours',
+                'restaurants.id',
+                'restaurants.name',
+                'restaurants.address',
+                'restaurants.latitude',
+                'restaurants.longitude',
+                'restaurants.rating',
+                'restaurants.description',
+                'restaurants.opening_hours',
             ])
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->limit(self::MAX_RESTAURANTS_LIMIT); // Defensive limit: protects against huge payloads + Mapbox perf
+
+        // PERFORMANCE OPTIMIZATION: Use LEFT JOIN instead of separate query + in_array()
+        // This is O(1) database lookup vs O(n*m) array iteration
+        // Only executes when user is authenticated with customer profile
+        if ($customerId) {
+            $query->leftJoin('favorite_restaurants', function ($join) use ($customerId) {
+                $join->on('restaurants.id', '=', 'favorite_restaurants.restaurant_id')
+                    ->where('favorite_restaurants.customer_user_id', '=', $customerId);
+            })
+                ->addSelect(\DB::raw('CASE WHEN favorite_restaurants.restaurant_id IS NOT NULL THEN 1 ELSE 0 END as is_favorited'));
+        }
 
         // Apply geolocation filtering if coordinates are provided
         if ($latitude !== null && $longitude !== null) {
@@ -114,13 +129,6 @@ class MapController extends Controller
             $query->latest('rating');
         }
 
-        $user = $request->user();
-
-        $favoriteIds = [];
-        if ($user && $user->customer) {
-            $favoriteIds = $user->customer->favoriteRestaurants()->pluck('restaurants.id')->toArray();
-        }
-
         $restaurants = $query->get()
             ->map(fn (Restaurant $restaurant) => [
                 'id' => $restaurant->id,
@@ -132,7 +140,7 @@ class MapController extends Controller
                 'description' => $restaurant->description,
                 'opening_hours' => $restaurant->opening_hours,
                 'distance' => $this->geoService->formatDistance($restaurant->distance),
-                'is_favorited' => in_array($restaurant->id, $favoriteIds),
+                'is_favorited' => (bool) ($restaurant->is_favorited ?? false),
                 'images' => $restaurant->images->map(fn ($img) => [
                     'id' => $img->id,
                     'url' => $img->image,
