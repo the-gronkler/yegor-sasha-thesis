@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
-use App\Models\Employee;
-use App\Models\Restaurant;
 use App\Models\User;
+use App\Services\DatabaseSeederService;
 use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\OrderStatusSeeder;
 use Illuminate\Database\Seeder;
@@ -15,7 +14,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+    public function run(DatabaseSeederService $service): void
     {
         // make site-wide admin for testing.
         $adminUser = User::factory()->create([
@@ -39,22 +38,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create a default employee for testing
-        $restaurant = Restaurant::first();
-
-        if ($restaurant) {
-            $employeeUser = User::factory()->create([
-                'name' => 'Default',
-                'surname' => 'Employee',
-                'email' => 'employee@example.com',
-                'password' => bcrypt('employee'),
-            ]);
-
-            Employee::factory()
-                ->admin()
-                ->forRestaurant($restaurant)
-                ->create([
-                    'user_id' => $employeeUser->id,
-                ]);
-        }
+        $service->createDefaultEmployee();
     }
 }

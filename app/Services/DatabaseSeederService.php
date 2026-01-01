@@ -63,7 +63,7 @@ class DatabaseSeederService
     }
 
     // Adds a default employee for testing purposes
-    // is admin for restaurant 1
+    // is admin for the first restaurant
     public function createDefaultEmployee(): ?User
     {
         $restaurant = Restaurant::first();

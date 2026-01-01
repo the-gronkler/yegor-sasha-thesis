@@ -5,8 +5,6 @@ import {
   BuildingStorefrontIcon,
   ClipboardDocumentListIcon,
   ArrowRightEndOnRectangleIcon,
-  HomeIcon,
-  UserGroupIcon,
   QueueListIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '@/Contexts/CartContext';
@@ -44,7 +42,7 @@ export default function BottomNav() {
     );
   }
 
-  //Customer
+  // Customer
   return (
     <nav className="bottom-nav">
       <IconNavItem

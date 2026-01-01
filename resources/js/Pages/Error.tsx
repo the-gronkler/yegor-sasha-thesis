@@ -1,19 +1,17 @@
-import { Link, Head, usePage } from '@inertiajs/react';
-import { PageProps } from '@/types';
+import { Link, Head } from '@inertiajs/react';
 import {
   ExclamationTriangleIcon,
   HomeIcon,
   ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '@/Hooks/useAuth';
 
 interface Props {
   status: number;
 }
 
 export default function Error({ status }: Props) {
-  const { props } = usePage<PageProps>();
-  const auth = props.auth || {};
-  const isEmployee = !!auth.restaurant_id;
+  const { isEmployee } = useAuth();
 
   const title =
     {
@@ -68,7 +66,7 @@ export default function Error({ status }: Props) {
 
           <Link href={route(homeRoute)} className="error-page__btn-home">
             <HomeIcon className="error-page__btn-icon" />
-            Go Home
+            {homeLabel}
           </Link>
         </div>
       </div>

@@ -73,7 +73,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('manage-restaurant', function (User $user) {
-            return $user->isEmployee() && $user->employee->is_admin;
+            return $user->isEmployee() && ($user->employee?->is_admin === true);
         });
     }
 }

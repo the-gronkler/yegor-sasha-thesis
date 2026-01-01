@@ -52,7 +52,7 @@ class MenuCategoryController extends Controller
             'name' => $validated['name'],
         ]);
 
-        return redirect()->route('restaurant.menu-categories.index')
+        return redirect()->route('employee.restaurant.menu-categories.index')
             ->with('success', 'Category created.');
     }
 
@@ -76,7 +76,7 @@ class MenuCategoryController extends Controller
 
         $menuCategory->update(['name' => $validated['name']]);
 
-        return redirect()->route('restaurant.menu-categories.index')
+        return redirect()->route('employee.restaurant.menu-categories.index')
             ->with('success', 'Category updated.');
     }
 
@@ -86,7 +86,7 @@ class MenuCategoryController extends Controller
 
         $menuCategory->delete();
 
-        return redirect()->route('restaurant.menu-categories.index')
+        return redirect()->route('employee.restaurant.menu-categories.index')
             ->with('success', 'Category deleted.');
     }
 }

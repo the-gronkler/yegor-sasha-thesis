@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
         if ($user->isEmployee()) {
-            return redirect('/employee');
+            return redirect()->route('employee.index');
         }
 
         return redirect('/');
