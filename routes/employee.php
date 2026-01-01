@@ -14,7 +14,7 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
     ->name('employee.')
     ->group(function () {
         // Redirect /employee to the first tab (Orders)
-        Route::get('', fn () => redirect()->route('employee.orders.index'))->name('index');
+        Route::get('/', fn () => redirect()->route('employee.orders.index'))->name('index');
 
         // Orders
         Route::get('orders', [EmployeeOrderController::class, 'index'])->name('orders.index');
@@ -37,13 +37,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
 
             Route::put('orders/{order}/status', [EmployeeOrderController::class, 'updateStatus'])
                 ->name('orders.updateStatus');
-        });
-    });
 
-// Restaurant Admin Routes (Admins Only)
-Route::middleware(['auth', 'can:manage-restaurant'])
-    ->prefix('employee/restaurant')
-    ->name('employee.restaurant.')
-    ->group(function () {
-        Route::resource('workers', EstablishmentController::class);
+            // Admin-only routes
+            Route::middleware('can:manage-restaurant')->group(function () {
+                Route::resource('workers', EstablishmentController::class);
+            });
+        });
     });
