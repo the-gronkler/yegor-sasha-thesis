@@ -1,5 +1,5 @@
 import { Head, useForm, Link } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Order } from '@/types/models';
 import { FormEvent } from 'react';
 
@@ -20,7 +20,7 @@ export default function CheckoutIndex({
 
   if (items.length === 0) {
     return (
-      <CustomerLayout>
+      <AppLayout>
         <Head title="Checkout" />
         <div className="checkout-page">
           <div className="checkout-container">
@@ -32,7 +32,7 @@ export default function CheckoutIndex({
             </div>
           </div>
         </div>
-      </CustomerLayout>
+      </AppLayout>
     );
   }
 
@@ -42,7 +42,7 @@ export default function CheckoutIndex({
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Checkout" />
 
       <div className="checkout-page">
@@ -110,6 +110,6 @@ export default function CheckoutIndex({
           </div>
         </div>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

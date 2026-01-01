@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
 import SearchInput from '@/Components/UI/SearchInput';
@@ -54,7 +54,7 @@ export default function RestaurantShow({
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title={restaurant.name} />
 
       <div className="restaurant-show-page">
@@ -164,6 +164,6 @@ export default function RestaurantShow({
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }
