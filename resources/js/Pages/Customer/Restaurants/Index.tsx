@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { IFuseOptions } from 'fuse.js';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import SearchInput from '@/Components/UI/SearchInput';
 import { useSearch } from '@/Hooks/useSearch';
@@ -30,7 +30,7 @@ export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
   } = useSearch(restaurants, EMPTY_KEYS, SEARCH_OPTIONS);
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Explore Restaurants" />
 
       <div className="restaurant-index-page">
@@ -56,6 +56,6 @@ export default function RestaurantIndex({ restaurants }: RestaurantIndexProps) {
           )}
         </div>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

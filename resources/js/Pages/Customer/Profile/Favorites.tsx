@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Restaurant } from '@/types/models';
 import { useState, DragEvent } from 'react';
 import FavoriteRestaurantCard from '@/Components/Shared/FavoriteRestaurantCard';
@@ -153,7 +153,7 @@ export default function Favorites({
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="My Favorites" />
 
       <div className="profile-page">
@@ -203,6 +203,6 @@ export default function Favorites({
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

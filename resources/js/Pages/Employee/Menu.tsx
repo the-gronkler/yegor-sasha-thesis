@@ -1,14 +1,14 @@
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Head } from '@inertiajs/react';
 
 export default function MenuIndex() {
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Menu Management" />
       <div className="employee-page">
         <h1>Menu Management</h1>
         <p>Menu management placeholder.</p>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }
