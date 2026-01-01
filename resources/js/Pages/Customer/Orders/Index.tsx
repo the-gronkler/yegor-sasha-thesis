@@ -22,7 +22,7 @@ export default function OrdersIndex({ orders }: Props) {
         <div className="orders-index__header">
           <Link href={route('profile.show')} className="back-button-link">
             <ArrowLeftIcon className="icon" />
-            <span>Back</span>
+            <span>Profile</span>
           </Link>
           <h1>My Orders</h1>
         </div>

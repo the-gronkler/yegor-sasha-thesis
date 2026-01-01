@@ -7,6 +7,7 @@ import {
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
 import IconNavItem from '@/Components/UI/IconNavItem';
+import { ClipboardDocumentListIcon } from '@heroicons/react/16/solid';
 
 export default function BottomNav() {
   const { itemCount } = useCart();
@@ -28,6 +29,12 @@ export default function BottomNav() {
             icon={ShoppingCartIcon}
             label="Cart"
             badge={itemCount}
+          />
+          <IconNavItem
+            href={route('orders.index')}
+            active={route().current('orders.index')}
+            icon={ClipboardDocumentListIcon}
+            label="Orders"
           />
           <IconNavItem
             href={route('profile.show')}
