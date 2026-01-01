@@ -26,7 +26,7 @@ export default function CheckoutIndex({
           <div className="checkout-container">
             <div className="empty-checkout">
               <p>This order has no items.</p>
-              <Link href={route('restaurants.index')} className="back-link">
+              <Link href={route('map.index')} className="back-link">
                 Browse Restaurants
               </Link>
             </div>

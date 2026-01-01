@@ -2,14 +2,13 @@ import {
   MapPinIcon,
   ShoppingCartIcon,
   UserIcon,
-  BuildingStorefrontIcon,
-  ClipboardDocumentListIcon,
   ArrowRightEndOnRectangleIcon,
   QueueListIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
 import IconNavItem from '@/Components/UI/IconNavItem';
+import { ClipboardDocumentListIcon } from '@heroicons/react/16/solid';
 
 export default function BottomNav() {
   const { itemCount } = useCart();
@@ -50,12 +49,6 @@ export default function BottomNav() {
         active={route().current('map.index')}
         icon={MapPinIcon}
         label="Explore"
-      />
-      <IconNavItem
-        href={route('restaurants.index')}
-        active={route().current('restaurants.index')}
-        icon={BuildingStorefrontIcon}
-        label="Restaurants"
       />
       {isAuthenticated && (
         <>

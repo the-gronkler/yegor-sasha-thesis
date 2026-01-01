@@ -201,7 +201,7 @@ export default function Favorites({
             <HeartIcon className="empty-icon" />
             <h2>No favorites yet</h2>
             <p>Start adding your favorite restaurants!</p>
-            <Link href={route('restaurants.index')} className="btn-primary">
+            <Link href={route('map.index')} className="btn-primary">
               Browse Restaurants
             </Link>
           </div>

@@ -8,12 +8,36 @@
   padding-bottom: 5rem; // Space for bottom nav
 
   &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
 
     h1 {
       font-size: 1.5rem;
       font-weight: 700;
       color: main-colors.$text-primary;
+      margin: 0;
+    }
+
+    .back-button-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: main-colors.$brand-primary;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: color 0.2s ease;
+
+      .icon {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      &:hover {
+        color: main-colors.$brand-primary-hover;
+      }
     }
   }
 
