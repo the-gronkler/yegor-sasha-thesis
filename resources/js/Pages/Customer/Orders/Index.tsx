@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Order, PaginatedResponse } from '@/types/models';
 import { formatDateTime, formatCurrency } from '@/Utils/formatters';
 import {
@@ -15,7 +15,7 @@ interface Props {
 
 export default function OrdersIndex({ orders }: Props) {
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="My Orders" />
 
       <div className="orders-index">
@@ -70,6 +70,6 @@ export default function OrdersIndex({ orders }: Props) {
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

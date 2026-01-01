@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Restaurant\Admin;
+namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
 
-class MenuItemController extends Controller
+class EmployeeMenuItemController extends Controller
 {
     public function updateStatus(Request $request, MenuItem $item)
     {

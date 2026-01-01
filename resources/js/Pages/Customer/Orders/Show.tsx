@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Order } from '@/types/models';
 import { PageProps } from '@/types';
 import { formatDateTime, formatCurrency } from '@/Utils/formatters';
@@ -14,7 +14,7 @@ export default function OrderShow({ order }: OrderShowProps) {
   const total = calculateOrderTotal(order.menu_items);
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title={`Order #${order.id}`} />
 
       <div className="order-show-page">
@@ -81,6 +81,6 @@ export default function OrderShow({ order }: OrderShowProps) {
           </Link>
         </div>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

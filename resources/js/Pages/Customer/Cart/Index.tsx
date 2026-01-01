@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { useCart } from '@/Contexts/CartContext';
 import { PageProps } from '@/types';
 import { Order } from '@/types/models';
@@ -92,7 +92,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
 
   if (items.length === 0) {
     return (
-      <CustomerLayout>
+      <AppLayout>
         <Head title="Cart" />
         <div className="cart-page">
           <div className="cart-header">
@@ -105,7 +105,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
             </Link>
           </div>
         </div>
-      </CustomerLayout>
+      </AppLayout>
     );
   }
 
@@ -120,7 +120,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
   });
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Cart" />
       <div className="cart-page">
         {/* Header */}
@@ -179,6 +179,6 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
           </button>
         </div> */}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

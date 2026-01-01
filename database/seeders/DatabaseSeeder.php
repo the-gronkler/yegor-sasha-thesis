@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Services\DatabaseSeederService;
 use Database\Seeders\static_data\AllergenSeeder;
 use Database\Seeders\static_data\OrderStatusSeeder;
 use Illuminate\Database\Seeder;
@@ -13,7 +14,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+    public function run(DatabaseSeederService $service): void
     {
         // make site-wide admin for testing.
         $adminUser = User::factory()->create([
@@ -35,5 +36,8 @@ class DatabaseSeeder extends Seeder
             EmployeeSeeder::class,
             CustomerSeeder::class,
         ]);
+
+        // Create a default employee for testing
+        $service->createDefaultEmployee();
     }
 }

@@ -8,20 +8,23 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\RestaurantController;
 use App\Http\Controllers\Customer\ReviewController;
+use App\Http\Middleware\BlockEmployees;
+use App\Http\Middleware\EnsureUserIsCustomer;
 use Illuminate\Support\Facades\Route;
 
 // Customer-side: Restaurants (Public)
-Route::get('/', [MapController::class, 'index'])->name('map.index');
+Route::middleware([BlockEmployees::class])->group(function () {
+    Route::get('/', [MapController::class, 'index'])->name('map.index');
 
-Route::prefix('restaurants')->name('restaurants.')->group(function () {
-    // Redirect to map page instead of showing separate restaurants index
-    Route::get('/', fn () => redirect()->route('map.index'))->name('index');
-    Route::get('/{restaurant}', [RestaurantController::class, 'show'])->name('show');
-    Route::post('/{restaurant}/favorite', [RestaurantController::class, 'toggleFavorite'])->name('toggleFavorite')->middleware('auth');
-    Route::get('/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('menu-items.show');
+    Route::prefix('restaurants')->name('restaurants.')->group(function () {
+        Route::get('/', [RestaurantController::class, 'index'])->name('index');
+        Route::get('/{restaurant}', [RestaurantController::class, 'show'])->name('show');
+        Route::post('/{restaurant}/favorite', [RestaurantController::class, 'toggleFavorite'])->name('toggleFavorite')->middleware('auth');
+        Route::get('/{restaurant}/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('menu-items.show');
+    });
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', EnsureUserIsCustomer::class])->group(function () {
     // Cart (for current customer)
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
@@ -65,17 +68,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/favorites', [ProfileController::class, 'favorites'])->name('favorites');
         Route::put('/favorites/ranks', [ProfileController::class, 'updateFavoriteRanks'])->name('favorites.updateRanks');
     });
-});
-
-// Admin / Restaurant management
-Route::middleware(['auth', 'can:manage-restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    Route::resource('menu-categories', App\Http\Controllers\Restaurant\Admin\MenuCategoryController::class);
-    Route::resource('menu-items', App\Http\Controllers\Restaurant\Admin\MenuItemController::class);
-    Route::resource('workers', App\Http\Controllers\Restaurant\Admin\WorkerController::class);
-
-    Route::put('/menu-items/{item}/status', [App\Http\Controllers\Restaurant\Admin\MenuItemController::class, 'updateStatus'])
-        ->name('menu-items.updateStatus');
-
-    Route::put('/orders/{order}/status', [App\Http\Controllers\Restaurant\Admin\OrderController::class, 'updateStatus'])
-        ->name('orders.updateStatus');
 });

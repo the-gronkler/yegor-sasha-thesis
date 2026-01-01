@@ -4,7 +4,7 @@ import {
   MinusIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { MenuItem } from '@/types/models';
 import { PageProps } from '@/types';
 import { useCart } from '@/Contexts/CartContext';
@@ -48,7 +48,7 @@ export default function MenuItemShow({
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title={menuItem.name} />
 
       <div className="menu-item-show-page">
@@ -128,6 +128,6 @@ export default function MenuItemShow({
           </div>
         </div>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }
