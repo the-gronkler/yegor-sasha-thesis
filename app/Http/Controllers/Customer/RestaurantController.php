@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
+use App\Models\User;
 use App\Services\GeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -71,7 +72,69 @@ class RestaurantController extends Controller
 
         return Inertia::render('Customer/Restaurants/Show', [
             'restaurant' => $this->formatRestaurant($restaurant),
+            'isFavorited' => $this->isRestaurantFavorited($restaurant, $request->user()),
         ]);
+    }
+
+    /**
+     * Toggle favorite status for a restaurant.
+     *
+     * Note: Auth middleware ensures authenticated user.
+     * Customer existence check below handles authorization.
+     */
+    public function toggleFavorite(Request $request, Restaurant $restaurant)
+    {
+        $user = $request->user();
+        $customer = $user->customer;
+
+        if (! $customer) {
+            return back()->with('error', 'Only customers can favorite restaurants.');
+        }
+
+        // Wrap in transaction to prevent race conditions
+        $message = \DB::transaction(function () use ($customer, $restaurant) {
+            // Check if already favorited
+            $isFavorited = $customer->favoriteRestaurants()->where('restaurant_id', $restaurant->id)->exists();
+
+            if ($isFavorited) {
+                // Remove from favorites
+                $customer->favoriteRestaurants()->detach($restaurant->id);
+
+                // Reorder remaining favorites to ensure consecutive ranks
+                $remainingFavorites = $customer->favoriteRestaurants()->orderBy('favorite_restaurants.rank')->get();
+                $remainingFavorites->each(function ($favRestaurant, $index) use ($customer) {
+                    $customer->favoriteRestaurants()->updateExistingPivot($favRestaurant->id, ['rank' => $index + 1]);
+                });
+
+                return 'Restaurant removed from favorites.';
+            } else {
+                // Add to favorites with auto-assigned rank
+                // Get the current maximum rank and add 1 (lower priority = higher number)
+                $maxRank = $customer->favoriteRestaurants()->max('favorite_restaurants.rank') ?? 0;
+                $customer->favoriteRestaurants()->attach($restaurant->id, [
+                    'rank' => $maxRank + 1,
+                ]);
+
+                return 'Restaurant added to favorites!';
+            }
+        });
+
+        // Return back with success message
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Check if a restaurant is favorited by the current user.
+     */
+    private function isRestaurantFavorited(Restaurant $restaurant, ?User $user): bool
+    {
+        if (! $user || ! $user->customer) {
+            return false;
+        }
+
+        return $user->customer->favoriteRestaurants()
+            ->where('restaurant_id', $restaurant->id)
+            ->exists();
     }
 
     private function formatRestaurant(Restaurant $restaurant): array

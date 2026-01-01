@@ -1,12 +1,12 @@
 import { FormEventHandler } from 'react';
-import { Head, useForm, router, Link } from '@inertiajs/react';
+import { Head, useForm, Link } from '@inertiajs/react';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { User, Restaurant, Customer } from '@/types/models';
+import { User, Customer } from '@/types/models';
 
-interface ProfileShowProps {
+interface ProfileEditProps {
   user: User;
   customer: Customer;
-  favorites: Restaurant[];
 }
 
 interface ProfileFormData {
@@ -18,11 +18,7 @@ interface ProfileFormData {
   payment_method_token: string;
 }
 
-export default function ProfileShow({
-  user,
-  customer,
-  favorites,
-}: ProfileShowProps) {
+export default function ProfileEdit({ user, customer }: ProfileEditProps) {
   const form = useForm<ProfileFormData>({
     name: user.name || '',
     surname: user.surname || '',
@@ -42,22 +38,18 @@ export default function ProfileShow({
     });
   };
 
-  const handleLogout: FormEventHandler = (e) => {
-    e.preventDefault();
-    router.post(route('logout'));
-  };
-
   return (
     <CustomerLayout>
-      <Head title="My Profile" />
+      <Head title="Edit Profile" />
 
       <div className="profile-page">
         {/* Header */}
         <div className="profile-header">
-          <h1 className="profile-title">My Profile</h1>
-          <button onClick={handleLogout} className="logout-button">
-            Logout
-          </button>
+          <Link href={route('profile.show')} className="back-button-link">
+            <ArrowLeftIcon className="icon" />
+            <span>Back</span>
+          </Link>
+          <h1 className="profile-title">Edit Profile</h1>
         </div>
 
         {/* Profile Form */}
@@ -182,34 +174,6 @@ export default function ProfileShow({
             </button>
           </form>
         </div>
-
-        {/* Favorites Section */}
-        {favorites && favorites.length > 0 && (
-          <div className="favorites-section">
-            <div className="section-header">
-              <h2 className="section-title">My Favorite Restaurants</h2>
-              <Link href={route('profile.favorites')} className="view-all-link">
-                View All
-              </Link>
-            </div>
-
-            <div className="favorites-list">
-              {favorites.slice(0, 3).map((favorite) => (
-                <Link
-                  key={favorite.id}
-                  href={route('restaurants.show', favorite.id)}
-                  className="favorite-item"
-                >
-                  <span className="favorite-rank">#{favorite.rank}</span>
-                  <div className="favorite-info">
-                    <h4 className="favorite-name">{favorite.name}</h4>
-                  </div>
-                  <span className="favorite-arrow">→</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </CustomerLayout>
   );

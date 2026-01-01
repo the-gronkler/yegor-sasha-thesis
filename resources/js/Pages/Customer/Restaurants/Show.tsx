@@ -1,5 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import MenuItemCard from '@/Components/Shared/MenuItemCard';
@@ -9,14 +10,20 @@ import { PageProps } from '@/types';
 import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
 import { useRestaurantMenu } from '@/Hooks/useRestaurantMenu';
 import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
+import { useState } from 'react';
 import { useAuth } from '@/Hooks/useAuth';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
+  isFavorited: boolean;
 }
 
-export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
+export default function RestaurantShow({
+  restaurant,
+  isFavorited,
+}: RestaurantShowProps) {
   const { requireAuth } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const primaryImage =
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
     restaurant.images?.[0];
@@ -29,9 +36,20 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
     restaurant.id,
   );
 
-  const handleFavoriteClick = () => {
+  const handleToggleFavorite = () => {
     requireAuth(() => {
-      // TODO: Implement favorite logic
+      if (isSubmitting) return;
+
+      setIsSubmitting(true);
+      router.post(
+        route('restaurants.toggleFavorite', restaurant.id),
+        {},
+        {
+          preserveScroll: true,
+          preserveState: false, // Force props refresh to update isFavorited
+          onFinish: () => setIsSubmitting(false),
+        },
+      );
     });
   };
 
@@ -57,10 +75,17 @@ export default function RestaurantShow({ restaurant }: RestaurantShowProps) {
           <h1 className="restaurant-name">{restaurant.name}</h1>
           <button
             className="favorite-button"
-            aria-label="Add to favorites"
-            onClick={handleFavoriteClick}
+            onClick={handleToggleFavorite}
+            disabled={isSubmitting}
+            aria-label={
+              isFavorited ? 'Remove from favorites' : 'Add to favorites'
+            }
           >
-            <HeartIcon className="icon" />
+            {isFavorited ? (
+              <HeartIconSolid className="icon" />
+            ) : (
+              <HeartIcon className="icon" />
+            )}
           </button>
 
           <div className="rating-container">

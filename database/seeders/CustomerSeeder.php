@@ -9,13 +9,25 @@ use Illuminate\Database\Seeder;
 
 class CustomerSeeder extends Seeder
 {
-    public function run(): void
+    public function run(?int $count = null, ?int $reviewsPerCustomer = null, ?int $ordersPerCustomer = null): void
     {
+        $count ??= config('seeding.customers');
+        $reviewsPerCustomer ??= config('seeding.reviews_per_customer');
+        $ordersPerCustomer ??= config('seeding.orders_per_customer');
+
+        $restaurantCount = Restaurant::count();
+
         Customer::factory()
-            ->count(5)
-            ->hasOrders(4) // requires orders() on model and OrderFactory
-            ->afterCreating(function (Customer $customer) {
-                $restaurants = Restaurant::inRandomOrder()->take(2)->get();
+            ->count($count)
+            ->hasOrders($ordersPerCustomer) // requires orders() on model and OrderFactory
+            ->afterCreating(function (Customer $customer) use ($reviewsPerCustomer, $restaurantCount) {
+                if ($restaurantCount <= 0 || $reviewsPerCustomer <= 0) {
+                    return;
+                }
+
+                $reviewsToCreate = min($reviewsPerCustomer, $restaurantCount);
+
+                $restaurants = Restaurant::inRandomOrder()->take($reviewsToCreate)->get();
 
                 foreach ($restaurants as $restaurant) {
                     Review::factory()->create([

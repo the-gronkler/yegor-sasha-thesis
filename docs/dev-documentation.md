@@ -10,6 +10,105 @@ This file stores technical documentation useful during development. If a PR intr
 - [TypeScript Guidelines](./ts-guidelines.md)
 - [CSS Documentation](./css-documentation.md)
 
+## Running the app
+
+Install Herd, run the app with **HTTPS** mode, and run `npm run dev` command from project root to start the Vite development server. You will need to run the database separately though. Alternatively, you can run in docker, instructions below.
+
+## Console commands
+
+Custom artisan commands, to use type:
+
+```powershell
+php artisan <command-name>
+```
+
+### Database Seeding Commands
+
+#### `mfs` - Migrate Fresh with Seed
+
+**Description:** Wipes the database, reruns all migrations, and seeds the database with configurable data.
+
+**Usage:**
+
+```powershell
+php artisan mfs [options]
+```
+
+**Options:**
+
+- `--force`: Force the operation to run when in production
+- `--restaurants=<number>`: Number of restaurants to seed (default: 10)
+- `--customers=<number>`: Number of customers to seed (default: 5)
+- `--employees-min=<number>`: Minimum employees per restaurant (default: 2)
+- `--employees-max=<number>`: Maximum employees per restaurant (default: 14)
+- `--reviews-per-customer=<number>`: Number of reviews each customer creates (default: 2)
+- `--orders-per-customer=<number>`: Number of orders each customer has (default: 4)
+- `--radius=<number>`: Radius in km for restaurant distribution (default: 10)
+
+**Examples:**
+
+```powershell
+# Default seeding
+php artisan mfs
+
+# Custom minimal setup
+php artisan mfs --restaurants=5 --customers=3 --employees-min=1 --employees-max=2 --radius=5
+
+# Force in production with heavy data
+php artisan mfs --force --restaurants=50 --customers=100 --reviews-per-customer=5
+```
+
+#### `seed:restaurants` - Seed Restaurants Only
+
+**Description:** Seeds restaurants with natural clustered distribution around a center point.
+
+**Usage:**
+
+```powershell
+php artisan seed:restaurants [options]
+```
+
+**Options:**
+
+- `--center-lat=<float>`: Center latitude (default: 52.2297 - Warsaw)
+- `--center-lon=<float>`: Center longitude (default: 21.0122 - Warsaw)
+- `--radius=<float>`: Radius in km for distribution (default: 10)
+- `--count=<number>`: Number of restaurants to seed (default: 10)
+
+**Examples:**
+
+```powershell
+# Default Warsaw seeding
+php artisan seed:restaurants
+
+# Custom location and count
+php artisan seed:restaurants --center-lat=50.0647 --center-lon=19.9450 --radius=5 --count=20
+```
+
+#### `seed:static-data` - Seed Static Data
+
+**Description:** Seeds static data that doesn't change (allergens and order statuses).
+
+**Usage:**
+
+```powershell
+php artisan seed:static-data
+```
+
+**Options:** None
+
+**Example:**
+
+```powershell
+php artisan seed:static-data
+```
+
+### Other Commands
+
+- `ziggy:generate`
+
+  Generates the `resources/js/ziggy.js` file. Run this whenever you add or modify named routes in `routes/web.php` to make them available in the frontend.
+
 ## Running with Docker
 
 ### Prerequisites
@@ -74,22 +173,6 @@ docker cp thesis-caddy:/data/caddy/pki/authorities/local/root.crt ./caddy-root.c
 ### 3. Restart Browser
 
 Close and reopen your browser. The site should now be secure.
-
-## Console commands
-
-Custom artisan commands, to use type:
-
-```powershell
-php artisan <command-name>
-```
-
-- `mfs`
-
-  Alias for: `migrate:fresh --path=database/migrations/* --seed`. Wipes the DB, reruns all migrations in the specified folder and its subfolders, and then seeds the database.
-
-- `ziggy:generate`
-
-  Generates the `resources/js/ziggy.js` file. Run this whenever you add or modify named routes in `routes/web.php` to make them available in the frontend.
 
 ## Formatting
 
