@@ -16,7 +16,7 @@ class EnsureUserIsEmployee
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user() || ! $request->user()->isEmployee()) {
-            abort(403, 'Unauthorized access to employee area.');
+            abort(403, 'You do not have permission to access the employee area.');
         }
 
         return $next($request);

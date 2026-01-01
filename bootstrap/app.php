@@ -38,7 +38,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (HttpException $e, Request $request) {
             $status = $e->getStatusCode();
 
-            if (in_array($status, [401, 403, 404, 419, 429, 500, 503])) {
+            if ($status === 419) {
+                return redirect()->route('login')
+                    ->with('status', 'Your session has expired. Please log in again.');
+            }
+
+            if (in_array($status, [401, 403, 404, 429, 500, 503])) {
                 return Inertia::render('Error', ['status' => $status])
                     ->toResponse($request)
                     ->setStatusCode($status);

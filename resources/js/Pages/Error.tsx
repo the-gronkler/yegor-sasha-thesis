@@ -32,7 +32,7 @@ export default function Error({ status }: Props) {
     }[status] || 'An unexpected error occurred.';
 
   // Determine redirection based on user role
-  const homeRoute = isEmployee ? 'employee.index' : 'map.index';
+  const homeRoute = isEmployee ? 'employee.orders.index' : 'map.index';
   const homeLabel = isEmployee ? 'Back to Dashboard' : 'Back to Map';
 
   return (

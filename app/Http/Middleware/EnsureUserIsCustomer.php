@@ -16,7 +16,7 @@ class EnsureUserIsCustomer
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user() || ! $request->user()->isCustomer()) {
-            abort(403, 'Unauthorized access to customer area.');
+            abort(403, 'You do not have permission to access the customer area.');
         }
 
         return $next($request);
