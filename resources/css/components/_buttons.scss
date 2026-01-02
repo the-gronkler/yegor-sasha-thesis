@@ -83,7 +83,7 @@
     }
 
     &:hover {
-      background-color: rgba(220, 38, 38, 0.1); // Light red background on hover
+      background-color: exception-colors.$status-error-bg;
     }
   }
 }

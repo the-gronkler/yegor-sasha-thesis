@@ -117,6 +117,7 @@ export default function Workers({ employees }: WorkersProps) {
               type="button"
               onClick={() => setShowAddForm(!showAddForm)}
               className="btn-icon btn-add"
+              aria-label="Add new employee"
             >
               <PlusIcon className="icon" />
             </button>
@@ -338,7 +339,7 @@ export default function Workers({ employees }: WorkersProps) {
                         type="button"
                         onClick={() => handleEditClick(employee)}
                         className="btn-icon btn-edit"
-                        title="Edit employee"
+                        aria-label="Edit employee"
                       >
                         <PencilIcon className="icon" />
                       </button>

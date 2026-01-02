@@ -81,6 +81,7 @@ export default function Photos({ images }: PhotosProps) {
               type="button"
               onClick={() => setShowUploadForm(!showUploadForm)}
               className="btn-icon btn-add"
+              aria-label="Add new photo"
             >
               <PlusIcon className="icon" />
             </button>
@@ -90,7 +91,7 @@ export default function Photos({ images }: PhotosProps) {
           {showUploadForm && (
             <form
               onSubmit={handleUploadImage}
-              className="profile-form add-worker-form"
+              className="profile-form upload-form"
             >
               <div className="form-group">
                 <label htmlFor="image">Upload Image</label>
@@ -165,6 +166,7 @@ export default function Photos({ images }: PhotosProps) {
                       type="button"
                       onClick={() => handleSetPrimary(image.id)}
                       className="btn-photo-action"
+                      aria-label={`Set this photo as primary image for restaurant${image.description ? `: ${image.description}` : ''}`}
                     >
                       Set as Primary
                     </button>
@@ -173,6 +175,7 @@ export default function Photos({ images }: PhotosProps) {
                     type="button"
                     onClick={() => handleDeleteImage(image.id)}
                     className="btn-photo-action btn-danger"
+                    aria-label={`Delete photo${image.description ? `: ${image.description}` : ''}`}
                   >
                     <TrashIcon className="icon" />
                   </button>
