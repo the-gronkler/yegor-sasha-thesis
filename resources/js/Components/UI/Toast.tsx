@@ -15,12 +15,21 @@ export default function Toast() {
 
   // Track all timers for proper cleanup (browser setTimeout returns number)
   const timersRef = useRef<number[]>([]);
+  const isMountedRef = useRef(true);
 
   // Helper to clear all timers
   const clearAllTimers = () => {
     timersRef.current.forEach((timer) => clearTimeout(timer));
     timersRef.current = [];
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      clearAllTimers();
+    };
+  }, []);
 
   useEffect(() => {
     if (flash.success || flash.error) {
@@ -33,6 +42,8 @@ export default function Toast() {
       // Wait for exit animation if toast was already visible
       const resetTimer = setTimeout(
         () => {
+          if (!isMountedRef.current) return;
+
           if (flash.success) {
             setMessage(flash.success);
             setType('success');
@@ -42,31 +53,39 @@ export default function Toast() {
           }
 
           // Delay setting visible to allow CSS transition to trigger
-          const showTimer = setTimeout(() => setVisible(true), 10);
+          const showTimer = setTimeout(() => {
+            if (isMountedRef.current) {
+              setVisible(true);
+            }
+          }, 10);
           timersRef.current.push(showTimer);
         },
         message ? 50 : 0,
       ); // Wait 50ms if message exists, 0ms if new
 
       timersRef.current.push(resetTimer);
-
-      return clearAllTimers;
     }
-  }, [flash]);
+  }, [flash, message]); // ✅ Added 'message' to dependency array
 
   useEffect(() => {
     if (visible) {
       const hideTimer = setTimeout(() => {
+        if (!isMountedRef.current) return;
         setVisible(false);
 
         // Clear message after fade-out animation completes
-        const clearTimer = setTimeout(() => setMessage(null), 400);
+        const clearTimer = setTimeout(() => {
+          if (isMountedRef.current) {
+            setMessage(null);
+          }
+        }, 400);
         timersRef.current.push(clearTimer);
       }, 5000); // Auto-hide after 5 seconds
 
       timersRef.current.push(hideTimer);
 
       return () => {
+        // ✅ Clear both hideTimer and any clearTimer that may have been created
         clearTimeout(hideTimer);
         timersRef.current = timersRef.current.filter((t) => t !== hideTimer);
       };
@@ -78,7 +97,11 @@ export default function Toast() {
     setVisible(false);
 
     // Clear message after fade-out animation completes
-    const clearTimer = setTimeout(() => setMessage(null), 400);
+    const clearTimer = setTimeout(() => {
+      if (isMountedRef.current) {
+        setMessage(null);
+      }
+    }, 400);
     timersRef.current.push(clearTimer);
   };
 
