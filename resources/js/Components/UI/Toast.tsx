@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePage } from '@inertiajs/react';
 import {
   CheckCircleIcon,
@@ -13,36 +13,73 @@ export default function Toast() {
   const [message, setMessage] = useState<string | null>(null);
   const [type, setType] = useState<'success' | 'error'>('success');
 
+  // Track all timers for proper cleanup (browser setTimeout returns number)
+  const timersRef = useRef<number[]>([]);
+
+  // Helper to clear all timers
+  const clearAllTimers = () => {
+    timersRef.current.forEach((timer) => clearTimeout(timer));
+    timersRef.current = [];
+  };
+
   useEffect(() => {
-    if (flash.success) {
-      setMessage(flash.success);
-      setType('success');
-      // Delay setting visible to allow CSS transition to trigger
-      setTimeout(() => setVisible(true), 10);
-    } else if (flash.error) {
-      setMessage(flash.error);
-      setType('error');
-      // Delay setting visible to allow CSS transition to trigger
-      setTimeout(() => setVisible(true), 10);
+    if (flash.success || flash.error) {
+      // Clear any existing timers
+      clearAllTimers();
+
+      // Hide existing toast first
+      setVisible(false);
+
+      // Wait for exit animation if toast was already visible
+      const resetTimer = setTimeout(
+        () => {
+          if (flash.success) {
+            setMessage(flash.success);
+            setType('success');
+          } else if (flash.error) {
+            setMessage(flash.error);
+            setType('error');
+          }
+
+          // Delay setting visible to allow CSS transition to trigger
+          const showTimer = setTimeout(() => setVisible(true), 10);
+          timersRef.current.push(showTimer);
+        },
+        message ? 50 : 0,
+      ); // Wait 50ms if message exists, 0ms if new
+
+      timersRef.current.push(resetTimer);
+
+      return clearAllTimers;
     }
   }, [flash]);
 
   useEffect(() => {
     if (visible) {
-      const timer = setTimeout(() => {
+      const hideTimer = setTimeout(() => {
         setVisible(false);
-        // Clear message after fade-out animation completes (400ms to match CSS transition)
-        setTimeout(() => setMessage(null), 400);
+
+        // Clear message after fade-out animation completes
+        const clearTimer = setTimeout(() => setMessage(null), 400);
+        timersRef.current.push(clearTimer);
       }, 5000); // Auto-hide after 5 seconds
 
-      return () => clearTimeout(timer);
+      timersRef.current.push(hideTimer);
+
+      return () => {
+        clearTimeout(hideTimer);
+        timersRef.current = timersRef.current.filter((t) => t !== hideTimer);
+      };
     }
   }, [visible]);
 
   const handleClose = () => {
+    clearAllTimers();
     setVisible(false);
-    // Clear message after fade-out animation completes (400ms to match CSS transition)
-    setTimeout(() => setMessage(null), 400);
+
+    // Clear message after fade-out animation completes
+    const clearTimer = setTimeout(() => setMessage(null), 400);
+    timersRef.current.push(clearTimer);
   };
 
   if (!message) {
