@@ -17,11 +17,13 @@ export default function Toast() {
     if (flash.success) {
       setMessage(flash.success);
       setType('success');
-      setVisible(true);
+      // Delay setting visible to allow CSS transition to trigger
+      setTimeout(() => setVisible(true), 10);
     } else if (flash.error) {
       setMessage(flash.error);
       setType('error');
-      setVisible(true);
+      // Delay setting visible to allow CSS transition to trigger
+      setTimeout(() => setVisible(true), 10);
     }
   }, [flash]);
 
@@ -29,8 +31,8 @@ export default function Toast() {
     if (visible) {
       const timer = setTimeout(() => {
         setVisible(false);
-        // Clear message after fade-out animation completes
-        setTimeout(() => setMessage(null), 300);
+        // Clear message after fade-out animation completes (400ms to match CSS transition)
+        setTimeout(() => setMessage(null), 400);
       }, 5000); // Auto-hide after 5 seconds
 
       return () => clearTimeout(timer);
@@ -39,11 +41,11 @@ export default function Toast() {
 
   const handleClose = () => {
     setVisible(false);
-    // Clear message after fade-out animation completes
-    setTimeout(() => setMessage(null), 300);
+    // Clear message after fade-out animation completes (400ms to match CSS transition)
+    setTimeout(() => setMessage(null), 400);
   };
 
-  if (!visible || !message) {
+  if (!message) {
     return null;
   }
 
