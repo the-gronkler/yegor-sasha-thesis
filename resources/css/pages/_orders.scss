@@ -1,0 +1,551 @@
+@use '../variables/main-colors';
+@use '../variables/layout';
+@use '../variables/exception-colors';
+
+// ======================================================================
+// ORDERS PAGE
+// ======================================================================
+
+.orders-page {
+  min-height: 100vh;
+  background-color: main-colors.$bg-main;
+  padding: 1rem;
+  padding-bottom: 100px;
+}
+
+.orders-header {
+  margin-bottom: 1.5rem;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .header-text {
+      flex: 1;
+    }
+  }
+
+  .orders-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: main-colors.$text-primary;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .orders-subtitle {
+    font-size: 0.875rem;
+    color: main-colors.$text-secondary;
+    margin: 0;
+  }
+
+  .filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: main-colors.$bg-surface;
+    border: 1px solid main-colors.$border-light;
+    border-radius: layout.$border-radius;
+    color: main-colors.$text-primary;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+
+    .filter-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .filter-badge {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: main-colors.$brand-primary;
+      border-radius: 50%;
+      font-size: 0;
+    }
+
+    &:hover {
+      border-color: main-colors.$brand-primary;
+      background-color: main-colors.$bg-alt-1;
+    }
+  }
+}
+
+// Filter Panel
+.filter-panel {
+  background-color: main-colors.$bg-surface;
+  border: 1px solid main-colors.$border-light;
+  border-radius: layout.$border-radius;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+
+  .filter-header {
+    margin-bottom: 1rem;
+
+    .filter-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: main-colors.$text-primary;
+      margin: 0;
+    }
+  }
+
+  .filter-quick-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+
+    .filter-quick-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background-color: main-colors.$bg-alt-1;
+      border: 2px solid transparent;
+      border-radius: layout.$border-radius;
+      color: main-colors.$text-primary;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$bg-alt-2;
+      }
+
+      &.active {
+        background-color: main-colors.$brand-primary-light;
+        border-color: main-colors.$brand-primary;
+        color: main-colors.$brand-primary;
+      }
+    }
+  }
+
+  .filter-statuses {
+    margin-bottom: 1.5rem;
+
+    .filter-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: main-colors.$text-secondary;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .filter-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      cursor: pointer;
+      border-radius: layout.$border-radius;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$bg-alt-1;
+      }
+
+      input[type='checkbox'] {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+      }
+
+      .checkbox-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: main-colors.$text-primary;
+        flex: 1;
+      }
+
+      .active-indicator {
+        font-size: 0.75rem;
+        color: main-colors.$text-secondary;
+        font-style: italic;
+      }
+    }
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+
+    .btn-secondary {
+      padding: 0.75rem 1.5rem;
+      background-color: transparent;
+      color: main-colors.$text-secondary;
+      border: 1px solid main-colors.$border-light;
+      border-radius: layout.$border-radius;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$bg-alt-1;
+        border-color: main-colors.$text-secondary;
+      }
+    }
+
+    .btn-primary {
+      padding: 0.75rem 1.5rem;
+      background-color: main-colors.$brand-primary;
+      color: main-colors.$text-inverse;
+      border: none;
+      border-radius: layout.$border-radius;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$brand-primary-hover;
+      }
+
+      &:disabled {
+        background-color: main-colors.$btn-primary-disabled-bg;
+        color: main-colors.$btn-primary-disabled-text;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// ======================================================================
+// ORDERS BOARD (Kanban Style)
+// ======================================================================
+
+.orders-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+.orders-column {
+  background-color: main-colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-bottom: 2px solid transparent;
+  border-radius: layout.$border-radius layout.$border-radius 0 0;
+
+  .column-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .column-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: main-colors.$text-primary;
+    margin: 0;
+    flex: 1;
+  }
+
+  .column-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.5rem;
+    background-color: main-colors.$bg-main;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  &.column-header-new {
+    border-bottom-color: #3b82f6;
+
+    .column-icon {
+      color: #3b82f6;
+    }
+  }
+
+  &.column-header-accepted {
+    border-bottom-color: #10b981;
+
+    .column-icon {
+      color: #10b981;
+    }
+  }
+
+  &.column-header-declined {
+    border-bottom-color: #ef4444;
+
+    .column-icon {
+      color: #ef4444;
+    }
+  }
+
+  &.column-header-preparing {
+    border-bottom-color: #f59e0b;
+
+    .column-icon {
+      color: #f59e0b;
+    }
+  }
+
+  &.column-header-ready {
+    border-bottom-color: #8b5cf6;
+
+    .column-icon {
+      color: #8b5cf6;
+    }
+  }
+
+  &.column-header-cancelled {
+    border-bottom-color: #6b7280;
+
+    .column-icon {
+      color: #6b7280;
+    }
+  }
+
+  &.column-header-fulfilled {
+    border-bottom-color: #059669;
+
+    .column-icon {
+      color: #059669;
+    }
+  }
+}
+
+.column-content {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: main-colors.$bg-main;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: main-colors.$border-light;
+    border-radius: 3px;
+
+    &:hover {
+      background: main-colors.$text-secondary;
+    }
+  }
+}
+
+.empty-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: main-colors.$text-secondary;
+  font-size: 0.875rem;
+}
+
+// ======================================================================
+// ORDER CARD
+// ======================================================================
+
+.order-card {
+  background-color: main-colors.$bg-alt-1;
+  border-radius: layout.$border-radius;
+  overflow: hidden;
+  box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 6px main-colors.$shadow-color-strong;
+    transform: translateY(-2px);
+  }
+}
+
+.order-card-header {
+  padding: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+
+  .order-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+
+    .order-customer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .customer-icon {
+        width: 1rem;
+        height: 1rem;
+        color: main-colors.$brand-primary;
+      }
+
+      .customer-name {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: main-colors.$text-primary;
+      }
+    }
+
+    .order-time {
+      font-size: 0.75rem;
+      color: main-colors.$text-secondary;
+    }
+  }
+
+  .order-total {
+    font-size: 1rem;
+    font-weight: 700;
+    color: main-colors.$brand-primary;
+  }
+}
+
+.order-card-body {
+  padding: 0 0.75rem 0.75rem;
+  border-top: 1px solid main-colors.$border-light;
+  animation: slideDown 0.2s ease-out;
+}
+
+.order-items {
+  margin-bottom: 0.75rem;
+
+  .items-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: main-colors.$text-secondary;
+    text-transform: uppercase;
+    margin: 0.75rem 0 0.5rem 0;
+  }
+
+  .order-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    border-bottom: 1px solid main-colors.$bg-main;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .item-quantity {
+      font-weight: 700;
+      color: main-colors.$brand-primary;
+      min-width: 2rem;
+    }
+
+    .item-name {
+      flex: 1;
+      color: main-colors.$text-primary;
+    }
+
+    .item-price {
+      font-weight: 600;
+      color: main-colors.$text-primary;
+    }
+  }
+}
+
+.order-notes {
+  margin-bottom: 0.75rem;
+
+  .notes-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: main-colors.$text-secondary;
+    text-transform: uppercase;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .notes-text {
+    font-size: 0.875rem;
+    color: main-colors.$text-primary;
+    background-color: main-colors.$bg-main;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin: 0;
+  }
+}
+
+.order-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+
+  .status-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: main-colors.$text-secondary;
+    text-transform: uppercase;
+  }
+
+  .status-select {
+    padding: 0.5rem;
+    border: 1px solid main-colors.$border-light;
+    border-radius: layout.$border-radius;
+    background-color: main-colors.$bg-surface;
+    color: main-colors.$text-primary;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: main-colors.$brand-primary;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: main-colors.$brand-primary;
+      box-shadow: 0 0 0 3px rgba(238, 91, 43, 0.1);
+    }
+  }
+}
+
+// ======================================================================
+// RESPONSIVE ADJUSTMENTS
+// ======================================================================
+
+@media (max-width: 767px) {
+  .orders-board {
+    grid-template-columns: 1fr;
+  }
+
+  .column-content {
+    max-height: 400px;
+  }
+}
