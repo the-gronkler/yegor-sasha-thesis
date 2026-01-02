@@ -23,6 +23,28 @@ class MenuController extends Controller
 
         return Inertia::render('Employee/Menu', [
             'restaurant' => $restaurant,
+            'isRestaurantAdmin' => $employee->is_admin,
+        ]);
+    }
+
+    /**
+     * Display the menu edit page (for admins).
+     */
+    public function edit(): Response
+    {
+        $employee = Auth::user()->employee;
+
+        // Ensure user is admin (middleware handles this, but good for safety)
+        if (! $employee->is_admin) {
+            abort(403);
+        }
+
+        $restaurant = Restaurant::with(['foodTypes.menuItems' => function ($query) {
+            $query->orderBy('name');
+        }])->findOrFail($employee->restaurant_id);
+
+        return Inertia::render('Employee/MenuEdit', [
+            'restaurant' => $restaurant,
         ]);
     }
 }

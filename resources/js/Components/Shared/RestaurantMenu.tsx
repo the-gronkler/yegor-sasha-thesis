@@ -5,7 +5,7 @@ import { useRestaurantMenu } from '@/Hooks/useRestaurantMenu';
 
 interface Props {
   restaurant: Restaurant;
-  mode?: 'customer' | 'employee';
+  mode?: 'customer' | 'employee' | 'employee-edit';
 }
 
 export default function RestaurantMenu({

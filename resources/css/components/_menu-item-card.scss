@@ -166,5 +166,31 @@
   .employee-actions {
     display: flex;
     align-items: center;
+    gap: 1rem;
+
+    .edit-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid main-colors.$border-light;
+      background-color: main-colors.$bg-surface;
+      color: main-colors.$text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      .icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      &:hover {
+        background-color: main-colors.$bg-alt-1;
+        color: main-colors.$brand-primary;
+        border-color: main-colors.$brand-primary;
+      }
+    }
   }
 }

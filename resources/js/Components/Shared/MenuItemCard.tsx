@@ -3,11 +3,12 @@ import { useCart } from '@/Contexts/CartContext';
 import { router } from '@inertiajs/react';
 import { useAuth } from '@/Hooks/useAuth';
 import Toggle from '@/Components/UI/Toggle';
+import { PencilIcon } from '@heroicons/react/24/outline';
 
 interface MenuItemCardProps {
   item: MenuItem;
   restaurantId: number;
-  mode?: 'customer' | 'employee';
+  mode?: 'customer' | 'employee' | 'employee-edit';
 }
 
 export default function MenuItemCard({
@@ -45,11 +46,18 @@ export default function MenuItemCard({
     });
   };
 
+  const handleEditClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    router.visit(route('employee.restaurant.menu-items.edit', item.id));
+  };
+
   const handleCardClick = () => {
     if (mode === 'customer') {
       router.visit(
         route('restaurants.menu-items.show', [restaurantId, item.id]),
       );
+    } else if (mode === 'employee-edit') {
+      handleEditClick();
     }
   };
 
@@ -68,7 +76,7 @@ export default function MenuItemCard({
   return (
     <div
       className={`menu-item-card ${!isAvailable ? 'unavailable' : ''} ${
-        mode === 'employee' ? 'employee-mode' : ''
+        mode === 'employee' || mode === 'employee-edit' ? 'employee-mode' : ''
       }`}
     >
       <div className="menu-item-content" onClick={handleCardClick}>
@@ -86,7 +94,7 @@ export default function MenuItemCard({
       </div>
 
       <div className="menu-item-actions">
-        {mode === 'customer' ? (
+        {mode === 'customer' && (
           <>
             {quantityInCart > 0 && (
               <button
@@ -110,13 +118,27 @@ export default function MenuItemCard({
               )}
             </button>
           </>
-        ) : (
+        )}
+
+        {mode === 'employee' && (
           <div className="employee-actions">
             <Toggle
               checked={isAvailable}
               onChange={handleAvailabilityToggle}
               label={isAvailable ? 'Available' : 'Unavailable'}
             />
+          </div>
+        )}
+
+        {mode === 'employee-edit' && (
+          <div className="employee-actions">
+            <button
+              className="edit-button"
+              onClick={handleEditClick}
+              aria-label="Edit menu item"
+            >
+              <PencilIcon className="icon" />
+            </button>
           </div>
         )}
       </div>
