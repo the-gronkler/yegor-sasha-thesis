@@ -29,6 +29,8 @@ export default function Toast() {
     if (visible) {
       const timer = setTimeout(() => {
         setVisible(false);
+        // Clear message after fade-out animation completes
+        setTimeout(() => setMessage(null), 300);
       }, 5000); // Auto-hide after 5 seconds
 
       return () => clearTimeout(timer);
@@ -37,6 +39,8 @@ export default function Toast() {
 
   const handleClose = () => {
     setVisible(false);
+    // Clear message after fade-out animation completes
+    setTimeout(() => setMessage(null), 300);
   };
 
   if (!visible || !message) {
@@ -44,7 +48,12 @@ export default function Toast() {
   }
 
   return (
-    <div className={`toast toast-${type} ${visible ? 'toast-visible' : ''}`}>
+    <div
+      className={`toast toast-${type} ${visible ? 'toast-visible' : ''}`}
+      role={type === 'error' ? 'alert' : 'status'}
+      aria-live={type === 'error' ? 'assertive' : 'polite'}
+      aria-atomic="true"
+    >
       <div className="toast-icon">
         {type === 'success' ? (
           <CheckCircleIcon className="icon" />
