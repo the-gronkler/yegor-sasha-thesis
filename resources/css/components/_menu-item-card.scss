@@ -37,7 +37,7 @@
 
   &.employee-mode {
     &.unavailable {
-      background-color: #f3f4f6; // lighter gray
+      background-color: main-colors.$bg-surface; // lighter gray
       color: inherit;
 
       .menu-item-image {

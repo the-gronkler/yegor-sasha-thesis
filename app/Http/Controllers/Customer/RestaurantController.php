@@ -64,7 +64,7 @@ class RestaurantController extends Controller
             ->with([
                 'foodTypes.menuItems' => fn ($q) => $q->orderBy('name'),
                 'foodTypes.menuItems.images',
-                'menuItems.allergens',
+                'foodTypes.menuItems.allergens',
                 'images',
                 'reviews.customer.user',
                 'reviews.images',
