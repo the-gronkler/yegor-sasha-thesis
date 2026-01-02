@@ -36,7 +36,7 @@ class MenuItemController extends Controller
                 'food_type_id' => $menuItem->food_type_id,
                 'images' => $menuItem->images->map(fn ($img) => [
                     'id' => $img->id,
-                    'url' => $img->image,
+                    'url' => $img->url,
                     'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
                 ]),
                 'allergens' => $menuItem->allergens->map(fn ($allergen) => [

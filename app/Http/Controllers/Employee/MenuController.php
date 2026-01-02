@@ -43,7 +43,7 @@ class MenuController extends Controller
         }
 
         $restaurant = Restaurant::with(['foodTypes.menuItems' => function ($query) {
-            $query->orderBy('name');
+            $query->orderBy('name')->with('images');
         }])->findOrFail($employee->restaurant_id);
 
         return Inertia::render('Employee/MenuEdit', [

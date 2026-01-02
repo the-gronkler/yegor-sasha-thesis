@@ -10,7 +10,25 @@ use Inertia\Inertia;
 
 class EmployeeMenuItemController extends Controller
 {
-    public function edit(MenuItem $menuItem)
+    public function show(MenuItem $menuItem)
+    {
+        $user = auth()->user();
+
+        // Ensure the employee belongs to the restaurant of the menu item
+        if (! $user->is_admin && $user->employee?->restaurant_id !== $menuItem->restaurant_id) {
+            abort(403);
+        }
+
+        $menuItem->load(['allergens', 'images', 'restaurant']);
+
+        return Inertia::render('Employee/MenuItem/Show', [
+            'menuItem' => $menuItem,
+            'restaurantName' => $menuItem->restaurant->name,
+            'canEdit' => $user->can('update', $menuItem),
+        ]);
+    }
+
+    public function edit(Request $request, MenuItem $menuItem)
     {
         $this->authorize('update', $menuItem);
 
@@ -24,6 +42,7 @@ class EmployeeMenuItemController extends Controller
             'menuItem' => $menuItem,
             'foodTypes' => $foodTypes,
             'allergens' => $allergens,
+            'queryParams' => $request->query(),
         ]);
     }
 
@@ -39,7 +58,7 @@ class EmployeeMenuItemController extends Controller
                 'required',
                 Rule::exists('food_types', 'id')->where('restaurant_id', $menuItem->restaurant_id),
             ],
-            'is_available' => ['boolean'],
+            'is_available' => ['required', 'boolean'],
             'allergens' => ['array'],
             'allergens.*' => ['exists:allergens,id'],
         ]);

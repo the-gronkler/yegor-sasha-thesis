@@ -51,6 +51,10 @@ export default function MenuItemCard({
     router.visit(route('employee.restaurant.menu-items.edit', item.id));
   };
 
+  const handleEmployeeShowClick = () => {
+    router.visit(route('employee.restaurant.menu-items.show', item.id));
+  };
+
   const handleCardClick = () => {
     if (mode === 'customer') {
       router.visit(
@@ -58,6 +62,8 @@ export default function MenuItemCard({
       );
     } else if (mode === 'employee-edit') {
       handleEditClick();
+    } else if (mode === 'employee') {
+      handleEmployeeShowClick();
     }
   };
 

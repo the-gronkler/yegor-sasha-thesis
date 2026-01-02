@@ -8,13 +8,21 @@ interface Props {
   menuItem: MenuItem;
   foodTypes: FoodType[];
   allergens: Allergen[];
+  queryParams?: { from?: string };
 }
 
 export default function EditMenuItem({
   menuItem,
   foodTypes,
   allergens,
+  queryParams,
 }: Props) {
+  // Determine back URL based on query param
+  const backUrl =
+    queryParams?.from === 'show'
+      ? route('employee.restaurant.menu-items.show', menuItem.id)
+      : route('employee.menu.edit');
+
   const { data, setData, put, processing, errors } = useForm({
     name: menuItem.name,
     description: menuItem.description || '',
@@ -48,11 +56,7 @@ export default function EditMenuItem({
       <div className="menu-item-edit-page">
         <div className="page-header">
           <div className="header-left">
-            <Link
-              href={route('employee.menu.edit')}
-              className="back-link"
-              aria-label="Back to Menu"
-            >
+            <Link href={backUrl} className="back-link" aria-label="Back">
               <ArrowLeftIcon className="icon" />
             </Link>
             <h1 className="page-title">Edit Item</h1>
