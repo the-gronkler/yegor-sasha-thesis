@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, router } from '@inertiajs/react';
 import {
@@ -67,9 +67,15 @@ export default function OrdersIndex({
   const [showFilters, setShowFilters] = useState(false);
 
   // Ensure currentFilter is always an array (safety check)
+  // Ensure currentFilter is always an array (safety check)
   const filterArray = Array.isArray(currentFilter) ? currentFilter : [];
   const [selectedStatuses, setSelectedStatuses] =
     useState<number[]>(filterArray);
+
+  // Sync selectedStatuses with currentFilter when it changes (from server response)
+  useEffect(() => {
+    setSelectedStatuses(filterArray);
+  }, [JSON.stringify(currentFilter)]); // Use stringified version to avoid reference changes
 
   const isDefaultFilter =
     JSON.stringify([...filterArray].sort()) ===
@@ -107,6 +113,8 @@ export default function OrdersIndex({
   };
 
   const showActiveOnly = () => {
+    // Update checkboxes to match active statuses
+    setSelectedStatuses(defaultActiveStatuses);
     router.get(
       route('employee.orders.index'),
       {},
@@ -116,6 +124,9 @@ export default function OrdersIndex({
   };
 
   const showAllOrders = () => {
+    // Update checkboxes to select all statuses
+    const allStatusIds = availableStatuses.map((s) => s.id);
+    setSelectedStatuses(allStatusIds);
     router.get(
       route('employee.orders.index'),
       { statuses: 'all' },
