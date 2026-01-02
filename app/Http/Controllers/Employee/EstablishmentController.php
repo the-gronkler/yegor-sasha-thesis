@@ -237,8 +237,8 @@ class EstablishmentController extends Controller
             'address' => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:1000'],
             'opening_hours' => ['nullable', 'string', 'max:500'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'latitude' => ['nullable', 'numeric', 'min:-90', 'max:90'],
+            'longitude' => ['nullable', 'numeric', 'min:-180', 'max:180'],
         ]);
 
         $restaurant->update($validated);
@@ -263,17 +263,26 @@ class EstablishmentController extends Controller
         // Store the image
         $path = $request->file('image')->store('restaurants', self::RESTAURANT_IMAGES_DISK);
 
-        // Create image record
-        $image = Image::create([
-            'restaurant_id' => $restaurant->id,
-            'image' => $path,
-            'description' => $validated['description'] ?? null,
-            'is_primary_for_restaurant' => $validated['is_primary'] ?? false,
-        ]);
+        try {
+            // Wrap database operations in transaction
+            DB::transaction(function () use ($validated, $restaurant, $path) {
+                // Create image record
+                $image = Image::create([
+                    'restaurant_id' => $restaurant->id,
+                    'image' => $path,
+                    'description' => $validated['description'] ?? null,
+                    'is_primary_for_restaurant' => $validated['is_primary'] ?? false,
+                ]);
 
-        // If this is set as primary, update all other images
-        if ($validated['is_primary'] ?? false) {
-            $this->setRestaurantPrimaryImage($restaurant, $image);
+                // If this is set as primary, update all other images
+                if ($validated['is_primary'] ?? false) {
+                    $this->setRestaurantPrimaryImage($restaurant, $image);
+                }
+            });
+        } catch (\Throwable $e) {
+            // Roll back stored file if database operations fail
+            Storage::disk(self::RESTAURANT_IMAGES_DISK)->delete($path);
+            throw $e;
         }
 
         return back()->with('success', 'Image uploaded successfully.');

@@ -8,14 +8,8 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { PageProps } from '@/types';
+import { Image } from '@/types/models';
 import Button from '@/Components/UI/Button';
-
-interface Image {
-  id: number;
-  url: string;
-  is_primary_for_restaurant: boolean;
-  description: string | null;
-}
 
 interface PhotosProps extends PageProps {
   images: Image[];
