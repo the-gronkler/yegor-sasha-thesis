@@ -67,6 +67,7 @@ export interface MenuItem {
   name: string;
   price: number;
   description: string | null;
+  is_available: boolean;
   images?: Image[];
   allergens?: Allergen[];
   pivot?: {

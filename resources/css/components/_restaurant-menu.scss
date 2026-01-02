@@ -1,0 +1,33 @@
+@use '../variables/main-colors';
+
+.restaurant-menu-list {
+  .menu-search {
+    margin: 0 1rem 1.5rem;
+  }
+
+  .menu-category {
+    margin: 0 1rem 2rem;
+
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      border-bottom: 4px solid main-colors.$border-light;
+      display: inline-block;
+      padding-right: 2rem;
+      width: 100%;
+      color: main-colors.$text-primary;
+    }
+
+    .menu-items-list {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+    color: main-colors.$text-secondary;
+  }
+}

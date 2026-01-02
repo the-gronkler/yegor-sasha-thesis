@@ -71,6 +71,7 @@ class MenuItemFactory extends Factory
             'price' => $this->faker->randomFloat(2, 1, 100),
             'description' => self::$menuItemDescriptions[array_rand(self::$menuItemDescriptions)],
             'food_type_id' => FoodType::factory(),
+            'is_available' => $this->faker->boolean(80), // 80% chance of being available
         ];
     }
 }

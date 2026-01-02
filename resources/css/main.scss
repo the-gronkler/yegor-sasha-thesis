@@ -21,6 +21,8 @@
 @use 'components/modal';
 @use 'components/auth-form';
 @use 'components/restaurant-card';
+@use 'components/restaurant-menu';
+@use 'components/toggle';
 
 // Pages
 @use 'pages/restaurant-show';
