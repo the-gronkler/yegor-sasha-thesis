@@ -924,12 +924,13 @@
     color: exception-colors.$status-error;
 
     &:hover {
-      background-color: rgba(220, 38, 38, 0.1);
+      background-color: exception-colors.$status-error-bg;
     }
   }
 }
 
-.add-worker-form {
+.add-worker-form,
+.upload-form {
   padding: 1rem;
   background-color: main-colors.$bg-alt-1;
   border-radius: layout.$border-radius;

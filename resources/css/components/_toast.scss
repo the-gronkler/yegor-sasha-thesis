@@ -1,0 +1,125 @@
+@use '../variables/main-colors';
+@use '../variables/layout';
+@use '../variables/exception-colors';
+
+// ======================================================================
+// TOAST NOTIFICATIONS
+// ======================================================================
+
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 320px;
+  max-width: 500px;
+  padding: 1rem;
+  background-color: main-colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transform: translateX(calc(100% + 2rem)) scale(0.95);
+  transition:
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+
+  &.toast-visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: all;
+  }
+
+  .toast-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  .toast-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+
+    .toast-message {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.5;
+      color: main-colors.$text-primary;
+      word-wrap: break-word;
+    }
+  }
+
+  .toast-close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    color: main-colors.$text-secondary;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+
+    .icon {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    &:hover {
+      background-color: main-colors.$bg-alt-1;
+      color: main-colors.$text-primary;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px main-colors.$brand-primary-light;
+    }
+  }
+
+  // Success variant
+  &.toast-success {
+    border-left: 4px solid exception-colors.$status-success;
+
+    .toast-icon .icon {
+      color: exception-colors.$status-success;
+    }
+  }
+
+  // Error variant
+  &.toast-error {
+    border-left: 4px solid exception-colors.$status-error;
+
+    .toast-icon .icon {
+      color: exception-colors.$status-error;
+    }
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 640px) {
+  .toast {
+    top: auto;
+    bottom: 5rem; // Above bottom navigation
+    right: 1rem;
+    left: 1rem;
+    min-width: auto;
+    max-width: none;
+  }
+}

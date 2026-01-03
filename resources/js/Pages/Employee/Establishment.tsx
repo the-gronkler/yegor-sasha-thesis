@@ -1,5 +1,5 @@
 import AppLayout from '@/Layouts/AppLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
   UsersIcon,
   BuildingStorefrontIcon,
@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
+import { FormEventHandler } from 'react';
 
 interface EstablishmentIndexProps extends PageProps {
   restaurant: Restaurant;
@@ -22,6 +23,11 @@ export default function EstablishmentIndex({
   restaurant,
   stats,
 }: EstablishmentIndexProps) {
+  const handleLogout: FormEventHandler = (e) => {
+    e.preventDefault();
+    router.post(route('logout'));
+  };
+
   return (
     <AppLayout>
       <Head title="Establishment Management" />
@@ -30,6 +36,9 @@ export default function EstablishmentIndex({
         {/* Header */}
         <div className="profile-header">
           <h1 className="profile-title">Establishment</h1>
+          <button onClick={handleLogout} className="logout-button">
+            Logout
+          </button>
         </div>
 
         {/* Restaurant Info Card */}

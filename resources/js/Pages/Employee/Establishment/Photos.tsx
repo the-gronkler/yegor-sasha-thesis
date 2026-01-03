@@ -8,14 +8,8 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { PageProps } from '@/types';
+import { Image } from '@/types/models';
 import Button from '@/Components/UI/Button';
-
-interface Image {
-  id: number;
-  url: string;
-  is_primary_for_restaurant: boolean;
-  description: string | null;
-}
 
 interface PhotosProps extends PageProps {
   images: Image[];
@@ -81,6 +75,7 @@ export default function Photos({ images }: PhotosProps) {
               type="button"
               onClick={() => setShowUploadForm(!showUploadForm)}
               className="btn-icon btn-add"
+              aria-label="Add new photo"
             >
               <PlusIcon className="icon" />
             </button>
@@ -90,7 +85,7 @@ export default function Photos({ images }: PhotosProps) {
           {showUploadForm && (
             <form
               onSubmit={handleUploadImage}
-              className="profile-form add-worker-form"
+              className="profile-form upload-form"
             >
               <div className="form-group">
                 <label htmlFor="image">Upload Image</label>
@@ -165,6 +160,7 @@ export default function Photos({ images }: PhotosProps) {
                       type="button"
                       onClick={() => handleSetPrimary(image.id)}
                       className="btn-photo-action"
+                      aria-label={`Set this photo as primary image for restaurant${image.description ? `: ${image.description}` : ''}`}
                     >
                       Set as Primary
                     </button>
@@ -173,6 +169,7 @@ export default function Photos({ images }: PhotosProps) {
                     type="button"
                     onClick={() => handleDeleteImage(image.id)}
                     className="btn-photo-action btn-danger"
+                    aria-label={`Delete photo${image.description ? `: ${image.description}` : ''}`}
                   >
                     <TrashIcon className="icon" />
                   </button>

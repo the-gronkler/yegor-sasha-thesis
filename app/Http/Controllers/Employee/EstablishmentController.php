@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Image;
+use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,11 @@ use Inertia\Response;
 class EstablishmentController extends Controller
 {
     /**
+     * Storage disk for restaurant images.
+     */
+    private const RESTAURANT_IMAGES_DISK = 'r2';
+
+    /**
      * Display the establishment management page (admins only).
      */
     public function index(Request $request): Response
@@ -25,18 +31,18 @@ class EstablishmentController extends Controller
         $user = $request->user();
         $restaurant = $user->employee->restaurant;
 
-        // Load restaurant with related data
-        $restaurant->load([
-            'employees.user',
+        // Load counts for statistics (more efficient than loading full relationships)
+        $restaurant->loadCount([
+            'employees',
             'images',
             'menuItems',
         ]);
 
         // Count statistics
         $stats = [
-            'employeeCount' => $restaurant->employees->count(),
-            'menuItemCount' => $restaurant->menuItems->count(),
-            'imageCount' => $restaurant->images->count(),
+            'employeeCount' => $restaurant->employees_count,
+            'menuItemCount' => $restaurant->menu_items_count,
+            'imageCount' => $restaurant->images_count,
         ];
 
         return Inertia::render('Employee/Establishment', [
@@ -162,15 +168,13 @@ class EstablishmentController extends Controller
             'is_admin' => ['required', 'boolean'],
         ]);
 
-        // Find the employee record
-        $employee = Employee::where('user_id', $user->id)
-            ->where('restaurant_id', $restaurant->id)
-            ->firstOrFail();
+        // Verify and get the employee record (aborts with 403 if not found)
+        $employee = $this->getEmployeeForRestaurant($user, $restaurant);
 
         // Prevent removing own admin privileges
         if ($employee->user_id === $currentUser->id && $validated['is_admin'] === false) {
             return back()->withErrors([
-                'error' => 'You cannot remove your own admin privileges.',
+                'is_admin' => 'You cannot remove your own admin privileges.',
             ]);
         }
 
@@ -195,19 +199,28 @@ class EstablishmentController extends Controller
         $currentUser = $request->user();
         $restaurant = $currentUser->employee->restaurant;
 
-        // Find the employee record
-        $employee = Employee::where('user_id', $user->id)
-            ->where('restaurant_id', $restaurant->id)
-            ->firstOrFail();
+        // Verify and get the employee record (aborts with 403 if not found)
+        $employee = $this->getEmployeeForRestaurant($user, $restaurant);
 
         // Prevent self-deletion
         if ($employee->user_id === $currentUser->id) {
-            return back()->withErrors([
-                'error' => 'You cannot remove yourself.',
-            ]);
+            return back()->with('error', 'You cannot remove yourself.');
         }
 
-        $employee->delete();
+        // Delete employee record and clean up orphaned user account if needed
+        DB::transaction(function () use ($employee, $user) {
+            // Delete the employee record for this restaurant
+            $employee->delete();
+
+            // If the user has no other employee records or customer record, delete the user
+            // to avoid orphaned accounts that can't be cleaned up
+            $hasOtherEmployeeRecords = Employee::where('user_id', $user->id)->exists();
+            $hasCustomerRecord = $user->customer()->exists();
+
+            if (! $hasOtherEmployeeRecords && ! $hasCustomerRecord) {
+                $user->delete();
+            }
+        });
 
         return back()->with('success', 'Employee removed successfully.');
     }
@@ -225,8 +238,8 @@ class EstablishmentController extends Controller
             'address' => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:1000'],
             'opening_hours' => ['nullable', 'string', 'max:500'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'latitude' => ['nullable', 'numeric', 'min:-90', 'max:90'],
+            'longitude' => ['nullable', 'numeric', 'min:-180', 'max:180'],
         ]);
 
         $restaurant->update($validated);
@@ -249,21 +262,29 @@ class EstablishmentController extends Controller
         ]);
 
         // Store the image
-        $path = $request->file('image')->store('restaurants', 'r2');
+        $path = $request->file('image')->store('restaurants', self::RESTAURANT_IMAGES_DISK);
 
-        // If this is set as primary, unset other primary images
-        if ($validated['is_primary'] ?? false) {
-            Image::where('restaurant_id', $restaurant->id)
-                ->update(['is_primary_for_restaurant' => false]);
+        try {
+            // Wrap database operations in transaction
+            DB::transaction(function () use ($validated, $restaurant, $path) {
+                // Create image record
+                $image = Image::create([
+                    'restaurant_id' => $restaurant->id,
+                    'image' => $path,
+                    'description' => $validated['description'] ?? null,
+                    'is_primary_for_restaurant' => $validated['is_primary'] ?? false,
+                ]);
+
+                // If this is set as primary, update all other images
+                if ($validated['is_primary'] ?? false) {
+                    $this->setRestaurantPrimaryImage($restaurant, $image);
+                }
+            });
+        } catch (\Throwable $e) {
+            // Roll back stored file if database operations fail
+            Storage::disk(self::RESTAURANT_IMAGES_DISK)->delete($path);
+            throw $e;
         }
-
-        // Create image record
-        Image::create([
-            'restaurant_id' => $restaurant->id,
-            'image' => $path,
-            'description' => $validated['description'] ?? null,
-            'is_primary_for_restaurant' => $validated['is_primary'] ?? false,
-        ]);
 
         return back()->with('success', 'Image uploaded successfully.');
     }
@@ -277,14 +298,16 @@ class EstablishmentController extends Controller
         $restaurant = $user->employee->restaurant;
 
         // Ensure the image belongs to this restaurant
-        if ($image->restaurant_id !== $restaurant->id) {
-            abort(403);
-        }
+        $this->ensureImageBelongsToRestaurant($image, $restaurant);
 
-        // Delete the file from storage
-        Storage::disk('r2')->delete($image->image);
+        // Store the path before deleting the database record
+        $path = $image->image;
 
+        // Delete the database record first
         $image->delete();
+
+        // Then delete the file from storage
+        Storage::disk(self::RESTAURANT_IMAGES_DISK)->delete($path);
 
         return back()->with('success', 'Image deleted successfully.');
     }
@@ -298,20 +321,65 @@ class EstablishmentController extends Controller
         $restaurant = $user->employee->restaurant;
 
         // Ensure the image belongs to this restaurant
-        if ($image->restaurant_id !== $restaurant->id) {
-            abort(403);
-        }
+        $this->ensureImageBelongsToRestaurant($image, $restaurant);
 
-        DB::transaction(function () use ($restaurant, $image) {
-            // Unset all primary images for this restaurant
-            Image::where('restaurant_id', $restaurant->id)
-                ->update(['is_primary_for_restaurant' => false]);
-
-            // Set this image as primary
-            $image->update(['is_primary_for_restaurant' => true]);
-        });
+        // Set this image as primary and unset others
+        $this->setRestaurantPrimaryImage($restaurant, $image);
 
         return back()->with('success', 'Primary image updated successfully.');
+    }
+
+    /**
+     * Ensure the image belongs to the given restaurant.
+     *
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
+    private function ensureImageBelongsToRestaurant(Image $image, Restaurant $restaurant): void
+    {
+        if ($image->restaurant_id !== $restaurant->id) {
+            abort(403, 'This image does not belong to your restaurant.');
+        }
+    }
+
+    /**
+     * Get employee record for a user, ensuring they belong to the restaurant.
+     *
+     * This method prevents information leakage by returning a 403 Forbidden
+     * instead of 404 Not Found when the employee doesn't exist, making it
+     * impossible for attackers to enumerate user IDs.
+     *
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
+    private function getEmployeeForRestaurant(User $user, Restaurant $restaurant): Employee
+    {
+        $employee = Employee::where('user_id', $user->id)
+            ->where('restaurant_id', $restaurant->id)
+            ->first();
+
+        if (! $employee) {
+            abort(403, 'This user is not an employee of your restaurant.');
+        }
+
+        return $employee;
+    }
+
+    /**
+     * Set the primary image for a restaurant.
+     *
+     * Atomically updates all images for the restaurant so that only the
+     * specified image is marked as primary. Uses a single UPDATE query
+     * with a CASE statement for optimal performance.
+     */
+    private function setRestaurantPrimaryImage(Restaurant $restaurant, Image $image): void
+    {
+        Image::where('restaurant_id', $restaurant->id)
+            ->update([
+                'is_primary_for_restaurant' => DB::raw(
+                    'CASE WHEN id = '.(int) $image->id.' THEN TRUE ELSE FALSE END'
+                ),
+            ]);
     }
 
     /**

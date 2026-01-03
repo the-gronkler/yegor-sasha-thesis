@@ -47,9 +47,9 @@ export interface Employee {
   user_id: number;
   restaurant_id: number;
   is_admin: boolean;
-  name?: string;
-  surname?: string | null;
-  email?: string;
+  name: string;
+  surname: string | null;
+  email: string;
   created_at: string;
   updated_at: string;
 }
