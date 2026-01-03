@@ -42,6 +42,10 @@ class HandleInertiaRequests extends Middleware
                 'restaurant_id' => $request->user()?->employee?->restaurant_id,
                 'isRestaurantAdmin' => $request->user()?->employee?->is_admin ?? false,
             ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
             // Expose other keys as needed below:
             // TODO: check if we should not expose this if request is not a map related request
             'mapboxPublicKey' => config('services.mapbox.public_key'),
