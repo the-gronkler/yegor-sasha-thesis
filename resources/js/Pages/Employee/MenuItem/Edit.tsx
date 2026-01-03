@@ -26,7 +26,7 @@ export default function EditMenuItem({
   const { data, setData, put, processing, errors } = useForm({
     name: menuItem.name,
     description: menuItem.description || '',
-    price: menuItem.price as number | string,
+    price: menuItem.price,
     food_type_id: menuItem.food_type_id,
     is_available: menuItem.is_available,
     allergens: menuItem.allergens?.map((a) => a.id) || [],

@@ -15,14 +15,8 @@ class MenuController extends Controller
      */
     public function index(): Response
     {
+        $restaurant = $this->getEmployeeRestaurant(['images', 'allergens']);
         $employee = Auth::user()->employee;
-
-        if (! $employee || $employee->restaurant_id === null) {
-            abort(404);
-        }
-        $restaurant = Restaurant::with(['foodTypes.menuItems' => function ($query) {
-            $query->orderBy('name')->with('images');
-        }])->findOrFail($employee->restaurant_id);
 
         return Inertia::render('Employee/Menu', [
             'restaurant' => $restaurant,
@@ -35,19 +29,26 @@ class MenuController extends Controller
      */
     public function edit(): Response
     {
-        $employee = Auth::user()->employee;
-
-        // Ensure user is admin (middleware handles this, but good for safety)
-        if (! $employee->is_admin) {
-            abort(403);
-        }
-
-        $restaurant = Restaurant::with(['foodTypes.menuItems' => function ($query) {
-            $query->orderBy('name')->with('images');
-        }])->findOrFail($employee->restaurant_id);
+        $restaurant = $this->getEmployeeRestaurant(['images', 'allergens']);
 
         return Inertia::render('Employee/MenuEdit', [
             'restaurant' => $restaurant,
         ]);
+    }
+
+    /**
+     * Get the restaurant for the current employee with specified menu item relations.
+     */
+    private function getEmployeeRestaurant(array $menuItemRelations = ['images', 'allergens']): Restaurant
+    {
+        $employee = Auth::user()->employee;
+
+        if (! $employee || $employee->restaurant_id === null) {
+            abort(403, 'You must be assigned to a restaurant to access this page');
+        }
+
+        return Restaurant::with(['foodTypes.menuItems' => function ($query) use ($menuItemRelations) {
+            $query->orderBy('name')->with($menuItemRelations);
+        }])->findOrFail($employee->restaurant_id);
     }
 }

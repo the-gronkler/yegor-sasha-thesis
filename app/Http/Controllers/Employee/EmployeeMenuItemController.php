@@ -14,10 +14,7 @@ class EmployeeMenuItemController extends Controller
     {
         $user = auth()->user();
 
-        // Ensure the employee belongs to the restaurant of the menu item
-        if (! $user->is_admin && $user->employee?->restaurant_id !== $menuItem->restaurant_id) {
-            abort(403);
-        }
+        $this->authorize('update', $menuItem);
 
         $menuItem->load(['allergens', 'images', 'restaurant']);
 
