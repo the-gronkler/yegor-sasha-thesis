@@ -13,7 +13,7 @@ export default function Toast() {
   const [message, setMessage] = useState<string | null>(null);
   const [type, setType] = useState<'success' | 'error'>('success');
 
-  // Track all timers for proper cleanup (browser setTimeout returns number)
+  // All timers: 
   const timersRef = useRef<number[]>([]);
   const isMountedRef = useRef(true);
 
