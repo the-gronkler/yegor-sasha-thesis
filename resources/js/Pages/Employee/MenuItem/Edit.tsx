@@ -103,9 +103,11 @@ export default function EditMenuItem({
                 id="price"
                 step="0.01"
                 min="0"
+                required
                 value={data.price}
                 onChange={(e) => {
                   const value = e.target.value;
+                  // @ts-ignore - Inertia's useForm types are strict about the initial type, but we need to allow empty string for controlled inputs
                   setData('price', value === '' ? '' : parseFloat(value));
                 }}
                 className={errors.price ? 'error' : ''}
@@ -121,12 +123,9 @@ export default function EditMenuItem({
               <select
                 id="food_type_id"
                 value={data.food_type_id}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (!Number.isNaN(value)) {
-                    setData('food_type_id', value);
-                  }
-                }}
+                onChange={(e) =>
+                  setData('food_type_id', Number(e.target.value))
+                }
                 className={errors.food_type_id ? 'error' : ''}
               >
                 {foodTypes.map((type) => (
