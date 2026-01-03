@@ -33,10 +33,16 @@ class CartController extends Controller
     public function addItem(Request $request)
     {
         $data = $request->validate([
-            'menu_item_id' => 'required|integer|exists:menu_items,id',
+            'menu_item_id' => 'required|integer',
             'quantity' => 'required|integer|min:1',
             'restaurant_id' => 'required|integer|exists:restaurants,id',
         ]);
+
+        // Check availability
+        $menuItem = \App\Models\MenuItem::find($data['menu_item_id']);
+        if (! $menuItem || ! $menuItem->is_available) {
+            return back()->with('error', 'This item is currently unavailable.');
+        }
 
         $customer = $request->user()->customer;
 
@@ -50,9 +56,10 @@ class CartController extends Controller
         );
 
         // Sync item quantity (will update if exists, create if not)
-        $currentQuantity = $order->menuItems()
+        $currentQuantity = \Illuminate\Support\Facades\DB::table('order_items')
+            ->where('order_id', $order->id)
             ->where('menu_item_id', $data['menu_item_id'])
-            ->first()?->pivot?->quantity ?? 0;
+            ->value('quantity') ?? 0;
 
         $newQuantity = $currentQuantity + $data['quantity'];
 

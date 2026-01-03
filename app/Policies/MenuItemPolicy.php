@@ -56,7 +56,15 @@ class MenuItemPolicy
      */
     public function update(User $user, MenuItem $menuItem): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id && $user->employee->is_admin);
+    }
+
+    /**
+     * Determine whether the user can update the status (availability) of the model.
+     */
+    public function updateStatus(User $user, MenuItem $menuItem): bool
+    {
+        return $user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id;
     }
 
     /**

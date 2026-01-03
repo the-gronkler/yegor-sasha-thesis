@@ -21,6 +21,8 @@
 @use 'components/modal';
 @use 'components/auth-form';
 @use 'components/restaurant-card';
+@use 'components/restaurant-menu';
+@use 'components/toggle';
 @use 'components/toast';
 
 // Pages
@@ -35,4 +37,5 @@
 @use 'pages/orders-index';
 @use 'pages/order-show';
 @use 'pages/error';
+@use 'pages/menu-item-edit';
 @use 'pages/orders';

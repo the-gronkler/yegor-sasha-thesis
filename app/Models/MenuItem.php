@@ -18,7 +18,15 @@ class MenuItem extends Model
         'price',
         'description',
         'food_type_id',
+        'is_available',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_available' => 'boolean',
+        ];
+    }
 
     public function restaurant(): BelongsTo
     {

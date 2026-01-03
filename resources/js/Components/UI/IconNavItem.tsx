@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import React from 'react';
 
 interface BaseIconNavProps {
   active?: boolean;
