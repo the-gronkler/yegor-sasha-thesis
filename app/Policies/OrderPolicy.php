@@ -39,6 +39,10 @@ class OrderPolicy
 
     /**
      * Determine whether the user can update the model.
+     *
+     * Security: Employees can only update orders belonging to their restaurant.
+     * The check verifies $user->employee->restaurant_id === $order->restaurant_id
+     * to prevent cross-restaurant order manipulation.
      */
     public function update(User $user, Order $order): bool
     {

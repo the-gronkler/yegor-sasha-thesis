@@ -60,12 +60,10 @@ class EmployeeOrderController extends Controller
             ->map(function ($order) {
                 return [
                     'id' => $order->id,
-                    'customer_name' => $order->customer->user->name.' '.($order->customer->user->surname ?? ''),
+                    'customer_name' => trim($order->customer->user->name.' '.($order->customer->user->surname ?? '')),
                     'customer_email' => $order->customer->user->email,
-                    'status_id' => $order->order_status_id,
-                    'status_name' => $order->order_status_id instanceof OrderStatusEnum
-                        ? $order->order_status_id->label()
-                        : OrderStatusEnum::from($order->order_status_id)->label(),
+                    'status_id' => $order->order_status_id->value,
+                    'status_name' => $order->order_status_id->label(),
                     'time_placed' => $order->time_placed,
                     'notes' => $order->notes,
                     'items' => $order->menuItems->map(fn ($item) => [
@@ -74,7 +72,7 @@ class EmployeeOrderController extends Controller
                         'quantity' => $item->pivot->quantity,
                         'price' => $item->price,
                     ]),
-                    'total' => $order->menuItems->sum(fn ($item) => $item->price * $item->pivot->quantity),
+                    'total' => $order->total,
                 ];
             });
 
@@ -121,6 +119,7 @@ class EmployeeOrderController extends Controller
      */
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
+        // Authorization check verifies the employee belongs to the order's restaurant
         $this->authorize('update', $order);
 
         $validated = $request->validate([

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, router } from '@inertiajs/react';
 import {
@@ -67,25 +67,40 @@ export default function OrdersIndex({
   const [showFilters, setShowFilters] = useState(false);
 
   // Ensure currentFilter is always an array (safety check)
-  // Ensure currentFilter is always an array (safety check)
   const filterArray = Array.isArray(currentFilter) ? currentFilter : [];
+
+  // Create a stable reference for the filter array
+  const filterKey = useMemo(
+    () => [...filterArray].sort((a, b) => a - b).join(','),
+    [filterArray.join(',')],
+  );
+
   const [selectedStatuses, setSelectedStatuses] =
     useState<number[]>(filterArray);
 
   // Sync selectedStatuses with currentFilter when it changes (from server response)
   useEffect(() => {
     setSelectedStatuses(filterArray);
-  }, [JSON.stringify(currentFilter)]); // Use stringified version to avoid reference changes
+  }, [filterKey]);
 
-  const isDefaultFilter =
-    JSON.stringify([...filterArray].sort()) ===
-    JSON.stringify([...defaultActiveStatuses].sort());
+  // Create stable keys for filter comparisons
+  const defaultFilterKey = useMemo(
+    () => [...defaultActiveStatuses].sort((a, b) => a - b).join(','),
+    [defaultActiveStatuses.join(',')],
+  );
 
-  // Check if "All Orders" filter is active (all statuses except InCart)
-  const allStatusIds = availableStatuses.map((s) => s.id);
-  const isAllOrders =
-    JSON.stringify([...filterArray].sort()) ===
-    JSON.stringify([...allStatusIds].sort());
+  const allStatusIds = useMemo(
+    () => availableStatuses.map((s) => s.id),
+    [availableStatuses.length],
+  );
+
+  const allStatusKey = useMemo(
+    () => [...allStatusIds].sort((a, b) => a - b).join(','),
+    [allStatusIds.join(',')],
+  );
+
+  const isDefaultFilter = filterKey === defaultFilterKey;
+  const isAllOrders = filterKey === allStatusKey;
 
   const handleStatusChange = (orderId: number, newStatusId: number) => {
     router.put(
@@ -125,7 +140,6 @@ export default function OrdersIndex({
 
   const showAllOrders = () => {
     // Update checkboxes to select all statuses
-    const allStatusIds = availableStatuses.map((s) => s.id);
     setSelectedStatuses(allStatusIds);
     router.get(
       route('employee.orders.index'),

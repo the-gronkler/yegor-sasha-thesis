@@ -279,58 +279,58 @@
   }
 
   &.column-header-new {
-    border-bottom-color: #3b82f6;
+    border-bottom-color: exception-colors.$order-status-new;
 
     .column-icon {
-      color: #3b82f6;
+      color: exception-colors.$order-status-new;
     }
   }
 
   &.column-header-accepted {
-    border-bottom-color: #10b981;
+    border-bottom-color: exception-colors.$order-status-accepted;
 
     .column-icon {
-      color: #10b981;
+      color: exception-colors.$order-status-accepted;
     }
   }
 
   &.column-header-declined {
-    border-bottom-color: #ef4444;
+    border-bottom-color: exception-colors.$order-status-declined;
 
     .column-icon {
-      color: #ef4444;
+      color: exception-colors.$order-status-declined;
     }
   }
 
   &.column-header-preparing {
-    border-bottom-color: #f59e0b;
+    border-bottom-color: exception-colors.$order-status-preparing;
 
     .column-icon {
-      color: #f59e0b;
+      color: exception-colors.$order-status-preparing;
     }
   }
 
   &.column-header-ready {
-    border-bottom-color: #8b5cf6;
+    border-bottom-color: exception-colors.$order-status-ready;
 
     .column-icon {
-      color: #8b5cf6;
+      color: exception-colors.$order-status-ready;
     }
   }
 
   &.column-header-cancelled {
-    border-bottom-color: #6b7280;
+    border-bottom-color: exception-colors.$order-status-cancelled;
 
     .column-icon {
-      color: #6b7280;
+      color: exception-colors.$order-status-cancelled;
     }
   }
 
   &.column-header-fulfilled {
-    border-bottom-color: #059669;
+    border-bottom-color: exception-colors.$order-status-fulfilled;
 
     .column-icon {
-      color: #059669;
+      color: exception-colors.$order-status-fulfilled;
     }
   }
 }
@@ -342,7 +342,9 @@
   flex-direction: column;
   gap: 0.75rem;
   overflow-y: auto;
-  max-height: calc(100vh - 300px);
+  overflow-x: hidden;
+  max-height: calc(100vh - 280px);
+  min-height: 300px;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -380,9 +382,13 @@
 .order-card {
   background-color: main-colors.$bg-alt-1;
   border-radius: layout.$border-radius;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-height: fit-content;
 
   &:hover {
     box-shadow: 0 4px 6px main-colors.$shadow-color-strong;
@@ -394,6 +400,8 @@
   padding: 0.75rem;
   cursor: pointer;
   user-select: none;
+  flex-shrink: 0;
+  min-height: 80px;
 
   .order-info {
     display: flex;
@@ -436,6 +444,27 @@
   padding: 0 0.75rem 0.75rem;
   border-top: 1px solid main-colors.$border-light;
   animation: slideDown 0.2s ease-out;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: main-colors.$bg-alt-1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: main-colors.$border-light;
+    border-radius: 3px;
+
+    &:hover {
+      background: main-colors.$text-secondary;
+    }
+  }
 }
 
 .order-items {
@@ -531,7 +560,7 @@
     &:focus {
       outline: none;
       border-color: main-colors.$brand-primary;
-      box-shadow: 0 0 0 3px rgba(238, 91, 43, 0.1);
+      box-shadow: 0 0 0 3px main-colors.$focus-ring-primary;
     }
   }
 }
@@ -546,6 +575,11 @@
   }
 
   .column-content {
-    max-height: 400px;
+    max-height: 500px;
+    min-height: 200px;
+  }
+
+  .order-card-body {
+    max-height: 300px;
   }
 }
