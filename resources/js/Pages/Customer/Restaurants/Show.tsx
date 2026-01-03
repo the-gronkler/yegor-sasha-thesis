@@ -1,14 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import StarRating from '@/Components/Shared/StarRating';
 import RestaurantMenu from '@/Components/Shared/RestaurantMenu';
+import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
 import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
 import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
-import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
-import { useState } from 'react';
 import { useAuth } from '@/Hooks/useAuth';
 
 interface RestaurantShowProps extends PageProps {
@@ -59,7 +59,7 @@ export default function RestaurantShow({
           style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
         >
           <div className="banner-actions">
-            <Link href={route('restaurants.index')} className="back-button">
+            <Link href={route('map.index')} className="back-button">
               <ArrowLeftIcon className="icon" />
             </Link>
           </div>

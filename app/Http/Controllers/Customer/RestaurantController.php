@@ -20,32 +20,6 @@ class RestaurantController extends Controller
     }
 
     /**
-     * Display a listing of restaurants (e.g., the "main page").
-     */
-    public function index(Request $request)
-    {
-        $this->authorize('viewAny', Restaurant::class);
-
-        // Try to get last known coordinates from session
-        $geo = $this->geoService->getValidGeoFromSession($request);
-        $lat = $geo['lat'] ?? null;
-        $lng = $geo['lng'] ?? null;
-
-        // Build query with optional distance calculation
-        $restaurants = Restaurant::query()
-            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
-            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
-            ->with(['images', 'foodTypes.menuItems'])
-            ->latest('rating')
-            ->get()
-            ->map(fn ($restaurant) => $this->formatRestaurant($restaurant));
-
-        return Inertia::render('Customer/Restaurants/Index', [
-            'restaurants' => $restaurants,
-        ]);
-    }
-
-    /**
      * Display the specified restaurant along with its categories, menu items, allergens, images.
      */
     public function show(Request $request, Restaurant $restaurant)

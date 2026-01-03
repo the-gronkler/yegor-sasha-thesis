@@ -4,6 +4,7 @@ import { router } from '@inertiajs/react';
 import { useAuth } from '@/Hooks/useAuth';
 import Toggle from '@/Components/UI/Toggle';
 import { PencilIcon } from '@heroicons/react/24/outline';
+import React from 'react';
 
 interface MenuItemCardProps {
   item: MenuItem;
