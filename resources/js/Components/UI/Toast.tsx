@@ -65,7 +65,7 @@ export default function Toast() {
 
       timersRef.current.push(resetTimer);
     }
-  }, [flash, message]); // ✅ Added 'message' to dependency array
+  }, [flash, message]);
 
   useEffect(() => {
     if (visible) {
