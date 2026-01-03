@@ -14,7 +14,7 @@ class EmployeeMenuItemController extends Controller
     {
         $user = auth()->user();
 
-        $this->authorize('update', $menuItem);
+        $this->authorize('view', $menuItem);
 
         $menuItem->load(['allergens', 'images', 'restaurant']);
 
