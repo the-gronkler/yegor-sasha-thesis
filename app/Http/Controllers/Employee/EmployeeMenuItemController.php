@@ -71,7 +71,7 @@ class EmployeeMenuItemController extends Controller
 
     public function updateStatus(Request $request, MenuItem $item)
     {
-        $this->authorize('update', $item);
+        $this->authorize('updateStatus', $item);
 
         $validated = $request->validate([
             'is_available' => ['required', 'boolean'],
