@@ -6,6 +6,7 @@ import { PageProps } from '@/types';
 import { Order } from '@/types/models';
 import CartRestaurantSection from '@/Components/Shared/CartRestaurantSection';
 import { CartItemType } from '@/Components/Shared/CartItem';
+import { useMenuItemUpdates } from '@/Hooks/useMenuItemUpdates';
 
 interface CartIndexProps extends PageProps {
   cartOrders: Order[];
@@ -13,6 +14,15 @@ interface CartIndexProps extends PageProps {
 
 export default function CartIndex({ cartOrders }: CartIndexProps) {
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
+
+  const restaurantIds = useMemo(
+    () =>
+      cartOrders
+        .map((o) => o.restaurant?.id)
+        .filter((id): id is number => id !== undefined && id !== null),
+    [cartOrders],
+  );
+  useMenuItemUpdates(restaurantIds);
 
   // Initialize notes with saved notes from orders
   const [notes, setNotes] = useState<Record<number, string>>(() => {
