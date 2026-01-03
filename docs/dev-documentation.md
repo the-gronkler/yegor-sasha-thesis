@@ -14,6 +14,58 @@ This file stores technical documentation useful during development. If a PR intr
 
 Install Herd, run the app with **HTTPS** mode, and run `npm run dev` command from project root to start the Vite development server. You will need to run the database separately though. Alternatively, you can run in docker, instructions below.
 
+### Real-Time Features (WebSockets)
+
+The application uses **Laravel Reverb** for real-time updates (e.g., order status changes, menu availability).
+
+#### 1. Environment Configuration
+
+Ensure your `.env` is configured for HTTPS (required if using Herd with SSL):
+
+```dotenv
+REVERB_APP_ID=572887
+REVERB_APP_KEY=fm3thdwjbmmri8yjvcm3
+REVERB_APP_SECRET=qvfvf3thb0apndkdqaaz
+REVERB_HOST="yegor-sasha-thesis.test"
+REVERB_PORT=8080
+REVERB_SCHEME=https
+
+# Point to your Herd SSL certificates
+REVERB_TLS_CERT="C:/Users/<USER>/.config/herd/config/valet/Certificates/yegor-sasha-thesis.test.crt"
+REVERB_TLS_KEY="C:/Users/<USER>/.config/herd/config/valet/Certificates/yegor-sasha-thesis.test.key"
+
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+```
+
+#### 2. Start the WebSocket Server
+
+Open a terminal and run:
+
+```powershell
+php artisan reverb:start
+```
+
+_Note: If you see SSL errors in the browser console, ensure you have accepted the certificate for port 8080 by visiting `https://yegor-sasha-thesis.test:8080` in your browser once._
+
+#### 3. Start the Queue Worker
+
+Events are broadcast asynchronously via the queue. Open a separate terminal and run:
+
+```powershell
+php artisan queue:work
+```
+
+### One-Command Startup
+
+You can run Vite, Reverb, and the Queue Worker simultaneously using the following npm command:
+
+```powershell
+npm run dev:all
+```
+
 ## Console commands
 
 Custom artisan commands, to use type:

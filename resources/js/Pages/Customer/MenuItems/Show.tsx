@@ -10,6 +10,7 @@ import { PageProps } from '@/types';
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
 import MenuItemDetail from '@/Components/Shared/MenuItemDetail';
+import { useMenuItemUpdates } from '@/Hooks/useMenuItemUpdates';
 
 interface MenuItemShowProps extends PageProps {
   menuItem: MenuItem;
@@ -24,6 +25,8 @@ export default function MenuItemShow({
 }: MenuItemShowProps) {
   const { addItem, updateQuantity, items } = useCart();
   const { requireAuth } = useAuth();
+
+  useMenuItemUpdates(restaurantId, (e) => e.menuItem.id === menuItem.id);
 
   // Check if item is already in cart and get quantity
   const cartItem = items.find((i) => i.id === menuItem.id);
