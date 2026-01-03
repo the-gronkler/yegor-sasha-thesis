@@ -359,7 +359,7 @@
     &:focus {
       outline: none;
       border-color: main-colors.$brand-primary;
-      box-shadow: 0 0 0 3px rgba(238, 91, 43, 0.1);
+      box-shadow: 0 0 0 3px main-colors.$focus-ring-primary;
     }
   }
 

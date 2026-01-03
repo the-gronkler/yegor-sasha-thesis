@@ -65,7 +65,7 @@ class ReviewController extends Controller
                 return back()->with('success', 'Review submitted successfully, but some images failed to upload: '.implode(', ', $result->uploadErrors));
             }
         } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-            return back()->withErrors(['general' => 'You have already reviewed this restaurant. Edit your existing review instead.']);
+            return back()->with('error', 'You have already reviewed this restaurant. Edit your existing review instead.');
         }
 
         return back()->with('success', 'Review submitted successfully.');
