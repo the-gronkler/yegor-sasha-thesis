@@ -15,7 +15,7 @@ export default function Toast() {
 
   // All timers:
   const timersRef = useRef<number[]>([]);
-  const isMountedRef = useRef(true);
+  const lastFlashRef = useRef<{ success?: string; error?: string }>({});
 
   // Helper to clear all timers
   const clearAllTimers = () => {
@@ -26,13 +26,21 @@ export default function Toast() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      isMountedRef.current = false;
       clearAllTimers();
     };
   }, []);
 
   useEffect(() => {
-    if (flash.success || flash.error) {
+    // Check if we have a new flash message (different from the last one we showed)
+    const hasNewSuccess =
+      flash.success && flash.success !== lastFlashRef.current.success;
+    const hasNewError =
+      flash.error && flash.error !== lastFlashRef.current.error;
+
+    if (hasNewSuccess || hasNewError) {
+      // Update our ref to track this message
+      lastFlashRef.current = { success: flash.success, error: flash.error };
+
       // Clear any existing timers
       clearAllTimers();
 
@@ -40,44 +48,34 @@ export default function Toast() {
       setVisible(false);
 
       // Wait for exit animation if toast was already visible
-      const resetTimer = setTimeout(
-        () => {
-          if (!isMountedRef.current) return;
+      const resetTimer = setTimeout(() => {
+        if (flash.success) {
+          setMessage(flash.success);
+          setType('success');
+        } else if (flash.error) {
+          setMessage(flash.error);
+          setType('error');
+        }
 
-          if (flash.success) {
-            setMessage(flash.success);
-            setType('success');
-          } else if (flash.error) {
-            setMessage(flash.error);
-            setType('error');
-          }
-
-          // Delay setting visible to allow CSS transition to trigger
-          const showTimer = setTimeout(() => {
-            if (isMountedRef.current) {
-              setVisible(true);
-            }
-          }, 10);
-          timersRef.current.push(showTimer);
-        },
-        message ? 50 : 0,
-      ); // Wait 50ms if message exists, 0ms if new
+        // Delay setting visible to allow CSS transition to trigger
+        const showTimer = setTimeout(() => {
+          setVisible(true);
+        }, 10);
+        timersRef.current.push(showTimer);
+      }, 50);
 
       timersRef.current.push(resetTimer);
     }
-  }, [flash, message]);
+  }, [flash.success, flash.error]);
 
   useEffect(() => {
     if (visible) {
       const hideTimer = setTimeout(() => {
-        if (!isMountedRef.current) return;
         setVisible(false);
 
         // Clear message after fade-out animation completes
         const clearTimer = setTimeout(() => {
-          if (isMountedRef.current) {
-            setMessage(null);
-          }
+          setMessage(null);
         }, 400);
         timersRef.current.push(clearTimer);
       }, 5000); // Auto-hide after 5 seconds
@@ -98,15 +96,13 @@ export default function Toast() {
 
     // Clear message after fade-out animation completes
     const clearTimer = setTimeout(() => {
-      if (isMountedRef.current) {
-        setMessage(null);
-      }
+      setMessage(null);
     }, 400);
     timersRef.current.push(clearTimer);
   };
 
   if (!message) {
-    return null;
+    return <div style={{ display: 'none' }} />;
   }
 
   return (
