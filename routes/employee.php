@@ -38,9 +38,9 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
 
             // Photos Management
             Route::get('establishment/photos', [EstablishmentController::class, 'photos'])->name('establishment.photos');
-            Route::post('establishment/images', [EstablishmentController::class, 'storeImage'])->name('establishment.images.store');
-            Route::delete('establishment/images/{image}', [EstablishmentController::class, 'destroyImage'])->name('establishment.images.destroy');
-            Route::put('establishment/images/{image}/primary', [EstablishmentController::class, 'setPrimaryImage'])->name('establishment.images.set-primary');
+            Route::post('establishment/photos', [EstablishmentController::class, 'storeImage'])->name('establishment.images.store');
+            Route::delete('establishment/photos/{image}', [EstablishmentController::class, 'destroyImage'])->name('establishment.images.destroy');
+            Route::put('establishment/photos/{image}/primary', [EstablishmentController::class, 'setPrimaryImage'])->name('establishment.images.set-primary');
         });
 
         // Shared Restaurant Management (All Employees)

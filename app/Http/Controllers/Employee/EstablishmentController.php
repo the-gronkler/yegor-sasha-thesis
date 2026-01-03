@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Image;
+use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,18 +31,18 @@ class EstablishmentController extends Controller
         $user = $request->user();
         $restaurant = $user->employee->restaurant;
 
-        // Load restaurant with related data
-        $restaurant->load([
-            'employees.user',
+        // Load counts for statistics (more efficient than loading full relationships)
+        $restaurant->loadCount([
+            'employees',
             'images',
             'menuItems',
         ]);
 
         // Count statistics
         $stats = [
-            'employeeCount' => $restaurant->employees->count(),
-            'menuItemCount' => $restaurant->menuItems->count(),
-            'imageCount' => $restaurant->images->count(),
+            'employeeCount' => $restaurant->employees_count,
+            'menuItemCount' => $restaurant->menu_items_count,
+            'imageCount' => $restaurant->images_count,
         ];
 
         return Inertia::render('Employee/Establishment', [
@@ -299,10 +300,14 @@ class EstablishmentController extends Controller
         // Ensure the image belongs to this restaurant
         $this->ensureImageBelongsToRestaurant($image, $restaurant);
 
-        // Delete the file from storage
-        Storage::disk(self::RESTAURANT_IMAGES_DISK)->delete($image->image);
+        // Store the path before deleting the database record
+        $path = $image->image;
 
+        // Delete the database record first
         $image->delete();
+
+        // Then delete the file from storage
+        Storage::disk(self::RESTAURANT_IMAGES_DISK)->delete($path);
 
         return back()->with('success', 'Image deleted successfully.');
     }
@@ -327,11 +332,10 @@ class EstablishmentController extends Controller
     /**
      * Ensure the image belongs to the given restaurant.
      *
-     * @param  \App\Models\Restaurant  $restaurant
      *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
-    private function ensureImageBelongsToRestaurant(Image $image, $restaurant): void
+    private function ensureImageBelongsToRestaurant(Image $image, Restaurant $restaurant): void
     {
         if ($image->restaurant_id !== $restaurant->id) {
             abort(403, 'This image does not belong to your restaurant.');
@@ -345,11 +349,10 @@ class EstablishmentController extends Controller
      * instead of 404 Not Found when the employee doesn't exist, making it
      * impossible for attackers to enumerate user IDs.
      *
-     * @param  \App\Models\Restaurant  $restaurant
      *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
-    private function getEmployeeForRestaurant(User $user, $restaurant): Employee
+    private function getEmployeeForRestaurant(User $user, Restaurant $restaurant): Employee
     {
         $employee = Employee::where('user_id', $user->id)
             ->where('restaurant_id', $restaurant->id)
@@ -368,10 +371,8 @@ class EstablishmentController extends Controller
      * Atomically updates all images for the restaurant so that only the
      * specified image is marked as primary. Uses a single UPDATE query
      * with a CASE statement for optimal performance.
-     *
-     * @param  \App\Models\Restaurant  $restaurant
      */
-    private function setRestaurantPrimaryImage($restaurant, Image $image): void
+    private function setRestaurantPrimaryImage(Restaurant $restaurant, Image $image): void
     {
         Image::where('restaurant_id', $restaurant->id)
             ->update([
