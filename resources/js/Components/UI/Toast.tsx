@@ -85,7 +85,7 @@ export default function Toast() {
       timersRef.current.push(hideTimer);
 
       return () => {
-        // ✅ Clear both hideTimer and any clearTimer that may have been created
+        // clear timer elements
         clearTimeout(hideTimer);
         timersRef.current = timersRef.current.filter((t) => t !== hideTimer);
       };
