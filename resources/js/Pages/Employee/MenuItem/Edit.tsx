@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { MenuItem, FoodType, Allergen } from '@/types/models';
@@ -31,6 +31,21 @@ export default function EditMenuItem({
     is_available: menuItem.is_available,
     allergens: menuItem.allergens?.map((a) => a.id) || [],
   });
+
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea function
+  const autoResize = (textarea: HTMLTextAreaElement | null) => {
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  };
+
+  // Auto-resize on mount and when description changes
+  useEffect(() => {
+    autoResize(descriptionRef.current);
+  }, [data.description]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,10 +99,17 @@ export default function EditMenuItem({
             <div className="form-group">
               <label htmlFor="description">Description</label>
               <textarea
+                ref={descriptionRef}
                 id="description"
                 value={data.description}
                 onChange={(e) => setData('description', e.target.value)}
-                className={errors.description ? 'error' : ''}
+                onInput={(e) => autoResize(e.currentTarget)}
+                className={
+                  errors.description
+                    ? 'error auto-resize-textarea'
+                    : 'auto-resize-textarea'
+                }
+                style={{ resize: 'none', overflow: 'hidden' }}
                 rows={3}
               />
               {errors.description && (
