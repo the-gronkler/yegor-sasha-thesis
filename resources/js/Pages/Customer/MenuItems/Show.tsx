@@ -31,7 +31,9 @@ export default function MenuItemShow({
 
   const handleAddToCart = () => {
     requireAuth(() => {
-      addItem(menuItem, restaurantId);
+      if (menuItem.is_available) {
+        addItem(menuItem, restaurantId);
+      }
     });
   };
 
@@ -78,11 +80,15 @@ export default function MenuItemShow({
               <button
                 className="quantity-btn increase-btn"
                 onClick={handleAddToCart}
+                disabled={!menuItem.is_available}
                 aria-label="Increase quantity"
               >
                 <PlusIcon className="icon" />
               </button>
             </div>
+            {!menuItem.is_available && (
+              <p className="unavailable-text">Currently Unavailable</p>
+            )}
           </div>
         </MenuItemDetail>
       </div>

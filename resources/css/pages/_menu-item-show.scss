@@ -1,5 +1,6 @@
 @use '../variables/layout';
 @use '../variables/main-colors';
+@use '../variables/exception-colors';
 
 .menu-item-show-page {
   background-color: main-colors.$bg-main;
@@ -208,6 +209,15 @@
     .quantity-controls {
       margin-top: 1.5rem;
 
+      .unavailable-text {
+        text-align: center;
+        color: exception-colors.$status-error;
+        font-weight: 700;
+        margin-top: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
       .quantity-buttons {
         display: flex;
         align-items: center;
@@ -253,9 +263,16 @@
             background-color: main-colors.$brand-primary;
             color: main-colors.$text-inverse;
 
-            &:hover {
+            &:hover:not(:disabled) {
               background-color: main-colors.$brand-primary-hover;
               transform: scale(1.1);
+            }
+
+            &:disabled {
+              background-color: main-colors.$disabled-bg;
+              color: main-colors.$disabled-text;
+              cursor: not-allowed;
+              transform: none;
             }
           }
 

@@ -32,6 +32,7 @@ class MenuItemController extends Controller
                 'name' => $menuItem->name,
                 'price' => $menuItem->price,
                 'description' => $menuItem->description,
+                'is_available' => $menuItem->is_available,
                 'restaurant_id' => $menuItem->restaurant_id,
                 'food_type_id' => $menuItem->food_type_id,
                 'images' => $menuItem->images->map(fn ($img) => [

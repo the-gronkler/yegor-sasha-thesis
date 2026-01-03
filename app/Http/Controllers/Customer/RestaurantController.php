@@ -36,7 +36,7 @@ class RestaurantController extends Controller
             ->whereKey($restaurant->getKey())
             ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
             ->with([
-                'foodTypes.menuItems' => fn ($q) => $q->where('is_available', true)->orderBy('name'),
+                'foodTypes.menuItems' => fn ($q) => $q->orderBy('name'),
                 'foodTypes.menuItems.images',
                 'foodTypes.menuItems.allergens',
                 'images',
@@ -137,6 +137,7 @@ class RestaurantController extends Controller
                     'name' => $mi->name,
                     'price' => $mi->price,
                     'description' => $mi->description,
+                    'is_available' => $mi->is_available,
                     'images' => $mi->relationLoaded('images') ? $mi->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->url,

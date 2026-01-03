@@ -45,10 +45,20 @@ class CheckoutController extends Controller
         }
 
         // Ensure the order has at least one menu item before processing
-        $order->loadMissing('menuItems');
+        // Use load() instead of loadMissing() to force a fresh DB query for availability checks
+        $order->load('menuItems');
         if ($order->menuItems->isEmpty()) {
             return back()->with('error', 'Cannot process an empty order. Please add items to your order before checking out.');
         }
+
+        // Check for unavailable items
+        $unavailableItems = $order->menuItems->filter(fn ($item) => ! $item->is_available);
+        if ($unavailableItems->isNotEmpty()) {
+            $names = $unavailableItems->pluck('name')->join(', ');
+
+            return back()->with('error', "The following items are no longer available: {$names}. Please remove them from your cart.");
+        }
+
         // TODO: Implement actual payment processing here.
         // For now, we'll just simulate a successful payment.
 
