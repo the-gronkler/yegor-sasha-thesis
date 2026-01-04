@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Employee;
 
-use App\Events\MenuItemUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
@@ -65,9 +64,8 @@ class EmployeeMenuItemController extends Controller
 
         if (isset($validated['allergens'])) {
             $menuItem->allergens()->sync($validated['allergens']);
+            $menuItem->touch(); // Ensure 'updated' event fires if only allergens changed
         }
-
-        MenuItemUpdated::dispatch($menuItem);
 
         return redirect()->route('employee.menu.edit')->with('success', 'Menu item updated successfully.');
     }
@@ -81,8 +79,6 @@ class EmployeeMenuItemController extends Controller
         ]);
 
         $item->update($validated);
-
-        MenuItemUpdated::dispatch($item);
 
         return back();
     }
