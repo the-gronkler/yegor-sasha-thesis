@@ -10,7 +10,7 @@ import { PageProps } from '@/types';
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
 import MenuItemDetail from '@/Components/Shared/MenuItemDetail';
-import { useMenuItemUpdates } from '@/Hooks/useMenuItemUpdates';
+import { useMenuItemUpdates } from '@/Hooks/Updates/useMenuItemUpdates';
 
 interface MenuItemShowProps extends PageProps {
   menuItem: MenuItem;

@@ -6,7 +6,7 @@ import { PageProps } from '@/types';
 import { Order } from '@/types/models';
 import CartRestaurantSection from '@/Components/Shared/CartRestaurantSection';
 import { CartItemType } from '@/Components/Shared/CartItem';
-import { useMenuItemUpdates } from '@/Hooks/useMenuItemUpdates';
+import { useMenuItemUpdates } from '@/Hooks/Updates/useMenuItemUpdates';
 
 interface CartIndexProps extends PageProps {
   cartOrders: Order[];
