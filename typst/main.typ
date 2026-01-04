@@ -1,5 +1,9 @@
 #import "template.typ": *
 
+#let code_ref = "a84a62a379fd683f5c7608ad8bc0fed8b16bba0a"
+#let repo_base = "https://github.com/the-gronkler/yegor-sasha-thesis/blob/"
+#let repo_ref = repo_base + code_ref
+
 // TODO: replace example content with our own thesis content
 
 // Project settings, title page and other pre-content.
@@ -23,7 +27,7 @@
   keywords: ("Keyword 1", "Keyword 2", "Keyword 3"),
 )
 
-// Main content of the thesis: 
+// Main content of the thesis:
 #include "examples/content-example.typ"
 
 // Project overview:

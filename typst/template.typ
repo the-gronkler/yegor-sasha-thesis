@@ -130,6 +130,9 @@
     it
   }
 
+  // Links
+  show link: set text(fill: rgb("#005580"))
+
   // Code blocks
   show raw.where(block: true): it => {
     set text(size: 0.9em)
