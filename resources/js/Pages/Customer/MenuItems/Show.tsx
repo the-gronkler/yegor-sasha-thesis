@@ -9,6 +9,7 @@ import { MenuItem } from '@/types/models';
 import { PageProps } from '@/types';
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
+import MenuItemDetail from '@/Components/Shared/MenuItemDetail';
 
 interface MenuItemShowProps extends PageProps {
   menuItem: MenuItem;
@@ -28,14 +29,11 @@ export default function MenuItemShow({
   const cartItem = items.find((i) => i.id === menuItem.id);
   const quantityInCart = cartItem?.quantity || 0;
 
-  const primaryImage =
-    menuItem.images?.find((img) => img.is_primary_for_menu_item) ||
-    menuItem.images?.[0];
-  const imageUrl = primaryImage ? primaryImage.url : null;
-
   const handleAddToCart = () => {
     requireAuth(() => {
-      addItem(menuItem, restaurantId);
+      if (menuItem.is_available) {
+        addItem(menuItem, restaurantId);
+      }
     });
   };
 
@@ -63,45 +61,7 @@ export default function MenuItemShow({
           <h2 className="header-title">View Menu Item</h2>
         </div>
 
-        {/* Item Image */}
-        <div className="menu-item-image-section">
-          {imageUrl ? (
-            <img src={imageUrl} alt={menuItem.name} className="item-image" />
-          ) : (
-            <div className="item-image-placeholder">
-              <span>No Image Available</span>
-            </div>
-          )}
-        </div>
-
-        {/* Item Details Card */}
-        <div className="menu-item-details-card">
-          <div className="restaurant-name-tag">{restaurantName}</div>
-
-          <h1 className="item-name">{menuItem.name}</h1>
-
-          <div className="item-price">€{menuItem.price.toFixed(2)}</div>
-
-          {menuItem.description && (
-            <div className="item-description-section">
-              <h3 className="section-title">Description</h3>
-              <p className="item-description">{menuItem.description}</p>
-            </div>
-          )}
-
-          {menuItem.allergens && menuItem.allergens.length > 0 && (
-            <div className="item-allergens-section">
-              <h3 className="section-title">Allergens</h3>
-              <div className="allergens-list">
-                {menuItem.allergens.map((allergen) => (
-                  <span key={allergen.id} className="allergen-badge">
-                    {allergen.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
+        <MenuItemDetail menuItem={menuItem} restaurantName={restaurantName}>
           {/* Quantity Controls */}
           <div className="quantity-controls">
             <h3 className="section-title">Quantity</h3>
@@ -120,13 +80,17 @@ export default function MenuItemShow({
               <button
                 className="quantity-btn increase-btn"
                 onClick={handleAddToCart}
+                disabled={!menuItem.is_available}
                 aria-label="Increase quantity"
               >
                 <PlusIcon className="icon" />
               </button>
             </div>
+            {!menuItem.is_available && (
+              <p className="unavailable-text">Currently Unavailable</p>
+            )}
           </div>
-        </div>
+        </MenuItemDetail>
       </div>
     </AppLayout>
   );

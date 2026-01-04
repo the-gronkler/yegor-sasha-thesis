@@ -21,7 +21,7 @@
       opacity: 0.5;
     }
 
-    &::after {
+    &:not(.employee-mode)::after {
       content: 'UNAVAILABLE';
       position: absolute;
       top: 50%;
@@ -32,6 +32,17 @@
       font-size: 1.2rem;
       letter-spacing: 1px;
       text-shadow: 0 1px 2px main-colors.$shadow-color-text;
+    }
+  }
+
+  &.employee-mode {
+    &.unavailable {
+      background-color: main-colors.$bg-surface; // lighter gray
+      color: inherit;
+
+      .menu-item-image {
+        opacity: 0.7;
+      }
     }
   }
 
@@ -149,6 +160,37 @@
       justify-content: center;
       line-height: 1;
       box-shadow: 0 2px 4px main-colors.$shadow-small;
+    }
+  }
+
+  .employee-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .edit-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid main-colors.$border-light;
+      background-color: main-colors.$bg-surface;
+      color: main-colors.$text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      .icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      &:hover {
+        background-color: main-colors.$bg-alt-1;
+        color: main-colors.$brand-primary;
+        border-color: main-colors.$brand-primary;
+      }
     }
   }
 }

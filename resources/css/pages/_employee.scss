@@ -1,3 +1,5 @@
+@use '../variables/main-colors';
+
 .employee-page {
   padding: 1rem;
 
@@ -5,5 +7,55 @@
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 1rem;
+    color: main-colors.$text-primary;
+  }
+}
+
+.employee-menu-page {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: main-colors.$bg-surface;
+      border: 1px solid main-colors.$border-light;
+      color: main-colors.$text-secondary;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$bg-alt-1;
+        color: main-colors.$brand-primary;
+        border-color: main-colors.$brand-primary;
+      }
+
+      .icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: main-colors.$text-primary;
+    }
   }
 }
