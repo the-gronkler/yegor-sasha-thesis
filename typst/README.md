@@ -116,17 +116,19 @@ def main():
 
 ## 🔗 Source Code Referencing
 
-When linking to source code files in the thesis, avoid hardcoding commit hashes or branch names. Instead, use the `repo_ref` variable defined in `main.typ` (which combines the base URL and reference) to ensure all references can be updated to point to the release version once the project is finalized.
+When linking to source code files in the thesis, avoid hardcoding commit hashes or branch names. Instead, use the `source_code_link` function from `config.typ`, which takes the file path and generates a link with the file name in monospace and a citation to the source repository.
 
 ### Example Usage
 
 ```typst
-#link(repo_ref + "/AGENTS.md")[`AGENTS.md`] @SourceCodeRepo
+#source_code_link("/AGENTS.md")
 ```
+
+This produces a clickable link to the file at the current reference (commit or branch), displays the file name in monospace, and includes a citation to the source repository.
 
 ### Updating References
 
-To change all code links to point to a different branch or commit (e.g., "release-1.0"), simply update the `code_ref` variable in `main.typ`:
+To change all code links to point to a different branch or commit (e.g., "release-1.0"), simply update the `code_ref` variable in `config.typ`:
 
 ```typst
 #let code_ref = "release-1.0"

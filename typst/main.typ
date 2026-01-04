@@ -1,8 +1,5 @@
 #import "template.typ": *
-
-#let code_ref = "a84a62a379fd683f5c7608ad8bc0fed8b16bba0a"
-#let repo_base = "https://github.com/the-gronkler/yegor-sasha-thesis/blob/"
-#let repo_ref = repo_base + code_ref
+#import "config.typ": *
 
 // TODO: replace example content with our own thesis content
 

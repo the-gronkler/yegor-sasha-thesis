@@ -278,5 +278,5 @@ Follow the standard engineering thesis structure:
 - **Vague Aims**: "I want to make an app." -> _Fix_: "To increase process efficiency by 20%..."
 - **Passive Voice Overuse**: While first-person is banned, avoid awkward passive constructions. Use strong verbs where possible.
 - **Hardcoded References**: Never type "Figure 1". Always use `@fig:id`.
-- **Hardcoded Code References**: Never hardcode commit hashes or branches in links to source code. Use the configurable `repo_ref` variable defined in `main.typ` to ensure references can be updated to the release version.
+- **Hardcoded Code References**: Never hardcode commit hashes or branches in links to source code. Use the `source_code_link` function from `config.typ` to generate consistent links that can be updated centrally to point to the release version.
 - **LaTeX Habits**: Do not use `\section`, `\textbf`, or `\cite`. Use Typst syntax.

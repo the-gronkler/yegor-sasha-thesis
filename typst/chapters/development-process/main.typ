@@ -1,4 +1,6 @@
 //  I want to write this one (ㅅ´ ˘ `) pls
+#import "../../config.typ": *
+
 = Development Process
 
 == Overview
@@ -35,7 +37,7 @@ AI was utilized for initial research into the solution, with all findings confir
 === AI in Development
 During development, AI was employed primarily for code review, as it can identify common mistakes and suggest improvements.
 
-To this end, a custom AI code review agent was developed, with guidelines detailed in the project's agent configuration file, #link(repo_ref + "/AGENTS.md")[`AGENTS.md`] @SourceCodeRepo.
+To this end, a custom AI code review agent was developed, with guidelines detailed in the project's agent configuration file, #source_code_link("/AGENTS.md").
 
 // What is AGENTS.md? cite sources, how it works, best practices, etc...
 
