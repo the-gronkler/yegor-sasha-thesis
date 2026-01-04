@@ -23,7 +23,7 @@
   keywords: ("Keyword 1", "Keyword 2", "Keyword 3"),
 )
 
-// Main content of the thesis: 
+// Main content of the thesis:
 #include "examples/content-example.typ"
 
 // Project overview:
@@ -38,7 +38,13 @@
 
 // Technical chapters:
 #include "chapters/technologies.typ"  //Technologies used (for the app, not in development process)
+#include "chapters/system-architecture.typ"
+#include "chapters/database-design.typ"
+#include "chapters/implementation.typ"
 #include "chapters/development-process/main.typ"
+#include "chapters/testing-and-validation.typ"
+#include "chapters/conclusions-and-future-work.typ"
+
 
 
 
