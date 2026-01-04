@@ -13,6 +13,7 @@ import {
   CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
 import { PageProps } from '@/types';
+import { useRestaurantOrdersUpdates } from '@/Hooks/Updates/useRestaurantOrdersUpdates';
 
 interface OrderItem {
   id: number;
@@ -62,9 +63,13 @@ export default function OrdersIndex({
   availableStatuses,
   currentFilter,
   defaultActiveStatuses,
+  auth,
 }: OrdersProps) {
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Enable live updates for all restaurant orders
+  useRestaurantOrdersUpdates(auth.user.restaurant_id);
 
   // Ensure currentFilter is always an array (safety check)
   const filterArray = Array.isArray(currentFilter) ? currentFilter : [];

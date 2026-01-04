@@ -5,6 +5,7 @@ import { PageProps } from '@/types';
 import { formatDateTime, formatCurrency } from '@/Utils/formatters';
 import { calculateOrderTotal } from '@/Utils/orderHelpers';
 import OrderStatusBadge from '@/Components/Shared/OrderStatusBadge';
+import { useOrderUpdates } from '@/Hooks/Updates/useOrderUpdates';
 
 interface OrderShowProps extends PageProps {
   order: Order;
@@ -12,6 +13,9 @@ interface OrderShowProps extends PageProps {
 
 export default function OrderShow({ order }: OrderShowProps) {
   const total = calculateOrderTotal(order.menu_items);
+
+  // Enable live updates for this specific order's status
+  useOrderUpdates([order.id]);
 
   return (
     <AppLayout>
