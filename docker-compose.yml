@@ -3,6 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        APP_ENV: ${APP_ENV:-local}
+        VITE_APP_NAME: ${VITE_APP_NAME}
+        VITE_REVERB_APP_KEY: ${VITE_REVERB_APP_KEY}
+        VITE_REVERB_HOST: ${VITE_REVERB_HOST}
+        VITE_REVERB_PORT: ${VITE_REVERB_PORT}
+        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME}
     image: yegor-sasha-thesis-app
     container_name: thesis-app
     restart: unless-stopped
@@ -33,6 +40,8 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+    extra_hosts:
+      - '${DOMAIN_NAME:-yegor-sasha-thesis.test}:127.0.0.1'
     ports:
       - '5173:5173'
     depends_on:
