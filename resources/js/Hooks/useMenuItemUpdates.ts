@@ -37,6 +37,11 @@ export function useMenuItemUpdates(
 
     if (uniqueIds.length === 0) return;
 
+    if (!window.Echo) {
+      console.warn('Echo is not available. Skipping menu item updates.');
+      return;
+    }
+
     uniqueIds.forEach((id) => {
       const channel = window.Echo.channel(`restaurant.${id}`);
 
