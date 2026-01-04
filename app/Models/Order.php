@@ -24,6 +24,18 @@ class Order extends Model
         'time_placed',
     ];
 
+    protected $appends = [
+        'total',
+    ];
+
+    /**
+     * Get the total price of the order.
+     */
+    public function getTotalAttribute(): float
+    {
+        return $this->menuItems->sum(fn ($item) => $item->price * $item->pivot->quantity);
+    }
+
     public function menuItems(): BelongsToMany
     {
         return $this->belongsToMany(MenuItem::class, 'order_items')

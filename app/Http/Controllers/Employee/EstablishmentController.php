@@ -173,8 +173,8 @@ class EstablishmentController extends Controller
 
         // Prevent removing own admin privileges
         if ($employee->user_id === $currentUser->id && $validated['is_admin'] === false) {
-            return back()->withErrors([
-                'is_admin' => 'You cannot remove your own admin privileges.',
+            return back()->with([
+                'error' => 'You cannot remove your own admin privileges.',
             ]);
         }
 

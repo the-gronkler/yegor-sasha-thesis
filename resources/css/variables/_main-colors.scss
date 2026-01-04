@@ -100,7 +100,7 @@ $btn-primary-disabled-text: color.adjust($text-primary, $lightness: 40%);
 // DISABLED / INACTIVE STATES
 // ======================================================================
 
-$disabled-bg: #ededed;
+$disabled-bg: #bbbbbb;
 // Purpose: Disabled input background.
 
 $disabled-border: #e6e6e6;
@@ -134,6 +134,9 @@ $shadow-focus: rgba(99, 102, 241, 0.3);
 
 $focus-ring: rgba(99, 102, 241, 0.1);
 // Purpose: Focus ring color for inputs and buttons.
+
+$focus-ring-primary: rgba(238, 91, 43, 0.1);
+// Purpose: Focus ring color for primary brand elements.
 
 $overlay-light: rgba(0, 0, 0, 0.3);
 // Purpose: Light overlay.
