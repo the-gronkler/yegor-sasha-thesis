@@ -91,6 +91,38 @@ A modern, real-time shopping cart implementation that allows customers to add me
 **Database Schema:**
 Cart functionality leverages the existing `orders` and `order_items` tables, with orders having `order_status_id = 1` (InCart) representing active carts.
 
+### Optimistic UI Updates for Menu Item Availability Toggle
+
+**Description:**
+An enhancement to the menu item availability toggle that provides immediate visual feedback to employees when changing a menu item's availability status. Instead of waiting for the server response, the UI updates instantly, improving perceived performance and user experience.
+
+**Technical Implementation:**
+
+- **Local State Management:** Uses React's `useState` hook to maintain a local copy of the availability status, initialized from server-provided props.
+- **Optimistic Updates:** When the toggle is clicked, the local state updates immediately, providing instant visual feedback.
+- **Error Handling:** If the server request fails, the local state reverts to the previous value using Inertia.js's `onError` callback.
+- **State Synchronization:** A `useEffect` hook ensures the local state stays in sync with any external prop changes (e.g., from real-time broadcasts).
+- **Integration:** Works seamlessly with existing event broadcasting for customer-side updates.
+
+**Features:**
+
+1.  **Instant Toggle Feedback:** Employees see the availability status change immediately upon clicking the toggle.
+2.  **Error Recovery:** If the update fails (e.g., network issues), the toggle reverts automatically.
+3.  **Consistent State:** Local state syncs with server data on successful updates or external changes.
+
+**User Experience Enhancements:**
+
+- Eliminates perceived lag when toggling availability
+- Provides clear visual confirmation of actions
+- Maintains data consistency through proper error handling
+- No disruption to existing functionality
+
+**Code Reference:**
+
+- Component: `resources/js/Components/Shared/MenuItemCard.tsx`
+
+---
+
 ### User Geolocation
 
 The application uses the browser's Geolocation API to determine the user's location for map-based features.

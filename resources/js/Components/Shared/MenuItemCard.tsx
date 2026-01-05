@@ -4,7 +4,7 @@ import { router } from '@inertiajs/react';
 import { useAuth } from '@/Hooks/useAuth';
 import Toggle from '@/Components/UI/Toggle';
 import { PencilIcon } from '@heroicons/react/24/outline';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -24,7 +24,12 @@ export default function MenuItemCard({
   const cartItem = items.find((i) => i.id === item.id);
   const quantityInCart = cartItem?.quantity || 0;
 
-  const isAvailable = item.is_available;
+  const [isAvailable, setIsAvailable] = useState(item.is_available);
+
+  // Sync local state with props if item.is_available changes
+  useEffect(() => {
+    setIsAvailable(item.is_available);
+  }, [item.is_available]);
 
   const primaryImage =
     item.images?.find((img) => img.is_primary_for_menu_item) ||
@@ -69,6 +74,9 @@ export default function MenuItemCard({
   };
 
   const handleAvailabilityToggle = (checked: boolean) => {
+    // Optimistically update local state
+    setIsAvailable(checked);
+
     router.put(
       route('employee.restaurant.menu-items.updateStatus', item.id),
       {
@@ -76,6 +84,10 @@ export default function MenuItemCard({
       },
       {
         preserveScroll: true,
+        onError: () => {
+          // Revert on error
+          setIsAvailable(!checked);
+        },
       },
     );
   };

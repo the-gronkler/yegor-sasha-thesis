@@ -2,6 +2,7 @@ import { Head, useForm, Link } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Order } from '@/types/models';
 import { FormEvent } from 'react';
+import { useMenuItemUpdates } from '@/Hooks/Updates/useMenuItemUpdates';
 
 interface CheckoutIndexProps {
   order: Order;
@@ -17,6 +18,8 @@ export default function CheckoutIndex({
   const { post, processing } = useForm();
 
   const items = order.menu_items || [];
+
+  useMenuItemUpdates(order.restaurant?.id);
 
   if (items.length === 0) {
     return (

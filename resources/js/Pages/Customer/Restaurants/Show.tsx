@@ -10,6 +10,7 @@ import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
 import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
 import { useAuth } from '@/Hooks/useAuth';
+import { useMenuItemUpdates } from '@/Hooks/Updates/useMenuItemUpdates';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
@@ -30,6 +31,8 @@ export default function RestaurantShow({
   const { cartItemCount, cartTotal, handleGoToCart } = useRestaurantCart(
     restaurant.id,
   );
+
+  useMenuItemUpdates(restaurant.id);
 
   const handleToggleFavorite = () => {
     requireAuth(() => {

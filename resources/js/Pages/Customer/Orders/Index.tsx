@@ -1,19 +1,24 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import AppLayout from '@/Layouts/AppLayout';
-import { Order, PaginatedResponse } from '@/types/models';
+import { Order, PaginatedResponse, User } from '@/types/models';
 import { formatDateTime, formatCurrency } from '@/Utils/formatters';
 import {
   calculateOrderTotal,
   calculateOrderItemCount,
 } from '@/Utils/orderHelpers';
 import OrderStatusBadge from '@/Components/Shared/OrderStatusBadge';
+import { useUserOrdersUpdates } from '@/Hooks/Updates/useUserOrdersUpdates';
 
 interface Props {
   orders: PaginatedResponse<Order>;
+  auth: { user: User };
 }
 
-export default function OrdersIndex({ orders }: Props) {
+export default function OrdersIndex({ orders, auth }: Props) {
+  // Enable live updates for all user's orders
+  useUserOrdersUpdates(auth.user.id);
+
   return (
     <AppLayout>
       <Head title="My Orders" />
