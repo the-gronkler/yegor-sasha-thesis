@@ -8,6 +8,7 @@ import FilterToggleButton from '@/Components/UI/FilterToggleButton';
 import OrdersFilterPanel from '@/Components/Shared/OrdersFilterPanel';
 import OrdersBoard from '@/Components/Shared/OrdersBoard';
 import { OrdersProps } from '@/types/orders';
+import { useOptimisticOrderStatusUpdates } from '@/Hooks/useOptimisticOrderStatusUpdates';
 
 export default function OrdersIndex({
   ordersByStatus,
@@ -56,13 +57,22 @@ export default function OrdersIndex({
       ),
   });
 
-  const handleStatusChange = (orderId: number, newStatusId: number) => {
-    router.put(
-      route('employee.restaurant.orders.updateStatus', orderId),
-      { order_status_id: newStatusId },
-      { preserveScroll: true },
-    );
-  };
+  const { displayedOrdersByStatus, handleStatusChange } =
+    useOptimisticOrderStatusUpdates({
+      ordersByStatus,
+      availableStatuses,
+      onStatusUpdate: (orderId, newStatusId, onSuccess, onError) => {
+        router.put(
+          route('employee.restaurant.orders.updateStatus', orderId),
+          { order_status_id: newStatusId },
+          {
+            preserveScroll: true,
+            onSuccess,
+            onError,
+          },
+        );
+      },
+    });
 
   const toggleOrderDetails = (orderId: number) => {
     setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
@@ -103,7 +113,7 @@ export default function OrdersIndex({
         </div>
 
         <OrdersBoard
-          ordersByStatus={ordersByStatus}
+          ordersByStatus={displayedOrdersByStatus}
           availableStatuses={availableStatuses}
           onStatusChange={handleStatusChange}
           expandedOrderId={expandedOrderId}
