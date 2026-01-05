@@ -1,0 +1,93 @@
+@use '../variables/main-colors';
+@use '../variables/layout';
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: main-colors.$overlay-backdrop;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.manage-categories-modal {
+  background: main-colors.$bg-surface;
+  border-radius: layout.$border-radius;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: main-colors.$shadow-color-strong;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h2 {
+      margin: 0;
+      color: main-colors.$text-primary;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: main-colors.$text-secondary;
+    }
+  }
+
+  .modal-body {
+    .add-category {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid main-colors.$border-light;
+        border-radius: layout.$border-radius;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+      }
+    }
+
+    .categories-list {
+      list-style: none;
+      padding: 0;
+
+      .category-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid main-colors.$border-light;
+
+        span {
+          flex: 1;
+          color: main-colors.$text-primary;
+        }
+
+        button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: main-colors.$text-secondary;
+
+          &:hover {
+            color: main-colors.$brand-primary;
+          }
+        }
+      }
+    }
+  }
+}

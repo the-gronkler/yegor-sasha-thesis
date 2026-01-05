@@ -52,8 +52,7 @@ class MenuCategoryController extends Controller
             'name' => $validated['name'],
         ]);
 
-        return redirect()->route('employee.restaurant.menu-categories.index')
-            ->with('success', 'Category created.');
+        return back()->with('success', 'Category created successfully.');
     }
 
     public function edit(Request $request, FoodType $menuCategory)
@@ -76,8 +75,7 @@ class MenuCategoryController extends Controller
 
         $menuCategory->update(['name' => $validated['name']]);
 
-        return redirect()->route('employee.restaurant.menu-categories.index')
-            ->with('success', 'Category updated.');
+        return back()->with('success', 'Category updated.');
     }
 
     public function destroy(Request $request, FoodType $menuCategory)
@@ -86,7 +84,16 @@ class MenuCategoryController extends Controller
 
         $menuCategory->delete();
 
-        return redirect()->route('employee.restaurant.menu-categories.index')
-            ->with('success', 'Category deleted.');
+        return back()->with('success', 'Category deleted.');
+    }
+
+    public function show(Request $request, FoodType $menuCategory)
+    {
+        // Ensure the category belongs to this restaurant
+        $this->authorize('view', $menuCategory);
+
+        return Inertia::render('Restaurant/Admin/MenuCategories/Show', [
+            'category' => ['id' => $menuCategory->id, 'name' => $menuCategory->name],
+        ]);
     }
 }
