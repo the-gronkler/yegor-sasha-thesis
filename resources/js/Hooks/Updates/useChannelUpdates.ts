@@ -58,6 +58,7 @@ export function useChannelUpdates<T>(
 
           reloadTimeoutRef.current = setTimeout(() => {
             router.reload({
+              // @ts-ignore-next-line
               preserveScroll: true,
             });
           }, 200);
