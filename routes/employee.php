@@ -21,9 +21,6 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
 
         // Menu
         Route::get('menu', [MenuController::class, 'index'])->name('menu.index');
-        Route::get('menu/edit', [MenuController::class, 'edit'])
-            ->middleware('can:manage-restaurant')
-            ->name('menu.edit');
 
         // Establishment (Admins only)
         Route::middleware(['can:manage-restaurant'])->group(function () {

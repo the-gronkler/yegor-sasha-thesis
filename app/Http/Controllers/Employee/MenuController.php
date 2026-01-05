@@ -25,18 +25,6 @@ class MenuController extends Controller
     }
 
     /**
-     * Display the menu edit page (for admins).
-     */
-    public function edit(): Response
-    {
-        $restaurant = $this->getEmployeeRestaurant(['images', 'allergens']);
-
-        return Inertia::render('Employee/MenuEdit', [
-            'restaurant' => $restaurant,
-        ]);
-    }
-
-    /**
      * Get the restaurant for the current employee with specified menu item relations.
      */
     private function getEmployeeRestaurant(array $menuItemRelations = ['images', 'allergens']): Restaurant

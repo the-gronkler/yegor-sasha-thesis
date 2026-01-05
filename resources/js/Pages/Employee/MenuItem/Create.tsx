@@ -1,35 +1,29 @@
 import React, { useEffect, useRef } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
-import { MenuItem, FoodType, Allergen } from '@/types/models';
+import { FoodType, Allergen } from '@/types/models';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 interface Props {
-  menuItem: MenuItem;
   foodTypes: FoodType[];
   allergens: Allergen[];
-  queryParams?: { from?: string };
+  preselectedFoodTypeId?: number;
 }
 
-export default function EditMenuItem({
-  menuItem,
+export default function CreateMenuItem({
   foodTypes,
   allergens,
-  queryParams,
+  preselectedFoodTypeId,
 }: Props) {
-  // Determine back URL based on query param
-  const backUrl =
-    queryParams?.from === 'show'
-      ? route('employee.restaurant.menu-items.show', menuItem.id)
-      : route('employee.menu.index');
+  const backUrl = route('employee.menu.index');
 
-  const { data, setData, put, processing, errors } = useForm({
-    name: menuItem.name,
-    description: menuItem.description || '',
-    price: menuItem.price,
-    food_type_id: menuItem.food_type_id,
-    is_available: menuItem.is_available,
-    allergens: menuItem.allergens?.map((a) => a.id) || [],
+  const { data, setData, post, processing, errors } = useForm({
+    name: '',
+    description: '',
+    price: '' as string | number,
+    food_type_id: preselectedFoodTypeId || (foodTypes[0]?.id ?? 0),
+    is_available: true,
+    allergens: [] as number[],
   });
 
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -49,7 +43,7 @@ export default function EditMenuItem({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    put(route('employee.restaurant.menu-items.update', menuItem.id));
+    post(route('employee.restaurant.menu-items.store'));
   };
 
   const handleAllergenChange = (allergenId: number) => {
@@ -66,7 +60,7 @@ export default function EditMenuItem({
 
   return (
     <AppLayout>
-      <Head title={`Edit ${menuItem.name}`} />
+      <Head title="Create Menu Item" />
 
       <div className="menu-item-edit-page">
         <div className="page-header">
@@ -74,7 +68,7 @@ export default function EditMenuItem({
             <Link href={backUrl} className="back-link" aria-label="Back">
               <ArrowLeftIcon className="icon" />
             </Link>
-            <h1 className="page-title">Edit Item</h1>
+            <h1 className="page-title">Create Menu Item</h1>
           </div>
         </div>
 
@@ -89,6 +83,7 @@ export default function EditMenuItem({
                 value={data.name}
                 onChange={(e) => setData('name', e.target.value)}
                 className={errors.name ? 'error' : ''}
+                required
               />
               {errors.name && (
                 <div className="error-message">{errors.name}</div>
@@ -196,7 +191,7 @@ export default function EditMenuItem({
                 className="btn-primary"
                 disabled={processing}
               >
-                {processing ? 'Saving...' : 'Save Changes'}
+                {processing ? 'Creating...' : 'Create Menu Item'}
               </button>
             </div>
           </form>

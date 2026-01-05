@@ -79,6 +79,14 @@ export default function RestaurantMenu({
     );
   };
 
+  const handleAddMenuItem = (foodTypeId: number) => {
+    router.visit(
+      route('employee.restaurant.menu-items.create', {
+        food_type_id: foodTypeId,
+      }),
+    );
+  };
+
   return (
     <div className="restaurant-menu-list">
       <div className="menu-search">
@@ -150,6 +158,17 @@ export default function RestaurantMenu({
                 />
               ))}
             </div>
+
+            {mode === 'employee-edit' && isRestaurantAdmin && (
+              <div className="add-menu-item">
+                <button
+                  onClick={() => handleAddMenuItem(category.id)}
+                  className="btn-add-menu-item"
+                >
+                  + Add Menu Item
+                </button>
+              </div>
+            )}
           </div>
         ))
       ) : query ? (

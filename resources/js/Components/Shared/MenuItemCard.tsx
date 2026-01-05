@@ -3,7 +3,7 @@ import { useCart } from '@/Contexts/CartContext';
 import { router } from '@inertiajs/react';
 import { useAuth } from '@/Hooks/useAuth';
 import Toggle from '@/Components/UI/Toggle';
-import { PencilIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import React, { useState, useEffect } from 'react';
 
 interface MenuItemCardProps {
@@ -92,6 +92,15 @@ export default function MenuItemCard({
     );
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      router.delete(route('employee.restaurant.menu-items.destroy', item.id), {
+        preserveScroll: true,
+      });
+    }
+  };
+
   return (
     <div
       className={`menu-item-card ${!isAvailable ? 'unavailable' : ''} ${
@@ -157,6 +166,13 @@ export default function MenuItemCard({
               aria-label="Edit menu item"
             >
               <PencilIcon className="icon" />
+            </button>
+            <button
+              className="delete-button"
+              onClick={handleDelete}
+              aria-label="Delete menu item"
+            >
+              <TrashIcon className="icon" />
             </button>
           </div>
         )}

@@ -67,7 +67,7 @@ class EmployeeMenuItemController extends Controller
             $menuItem->touch(); // Ensure 'updated' event fires if only allergens changed
         }
 
-        return redirect()->route('employee.menu.edit')->with('success', 'Menu item updated successfully.');
+        return redirect()->route('employee.menu.index')->with('success', 'Menu item updated successfully.');
     }
 
     public function updateStatus(Request $request, MenuItem $item)
@@ -81,5 +81,72 @@ class EmployeeMenuItemController extends Controller
         $item->update($validated);
 
         return back();
+    }
+
+    public function create(Request $request)
+    {
+        $restaurant = $request->user()->employee?->restaurant;
+
+        if (! $restaurant) {
+            abort(403, 'User is not associated with a restaurant.');
+        }
+
+        $this->authorize('create', [MenuItem::class, $restaurant]);
+
+        $foodTypes = \App\Models\FoodType::where('restaurant_id', $restaurant->id)->get();
+        $allergens = \App\Models\Allergen::all();
+
+        // Get the food_type_id from query params if provided
+        $foodTypeId = $request->query('food_type_id');
+
+        return Inertia::render('Employee/MenuItem/Create', [
+            'restaurant' => $restaurant,
+            'foodTypes' => $foodTypes,
+            'allergens' => $allergens,
+            'preselectedFoodTypeId' => $foodTypeId,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $restaurant = $request->user()->employee?->restaurant;
+
+        if (! $restaurant) {
+            abort(403, 'User is not associated with a restaurant.');
+        }
+
+        $this->authorize('create', [MenuItem::class, $restaurant]);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'food_type_id' => [
+                'required',
+                Rule::exists('food_types', 'id')->where('restaurant_id', $restaurant->id),
+            ],
+            'is_available' => ['required', 'boolean'],
+            'allergens' => ['array'],
+            'allergens.*' => ['exists:allergens,id'],
+        ]);
+
+        $validated['restaurant_id'] = $restaurant->id;
+
+        $menuItem = MenuItem::create($validated);
+
+        if (isset($validated['allergens'])) {
+            $menuItem->allergens()->sync($validated['allergens']);
+        }
+
+        return back()->with('success', 'Menu item created successfully.');
+    }
+
+    public function destroy(Request $request, MenuItem $menuItem)
+    {
+        $this->authorize('delete', $menuItem);
+
+        $menuItem->delete();
+
+        return back()->with('success', 'Menu item deleted successfully.');
     }
 }

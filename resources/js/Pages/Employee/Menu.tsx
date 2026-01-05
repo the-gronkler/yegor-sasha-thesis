@@ -21,26 +21,28 @@ export default function EmployeeMenu({ restaurant, isRestaurantAdmin }: Props) {
       <div className="employee-menu-page">
         <div className="page-header">
           <h1 className="page-title">Menu Management</h1>
-          {isRestaurantAdmin && isEditMode && (
-            <button
-              onClick={() => setIsManagingCategories(!isManagingCategories)}
-              className="btn-secondary"
-              aria-label="Manage Categories"
-            >
-              <Cog6ToothIcon className="icon-sm" />
-              {isManagingCategories ? 'Done Managing' : 'Manage Categories'}
-            </button>
-          )}
-          {isRestaurantAdmin && (
-            <button
-              onClick={() => setIsEditMode(!isEditMode)}
-              className="btn-secondary"
-              aria-label="Toggle Edit Menu Mode"
-            >
-              <PencilSquareIcon className="icon-sm" />
-              {isEditMode ? 'Exit Edit' : 'Edit Menu'}
-            </button>
-          )}
+          <div className="edit-buttons">
+            {isRestaurantAdmin && isEditMode && (
+              <button
+                onClick={() => setIsManagingCategories(!isManagingCategories)}
+                className="btn-secondary"
+                aria-label="Manage Categories"
+              >
+                <Cog6ToothIcon className="icon-sm" />
+                {isManagingCategories ? 'Done Managing' : 'Manage Categories'}
+              </button>
+            )}
+            {isRestaurantAdmin && (
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className="btn-secondary"
+                aria-label="Toggle Edit Menu Mode"
+              >
+                <PencilSquareIcon className="icon-sm" />
+                {isEditMode ? 'Exit Edit' : 'Edit Menu'}
+              </button>
+            )}
+          </div>
         </div>
 
         <RestaurantMenu
