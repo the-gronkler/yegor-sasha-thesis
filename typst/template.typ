@@ -14,6 +14,7 @@
 /// - acknowledgements: Here include your thanks to people who helped you in the journey of implementing and preparing this thesis.
 /// - keywords: Keywords can be both single- or multiple-word phrases. At least 3 keywords are necessary. Treat them as tags. Your thesis must be searchable using them.
 /// - body: The main content of the thesis.
+
 #let project(
   title: "",
   authors: (),
@@ -130,6 +131,9 @@
     it
   }
 
+  // Links
+  show link: set text(fill: rgb("#005580"))
+
   // Code blocks
   show raw.where(block: true): it => {
     set text(size: 0.9em)
@@ -150,7 +154,20 @@
       radius: 5pt,
       stroke: rgb("#e0e0e0"),
       width: 100%,
+      breakable: false,
       align(left, it),
+    )
+  }
+
+  // Inline code
+  show raw.where(block: false): it => {
+    box(
+      baseline: 2pt,
+      fill: rgb("#f6f8fa"),
+      inset: (x: 4pt, y: 2pt),
+      radius: 3pt,
+      stroke: rgb("#d1d9e0"),
+      text(fill: rgb("#24292f"), font: "Consolas", weight: "semibold", spacing: 0.05em, size: 12pt, it),
     )
   }
 
