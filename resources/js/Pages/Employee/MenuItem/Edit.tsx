@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
-import { MenuItem, FoodType, Allergen } from '@/types/models';
+import { MenuItem, FoodType, Allergen, Image } from '@/types/models';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import MenuItemPhotos from '@/Components/Shared/MenuItemPhotos';
 
 interface Props {
   menuItem: MenuItem;
   foodTypes: FoodType[];
   allergens: Allergen[];
+  restaurantImages: Image[];
   queryParams?: { from?: string };
 }
 
@@ -15,6 +17,7 @@ export default function EditMenuItem({
   menuItem,
   foodTypes,
   allergens,
+  restaurantImages,
   queryParams,
 }: Props) {
   // Determine back URL based on query param
@@ -200,6 +203,15 @@ export default function EditMenuItem({
               </button>
             </div>
           </form>
+
+          {/* Photos Section */}
+          <div className="photos-section">
+            <MenuItemPhotos
+              menuItemId={menuItem.id}
+              restaurantImages={restaurantImages}
+              selectedImageId={menuItem.image_id || null}
+            />
+          </div>
         </div>
       </div>
     </AppLayout>

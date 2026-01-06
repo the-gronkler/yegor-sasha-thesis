@@ -16,7 +16,7 @@ class EmployeeMenuItemController extends Controller
 
         $this->authorize('view', $menuItem);
 
-        $menuItem->load(['allergens', 'images', 'restaurant']);
+        $menuItem->load(['allergens', 'images', 'restaurant', 'image']);
 
         return Inertia::render('Employee/MenuItem/Show', [
             'menuItem' => $menuItem,
@@ -35,10 +35,18 @@ class EmployeeMenuItemController extends Controller
         $foodTypes = \App\Models\FoodType::where('restaurant_id', $menuItem->restaurant_id)->get();
         $allergens = \App\Models\Allergen::all();
 
+        // Get all restaurant images for photo selection
+        $restaurantImages = \App\Models\Image::where('restaurant_id', $menuItem->restaurant_id)
+            ->whereNull('menu_item_id') // Only restaurant photos, not menu item specific ones
+            ->orderBy('is_primary_for_restaurant', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return Inertia::render('Employee/MenuItem/Edit', [
             'menuItem' => $menuItem,
             'foodTypes' => $foodTypes,
             'allergens' => $allergens,
+            'restaurantImages' => $restaurantImages,
             'queryParams' => $request->query(),
         ]);
     }
@@ -83,6 +91,30 @@ class EmployeeMenuItemController extends Controller
         return back();
     }
 
+    public function updatePhoto(Request $request, MenuItem $menuItem)
+    {
+        $this->authorize('update', $menuItem);
+
+        $validated = $request->validate([
+            'image_id' => ['nullable', 'exists:images,id'],
+        ]);
+
+        // If image_id is provided, verify it belongs to the same restaurant
+        if ($validated['image_id']) {
+            $image = \App\Models\Image::find($validated['image_id']);
+            if ($image->restaurant_id !== $menuItem->restaurant_id) {
+                abort(403, 'This image does not belong to your restaurant.');
+            }
+        }
+
+        // Update the menu item's selected image
+        $menuItem->update([
+            'image_id' => $validated['image_id'],
+        ]);
+
+        return back()->with('success', $validated['image_id'] ? 'Photo selected successfully.' : 'Photo removed successfully.');
+    }
+
     public function create(Request $request)
     {
         $restaurant = $request->user()->employee?->restaurant;
@@ -96,6 +128,13 @@ class EmployeeMenuItemController extends Controller
         $foodTypes = \App\Models\FoodType::where('restaurant_id', $restaurant->id)->get();
         $allergens = \App\Models\Allergen::all();
 
+        // Get all restaurant images for photo selection
+        $restaurantImages = \App\Models\Image::where('restaurant_id', $restaurant->id)
+            ->whereNull('menu_item_id')
+            ->orderBy('is_primary_for_restaurant', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         // Get the food_type_id from query params if provided
         $foodTypeId = $request->query('food_type_id');
 
@@ -103,6 +142,7 @@ class EmployeeMenuItemController extends Controller
             'restaurant' => $restaurant,
             'foodTypes' => $foodTypes,
             'allergens' => $allergens,
+            'restaurantImages' => $restaurantImages,
             'preselectedFoodTypeId' => $foodTypeId,
         ]);
     }
@@ -128,7 +168,16 @@ class EmployeeMenuItemController extends Controller
             'is_available' => ['required', 'boolean'],
             'allergens' => ['array'],
             'allergens.*' => ['exists:allergens,id'],
+            'image_id' => ['nullable', 'exists:images,id'],
         ]);
+
+        // Validate that image belongs to the same restaurant if provided
+        if (isset($validated['image_id'])) {
+            $image = \App\Models\Image::find($validated['image_id']);
+            if ($image && $image->restaurant_id !== $restaurant->id) {
+                return back()->withErrors(['image_id' => 'The selected image does not belong to your restaurant.']);
+            }
+        }
 
         $validated['restaurant_id'] = $restaurant->id;
 
@@ -138,7 +187,7 @@ class EmployeeMenuItemController extends Controller
             $menuItem->allergens()->sync($validated['allergens']);
         }
 
-        return back()->with('success', 'Menu item created successfully.');
+        return redirect()->route('employee.menu.index')->with('success', 'Menu item created successfully.');
     }
 
     public function destroy(Request $request, MenuItem $menuItem)

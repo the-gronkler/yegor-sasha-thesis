@@ -14,13 +14,29 @@ export default function EmployeeMenu({ restaurant, isRestaurantAdmin }: Props) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isManagingCategories, setIsManagingCategories] = useState(false);
 
+  const primaryImage =
+    restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
+    restaurant.images?.[0];
+  const bannerUrl = primaryImage ? primaryImage.url : null;
+
   return (
     <AppLayout>
       <Head title="Menu Management" />
 
       <div className="employee-menu-page">
+        {/* Banner */}
+        <div
+          className="restaurant-banner"
+          style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
+        >
+          <div className="banner-actions">
+            {/* Could add back button here if needed */}
+          </div>
+        </div>
+
+        {/* Header Card - Overlaps Banner */}
         <div className="page-header">
-          <h1 className="page-title">Menu Management</h1>
+          <h1 className="page-title">{restaurant.name} Menu Management</h1>
           <div className="edit-buttons">
             {isRestaurantAdmin && isEditMode && (
               <button

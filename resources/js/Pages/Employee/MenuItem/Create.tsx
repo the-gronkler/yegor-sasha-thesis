@@ -1,18 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
-import { FoodType, Allergen } from '@/types/models';
+import { FoodType, Allergen, Image } from '@/types/models';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import MenuItemPhotos from '@/Components/Shared/MenuItemPhotos';
 
 interface Props {
   foodTypes: FoodType[];
   allergens: Allergen[];
+  restaurantImages: Image[];
   preselectedFoodTypeId?: number;
 }
 
 export default function CreateMenuItem({
   foodTypes,
   allergens,
+  restaurantImages,
   preselectedFoodTypeId,
 }: Props) {
   const backUrl = route('employee.menu.index');
@@ -24,6 +27,7 @@ export default function CreateMenuItem({
     food_type_id: preselectedFoodTypeId || (foodTypes[0]?.id ?? 0),
     is_available: true,
     allergens: [] as number[],
+    image_id: null as number | null,
   });
 
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -195,6 +199,15 @@ export default function CreateMenuItem({
               </button>
             </div>
           </form>
+
+          {/* Photos Section */}
+          <div className="photos-section">
+            <MenuItemPhotos
+              restaurantImages={restaurantImages}
+              selectedImageId={data.image_id}
+              onSelectImage={(imageId) => setData('image_id', imageId)}
+            />
+          </div>
         </div>
       </div>
     </AppLayout>

@@ -15,7 +15,7 @@ class MenuController extends Controller
      */
     public function index(): Response
     {
-        $restaurant = $this->getEmployeeRestaurant(['images', 'allergens']);
+        $restaurant = $this->getEmployeeRestaurant(['images', 'allergens', 'image']);
         $employee = Auth::user()->employee;
 
         return Inertia::render('Employee/Menu', [
@@ -35,8 +35,11 @@ class MenuController extends Controller
             abort(403, 'You must be assigned to a restaurant to access this page');
         }
 
-        return Restaurant::with(['foodTypes.menuItems' => function ($query) use ($menuItemRelations) {
-            $query->orderBy('name')->with($menuItemRelations);
-        }])->findOrFail($employee->restaurant_id);
+        return Restaurant::with([
+            'images', // Load restaurant images for banner
+            'foodTypes.menuItems' => function ($query) use ($menuItemRelations) {
+                $query->orderBy('name')->with($menuItemRelations);
+            },
+        ])->findOrFail($employee->restaurant_id);
     }
 }

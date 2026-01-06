@@ -51,6 +51,9 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
             Route::put('menu-items/{item}/status', [EmployeeMenuItemController::class, 'updateStatus'])
                 ->name('menu-items.updateStatus');
 
+            Route::put('menu-items/{menuItem}/photo', [EmployeeMenuItemController::class, 'updatePhoto'])
+                ->name('menu-items.update-photo');
+
             Route::put('orders/{order}/status', [EmployeeOrderController::class, 'updateStatus'])
                 ->name('orders.updateStatus');
 

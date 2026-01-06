@@ -1,0 +1,266 @@
+@use '../variables/main-colors';
+@use '../variables/exception-colors';
+@use '../variables/layout';
+
+.menu-item-photos {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin: 0;
+    }
+
+    .btn-secondary-small {
+      padding: 0.5rem 1rem;
+      background-color: main-colors.$bg-alt-1;
+      color: main-colors.$text-primary;
+      border: 1px solid main-colors.$border-light;
+      border-radius: layout.$border-radius;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$bg-alt-2;
+        border-color: main-colors.$brand-primary;
+        color: main-colors.$brand-primary;
+      }
+    }
+  }
+
+  .info-message {
+    padding: 1rem;
+    background-color: main-colors.$bg-alt-1;
+    border-radius: layout.$border-radius;
+    color: main-colors.$text-secondary;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .selected-photo-preview {
+    position: relative;
+    margin-bottom: 1.5rem;
+    border-radius: layout.$border-radius;
+    overflow: hidden;
+    border: 1px solid rgba(main-colors.$brand-primary, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    .preview-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background-color: rgba(
+        238,
+        91,
+        43,
+        0.4
+      ); // Brand primary with 40% opacity
+      color: main-colors.$bg-alt-2;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: rgba(238, 91, 43, 0.8);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      }
+
+      .icon-xs {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+
+  .photo-selector {
+    .selector-toggle {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      background-color: main-colors.$bg-alt-1;
+      border: 1px solid main-colors.$border-light;
+      border-radius: layout.$border-radius;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      color: main-colors.$text-primary;
+      font-weight: 500;
+
+      &:hover {
+        background-color: main-colors.$bg-alt-2;
+        border-color: main-colors.$brand-primary;
+      }
+
+      .toggle-text {
+        flex: 1;
+        text-align: left;
+      }
+
+      .icon-sm {
+        width: 20px;
+        height: 20px;
+        color: main-colors.$text-secondary;
+        flex-shrink: 0;
+      }
+    }
+
+    .photos-grid {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: main-colors.$bg-alt-1;
+      border-radius: layout.$border-radius;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      animation: slideDown 0.3s ease;
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .photo-item {
+        position: relative;
+        background-color: main-colors.$bg-surface;
+        border-radius: layout.$border-radius;
+        overflow: hidden;
+        border: 2px solid main-colors.$border-light;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: main-colors.$brand-primary;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+          .photo-overlay {
+            opacity: 1;
+          }
+        }
+
+        // Selected state with subtle styling
+        &.selected {
+          border-color: main-colors.$brand-primary !important;
+          border-width: 3px !important;
+          box-shadow:
+            0 0 0 3px rgba(main-colors.$brand-primary, 0.15),
+            0 4px 12px rgba(0, 0, 0, 0.15) !important;
+          background-color: rgba(main-colors.$brand-primary, 0.03) !important;
+
+          &:hover {
+            box-shadow:
+              0 0 0 3px rgba(main-colors.$brand-primary, 0.25),
+              0 6px 16px rgba(0, 0, 0, 0.2) !important;
+          }
+
+          .photo-image {
+            opacity: 1;
+          }
+
+          .photo-overlay {
+            opacity: 1 !important;
+            background: linear-gradient(
+              to top,
+              rgba(main-colors.$brand-primary, 0.6),
+              transparent
+            ) !important;
+
+            .select-text {
+              color: white;
+              font-weight: 700;
+            }
+          }
+        }
+
+        .photo-image {
+          width: 100%;
+          height: 180px;
+          object-fit: cover;
+          display: block;
+        }
+
+        .photo-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+          padding: 2rem 0.75rem 0.75rem;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 5;
+
+          .select-text {
+            color: main-colors.$text-inverse;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            display: block;
+          }
+        }
+      }
+
+      .empty-state {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+        background-color: main-colors.$bg-surface;
+        border-radius: layout.$border-radius;
+        border: 2px dashed main-colors.$border-light;
+
+        .empty-icon {
+          width: 64px;
+          height: 64px;
+          color: main-colors.$text-tertiary;
+          margin-bottom: 1rem;
+        }
+
+        .empty-text {
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: main-colors.$text-secondary;
+          margin-bottom: 0.5rem;
+        }
+
+        .empty-description {
+          font-size: 0.9rem;
+          color: main-colors.$text-tertiary;
+          text-align: center;
+        }
+      }
+    }
+  }
+}
