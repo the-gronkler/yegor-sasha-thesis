@@ -141,10 +141,14 @@ These specific hooks encapsulate the correct parameters and event handling logic
 
 This layered architecture—generic hook, specific wrappers, and page-level usage—ensures clean separation of concerns and ease of testing.
 
-=== Channel Security and Authorization
-Private channels are used for sensitive order data (`private-restaurant.{id}`). Access control is enforced in #source_code_link("routes/channels.php") route definition file, with the `order.{orderId}` channel defined as:
+
+
 
 #code_example[
+  === Channel Security and Authorization
+  Private channels are used for sensitive order data (`private-restaurant.{id}`).
+
+  Access control is enforced in #source_code_link("routes/channels.php") route definition file, with the `order.{orderId}` channel defined as:
   ```php
   Broadcast::channel('order.{orderId}', function ($user, $orderId) {
       $order = Order::find($orderId);
@@ -156,7 +160,8 @@ Private channels are used for sensitive order data (`private-restaurant.{id}`). 
       $employeeRestaurantId = $user->employee?->restaurant_id;
 
       return (int) $user->id === (int) $order->customer_user_id ||
-          ($employeeRestaurantId !== null && (int) $employeeRestaurantId === (int) $order->restaurant_id);
+          ($employeeRestaurantId !== null &&
+          (int) $employeeRestaurantId === (int) $order->restaurant_id);
   });
   ```
 
