@@ -32,15 +32,15 @@
 
 === Additional Functionalities
 
-*Order Customization*
+==== Order Customization
 - Customers can add special instructions for their orders, such as dietary preferences or preparation requests.
 - Options to customize menu items (e.g., selecting toppings or choosing portion sizes).
 
-*Restaurant Ratings and Reviews*
+==== Restaurant Ratings and Reviews
 - Users can leave ratings and reviews for restaurants after placing an order.
 - Display aggregate ratings and reviews for each restaurant to help users make informed choices.
 
-*Order Sharing*
+==== Order Sharing
 - Enable group order sharing where multiple users can contribute to a single order and split payment.
 - Share restaurant heatmap or specific menus with friends via a unique link or app invitation.
 
@@ -63,9 +63,9 @@
 
 === Additional Functionalities
 
-*Dynamic Pricing and Promotions*
+==== Dynamic Pricing and Promotions
 - Tools to create dynamic pricing (e.g., discounts during off-peak hours or happy hour deals).
 - Ability to push promotional campaigns directly to the app users, such as "Buy 1 Get 1 Free."
 
-*Analytics and Reporting*
+==== Analytics and Reporting
 - Provide insights into order trends, customer preferences, and inventory performance.
