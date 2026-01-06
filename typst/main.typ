@@ -1,4 +1,5 @@
 #import "template.typ": *
+#import "config.typ": *
 
 // TODO: replace example content with our own thesis content
 

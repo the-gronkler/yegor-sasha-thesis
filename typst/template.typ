@@ -14,6 +14,7 @@
 /// - acknowledgements: Here include your thanks to people who helped you in the journey of implementing and preparing this thesis.
 /// - keywords: Keywords can be both single- or multiple-word phrases. At least 3 keywords are necessary. Treat them as tags. Your thesis must be searchable using them.
 /// - body: The main content of the thesis.
+
 #let project(
   title: "",
   authors: (),
@@ -129,6 +130,9 @@
     pagebreak(weak: true)
     it
   }
+
+  // Links
+  show link: set text(fill: rgb("#005580"))
 
   // Code blocks
   show raw.where(block: true): it => {
