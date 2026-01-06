@@ -64,6 +64,7 @@ class EmployeeMenuItemController extends Controller
 
         if (isset($validated['allergens'])) {
             $menuItem->allergens()->sync($validated['allergens']);
+            $menuItem->touch(); // Ensure 'updated' event fires if only allergens changed
         }
 
         return redirect()->route('employee.menu.edit')->with('success', 'Menu item updated successfully.');

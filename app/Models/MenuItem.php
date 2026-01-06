@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\MenuItemUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -53,5 +54,16 @@ class MenuItem extends Model
         return $this->belongsToMany(Order::class, 'order_items', 'order_items')
             ->withPivot('quantity')
             ->withTimestamps();
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($menuItem) {
+            MenuItemUpdated::dispatch($menuItem);
+        });
+
+        static::updated(function ($menuItem) {
+            MenuItemUpdated::dispatch($menuItem);
+        });
     }
 }
