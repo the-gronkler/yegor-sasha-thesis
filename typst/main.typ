@@ -44,6 +44,8 @@
 #include "chapters/implementation.typ"
 #include "chapters/development-process/main.typ"
 #include "chapters/testing-and-validation.typ"
+
+// Final chapters:
 #include "chapters/conclusions-and-future-work.typ"
 
 
