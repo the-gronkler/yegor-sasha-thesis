@@ -56,7 +56,10 @@ Headings automatically handle numbering and page breaks (for Level 1).
 = Chapter Title (Level 1)
 == Section Title (Level 2)
 === Subsection Title (Level 3)
+==== Sub-sub title (not numbered)
 ```
+
+**Note**: Avoid pseudo headings. Do not use bold text `*Heading*` to simulate headings. Always use the proper heading syntax above for correct structure and outline generation.
 
 ### Lists
 

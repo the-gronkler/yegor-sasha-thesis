@@ -123,7 +123,17 @@
   set par(justify: true, leading: 0.8em, spacing: 1.2em)
 
   // Headings
-  set heading(numbering: "1.1")
+  set heading(numbering: (..args) => {
+    let nums = args.pos()
+    if nums.len() >= 4 { none } else {
+      let s = ""
+      for (i, num) in nums.enumerate() {
+        if i > 0 { s += "." }
+        s += str(num)
+      }
+      s
+    }
+  })
   show heading: set block(above: 2em, below: 1em)
 
   show heading.where(level: 1): it => {

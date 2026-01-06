@@ -31,7 +31,7 @@ Key stakeholders for this project include:
 === Restaurant Owners and Managers
 Small restaurant operators who seek to expand their customer base without high upfront cost, or significant disruptions to their established workflow.
 
-*Expectations:*
+==== Expectations
 - A cost-effective, easy-to-integrate solution for managing orders.
 - Tools to track relevant inventory and update order statuses efficiently.
 - Customization options to align the system with their specific workflows.
@@ -40,7 +40,7 @@ Small restaurant operators who seek to expand their customer base without high u
 === End Users (Customers)
 Customers of small restaurants, who expect a convenient, user-friendly system for placing and tracking their orders, and enjoy a seamless ordering experience. Additionally, customers who like to discover and rate restaurants based on location, popularity, and ratings.
 
-*Expectations:*
+==== Expectations
 - An intuitive interface for selecting restaurants, browsing menus, placing orders, and tracking their food orders.
 - Effective real-time updates on order status.
 - Access to features like the restaurant heatmap to enable seamless and intuitive selection/discovery of a restaurant that best fits that user’s current needs.
