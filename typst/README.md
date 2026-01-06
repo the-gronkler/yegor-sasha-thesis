@@ -138,7 +138,44 @@ This practice maintains consistency and allows easy updates without searching th
 
 ---
 
-## 🚀 How to Preview/Compile
+## � Code Example Layout
+
+**MANDATORY**: When presenting code examples with explanatory text, you **MUST** use the `code_example` function to prevent awkward page breaks between paragraphs and code blocks.
+
+### Why This Matters
+
+Without this function, explanatory text and code can be separated by page breaks, making the document difficult to read and understand. This function ensures that related content stays together.
+
+### Example Usage
+
+````typst
+#code_example[
+  The broadcasting system uses Laravel events to dispatch real-time updates.
+
+  ```php
+  class OrderUpdated implements ShouldBroadcast
+  {
+      // Event implementation
+  }
+````
+
+]
+
+````
+
+### Import Requirement
+
+Add this import at the top of your chapter files:
+
+```typst
+#import "../config.typ": source_code_link, code_example
+````
+
+**ALWAYS USE THIS FUNCTION** when you have explanatory text followed by or preceding code blocks. Failure to do so results in poor document layout.
+
+---
+
+## How to Preview/Compile
 
 **VS Code (Recommended):**
 
