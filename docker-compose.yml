@@ -40,6 +40,9 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      # Force Reverb Backend to use HTTP internally in Docker, regardless of .env (which might be HTTPS for Herd)
+      REVERB_BACKEND_SCHEME: http
+      REVERB_BACKEND_HOST: 127.0.0.1
     extra_hosts:
       - '${DOMAIN_NAME:-yegor-sasha-thesis.test}:127.0.0.1'
     ports:
