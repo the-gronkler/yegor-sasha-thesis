@@ -154,7 +154,20 @@
       radius: 5pt,
       stroke: rgb("#e0e0e0"),
       width: 100%,
+      breakable: false,
       align(left, it),
+    )
+  }
+
+  // Inline code
+  show raw.where(block: false): it => {
+    box(
+      baseline: 2pt,
+      fill: rgb("#f6f8fa"),
+      inset: (x: 4pt, y: 2pt),
+      radius: 3pt,
+      stroke: rgb("#d1d9e0"),
+      text(fill: rgb("#24292f"), font: "Consolas", weight: "semibold", spacing: 0.05em, size: 12pt, it),
     )
   }
 
