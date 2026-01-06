@@ -51,8 +51,6 @@ export function useChannelUpdates<T>(
 
       eventNames.forEach((eventName) => {
         channel.listen(eventName, (event: T) => {
-          console.log(`Received ${eventName} on ${channelName}`, event);
-
           // Use the ref to access the latest callback
           if (shouldReloadRef.current && !shouldReloadRef.current(event)) {
             return;
@@ -64,17 +62,11 @@ export function useChannelUpdates<T>(
           }
 
           reloadTimeoutRef.current = setTimeout(() => {
-            console.log('Reloading page due to broadcast event');
             router.reload({
               preserveScroll: true,
             });
           }, 200);
         });
-      });
-
-      // Debug: Listen for any event on the channel
-      channel.listen('*', (event: any) => {
-        console.log(`Any event on ${channelName}`, event);
       });
     });
 
