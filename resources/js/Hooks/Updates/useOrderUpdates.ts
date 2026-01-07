@@ -15,5 +15,11 @@ export function useOrderUpdates(
   orderIds: number | number[] | undefined,
   shouldReload?: (event: OrderUpdatedEvent) => boolean,
 ) {
-  useChannelUpdates(orderIds, 'order', ['OrderUpdated'], shouldReload);
+  useChannelUpdates(
+    orderIds,
+    'order',
+    ['OrderUpdated'],
+    shouldReload,
+    true, // Private channel
+  );
 }

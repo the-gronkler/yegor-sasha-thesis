@@ -15,7 +15,7 @@
     "**/*.php": "php vendor/bin/pint"
   },
   "devDependencies": {
-    "@inertiajs/react": "^2.2.8",
+    "@inertiajs/react": "^2.3.6",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
