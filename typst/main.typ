@@ -1,4 +1,5 @@
 #import "template.typ": *
+#import "config.typ": *
 
 // TODO: replace example content with our own thesis content
 
@@ -43,6 +44,8 @@
 #include "chapters/implementation.typ"
 #include "chapters/development-process/main.typ"
 #include "chapters/testing-and-validation.typ"
+
+// Final chapters:
 #include "chapters/conclusions-and-future-work.typ"
 
 

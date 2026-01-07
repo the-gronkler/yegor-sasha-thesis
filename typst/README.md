@@ -56,7 +56,10 @@ Headings automatically handle numbering and page breaks (for Level 1).
 = Chapter Title (Level 1)
 == Section Title (Level 2)
 === Subsection Title (Level 3)
+==== Sub-sub title (not numbered)
 ```
+
+**Note**: Avoid pseudo headings. Do not use bold text `*Heading*` to simulate headings. Always use the proper heading syntax above for correct structure and outline generation.
 
 ### Lists
 
@@ -114,7 +117,68 @@ def main():
 
 ---
 
-## 🚀 How to Preview/Compile
+## 🔗 Source Code Referencing
+
+When linking to source code files in the thesis, avoid hardcoding commit hashes or branch names. Instead, use the `source_code_link` function from `config.typ`, which takes the file path and generates a link with the file name in monospace and a citation to the source repository.
+
+### Example Usage
+
+```typst
+#source_code_link("/AGENTS.md")
+```
+
+This produces a clickable link to the file at the current reference (commit or branch), displays the file name in monospace, and includes a citation to the source repository.
+
+### Updating References
+
+To change all code links to point to a different branch or commit (e.g., "release-1.0"), simply update the `code_ref` variable in `config.typ`:
+
+```typst
+#let code_ref = "release-1.0"
+```
+
+This practice maintains consistency and allows easy updates without searching through multiple files.
+
+---
+
+## � Code Example Layout
+
+**MANDATORY**: When presenting code examples with explanatory text, you **MUST** use the `code_example` function to prevent awkward page breaks between paragraphs and code blocks.
+
+### Why This Matters
+
+Without this function, explanatory text and code can be separated by page breaks, making the document difficult to read and understand. This function ensures that related content stays together.
+
+### Example Usage
+
+````typst
+#code_example[
+  The broadcasting system uses Laravel events to dispatch real-time updates.
+
+  ```php
+  class OrderUpdated implements ShouldBroadcast
+  {
+      // Event implementation
+  }
+````
+
+]
+
+````
+
+### Import Requirement
+
+Add this import at the top of your chapter files:
+
+```typst
+#import "../config.typ": source_code_link, code_example
+````
+
+**ALWAYS USE THIS FUNCTION** when you have explanatory text followed by or preceding code blocks. Failure to do so results in poor document layout.
+
+---
+
+## How to Preview/Compile
 
 **VS Code (Recommended):**
 
