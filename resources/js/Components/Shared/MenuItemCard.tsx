@@ -3,7 +3,7 @@ import { useCart } from '@/Contexts/CartContext';
 import { router } from '@inertiajs/react';
 import { useAuth } from '@/Hooks/useAuth';
 import Toggle from '@/Components/UI/Toggle';
-import { PencilIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import React, { useState, useEffect } from 'react';
 
 interface MenuItemCardProps {
@@ -31,10 +31,8 @@ export default function MenuItemCard({
     setIsAvailable(item.is_available);
   }, [item.is_available]);
 
-  const primaryImage =
-    item.images?.find((img) => img.is_primary_for_menu_item) ||
-    item.images?.[0];
-  const imageUrl = primaryImage ? primaryImage.url : null;
+  // Use the selected image (image_id relationship), fallback to first image, or null
+  const imageUrl = item.image?.url || item.images?.[0]?.url || null;
 
   const handleAddToCart = () => {
     requireAuth(() => {
@@ -90,6 +88,15 @@ export default function MenuItemCard({
         },
       },
     );
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      router.delete(route('employee.restaurant.menu-items.destroy', item.id), {
+        preserveScroll: true,
+      });
+    }
   };
 
   return (
@@ -157,6 +164,13 @@ export default function MenuItemCard({
               aria-label="Edit menu item"
             >
               <PencilIcon className="icon" />
+            </button>
+            <button
+              className="delete-button"
+              onClick={handleDelete}
+              aria-label="Delete menu item"
+            >
+              <TrashIcon className="icon" />
             </button>
           </div>
         )}

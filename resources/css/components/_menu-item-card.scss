@@ -168,7 +168,8 @@
     align-items: center;
     gap: 1rem;
 
-    .edit-button {
+    .edit-button,
+    .delete-button {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -190,6 +191,13 @@
         background-color: main-colors.$bg-alt-1;
         color: main-colors.$brand-primary;
         border-color: main-colors.$brand-primary;
+      }
+    }
+
+    .delete-button {
+      &:hover {
+        color: exception-colors.$status-error;
+        border-color: exception-colors.$status-error;
       }
     }
   }

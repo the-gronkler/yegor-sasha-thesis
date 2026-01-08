@@ -11,10 +11,8 @@ export default function MenuItemDetail({
   restaurantName,
   children,
 }: Props) {
-  const primaryImage =
-    menuItem.images?.find((img) => img.is_primary_for_menu_item) ||
-    menuItem.images?.[0];
-  const imageUrl = primaryImage ? primaryImage.url : null;
+  // Use the selected image (image_id relationship), fallback to first image, or null
+  const imageUrl = menuItem.image?.url || menuItem.images?.[0]?.url || null;
 
   return (
     <>

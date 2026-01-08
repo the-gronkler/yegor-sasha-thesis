@@ -79,7 +79,9 @@ export interface MenuItem {
   price: number;
   description: string | null;
   is_available: boolean;
-  images?: Image[];
+  image_id: number | null;
+  image?: Image; // The selected image
+  images?: Image[]; // All images (legacy, may not be used)
   allergens?: Allergen[];
   pivot?: {
     quantity: number;

@@ -133,7 +133,7 @@
   .floating-checkout-container {
     position: fixed;
     bottom: calc(
-      layout.$bottom-nav-height + 10px
+      #{layout.$bottom-nav-height} + 10px
     ); // Above bottom nav + 10px padding
     left: 0;
     width: 100%;

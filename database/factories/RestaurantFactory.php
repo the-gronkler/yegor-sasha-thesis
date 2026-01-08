@@ -151,51 +151,46 @@ class RestaurantFactory extends Factory
                         'food_type_id' => $ft->id,
                     ])
                     ->create()
-                    ->each(function (MenuItem $mi) use ($restaurant) {
-                        // For each menu item, attach a primary image
-                        Image::factory()->create([
-                            'restaurant_id' => $restaurant->id,
-                            'menu_item_id' => $mi->id,
-                            'is_primary_for_menu_item' => true,
-                            'is_primary_for_restaurant' => false,
-                        ]);
-
-                        // Optionally attach more images (non-primary)
-                        $extraCount = rand(0, 2);
-                        if ($extraCount > 0) {
-                            Image::factory()
-                                ->count($extraCount)
-                                ->state([
-                                    'restaurant_id' => $restaurant->id,
-                                    'menu_item_id' => $mi->id,
-                                    'is_primary_for_menu_item' => false,
-                                    'is_primary_for_restaurant' => false,
-                                ])
-                                ->create();
+                    ->each(function (MenuItem $mi) {
+                        // Optionally attach allergens to menu items for realistic seeded data
+                        $allergenIds = Allergen::pluck('id');
+                        if ($allergenIds->count() > 0) {
+                            $attachCount = rand(1, min(3, $allergenIds->count()));
+                            $subset = $allergenIds->random($attachCount);
+                            $mi->allergens()->attach(
+                                $subset->mapWithKeys(fn ($id) => [$id => []])
+                            );
                         }
                     });
             }
 
-            // Mark one image as primary for restaurant (based on one menu item)
-            $firstMenuItem = $restaurant->menuItems()->first();
-            if ($firstMenuItem) {
-                Image::factory()->create([
+            // Create restaurant images (not linked to specific menu items)
+            // These are the images that can be selected for menu items
+            $restaurantImages = Image::factory()
+                ->count(rand(5, 10))
+                ->create([
                     'restaurant_id' => $restaurant->id,
-                    'menu_item_id' => $firstMenuItem->id,
-                    'is_primary_for_restaurant' => true,
+                    'menu_item_id' => null, // Not linked to specific menu items
                     'is_primary_for_menu_item' => false,
-                    'description' => 'Primary image for restaurant',
+                    'is_primary_for_restaurant' => false,
+                ]);
+
+            // Set one as primary for restaurant
+            if ($restaurantImages->count() > 0) {
+                $restaurantImages->first()->update([
+                    'is_primary_for_restaurant' => true,
+                    'description' => 'Primary restaurant image',
                 ]);
             }
 
-            // Attach allergens to menu items
-            $allergenIds = Allergen::pluck('id');
+            // Now assign random restaurant images to menu items via image_id
+            $imageIds = $restaurantImages->pluck('id');
             foreach ($restaurant->menuItems as $mi) {
-                $attachCount = rand(1, min(3, $allergenIds->count()));
-                $subset = $allergenIds->random($attachCount);
-                $mi->allergens()->attach(
-                    $subset->mapWithKeys(fn ($id) => [$id => []])
-                );
+                if ($imageIds->count() > 0) {
+                    $mi->update([
+                        'image_id' => $imageIds->random(),
+                    ]);
+                }
             }
         });
     }
