@@ -43,6 +43,7 @@ This approach reduces errors by automating event dispatching on data changes, en
   In the `Order` model, the `booted` method dispatches the event on creation and status changes:
 
   ```php
+  <?php
   protected static function booted()
   {
       static::created(function ($order) {
@@ -62,6 +63,7 @@ This approach reduces errors by automating event dispatching on data changes, en
   For relationship updates, such as modifying allergens on a menu item, the controller calls `touch()` after the update to trigger the model's `updated` event:
 
   ```php
+  <?php
   // In MenuItemController, after updating allergens
   $menuItem->allergens()->sync($allergenIds);
   $menuItem->touch(); // Triggers MenuItemUpdated event
@@ -148,6 +150,7 @@ This layered architecture—generic hook, specific wrappers, and page-level usag
 
   Access control is enforced in #source_code_link("routes/channels.php") route definition file, with the `order.{orderId}` channel defined as:
   ```php
+  <?php
   Broadcast::channel('order.{orderId}', function ($user, $orderId) {
       $order = Order::find($orderId);
       if (! $order) {
