@@ -14,6 +14,7 @@
 /// - acknowledgements: Here include your thanks to people who helped you in the journey of implementing and preparing this thesis.
 /// - keywords: Keywords can be both single- or multiple-word phrases. At least 3 keywords are necessary. Treat them as tags. Your thesis must be searchable using them.
 /// - body: The main content of the thesis.
+
 #let project(
   title: "",
   authors: (),
@@ -122,13 +123,26 @@
   set par(justify: true, leading: 0.8em, spacing: 1.2em)
 
   // Headings
-  set heading(numbering: "1.1")
+  set heading(numbering: (..args) => {
+    let nums = args.pos()
+    if nums.len() >= 4 { none } else {
+      let s = ""
+      for (i, num) in nums.enumerate() {
+        if i > 0 { s += "." }
+        s += str(num)
+      }
+      s
+    }
+  })
   show heading: set block(above: 2em, below: 1em)
 
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
     it
   }
+
+  // Links
+  show link: set text(fill: rgb("#005580"))
 
   // Code blocks
   show raw.where(block: true): it => {
@@ -150,7 +164,20 @@
       radius: 5pt,
       stroke: rgb("#e0e0e0"),
       width: 100%,
+      breakable: false,
       align(left, it),
+    )
+  }
+
+  // Inline code
+  show raw.where(block: false): it => {
+    box(
+      baseline: 2pt,
+      fill: rgb("#f6f8fa"),
+      inset: (x: 4pt, y: 2pt),
+      radius: 3pt,
+      stroke: rgb("#d1d9e0"),
+      text(fill: rgb("#24292f"), font: "Consolas", weight: "semibold", spacing: 0.05em, size: 12pt, it),
     )
   }
 

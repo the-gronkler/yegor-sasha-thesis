@@ -8,12 +8,14 @@ import { router } from '@inertiajs/react';
  * @param channelPrefix - The prefix for the channel name (e.g., 'restaurant', 'order').
  * @param eventNames - The names of the events to listen for.
  * @param shouldReload - Optional callback to determine if reload should happen based on the event.
+ * @param isPrivate - Whether to use a private channel (requires auth). Defaults to false (public).
  */
 export function useChannelUpdates<T>(
   ids: number | number[] | undefined,
   channelPrefix: string,
   eventNames: string[],
   shouldReload?: (event: T) => boolean,
+  isPrivate: boolean = false,
 ) {
   // Use a ref to track the latest callback to avoid re-subscribing when the function reference changes
   const shouldReloadRef = useRef(shouldReload);
@@ -42,7 +44,10 @@ export function useChannelUpdates<T>(
     }
 
     uniqueIds.forEach((id) => {
-      const channel = window.Echo.channel(`${channelPrefix}.${id}`);
+      const channelName = `${channelPrefix}.${id}`;
+      const channel = isPrivate
+        ? window.Echo.private(channelName)
+        : window.Echo.channel(channelName);
 
       eventNames.forEach((eventName) => {
         channel.listen(eventName, (event: T) => {
@@ -73,5 +78,5 @@ export function useChannelUpdates<T>(
         window.Echo.leave(`${channelPrefix}.${id}`);
       });
     };
-  }, [stableIdsKey, channelPrefix, ...eventNames]);
+  }, [stableIdsKey, channelPrefix, isPrivate, ...eventNames]);
 }
