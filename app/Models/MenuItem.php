@@ -20,6 +20,7 @@ class MenuItem extends Model
         'description',
         'food_type_id',
         'is_available',
+        'image_id',
     ];
 
     protected function casts(): array
@@ -47,6 +48,11 @@ class MenuItem extends Model
     public function images(): HasMany
     {
         return $this->hasMany(Image::class);
+    }
+
+    public function image(): BelongsTo
+    {
+        return $this->belongsTo(Image::class, 'image_id');
     }
 
     public function orders(): BelongsToMany

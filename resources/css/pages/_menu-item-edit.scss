@@ -57,6 +57,12 @@
     box-shadow: 0 2px 8px main-colors.$shadow-color;
   }
 
+  .photos-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid main-colors.$border-light;
+  }
+
   .edit-form {
     .form-group {
       margin-bottom: 1.5rem;

@@ -153,6 +153,29 @@
       display: flex;
       flex-direction: column;
     }
+
+    .add-menu-item {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+
+      .btn-add-menu-item {
+        background: main-colors.$bg-alt-1;
+        color: main-colors.$text-secondary;
+        border: 1px dashed main-colors.$border-light;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.9rem;
+
+        &:hover {
+          background: main-colors.$bg-alt-2;
+          color: main-colors.$brand-primary;
+          border-color: main-colors.$brand-primary;
+        }
+      }
+    }
   }
 
   .no-results {
