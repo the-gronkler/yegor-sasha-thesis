@@ -28,7 +28,7 @@ export default function MenuItemPhotos({
       // Edit mode - save to database
       router.put(
         route('employee.restaurant.menu-items.update-photo', {
-          menuItem: menuItemId,
+          menu_item: menuItemId,
         }),
         {
           image_id: imageId,
@@ -48,7 +48,7 @@ export default function MenuItemPhotos({
       // Edit mode - save to database
       router.put(
         route('employee.restaurant.menu-items.update-photo', {
-          menuItem: menuItemId,
+          menu_item: menuItemId,
         }),
         {
           image_id: null,

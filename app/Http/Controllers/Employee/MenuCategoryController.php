@@ -17,7 +17,7 @@ class MenuCategoryController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return Inertia::render('Restaurant/Admin/MenuCategories/Index', [
+        return Inertia::render('Employee/Restaurant/MenuCategories/Index', [
             'restaurant' => ['id' => $restaurant->id, 'name' => $restaurant->name],
             'categories' => $categories,
         ]);
@@ -25,7 +25,7 @@ class MenuCategoryController extends Controller
 
     public function create(Request $request)
     {
-        return Inertia::render('Restaurant/Admin/MenuCategories/Create');
+        return Inertia::render('Employee/Restaurant/MenuCategories/Create');
     }
 
     public function store(Request $request)
@@ -60,7 +60,7 @@ class MenuCategoryController extends Controller
         // Ensure the category belongs to this restaurant
         $this->authorize('update', $menuCategory);
 
-        return Inertia::render('Restaurant/Admin/MenuCategories/Edit', [
+        return Inertia::render('Employee/Restaurant/MenuCategories/Edit', [
             'category' => ['id' => $menuCategory->id, 'name' => $menuCategory->name],
         ]);
     }
@@ -92,7 +92,7 @@ class MenuCategoryController extends Controller
         // Ensure the category belongs to this restaurant
         $this->authorize('view', $menuCategory);
 
-        return Inertia::render('Restaurant/Admin/MenuCategories/Show', [
+        return Inertia::render('Employee/Restaurant/MenuCategories/Show', [
             'category' => ['id' => $menuCategory->id, 'name' => $menuCategory->name],
         ]);
     }

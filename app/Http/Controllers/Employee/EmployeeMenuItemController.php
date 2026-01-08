@@ -78,37 +78,34 @@ class EmployeeMenuItemController extends Controller
         return redirect()->route('employee.menu.index')->with('success', 'Menu item updated successfully.');
     }
 
-    public function updateStatus(Request $request, MenuItem $item)
+    public function updateStatus(Request $request, MenuItem $menu_item)
     {
-        $this->authorize('updateStatus', $item);
+        $this->authorize('updateStatus', $menu_item);
 
         $validated = $request->validate([
             'is_available' => ['required', 'boolean'],
         ]);
 
-        $item->update($validated);
+        $menu_item->update($validated);
 
         return back();
     }
 
-    public function updatePhoto(Request $request, MenuItem $menuItem)
+    public function updatePhoto(Request $request, MenuItem $menu_item)
     {
-        $this->authorize('update', $menuItem);
+        $this->authorize('update', $menu_item);
 
         $validated = $request->validate([
-            'image_id' => ['nullable', 'exists:images,id'],
+            'image_id' => [
+                'nullable',
+                Rule::exists('images', 'id')->where(function ($query) use ($menu_item) {
+                    $query->where('restaurant_id', $menu_item->restaurant_id);
+                }),
+            ],
         ]);
 
-        // If image_id is provided, verify it belongs to the same restaurant
-        if ($validated['image_id']) {
-            $image = \App\Models\Image::find($validated['image_id']);
-            if (! $image || $image->restaurant_id !== $menuItem->restaurant_id) {
-                abort(403, 'This image does not belong to your restaurant.');
-            }
-        }
-
         // Update the menu item's selected image
-        $menuItem->update([
+        $menu_item->update([
             'image_id' => $validated['image_id'],
         ]);
 
@@ -168,16 +165,13 @@ class EmployeeMenuItemController extends Controller
             'is_available' => ['required', 'boolean'],
             'allergens' => ['array'],
             'allergens.*' => ['exists:allergens,id'],
-            'image_id' => ['nullable', 'exists:images,id'],
+            'image_id' => [
+                'nullable',
+                Rule::exists('images', 'id')->where(function ($query) use ($restaurant) {
+                    $query->where('restaurant_id', $restaurant->id);
+                }),
+            ],
         ]);
-
-        // Validate that image belongs to the same restaurant if provided
-        if (isset($validated['image_id'])) {
-            $image = \App\Models\Image::find($validated['image_id']);
-            if ($image && $image->restaurant_id !== $restaurant->id) {
-                return back()->withErrors(['image_id' => 'The selected image does not belong to your restaurant.']);
-            }
-        }
 
         $validated['restaurant_id'] = $restaurant->id;
 

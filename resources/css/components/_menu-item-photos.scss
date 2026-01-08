@@ -63,12 +63,7 @@
       position: absolute;
       top: 1rem;
       left: 1rem;
-      background-color: rgba(
-        238,
-        91,
-        43,
-        0.4
-      ); // Brand primary with 40% opacity
+      background-color: rgba(main-colors.$brand-primary, 0.4);
       color: main-colors.$bg-alt-2;
       padding: 0.5rem 1rem;
       border-radius: 20px;
@@ -83,7 +78,7 @@
       transition: all 0.2s ease;
 
       &:hover {
-        background-color: rgba(238, 91, 43, 0.8);
+        background-color: rgba(main-colors.$brand-primary, 0.8);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       }
 

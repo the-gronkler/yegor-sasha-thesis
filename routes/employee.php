@@ -48,10 +48,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
             Route::resource('menu-categories', MenuCategoryController::class);
             Route::resource('menu-items', EmployeeMenuItemController::class);
 
-            Route::put('menu-items/{item}/status', [EmployeeMenuItemController::class, 'updateStatus'])
+            Route::put('menu-items/{menu_item}/status', [EmployeeMenuItemController::class, 'updateStatus'])
                 ->name('menu-items.updateStatus');
 
-            Route::put('menu-items/{menuItem}/photo', [EmployeeMenuItemController::class, 'updatePhoto'])
+            Route::put('menu-items/{menu_item}/photo', [EmployeeMenuItemController::class, 'updatePhoto'])
                 ->name('menu-items.update-photo');
 
             Route::put('orders/{order}/status', [EmployeeOrderController::class, 'updateStatus'])
