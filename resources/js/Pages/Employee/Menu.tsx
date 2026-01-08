@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import { Restaurant } from '@/types/models';
 import RestaurantMenu from '@/Components/Shared/RestaurantMenu';
 import { PencilSquareIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Props {
   restaurant: Restaurant;
@@ -18,6 +18,21 @@ export default function EmployeeMenu({ restaurant, isRestaurantAdmin }: Props) {
     restaurant.images?.find((img) => img.is_primary_for_restaurant) ||
     restaurant.images?.[0];
   const bannerUrl = primaryImage ? primaryImage.url : null;
+
+  // Reset logic for isEditMode and isManagingCategories
+  useEffect(() => {
+    if (!isRestaurantAdmin) {
+      setIsEditMode(false);
+      setIsManagingCategories(false);
+    }
+  }, [isRestaurantAdmin]);
+
+  // Reset managing categories when exiting edit mode
+  useEffect(() => {
+    if (!isEditMode) {
+      setIsManagingCategories(false);
+    }
+  }, [isEditMode]);
 
   return (
     <AppLayout>
@@ -38,16 +53,6 @@ export default function EmployeeMenu({ restaurant, isRestaurantAdmin }: Props) {
         <div className="page-header">
           <h1 className="page-title">{restaurant.name} Menu Management</h1>
           <div className="edit-buttons">
-            {isRestaurantAdmin && isEditMode && (
-              <button
-                onClick={() => setIsManagingCategories(!isManagingCategories)}
-                className="btn-secondary"
-                aria-label="Manage Categories"
-              >
-                <Cog6ToothIcon className="icon-sm" />
-                {isManagingCategories ? 'Done Managing' : 'Manage Categories'}
-              </button>
-            )}
             {isRestaurantAdmin && (
               <button
                 onClick={() => setIsEditMode(!isEditMode)}
@@ -56,6 +61,16 @@ export default function EmployeeMenu({ restaurant, isRestaurantAdmin }: Props) {
               >
                 <PencilSquareIcon className="icon-sm" />
                 {isEditMode ? 'Exit Edit' : 'Edit Menu'}
+              </button>
+            )}
+            {isRestaurantAdmin && isEditMode && (
+              <button
+                onClick={() => setIsManagingCategories(!isManagingCategories)}
+                className="btn-secondary"
+                aria-label="Manage Categories"
+              >
+                <Cog6ToothIcon className="icon-sm" />
+                {isManagingCategories ? 'Done Managing' : 'Manage Categories'}
               </button>
             )}
           </div>

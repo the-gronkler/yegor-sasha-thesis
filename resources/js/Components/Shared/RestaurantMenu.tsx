@@ -8,7 +8,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 
 interface Props {
@@ -30,6 +30,16 @@ export default function RestaurantMenu({
   const [editingName, setEditingName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Reset editing states when exiting category management mode
+  useEffect(() => {
+    if (!isManagingCategories) {
+      setEditingId(null);
+      setEditingName('');
+      setIsAddingCategory(false);
+      setNewCategoryName('');
+    }
+  }, [isManagingCategories]);
 
   const handleRename = (id: number) => {
     if (!editingName.trim()) return;
