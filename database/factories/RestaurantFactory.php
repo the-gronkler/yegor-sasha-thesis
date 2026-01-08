@@ -155,7 +155,7 @@ class RestaurantFactory extends Factory
                         // Create restaurant-level images (not linked to menu items)
                         // These will be available for selection
 
-                        // Optionally attach allergens (moved from later)
+                        // Optionally attach allergens so seeded menu items have realistic allergen data
                         $allergenIds = Allergen::pluck('id');
                         if ($allergenIds->count() > 0) {
                             $attachCount = rand(1, min(3, $allergenIds->count()));
