@@ -102,7 +102,7 @@ class EmployeeMenuItemController extends Controller
         // If image_id is provided, verify it belongs to the same restaurant
         if ($validated['image_id']) {
             $image = \App\Models\Image::find($validated['image_id']);
-            if ($image->restaurant_id !== $menuItem->restaurant_id) {
+            if (! $image || $image->restaurant_id !== $menuItem->restaurant_id) {
                 abort(403, 'This image does not belong to your restaurant.');
             }
         }
