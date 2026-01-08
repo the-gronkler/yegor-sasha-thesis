@@ -315,6 +315,7 @@ Follow the standard engineering thesis structure:
     - Use `#include "path/to/file.typ"` to include content.
 2.  **Formatting**:
     - Use `= Heading 1`, `== Heading 2`, `=== Heading 3`.
+    - **CRITICAL**: Avoid pseudo headings. Never use bold text (*Heading*) to simulate headings. Always use proper Typst heading syntax (`=`, `==`, `===`, etc.) for semantic structure and outline generation.
     - Use `-` for bullet points and `+` for numbered lists.
     - **CRITICAL**: Use `*text*` for **bold** and `_text_` for _italic_ (Typst syntax, NOT Markdown `**bold**` or `*italic*`).
     - Use ` ```lang ... ``` ` for code blocks.
@@ -328,5 +329,6 @@ Follow the standard engineering thesis structure:
 - **Passive Voice Overuse**: While first-person is banned, avoid awkward passive constructions. Use strong verbs where possible.
 - **Hardcoded References**: Never type "Figure 1". Always use `@fig:id`.
 - **Hardcoded Code References**: Never hardcode commit hashes or branches in links to source code. Use the `source_code_link` function from `config.typ` to generate consistent links that can be updated centrally to point to the release version.
+- **Pseudo Headings**: Never use bold text (*Heading*) to mimic headings. Use Typst's `=`, `==`, `===` syntax exclusively for all headings.
 - **LaTeX Habits**: Do not use `\section`, `\textbf`, or `\cite`. Use Typst syntax.
 ````
