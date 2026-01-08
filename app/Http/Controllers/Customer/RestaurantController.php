@@ -39,6 +39,7 @@ class RestaurantController extends Controller
                 'foodTypes.menuItems' => fn ($q) => $q->orderBy('name'),
                 'foodTypes.menuItems.images',
                 'foodTypes.menuItems.allergens',
+                'foodTypes.menuItems.image', // Load selected image
                 'images',
                 'reviews.customer.user',
                 'reviews.images',
@@ -138,6 +139,11 @@ class RestaurantController extends Controller
                     'price' => $mi->price,
                     'description' => $mi->description,
                     'is_available' => $mi->is_available,
+                    'image_id' => $mi->image_id,
+                    'image' => $mi->relationLoaded('image') && $mi->image ? [
+                        'id' => $mi->image->id,
+                        'url' => $mi->image->url,
+                    ] : null,
                     'images' => $mi->relationLoaded('images') ? $mi->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->url,

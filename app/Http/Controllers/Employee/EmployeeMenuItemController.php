@@ -16,7 +16,7 @@ class EmployeeMenuItemController extends Controller
 
         $this->authorize('view', $menuItem);
 
-        $menuItem->load(['allergens', 'images', 'restaurant']);
+        $menuItem->load(['allergens', 'images', 'restaurant', 'image']);
 
         return Inertia::render('Employee/MenuItem/Show', [
             'menuItem' => $menuItem,
@@ -35,10 +35,18 @@ class EmployeeMenuItemController extends Controller
         $foodTypes = \App\Models\FoodType::where('restaurant_id', $menuItem->restaurant_id)->get();
         $allergens = \App\Models\Allergen::all();
 
+        // Get all restaurant images for photo selection
+        $restaurantImages = \App\Models\Image::where('restaurant_id', $menuItem->restaurant_id)
+            ->whereNull('menu_item_id') // Only restaurant photos, not menu item specific ones
+            ->orderBy('is_primary_for_restaurant', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return Inertia::render('Employee/MenuItem/Edit', [
             'menuItem' => $menuItem,
             'foodTypes' => $foodTypes,
             'allergens' => $allergens,
+            'restaurantImages' => $restaurantImages,
             'queryParams' => $request->query(),
         ]);
     }
@@ -70,17 +78,38 @@ class EmployeeMenuItemController extends Controller
         return redirect()->route('employee.menu.index')->with('success', 'Menu item updated successfully.');
     }
 
-    public function updateStatus(Request $request, MenuItem $item)
+    public function updateStatus(Request $request, MenuItem $menu_item)
     {
-        $this->authorize('updateStatus', $item);
+        $this->authorize('updateStatus', $menu_item);
 
         $validated = $request->validate([
             'is_available' => ['required', 'boolean'],
         ]);
 
-        $item->update($validated);
+        $menu_item->update($validated);
 
         return back();
+    }
+
+    public function updatePhoto(Request $request, MenuItem $menu_item)
+    {
+        $this->authorize('update', $menu_item);
+
+        $validated = $request->validate([
+            'image_id' => [
+                'nullable',
+                Rule::exists('images', 'id')->where(function ($query) use ($menu_item) {
+                    $query->where('restaurant_id', $menu_item->restaurant_id);
+                }),
+            ],
+        ]);
+
+        // Update the menu item's selected image
+        $menu_item->update([
+            'image_id' => $validated['image_id'],
+        ]);
+
+        return back()->with('success', $validated['image_id'] ? 'Photo selected successfully.' : 'Photo removed successfully.');
     }
 
     public function create(Request $request)
@@ -96,6 +125,13 @@ class EmployeeMenuItemController extends Controller
         $foodTypes = \App\Models\FoodType::where('restaurant_id', $restaurant->id)->get();
         $allergens = \App\Models\Allergen::all();
 
+        // Get all restaurant images for photo selection
+        $restaurantImages = \App\Models\Image::where('restaurant_id', $restaurant->id)
+            ->whereNull('menu_item_id')
+            ->orderBy('is_primary_for_restaurant', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         // Get the food_type_id from query params if provided
         $foodTypeId = $request->query('food_type_id');
 
@@ -103,6 +139,7 @@ class EmployeeMenuItemController extends Controller
             'restaurant' => $restaurant,
             'foodTypes' => $foodTypes,
             'allergens' => $allergens,
+            'restaurantImages' => $restaurantImages,
             'preselectedFoodTypeId' => $foodTypeId,
         ]);
     }
@@ -128,6 +165,12 @@ class EmployeeMenuItemController extends Controller
             'is_available' => ['required', 'boolean'],
             'allergens' => ['array'],
             'allergens.*' => ['exists:allergens,id'],
+            'image_id' => [
+                'nullable',
+                Rule::exists('images', 'id')->where(function ($query) use ($restaurant) {
+                    $query->where('restaurant_id', $restaurant->id);
+                }),
+            ],
         ]);
 
         $validated['restaurant_id'] = $restaurant->id;
@@ -138,7 +181,7 @@ class EmployeeMenuItemController extends Controller
             $menuItem->allergens()->sync($validated['allergens']);
         }
 
-        return back()->with('success', 'Menu item created successfully.');
+        return redirect()->route('employee.menu.index')->with('success', 'Menu item created successfully.');
     }
 
     public function destroy(Request $request, MenuItem $menuItem)
