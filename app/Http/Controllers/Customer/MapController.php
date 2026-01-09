@@ -11,7 +11,7 @@ use Inertia\Response;
 
 class MapController extends Controller
 {
-    private const MAX_RESTAURANTS_LIMIT = 250;
+    private const MAX_RESTAURANTS_LIMIT = 500;
 
     protected GeoService $geoService;
 
@@ -28,8 +28,13 @@ class MapController extends Controller
      * Performance optimizations:
      * - Only loads 'images' relation (NOT foodTypes.menuItems - huge payload reduction)
      * - Uses model scopes for clean, maintainable geospatial logic
-     * - Limits to 250 restaurants max (protects JSON payload + Mapbox rendering)
+     * - Limits to 500 restaurants max (protects JSON payload + Mapbox rendering)
      * - Uses MariaDB ST_Distance_Sphere or improved Haversine fallback
+     *
+     * Ranking algorithm:
+     * - Combines rating (0-5), review count, and distance (if available)
+     * - Rating: 50% weight, Reviews: 30% weight, Distance: 20% weight
+     * - Ensures quality restaurants appear first, with proximity as a tiebreaker
      *
      * @param  Request  $request  The incoming HTTP request, optionally containing
      *                            'lat' (float), 'lng' (float), and 'radius' (float, km)
@@ -37,8 +42,9 @@ class MapController extends Controller
      * @return Response Inertia response rendering the Customer/Map/Index page with:
      *                  - 'restaurants': a collection of restaurants including
      *                  id, name, address, latitude, longitude, rating,
-     *                  description, opening_hours, and related images.
+     *                  description, opening_hours, reviews_count, and related images.
      *                  Distance (km, rounded to 2 decimals) included when lat/lng provided.
+     *                  Sorted by composite score (rating + reviews + proximity).
      *                  - 'filters': an array with 'lat', 'lng', and 'radius'
      *                  representing the applied geolocation filter values.
      */
@@ -81,6 +87,7 @@ class MapController extends Controller
         $customerId = $user?->customer?->user_id;
 
         $query = Restaurant::with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
+            ->withCount('reviews') // Add reviews count for better ranking
             ->select([
                 'restaurants.id',
                 'restaurants.name',
@@ -121,32 +128,41 @@ class MapController extends Controller
                 // (Bounding box + HAVING distance constraint)
                 $query->withinRadiusKm($latitude, $longitude, $radius);
             }
-
-            // Use model scope for ordering
-            $query->orderByDistance();
-        } else {
-            // Default sorting by rating if no geolocation
-            $query->latest('rating');
         }
 
+        // Fetch restaurants and apply composite scoring
         $restaurants = $query->get()
-            ->map(fn (Restaurant $restaurant) => [
-                'id' => $restaurant->id,
-                'name' => $restaurant->name,
-                'address' => $restaurant->address,
-                'latitude' => (float) $restaurant->latitude,
-                'longitude' => (float) $restaurant->longitude,
-                'rating' => $restaurant->rating,
-                'description' => $restaurant->description,
-                'opening_hours' => $restaurant->opening_hours,
-                'distance' => $this->geoService->formatDistance($restaurant->distance),
-                'is_favorited' => (bool) ($restaurant->is_favorited ?? false),
-                'images' => $restaurant->images->map(fn ($img) => [
-                    'id' => $img->id,
-                    'url' => $img->image,
-                    'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
-                ]),
-            ]);
+            ->map(function (Restaurant $restaurant) {
+                // Calculate composite score for ranking
+                // Factors: rating (0-5), review count, and distance (if available)
+                $score = $this->calculateCompositeScore(
+                    $restaurant->rating ?? 0,
+                    $restaurant->reviews_count ?? 0,
+                    $restaurant->distance ?? null
+                );
+
+                return [
+                    'id' => $restaurant->id,
+                    'name' => $restaurant->name,
+                    'address' => $restaurant->address,
+                    'latitude' => (float) $restaurant->latitude,
+                    'longitude' => (float) $restaurant->longitude,
+                    'rating' => $restaurant->rating,
+                    'description' => $restaurant->description,
+                    'opening_hours' => $restaurant->opening_hours,
+                    'distance' => $this->geoService->formatDistance($restaurant->distance),
+                    'reviews_count' => $restaurant->reviews_count ?? 0,
+                    'is_favorited' => (bool) ($restaurant->is_favorited ?? false),
+                    'score' => $score, // Add score for debugging/transparency
+                    'images' => $restaurant->images->map(fn ($img) => [
+                        'id' => $img->id,
+                        'url' => $img->image,
+                        'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
+                    ]),
+                ];
+            })
+            ->sortByDesc('score') // Sort by composite score (best first)
+            ->values(); // Reset array keys after sorting
 
         return Inertia::render('Customer/Map/Index', [
             'restaurants' => $restaurants,
@@ -156,5 +172,44 @@ class MapController extends Controller
                 'radius' => $radius,
             ],
         ]);
+    }
+
+    /**
+     * Calculate a composite score for ranking restaurants.
+     *
+     * Algorithm:
+     * - Rating component (0-50): Normalized rating (0-5) * 10
+     * - Reviews component (0-30): Log-scaled review count (more reviews = better, with diminishing returns)
+     * - Distance component (0-20): Inverse distance bonus (closer = better, only when location available)
+     *
+     * This creates a balanced score where:
+     * - A perfect 5-star restaurant with many reviews nearby gets ~100 points
+     * - Quality (rating + reviews) matters more than proximity
+     * - Restaurants with no reviews still get credit for good ratings
+     *
+     * @param  float  $rating  Restaurant rating (0-5)
+     * @param  int  $reviewCount  Number of reviews
+     * @param  float|null  $distanceKm  Distance in kilometers (null if no location)
+     * @return float Composite score (0-100)
+     */
+    private function calculateCompositeScore(float $rating, int $reviewCount, ?float $distanceKm): float
+    {
+        // Rating component: 0-50 points (rating normalized to 0-5, then scaled)
+        $ratingScore = ($rating / 5) * 50;
+
+        // Reviews component: 0-30 points (log scale for diminishing returns)
+        // Uses log10(count + 1) to handle 0 reviews gracefully
+        // 1 review = 0 points, 10 reviews = 10 points, 100 reviews = 20 points, 1000+ reviews = 30 points
+        $reviewScore = min(30, log10($reviewCount + 1) * 10);
+
+        // Distance component: 0-20 points (only if location is available)
+        $distanceScore = 0;
+        if ($distanceKm !== null) {
+            // Inverse distance: closer restaurants get more points
+            // Within 1km = 20 points, 5km = 10 points, 10km = 5 points, 20km+ = 0 points
+            $distanceScore = max(0, 20 * (1 - ($distanceKm / 20)));
+        }
+
+        return $ratingScore + $reviewScore + $distanceScore;
     }
 }
