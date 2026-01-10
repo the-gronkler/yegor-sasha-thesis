@@ -114,6 +114,7 @@ class MapController extends Controller
         }
 
         // Apply geolocation filtering if coordinates are provided
+        $hasLocation = false;
         if ($latitude !== null && $longitude !== null) {
             // Persist coordinates in session for reuse on other pages (e.g., Restaurant Show)
             // Allows distance calculation to be consistent across the app
@@ -128,19 +129,21 @@ class MapController extends Controller
                 // (Bounding box + HAVING distance constraint)
                 $query->withinRadiusKm($latitude, $longitude, $radius);
             }
+
+            $hasLocation = true;
         }
 
-        // Fetch restaurants and apply composite scoring
+        // PERFORMANCE OPTIMIZATION: Calculate composite score in database instead of PHP
+        // This allows MySQL/MariaDB to handle sorting using indexes before loading into memory
+        // Significantly more efficient than loading 500 restaurants then sorting in PHP
+        $this->addCompositeScoreToQuery($query, $hasLocation);
+
+        // Order by composite score (best restaurants first) at database level
+        $query->orderByRaw('composite_score DESC');
+
+        // Fetch restaurants (already sorted by database)
         $restaurants = $query->get()
             ->map(function (Restaurant $restaurant) {
-                // Calculate composite score for ranking
-                // Factors: rating (0-5), review count, and distance (if available)
-                $score = $this->calculateCompositeScore(
-                    $restaurant->rating ?? 0,
-                    $restaurant->reviews_count ?? 0,
-                    $restaurant->distance ?? null
-                );
-
                 return [
                     'id' => $restaurant->id,
                     'name' => $restaurant->name,
@@ -153,16 +156,14 @@ class MapController extends Controller
                     'distance' => $this->geoService->formatDistance($restaurant->distance),
                     'reviews_count' => $restaurant->reviews_count ?? 0,
                     'is_favorited' => (bool) ($restaurant->is_favorited ?? false),
-                    'score' => $score, // Add score for debugging/transparency
+                    'score' => round($restaurant->composite_score ?? 0, 2), // Add score for debugging/transparency
                     'images' => $restaurant->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->image,
                         'is_primary_for_restaurant' => $img->is_primary_for_restaurant,
                     ]),
                 ];
-            })
-            ->sortByDesc('score') // Sort by composite score (best first)
-            ->values(); // Reset array keys after sorting
+            });
 
         return Inertia::render('Customer/Map/Index', [
             'restaurants' => $restaurants,
@@ -172,6 +173,43 @@ class MapController extends Controller
                 'radius' => $radius,
             ],
         ]);
+    }
+
+    /**
+     * Add composite score calculation to the query.
+     *
+     * This method adds a raw SQL expression to calculate the composite score
+     * directly in the database, allowing for efficient sorting before loading
+     * results into PHP memory.
+     *
+     * Algorithm (same as calculateCompositeScore but in SQL):
+     * - Rating component (0-50): (rating / 5) * 50
+     * - Reviews component (0-30): LEAST(30, LOG10(reviews_count + 1) * 10)
+     * - Distance component (0-20): MAX(0, 20 * (1 - (distance / 20)))
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query  The query builder instance
+     * @param  bool  $hasLocation  Whether location data is available for distance scoring
+     */
+    private function addCompositeScoreToQuery($query, bool $hasLocation): void
+    {
+        // Rating score: 0-50 points
+        $ratingScore = '(COALESCE(restaurants.rating, 0) / 5) * 50';
+
+        // Review score: 0-30 points (log scale)
+        // Using LOG10(count + 1) * 10, capped at 30
+        $reviewScore = 'LEAST(30, LOG10(COALESCE(reviews_count, 0) + 1) * 10)';
+
+        // Distance score: 0-20 points (only if location available)
+        if ($hasLocation) {
+            // Inverse distance: closer = better
+            // GREATEST ensures we don't go below 0
+            $distanceScore = 'GREATEST(0, 20 * (1 - (COALESCE(distance, 999999) / 20)))';
+        } else {
+            $distanceScore = '0';
+        }
+
+        // Combine all components into composite score
+        $query->selectRaw("({$ratingScore} + {$reviewScore} + {$distanceScore}) as composite_score");
     }
 
     /**
@@ -187,10 +225,15 @@ class MapController extends Controller
      * - Quality (rating + reviews) matters more than proximity
      * - Restaurants with no reviews still get credit for good ratings
      *
+     * NOTE: This method is kept for reference but sorting now happens at database level
+     * using addCompositeScoreToQuery() for better performance.
+     *
      * @param  float  $rating  Restaurant rating (0-5)
      * @param  int  $reviewCount  Number of reviews
      * @param  float|null  $distanceKm  Distance in kilometers (null if no location)
      * @return float Composite score (0-100)
+     *
+     * @deprecated Use database-level scoring via addCompositeScoreToQuery() instead
      */
     private function calculateCompositeScore(float $rating, int $reviewCount, ?float $distanceKm): float
     {
