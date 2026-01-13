@@ -58,29 +58,6 @@
   }
 }
 
-/* Radius expansion info notification */
-.map-radius-expanded-info {
-  @extend .map-controls-card;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: color.change(main-colors.$accent-warm, $alpha: 0.15);
-  border-color: color.change(main-colors.$accent-warm, $alpha: 0.3);
-  font-size: 0.85rem;
-  color: main-colors.$text-inverse;
-
-  .info-icon {
-    font-size: 1rem;
-    flex-shrink: 0;
-  }
-
-  .info-text {
-    flex: 1;
-    line-height: 1.3;
-  }
-}
-
 .map-controls-card {
   background: map-colors.$map-card-bg;
   border: 1px solid map-colors.$map-control-border;

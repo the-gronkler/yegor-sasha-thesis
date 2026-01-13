@@ -11,7 +11,7 @@ use Inertia\Response;
 
 class MapController extends Controller
 {
-    private const MAX_RESTAURANTS_LIMIT = 4;
+    private const MAX_RESTAURANTS_LIMIT = 250;
 
     protected GeoService $geoService;
 
@@ -151,14 +151,21 @@ class MapController extends Controller
                 $expansionFactor = min(16, ceil(5 / $radius));
                 $actualRadius = min($radius * $expansionFactor, GeoService::MAX_RADIUS_KM);
                 $expandedRadius = ($actualRadius > $radius);
-
-                $query->withinRadiusKm($distanceCalcLat, $distanceCalcLng, $actualRadius);
             } elseif ($radius > 0) {
                 // Normal radius filtering
                 $actualRadius = $radius;
-                $query->withinRadiusKm($distanceCalcLat, $distanceCalcLng, $radius);
             } else {
                 $actualRadius = 0;
+            }
+
+            // Add is_in_radius column instead of filtering
+            // Must repeat the distance calculation because SQL doesn't allow referencing column aliases
+            // in the same SELECT clause where they're defined
+            if ($actualRadius > 0) {
+                $distanceCalc = "(ST_Distance_Sphere(POINT(longitude, latitude), POINT({$distanceCalcLng}, {$distanceCalcLat})) / 1000)";
+                $query->addSelect(\DB::raw("({$distanceCalc} <= {$actualRadius}) as is_in_radius"));
+            } else {
+                $query->addSelect(\DB::raw('1 as is_in_radius')); // All in radius if no limit
             }
 
             $hasLocation = true;
@@ -169,8 +176,13 @@ class MapController extends Controller
         // Significantly more efficient than loading 500 restaurants then sorting in PHP
         $this->addCompositeScoreToQuery($query, $hasLocation, $distanceCalcLat, $distanceCalcLng);
 
-        // Order by composite score (best restaurants first) at database level
-        $query->orderByRaw('composite_score DESC');
+        // Sort by: is_in_radius DESC (inside first), then distance ASC (closer first), then composite_score DESC (better first)
+        // This ensures restaurants within radius appear first, sorted by distance, then quality
+        if ($hasLocation) {
+            $query->orderByRaw('is_in_radius DESC, distance ASC, composite_score DESC');
+        } else {
+            $query->orderByRaw('composite_score DESC');
+        }
 
         // Fetch restaurants (already sorted by database)
         $restaurants = $query->get()
@@ -187,6 +199,7 @@ class MapController extends Controller
                     'distance' => $this->geoService->formatDistance($restaurant->distance),
                     'reviews_count' => $restaurant->reviews_count ?? 0,
                     'is_favorited' => (bool) ($restaurant->is_favorited ?? false),
+                    'is_in_radius' => (bool) ($restaurant->is_in_radius ?? true),
                     'score' => round($restaurant->composite_score ?? 0, 2), // Add score for debugging/transparency
                     'images' => $restaurant->images->map(fn ($img) => [
                         'id' => $img->id,

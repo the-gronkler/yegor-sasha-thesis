@@ -55,7 +55,6 @@ export default function MapIndex({
     reloadMap,
     showSearchInArea,
     searchInArea,
-    searchRadius,
   } = useMapPage({ restaurants, filters, mapboxPublicKey });
 
   return (
@@ -110,9 +109,6 @@ export default function MapIndex({
             onError={setLocationError}
             showSearchInArea={showSearchInArea}
             onSearchInArea={searchInArea}
-            searchRadius={searchRadius}
-            radiusExpanded={filters.radius_expanded ?? false}
-            requestedRadius={filters.requested_radius}
           />
           <Map
             viewState={viewState}
