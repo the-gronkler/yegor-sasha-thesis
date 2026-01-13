@@ -20,5 +20,6 @@ export function useUserOrdersUpdates(
     'user',
     ['OrderUpdated'],
     shouldReload,
+    true, // Private channel
   );
 }

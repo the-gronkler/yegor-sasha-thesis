@@ -29,10 +29,20 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
-// window.Pusher.logToConsole = true; // Enable logging to debug connection issues
+if (import.meta.env.DEV) {
+  window.Pusher.logToConsole = true; // Enable logging to debug connection issues
+}
 
 const reverbScheme = import.meta.env.VITE_REVERB_SCHEME ?? 'http';
 const isSecure = reverbScheme === 'https';
+
+const csrfToken = document
+  .querySelector('meta[name="csrf-token"]')
+  ?.getAttribute('content');
+
+if (!csrfToken) {
+  console.warn('CSRF token not found. Broadcasting auth may fail.');
+}
 
 window.Echo = new Echo({
   broadcaster: 'reverb',
@@ -44,4 +54,9 @@ window.Echo = new Echo({
   encrypted: isSecure,
   enableStats: false,
   enabledTransports: ['ws', 'wss'],
+  auth: {
+    headers: {
+      'X-CSRF-TOKEN': csrfToken || '',
+    },
+  },
 });

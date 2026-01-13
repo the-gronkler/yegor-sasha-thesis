@@ -20,5 +20,6 @@ export function useRestaurantOrdersUpdates(
     'restaurant',
     ['OrderUpdated'],
     shouldReload,
+    true, // Private channel
   );
 }
