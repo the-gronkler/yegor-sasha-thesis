@@ -92,7 +92,7 @@ This parameterization allows flexible configuration while maintaining type safet
 
 To reduce code duplication and ensure parameter correctness, the generic `useChannelUpdates` hook is not used directly in page components. Instead, specific child hooks are created under #source_code_link("resources/js/Hooks/Updates") directory that wrap the generic hook with predefined configurations. Examples include:
 - `useMenuItemUpdates(restaurantId)`: Subscribes to public menu item events for a restaurant's availability updates.
-- `useOrderUpdates(orderId)`: Subscribes to private order events for status changes.
+- `useOrderUpdates(orderIds)`: Subscribes to private order events for status changes.
 - `useRestaurantOrdersUpdates(restaurantId)`: Subscribes to private restaurant order events.
 
 These specific hooks encapsulate the correct parameters and event handling logic, promoting reusability and reducing errors.
@@ -117,8 +117,6 @@ These specific hooks encapsulate the correct parameters and event handling logic
 
   This allows different pages to specify different reload conditions. For example, a customer order page might reload on all status changes, while an employee dashboard might only reload for certain status transitions.
 ]
-
-
 
 #code_example[
 

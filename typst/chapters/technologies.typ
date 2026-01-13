@@ -13,4 +13,4 @@ For the frontend, *Laravel Echo* acts as the JavaScript client library, paired w
 - *Echo*: Provides a high-level abstraction for subscribing to channels and listening for events, integrating directly with React components via hooks.
 - *Pusher.js*: Handles the underlying WebSocket connections and protocol negotiation, ensuring reliable real-time data flow.
 - *Advantages*: Eliminates the need for custom WebSocket management, supports authentication for private channels, and offers automatic reconnection and error handling.
-- *Alternatives Considered*: Direct WebSocket APIs were rejected due to complexity and lack of built-in security features; Socket.io was deemed unnecessary given Reverb's Pusher Protocol adherence.
+- *Alternatives Considered*: Direct WebSocket APIs were rejected due to complexity and lack of built-in security features; Socket.IO was deemed unnecessary given Reverb's Pusher Protocol adherence.
