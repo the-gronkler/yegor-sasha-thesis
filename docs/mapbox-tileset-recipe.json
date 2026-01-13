@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "layers": {
+    "restaurants-clustered": {
+      "source": "mapbox://tileset-source/{username}/restaurants-source",
+      "minzoom": 0,
+      "maxzoom": 14,
+      "tiles": {
+        "union": [
+          {
+            "source": "mapbox://tileset-source/{username}/restaurants-source",
+            "buffer": 128,
+            "cluster": {
+              "cluster_radius": 50,
+              "cluster_properties": {
+                "count": ["+", 1]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "restaurants": {
+      "source": "mapbox://tileset-source/{username}/restaurants-source",
+      "minzoom": 15,
+      "maxzoom": 16
+    }
+  },
+  "name": "Restaurants with Clustering",
+  "description": "Restaurant locations with MTS clustering (clustered at low zoom, raw points at high zoom)"
+}

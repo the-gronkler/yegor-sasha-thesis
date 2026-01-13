@@ -1,0 +1,70 @@
+name: Update Mapbox Tileset
+
+on:
+  workflow_dispatch: # Manual trigger
+  # Uncomment to run on schedule (e.g., daily at 2 AM UTC)
+  # schedule:
+  #   - cron: '0 2 * * *'
+
+jobs:
+  update-tileset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_mysql
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Export restaurants data
+        run: php artisan map:export-restaurants --format=ldgeojson
+        env:
+          DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+      - name: Install Mapbox Tilesets CLI
+        run: pip install mapbox-tilesets
+
+      - name: Upload tileset source
+        run: |
+          tilesets upload-source ${{ secrets.MAPBOX_USERNAME }} restaurants-source storage/app/map/restaurants.geojson --replace
+        env:
+          MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_SECRET_TOKEN }}
+
+      - name: Publish tileset
+        run: |
+          # Replace {username} in recipe with actual username
+          sed -i "s/{username}/${{ secrets.MAPBOX_USERNAME }}/g" docs/mapbox-tileset-recipe.json
+
+          # Create tileset if it doesn't exist (will fail silently if exists)
+          tilesets create ${{ secrets.MAPBOX_USERNAME }}.restaurants-clustered --recipe docs/mapbox-tileset-recipe.json --name "Restaurants Clustered" || true
+
+          # Update recipe
+          tilesets update-recipe ${{ secrets.MAPBOX_USERNAME }}.restaurants-clustered docs/mapbox-tileset-recipe.json
+
+          # Publish tileset
+          tilesets publish ${{ secrets.MAPBOX_USERNAME }}.restaurants-clustered
+        env:
+          MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_SECRET_TOKEN }}
+
+      - name: Check tileset status
+        run: |
+          echo "Tileset published! Monitor status at:"
+          echo "https://studio.mapbox.com/tilesets/${{ secrets.MAPBOX_USERNAME }}.restaurants-clustered/"
+
+          # Wait for processing to complete (optional)
+          tilesets status ${{ secrets.MAPBOX_USERNAME }}.restaurants-clustered
+        env:
+          MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_SECRET_TOKEN }}
+
