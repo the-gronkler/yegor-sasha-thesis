@@ -1,10 +1,7 @@
+import * as React from 'react';
 import { Head } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
-import BottomSheet from './Partials/BottomSheet';
-import MapOverlay from './Partials/MapOverlay';
-import { useMapPage } from '@/Hooks/useMapPage';
-import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
 
 /**
@@ -15,43 +12,80 @@ import { PageProps } from '@/types';
  * - Orchestrates data flow by connecting the `useMapPage` hook to UI components.
  * - Composes the layout: MapLayout > MapOverlay + Map + BottomSheet.
  * - Does NOT contain complex logic (delegated to useMapPage) or complex UI (delegated to Partials).
+ *
+ * ARCHITECTURE CHANGE (Vector Tiles):
+ * - Restaurants are now loaded from Mapbox Vector Tiles (not Inertia props)
+ * - Only receives tileset configuration and initial viewport
+ * - Frontend fetches restaurant details on-demand when user clicks points
  */
 interface MapIndexProps extends PageProps {
-  restaurants: Restaurant[];
-  filters: {
-    lat: number | null;
-    lng: number | null;
-    radius: number;
+  mapboxToken: string;
+  tilesetId?: string; // Mapbox tileset URL (e.g., mapbox://username.tileset-id)
+  initialViewport: {
+    latitude: number;
+    longitude: number;
+    zoom: number;
   };
-  mapboxPublicKey?: string;
+  userGeo?: {
+    lat: number;
+    lng: number;
+  } | null;
 }
 
 export default function MapIndex({
-  restaurants,
-  filters,
-  mapboxPublicKey,
+  mapboxToken,
+  tilesetId,
+  initialViewport,
+  userGeo,
 }: MapIndexProps) {
-  const {
-    query,
-    setQuery,
-    filteredRestaurants,
-    viewState,
-    setViewState,
-    selectedRestaurantId,
-    selectRestaurant,
-    locationError,
-    setLocationError,
-    isGeolocating,
-    triggerGeolocate,
-    registerGeolocateTrigger,
-    isPickingLocation,
-    setIsPickingLocation,
-    handleMapGeolocate,
-    handleGeolocateError,
-    handlePickLocation,
-    mapMarkers,
-    reloadMap,
-  } = useMapPage({ restaurants, filters, mapboxPublicKey });
+  // Simplified state management for vector tile approach
+  const [viewState, setViewState] = React.useState(initialViewport);
+  const [selectedRestaurantId, setSelectedRestaurantId] = React.useState<
+    number | null
+  >(null);
+  const [locationError, setLocationError] = React.useState<string | null>(null);
+  const [isGeolocating, setIsGeolocating] = React.useState(false);
+  const [isPickingLocation, setIsPickingLocation] = React.useState(false);
+
+  // Geolocation trigger callback
+  const geolocateTriggerRef = React.useRef<(() => boolean) | null>(null);
+  const registerGeolocateTrigger = React.useCallback(
+    (fn: (() => boolean) | null) => {
+      geolocateTriggerRef.current = fn;
+    },
+    [],
+  );
+
+  const triggerGeolocate = React.useCallback(() => {
+    if (geolocateTriggerRef.current) {
+      setIsGeolocating(true);
+      const success = geolocateTriggerRef.current();
+      if (!success) {
+        setIsGeolocating(false);
+      }
+    }
+  }, []);
+
+  const handleMapGeolocate = React.useCallback((lat: number, lng: number) => {
+    setIsGeolocating(false);
+    setLocationError(null);
+    setIsPickingLocation(false);
+
+    // Reload page with new coordinates
+    window.location.href = `/?lat=${lat}&lng=${lng}`;
+  }, []);
+
+  const handleGeolocateError = React.useCallback((error: string) => {
+    setIsGeolocating(false);
+    setLocationError(error);
+  }, []);
+
+  const handlePickLocation = React.useCallback(
+    (lat: number, lng: number) => {
+      handleMapGeolocate(lat, lng);
+    },
+    [handleMapGeolocate],
+  );
 
   return (
     <MapLayout>
@@ -87,44 +121,29 @@ export default function MapIndex({
           </div>
         )}
         <div className="map-container-box">
-          <MapOverlay
-            query={query}
-            onQueryChange={setQuery}
-            hasLocation={filters.lat !== null && filters.lng !== null}
-            currentRadius={filters.radius ?? 50}
-            onRadiusChange={(r) => {
-              if (filters.lat !== null && filters.lng !== null) {
-                reloadMap(filters.lat, filters.lng, r);
-              }
-            }}
-            isGeolocating={isGeolocating}
-            onTriggerGeolocate={triggerGeolocate}
-            isPickingLocation={isPickingLocation}
-            setIsPickingLocation={setIsPickingLocation}
-            onManualLocation={handleMapGeolocate}
-            onError={setLocationError}
-          />
+          {/* MapOverlay removed - simplified version without search/filter UI */}
+          {/* Can be re-added later with API-based search */}
+
           <Map
             viewState={viewState}
             onMove={setViewState}
-            markers={mapMarkers}
-            mapboxAccessToken={mapboxPublicKey || ''}
+            tilesetId={tilesetId}
+            mapboxAccessToken={mapboxToken}
             onGeolocate={handleMapGeolocate}
             onGeolocateError={handleGeolocateError}
             enableGeolocation={true}
             trackUserLocation={false}
             selectedRestaurantId={selectedRestaurantId}
-            onSelectRestaurant={selectRestaurant}
+            onSelectRestaurant={setSelectedRestaurantId}
             registerGeolocateTrigger={registerGeolocateTrigger}
             isPickingLocation={isPickingLocation}
             onPickLocation={handlePickLocation}
-            showGeolocateControlUi={false}
+            showGeolocateControlUi={true}
+            userGeo={userGeo}
           />
-          <BottomSheet
-            restaurants={filteredRestaurants}
-            selectedRestaurantId={selectedRestaurantId}
-            onSelectRestaurant={selectRestaurant}
-          />
+
+          {/* BottomSheet removed - popup now shows restaurant details */}
+          {/* Can be re-added later with API-based restaurant list */}
         </div>
       </div>
     </MapLayout>

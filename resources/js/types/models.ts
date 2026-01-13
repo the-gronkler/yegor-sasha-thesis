@@ -1,3 +1,32 @@
+export interface MapMarker {
+  id: number;
+  name: string;
+  lat: number;
+  lng: number;
+  address?: string | null;
+  openingHours?: string | null;
+  rating?: number | null;
+  distanceKm?: number | null;
+  imageUrl?: string | null;
+}
+
+/**
+ * Minimal restaurant data for map popup/card.
+ * Fetched on-demand from /api/restaurants/{id}/map-card
+ */
+export interface RestaurantMapCard {
+  id: number;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  rating: number | null;
+  opening_hours: string | null;
+  distance: string | null; // Formatted string (e.g., "2.5 km")
+  is_favorited: boolean;
+  primary_image_url: string | null;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   current_page: number;
@@ -147,18 +176,4 @@ export interface Review {
   restaurant?: Restaurant;
   images?: Image[];
   user_name?: string;
-}
-
-export interface MapMarker {
-  id: number;
-  lat: number;
-  lng: number;
-  name: string;
-
-  // Popup data (optional for user marker)
-  address?: string | null;
-  openingHours?: string | null;
-  rating?: number | null;
-  distanceKm?: number | null;
-  imageUrl?: string | null;
 }

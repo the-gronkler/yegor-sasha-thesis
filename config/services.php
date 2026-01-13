@@ -37,6 +37,7 @@ return [
 
     'mapbox' => [
         'public_key' => env('MAPBOX_PUBLIC_KEY'),
+        'restaurants_tileset' => env('MAPBOX_RESTAURANTS_TILESET'),
     ],
 
 ];
