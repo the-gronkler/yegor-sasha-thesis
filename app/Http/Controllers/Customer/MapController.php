@@ -11,7 +11,7 @@ use Inertia\Response;
 
 class MapController extends Controller
 {
-    private const MAX_RESTAURANTS_LIMIT = 4;
+    private const MAX_RESTAURANTS_LIMIT = 250;
 
     protected GeoService $geoService;
 

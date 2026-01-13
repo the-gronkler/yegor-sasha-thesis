@@ -11,7 +11,7 @@ class EmployeeSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(?int $minPerRestaurant = null, ?int $maxPerRestaurant = null): void
+    public function run(?int $minPerRestaurant = null, ?int $maxPerRestaurant = null, ?callable $progressCallback = null): void
     {
         $minPerRestaurant ??= config('seeding.employees_min');
         $maxPerRestaurant ??= config('seeding.employees_max');
@@ -20,7 +20,11 @@ class EmployeeSeeder extends Seeder
         $min = min($minPerRestaurant, $maxPerRestaurant);
         $max = max($minPerRestaurant, $maxPerRestaurant);
 
-        Restaurant::all()->each(function ($restaurant) use ($min, $max) {
+        $restaurants = Restaurant::all();
+        $total = $restaurants->count();
+        $current = 0;
+
+        $restaurants->each(function ($restaurant) use ($min, $max, &$current, $total, $progressCallback) {
             // One admin per restaurant
             Employee::factory()
                 ->admin()
@@ -32,6 +36,12 @@ class EmployeeSeeder extends Seeder
                 ->count(rand($min, $max))
                 ->forRestaurant($restaurant)
                 ->create();
+
+            $current++;
+
+            if ($progressCallback) {
+                $progressCallback($current, $total);
+            }
         });
     }
 }

@@ -59,7 +59,58 @@ class Mfs extends Command
             return;
         }
 
-        $this->info('Running migrate:fresh...');
+        $this->newLine();
+        $this->runMigrations();
+
+        $service = new DatabaseSeederService;
+
+        $this->info('🌱 Seeding database...');
+        $this->newLine();
+
+        $this->runSimpleTask('📋 Seeding static data (Allergens, Order Statuses)',
+            fn () => $service->seedStaticData()
+        );
+
+        $this->runWithProgressBar(
+            "🏪 Seeding {$restaurants} restaurants (radius: {$radius}km)",
+            $restaurants,
+            'Restaurant',
+            fn ($callback) => $service->seedRestaurants($restaurants, null, null, $radius, $callback)
+        );
+
+        $this->runSimpleTask('👤 Creating admin user',
+            fn () => $service->createAdminUser()
+        );
+
+        $this->runWithProgressBar(
+            "👥 Seeding {$customers} customers (with reviews & orders)",
+            $customers,
+            'Customer',
+            fn ($callback) => $service->seedCustomers($customers, $reviewsPerCustomer, $ordersPerCustomer, $callback)
+        );
+
+        $restaurantCount = \App\Models\Restaurant::count();
+        $this->runWithProgressBar(
+            "👔 Seeding employees ({$employeesMin}-{$employeesMax} per restaurant)",
+            $restaurantCount,
+            'Restaurant',
+            fn ($callback) => $service->seedEmployees($employeesMin, $employeesMax, $callback)
+        );
+
+        $this->runSimpleTask('👤 Creating default employee',
+            fn () => $service->createDefaultEmployee()
+        );
+
+        $this->displaySummary($restaurants, $customers, $employeesMin, $employeesMax, $reviewsPerCustomer, $ordersPerCustomer);
+    }
+
+    /**
+     * Run database migrations.
+     */
+    private function runMigrations(): void
+    {
+        $this->info('🔄 Running migrate:fresh...');
+        $this->line('   Dropping all tables and recreating database schema');
 
         Artisan::call('migrate:fresh', [
             '--path' => 'database/migrations/*',
@@ -67,20 +118,60 @@ class Mfs extends Command
             '--no-interaction' => true,
         ]);
 
-        $this->info('Seeding database...');
+        $this->info('✓ Migrations completed');
+        $this->newLine();
+    }
 
-        $service = new DatabaseSeederService;
+    /**
+     * Run a simple task with start/complete messages.
+     */
+    private function runSimpleTask(string $message, callable $task): void
+    {
+        $this->line($message);
+        $task();
+        $this->info('   ✓ Completed');
+        $this->newLine();
+    }
 
-        // Seed static data
-        $service->seedStaticData();
+    /**
+     * Run a task with a progress bar.
+     */
+    private function runWithProgressBar(string $label, int $total, string $itemType, callable $task): void
+    {
+        $this->line($label);
 
-        // Seed dynamic data with params
-        $service->seedRestaurants($restaurants, null, null, $radius);
-        $service->createAdminUser();
-        $service->seedCustomers($customers, $reviewsPerCustomer, $ordersPerCustomer);
-        $service->seedEmployees($employeesMin, $employeesMax);
-        $service->createDefaultEmployee();
+        $bar = $this->output->createProgressBar($total);
+        $bar->setFormat(' %current%/%max% [%bar%] %percent:3s%% %message%');
+        $bar->setMessage('Starting...');
+        $bar->start();
 
-        $this->info("Seeded {$restaurants} restaurants and {$customers} customers.");
+        $task(function ($current, $total) use ($bar, $itemType) {
+            $bar->setMessage("{$itemType} {$current}/{$total}");
+            $bar->advance();
+        });
+
+        $bar->setMessage('Complete');
+        $bar->finish();
+        $this->newLine();
+    }
+
+    /**
+     * Display seeding summary table.
+     */
+    private function displaySummary(int $restaurants, int $customers, int $employeesMin, int $employeesMax, int $reviewsPerCustomer, int $ordersPerCustomer): void
+    {
+        $this->info('✓ Database seeding completed successfully!');
+        $this->newLine();
+
+        $this->table(
+            ['Entity', 'Count'],
+            [
+                ['Restaurants', $restaurants],
+                ['Customers', $customers],
+                ['Employees', "{$employeesMin}-{$employeesMax} per restaurant"],
+                ['Reviews per customer', $reviewsPerCustomer],
+                ['Orders per customer', $ordersPerCustomer],
+            ]
+        );
     }
 }
