@@ -73,7 +73,7 @@ This approach reduces errors by automating event dispatching on data changes, en
 If needed, events can also be dispatched directly from controllers for custom logic, providing flexibility while maintaining the automatic broadcasting foundation.
 
 === Frontend Abstraction: `useChannelUpdates` Hook
-Instead of scattering specific `Echo` listeners across various components, a generic custom hook `useChannelUpdates` was implemented in #source_code_link("resources/js/Hooks/Updates/useChannelUpdates.ts"). This abstraction handles:
+To avoid the decentralization of specific `Echo` listeners across various components, a generic custom hook `useChannelUpdates` was implemented in #source_code_link("resources/js/Hooks/Updates/useChannelUpdates.ts"). This abstraction handles:
 - Connection lifecycle (subscribing/unsubscribing/leaving channels).
 - Discrimination between `public` and `private` channels, using `window.Echo.channel()` for public and `window.Echo.private()` for authenticated private channels.
 - Debouncing of reload requests to prevent "event storms" from causing multiple unnecessary page refreshes, implemented with a 200ms timeout chosen as a compromise between responsiveness and coalescing bursts of rapid-fire events into a single reload.
@@ -92,7 +92,7 @@ This parameterization allows flexible configuration while maintaining type safet
 
 To reduce code duplication and ensure parameter correctness, the generic `useChannelUpdates` hook is not used directly in page components. Instead, specific child hooks are created under #source_code_link("resources/js/Hooks/Updates") directory that wrap the generic hook with predefined configurations. Examples include:
 - `useMenuItemUpdates(restaurantId)`: Subscribes to public menu item events for a restaurant's availability updates.
-- `useOrderUpdates(orderIds)`: Subscribes to private order events for status changes.
+- `useOrderUpdates(orderIds | orderId)`: Subscribes to private order events for status changes; accepts a single ID or an array.
 - `useRestaurantOrdersUpdates(restaurantId)`: Subscribes to private restaurant order events.
 
 These specific hooks encapsulate the correct parameters and event handling logic, promoting reusability and reducing errors.
@@ -139,9 +139,6 @@ These specific hooks encapsulate the correct parameters and event handling logic
 
 This layered architecture—generic hook, specific wrappers, and page-level usage—ensures clean separation of concerns and ease of testing.
 
-
-
-
 #code_example[
   === Channel Security and Authorization
   Private channels are used for sensitive order data (`private-restaurant.{id}`).
@@ -173,7 +170,7 @@ Authorization leverages Laravel's channel-based authentication, preventing unaut
 
 === Environment Configuration and Protocol Handling
 A significant implementation challenge involved the "Split Protocol" architecture required for the containerized deployment:
-- *Internal Traffic*: Communication between the Laravel backend and the Reverb server occurs over plain HTTP (port 8080) within the private Docker network to avoid complexity with self-signed certificates.
+- *Internal Traffic*: Communication between the Laravel backend and the Reverb server occurs locally over the container's loopback interface (localhost) using plain HTTP (port 8080). This configuration utilizes the internal network stack, bypassing external listeners and avoiding the complexity of managing self-signed certificates for purely local inter-process communication.
 - *External Traffic*: Client browsers connect via Secure WebSockets (WSS) over HTTPS (port 443), terminated by the Caddy reverse proxy.
 
 This required specific configuration in `.env`:

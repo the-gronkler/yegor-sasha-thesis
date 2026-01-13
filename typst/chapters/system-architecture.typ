@@ -9,7 +9,7 @@ The system employs an event-driven architecture to decouple action execution fro
 - *Event Sources*: Actions such as "Order Placed" or "Menu Item Updated" dispatch strongly typed Events within the Laravel backend, encapsulating data changes and triggering downstream processes.
 - *Message Broker*: These events are forwarded to the *Reverb WebSocket Server* via a database-backed queue to ensure non-blocking operation of the main HTTP application, preventing performance degradation during high-load scenarios.
 - *Channel Distribution*:
-  - *Public Channels*: Used for general updates (e.g., `restaurant.{id}` for menu changes) where data sensitivity is low and broad reach is required, allowing all connected clients to receive updates without authentication.
+  - *Public Channels*: Used for general updates (e.g., `restaurant.{id}` for menu changes) where data is non-sensitive and broad reach is required, allowing all connected clients to receive updates without authentication.
   - *Private Channels*: Used for user-specific data (e.g., `private-restaurant.{id}` for order updates), requiring strict authentication to ensure data privacy and compliance with access controls.
 - *Client Subscription*: The React frontend maintains persistent WebSocket connections, subscribing to relevant channels based on the user's current view and permissions, ensuring the interface reflects the state of the server without polling or manual refreshes.
 

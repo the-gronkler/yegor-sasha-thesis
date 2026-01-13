@@ -1,7 +1,7 @@
 #import "../../config.typ": code_example, source_code_link
 
 == Optimistic Updates
-Without optimistic updates, users would experience noticeable delays between performing an action and seeing the result, leading to a sluggish interface that feels unresponsive. For instance, clicking "Mark as Ready" on an order or adding an item to the cart would show no immediate change, requiring users to wait for the server response, which could take seconds and result in frustration or uncertainty about whether the action was registered.
+Without optimistic updates, users would experience noticeable delays between performing an action and seeing the result, leading to a sluggish interface that feels unresponsive. For instance, clicking "Mark as Ready" on an order or adding an item to the cart would show no immediate change, requiring users to wait for the server response, which could take seconds and result in perceived system latency and ambiguity regarding the action's status about whether the action was registered.
 
 Optimistic updates are implemented to enhance perceived performance and user experience across the application. When a user performs an action, such as updating an order status or modifying the shopping cart, the UI immediately reflects the change assuming success, providing instant feedback without waiting for server confirmation.
 
