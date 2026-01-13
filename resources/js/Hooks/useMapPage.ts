@@ -36,6 +36,19 @@ const getLatLng = (restaurant: Restaurant): [number, number] | null => {
   return [restaurant.latitude, restaurant.longitude];
 };
 
+/**
+ * Calculate search radius based on zoom level.
+ * Higher zoom = smaller radius (more focused search)
+ * Lower zoom = larger radius (broader search)
+ */
+const calculateRadiusFromZoom = (zoomLevel: number): number => {
+  const baseRadius = 50; // km at zoom level 10
+  const radiusAtZoom = baseRadius / Math.pow(2, zoomLevel - 10);
+
+  // Clamp between 0.5km and 200km
+  return Math.max(0.5, Math.min(200, Math.round(radiusAtZoom * 10) / 10));
+};
+
 interface UseMapPageProps {
   restaurants: Restaurant[];
   filters: {
@@ -70,9 +83,11 @@ export function useMapPage({
   });
   const [isGeolocating, setIsGeolocating] = useState(false);
   const [isPickingLocation, setIsPickingLocation] = useState(false);
+  const [showSearchInArea, setShowSearchInArea] = useState(false);
 
   // --- Refs ---
   const geolocateTriggerRef = useRef<null | (() => boolean)>(null);
+  const initialCenterRef = useRef<{ lat: number; lng: number } | null>(null);
 
   // --- Callbacks & Handlers ---
 
@@ -132,6 +147,55 @@ export function useMapPage({
     setSelectedRestaurantId((prev) => (prev === id ? null : id));
   }, []);
 
+  const searchInArea = useCallback(() => {
+    const { latitude, longitude, zoom } = viewState;
+    setShowSearchInArea(false);
+
+    const searchRadius = calculateRadiusFromZoom(zoom);
+
+    // Use search_lat/search_lng to avoid setting user's actual location
+    router.get(
+      route('map.index'),
+      {
+        search_lat: latitude,
+        search_lng: longitude,
+        radius: searchRadius,
+        // Preserve existing user location if any
+        ...(filters.lat !== null && filters.lng !== null
+          ? {
+              lat: filters.lat,
+              lng: filters.lng,
+            }
+          : {}),
+      },
+      {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        only: ['restaurants', 'filters'],
+      },
+    );
+  }, [viewState, filters]);
+
+  const handleViewStateChange = useCallback(
+    (newViewState: { longitude: number; latitude: number; zoom: number }) => {
+      setViewState(newViewState);
+
+      // Check if map has moved significantly from initial center
+      if (initialCenterRef.current) {
+        const { lat: initialLat, lng: initialLng } = initialCenterRef.current;
+        const latDiff = Math.abs(newViewState.latitude - initialLat);
+        const lngDiff = Math.abs(newViewState.longitude - initialLng);
+
+        // Show button if moved more than ~0.01 degrees (~1km)
+        if (latDiff > 0.01 || lngDiff > 0.01) {
+          setShowSearchInArea(true);
+        }
+      }
+    },
+    [],
+  );
+
   // --- Effects ---
 
   // Validate API key
@@ -153,6 +217,9 @@ export function useMapPage({
         longitude: filters.lng!,
         latitude: filters.lat!,
       }));
+      // Update initial center reference when user location changes
+      initialCenterRef.current = { lat: filters.lat, lng: filters.lng };
+      setShowSearchInArea(false); // Hide button when user location is updated
     } else if (restaurants.length > 0) {
       const coords = getLatLng(restaurants[0]);
       if (coords) {
@@ -161,6 +228,9 @@ export function useMapPage({
           longitude: coords[1],
           latitude: coords[0],
         }));
+        if (!initialCenterRef.current) {
+          initialCenterRef.current = { lat: coords[0], lng: coords[1] };
+        }
       }
     }
   }, [filters.lat, filters.lng, restaurants]);
@@ -199,6 +269,11 @@ export function useMapPage({
     return [...restaurantMarkers, ...userMarker];
   }, [filteredRestaurants, filters.lat, filters.lng]);
 
+  // Compute search radius based on current zoom level
+  const searchRadius = useMemo(() => {
+    return calculateRadiusFromZoom(viewState.zoom);
+  }, [viewState.zoom]);
+
   return {
     // Search
     query,
@@ -206,7 +281,7 @@ export function useMapPage({
     filteredRestaurants,
     // Map State
     viewState,
-    setViewState,
+    setViewState: handleViewStateChange,
     // Selection
     selectedRestaurantId,
     selectRestaurant,
@@ -221,6 +296,10 @@ export function useMapPage({
     handleMapGeolocate,
     handleGeolocateError,
     handlePickLocation,
+    // Search in area
+    showSearchInArea,
+    searchInArea,
+    searchRadius,
     // Data / Actions
     mapMarkers,
     reloadMap,

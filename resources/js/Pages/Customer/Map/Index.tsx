@@ -22,6 +22,8 @@ interface MapIndexProps extends PageProps {
     lat: number | null;
     lng: number | null;
     radius: number;
+    requested_radius?: number;
+    radius_expanded?: boolean;
   };
   mapboxPublicKey?: string;
 }
@@ -51,6 +53,9 @@ export default function MapIndex({
     handlePickLocation,
     mapMarkers,
     reloadMap,
+    showSearchInArea,
+    searchInArea,
+    searchRadius,
   } = useMapPage({ restaurants, filters, mapboxPublicKey });
 
   return (
@@ -103,6 +108,11 @@ export default function MapIndex({
             setIsPickingLocation={setIsPickingLocation}
             onManualLocation={handleMapGeolocate}
             onError={setLocationError}
+            showSearchInArea={showSearchInArea}
+            onSearchInArea={searchInArea}
+            searchRadius={searchRadius}
+            radiusExpanded={filters.radius_expanded ?? false}
+            requestedRadius={filters.requested_radius}
           />
           <Map
             viewState={viewState}

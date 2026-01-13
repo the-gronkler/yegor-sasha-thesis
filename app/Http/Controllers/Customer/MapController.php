@@ -11,7 +11,7 @@ use Inertia\Response;
 
 class MapController extends Controller
 {
-    private const MAX_RESTAURANTS_LIMIT = 500;
+    private const MAX_RESTAURANTS_LIMIT = 4;
 
     protected GeoService $geoService;
 
@@ -58,20 +58,35 @@ class MapController extends Controller
         $validated = $request->validate([
             'lat' => 'nullable|numeric|between:-90,90',
             'lng' => 'nullable|numeric|between:-180,180',
+            'search_lat' => 'nullable|numeric|between:-90,90', // For "search in area" without setting user location
+            'search_lng' => 'nullable|numeric|between:-180,180',
             'radius' => 'nullable|numeric|min:0|max:'.GeoService::MAX_RADIUS_KM, // allow 0 == "no range"
         ]);
 
         $latitude = $validated['lat'] ?? null;
         $longitude = $validated['lng'] ?? null;
 
+        // Check if this is a "search in area" request (uses search_lat/search_lng)
+        $searchLatitude = $validated['search_lat'] ?? null;
+        $searchLongitude = $validated['search_lng'] ?? null;
+
+        // Use search coordinates for distance calculation if provided
+        $distanceCalcLat = $searchLatitude ?? $latitude;
+        $distanceCalcLng = $searchLongitude ?? $longitude;
+
         // If no coordinates provided in request, try to use persisted session coordinates
         // This allows showing distance even when user hasn't clicked "My Location" on this page
-        if ($latitude === null && $longitude === null) {
+        if ($distanceCalcLat === null && $distanceCalcLng === null) {
             $geo = $this->geoService->getValidGeoFromSession($request);
             if ($geo) {
-                $latitude = $geo['lat'];
-                $longitude = $geo['lng'];
+                $distanceCalcLat = $geo['lat'];
+                $distanceCalcLng = $geo['lng'];
             }
+        }
+
+        // Only persist user's actual location in session (not search coordinates)
+        if ($latitude !== null && $longitude !== null) {
+            $this->geoService->storeGeoInSession($request, $latitude, $longitude);
         }
 
         // If radius is omitted -> default 50 km
@@ -79,6 +94,12 @@ class MapController extends Controller
         $radius = array_key_exists('radius', $validated)
             ? (float) $validated['radius']
             : GeoService::DEFAULT_RADIUS_KM;
+
+        // Adaptive radius expansion: If this is a search_lat/search_lng request (search in area),
+        // start with the provided radius and expand if we don't find enough restaurants
+        $isSearchInArea = $searchLatitude !== null && $searchLongitude !== null;
+        $actualRadius = $radius;
+        $expandedRadius = false;
 
         // CRITICAL OPTIMIZATION: Only load 'images', NOT 'foodTypes.menuItems'
         // Map page only needs images for markers/cards; menu data is HEAVY
@@ -117,19 +138,27 @@ class MapController extends Controller
 
         // Apply geolocation filtering if coordinates are provided
         $hasLocation = false;
-        if ($latitude !== null && $longitude !== null) {
-            // Persist coordinates in session for reuse on other pages (e.g., Restaurant Show)
-            // Allows distance calculation to be consistent across the app
-            $this->geoService->storeGeoInSession($request, $latitude, $longitude);
-
+        if ($distanceCalcLat !== null && $distanceCalcLng !== null) {
             // Use model scope for distance calculation
             // (MariaDB ST_Distance_Sphere or Haversine fallback)
-            $query->withDistanceTo($latitude, $longitude);
+            $query->withDistanceTo($distanceCalcLat, $distanceCalcLng);
 
-            if ($radius > 0) {
-                // Use model scope for radius filtering
-                // (Bounding box + HAVING distance constraint)
-                $query->withinRadiusKm($latitude, $longitude, $radius);
+            // Adaptive radius for "search in area" when zoomed in very close
+            // For small radii, automatically expand to ensure we get enough results
+            if ($isSearchInArea && $radius > 0 && $radius < 5) {
+                // Calculate expanded radius: multiply by factor based on how small it is
+                // 0.2km → 16x → 3.2km, 1km → 8x → 8km, 5km → no expansion
+                $expansionFactor = min(16, ceil(5 / $radius));
+                $actualRadius = min($radius * $expansionFactor, GeoService::MAX_RADIUS_KM);
+                $expandedRadius = ($actualRadius > $radius);
+
+                $query->withinRadiusKm($distanceCalcLat, $distanceCalcLng, $actualRadius);
+            } elseif ($radius > 0) {
+                // Normal radius filtering
+                $actualRadius = $radius;
+                $query->withinRadiusKm($distanceCalcLat, $distanceCalcLng, $radius);
+            } else {
+                $actualRadius = 0;
             }
 
             $hasLocation = true;
@@ -138,7 +167,7 @@ class MapController extends Controller
         // PERFORMANCE OPTIMIZATION: Calculate composite score in database instead of PHP
         // This allows MySQL/MariaDB to handle sorting using indexes before loading into memory
         // Significantly more efficient than loading 500 restaurants then sorting in PHP
-        $this->addCompositeScoreToQuery($query, $hasLocation, $latitude, $longitude);
+        $this->addCompositeScoreToQuery($query, $hasLocation, $distanceCalcLat, $distanceCalcLng);
 
         // Order by composite score (best restaurants first) at database level
         $query->orderByRaw('composite_score DESC');
@@ -172,7 +201,9 @@ class MapController extends Controller
             'filters' => [
                 'lat' => $latitude,
                 'lng' => $longitude,
-                'radius' => $radius,
+                'radius' => $actualRadius, // Return the actual radius used (may be expanded)
+                'requested_radius' => $radius, // Original requested radius
+                'radius_expanded' => $expandedRadius, // Whether radius was auto-expanded
             ],
         ]);
     }
