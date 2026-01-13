@@ -17,7 +17,7 @@ class MenuCategoryController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return Inertia::render('Restaurant/Admin/MenuCategories/Index', [
+        return Inertia::render('Employee/Restaurant/MenuCategories/Index', [
             'restaurant' => ['id' => $restaurant->id, 'name' => $restaurant->name],
             'categories' => $categories,
         ]);
@@ -25,7 +25,7 @@ class MenuCategoryController extends Controller
 
     public function create(Request $request)
     {
-        return Inertia::render('Restaurant/Admin/MenuCategories/Create');
+        return Inertia::render('Employee/Restaurant/MenuCategories/Create');
     }
 
     public function store(Request $request)
@@ -52,8 +52,7 @@ class MenuCategoryController extends Controller
             'name' => $validated['name'],
         ]);
 
-        return redirect()->route('employee.restaurant.menu-categories.index')
-            ->with('success', 'Category created.');
+        return back()->with('success', 'Category created successfully.');
     }
 
     public function edit(Request $request, FoodType $menuCategory)
@@ -61,7 +60,7 @@ class MenuCategoryController extends Controller
         // Ensure the category belongs to this restaurant
         $this->authorize('update', $menuCategory);
 
-        return Inertia::render('Restaurant/Admin/MenuCategories/Edit', [
+        return Inertia::render('Employee/Restaurant/MenuCategories/Edit', [
             'category' => ['id' => $menuCategory->id, 'name' => $menuCategory->name],
         ]);
     }
@@ -76,8 +75,7 @@ class MenuCategoryController extends Controller
 
         $menuCategory->update(['name' => $validated['name']]);
 
-        return redirect()->route('employee.restaurant.menu-categories.index')
-            ->with('success', 'Category updated.');
+        return back()->with('success', 'Category updated.');
     }
 
     public function destroy(Request $request, FoodType $menuCategory)
@@ -86,7 +84,16 @@ class MenuCategoryController extends Controller
 
         $menuCategory->delete();
 
-        return redirect()->route('employee.restaurant.menu-categories.index')
-            ->with('success', 'Category deleted.');
+        return back()->with('success', 'Category deleted.');
+    }
+
+    public function show(Request $request, FoodType $menuCategory)
+    {
+        // Ensure the category belongs to this restaurant
+        $this->authorize('view', $menuCategory);
+
+        return Inertia::render('Employee/Restaurant/MenuCategories/Show', [
+            'category' => ['id' => $menuCategory->id, 'name' => $menuCategory->name],
+        ]);
     }
 }

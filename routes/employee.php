@@ -21,9 +21,6 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
 
         // Menu
         Route::get('menu', [MenuController::class, 'index'])->name('menu.index');
-        Route::get('menu/edit', [MenuController::class, 'edit'])
-            ->middleware('can:manage-restaurant')
-            ->name('menu.edit');
 
         // Establishment (Admins only)
         Route::middleware(['can:manage-restaurant'])->group(function () {
@@ -51,8 +48,11 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
             Route::resource('menu-categories', MenuCategoryController::class);
             Route::resource('menu-items', EmployeeMenuItemController::class);
 
-            Route::put('menu-items/{item}/status', [EmployeeMenuItemController::class, 'updateStatus'])
+            Route::put('menu-items/{menu_item}/status', [EmployeeMenuItemController::class, 'updateStatus'])
                 ->name('menu-items.updateStatus');
+
+            Route::put('menu-items/{menu_item}/photo', [EmployeeMenuItemController::class, 'updatePhoto'])
+                ->name('menu-items.update-photo');
 
             Route::put('orders/{order}/status', [EmployeeOrderController::class, 'updateStatus'])
                 ->name('orders.updateStatus');
