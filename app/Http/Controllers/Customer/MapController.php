@@ -96,7 +96,8 @@ class MapController extends Controller
             : GeoService::DEFAULT_RADIUS_KM;
 
         // Adaptive radius expansion: If this is a search_lat/search_lng request (search in area),
-        // start with the provided radius and expand if we don't find enough restaurants
+        // automatically expand small radii (< 5km) to ensure adequate coverage
+        // Expansion is unconditional for small radii, not based on result count
         $isSearchInArea = $searchLatitude !== null && $searchLongitude !== null;
         $actualRadius = $radius;
         $expandedRadius = false;
@@ -147,7 +148,7 @@ class MapController extends Controller
             // For small radii, automatically expand to ensure we get enough results
             if ($isSearchInArea && $radius > 0 && $radius < 5) {
                 // Calculate expanded radius: multiply by factor based on how small it is
-                // 0.2km → 16x → 3.2km, 1km → 8x → 8km, 5km → no expansion
+                // 0.2km → 16x → 3.2km, 1km → 5x → 5km, 2km → 3x → 6km, 5km → no expansion
                 $expansionFactor = min(16, ceil(5 / $radius));
                 $actualRadius = min($radius * $expansionFactor, GeoService::MAX_RADIUS_KM);
                 $expandedRadius = ($actualRadius > $radius);
@@ -158,14 +159,29 @@ class MapController extends Controller
                 $actualRadius = 0;
             }
 
-            // Add is_in_radius column instead of filtering
-            // Must repeat the distance calculation because SQL doesn't allow referencing column aliases
-            // in the same SELECT clause where they're defined
+            // PERFORMANCE OPTIMIZATION: Apply bounding box prefilter to reduce search space
+            // This uses indexed lat/lng columns to eliminate most restaurants before distance calculation
+            // Critical for performance with large datasets (e.g., 10k+ restaurants)
             if ($actualRadius > 0) {
-                $distanceCalc = "(ST_Distance_Sphere(POINT(longitude, latitude), POINT({$distanceCalcLng}, {$distanceCalcLat})) / 1000)";
-                $query->addSelect(\DB::raw("({$distanceCalc} <= {$actualRadius}) as is_in_radius"));
+                // Get bounding box for the search area
+                $bounds = $this->geoService->getBoundingBox($distanceCalcLat, $distanceCalcLng, $actualRadius);
+
+                // Apply bounding box prefilter (uses indexes on latitude/longitude)
+                $query->whereBetween('latitude', [$bounds['latMin'], $bounds['latMax']])
+                    ->whereBetween('longitude', [$bounds['lngMin'], $bounds['lngMax']]);
+
+                // Add is_in_radius column for original requested radius (not expanded)
+                // This allows us to show restaurants outside the original radius but within expanded search
+                // Must repeat the distance calculation because SQL doesn't allow referencing column aliases
+                // in the same SELECT clause where they're defined
+                // Use parameter binding to prevent SQL injection
+                $query->selectRaw(
+                    '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) <= ? as is_in_radius',
+                    [$distanceCalcLng, $distanceCalcLat, $radius]
+                );
             } else {
-                $query->addSelect(\DB::raw('1 as is_in_radius')); // All in radius if no limit
+                // No radius limit - all restaurants are considered "in radius"
+                $query->addSelect(\DB::raw('1 as is_in_radius'));
             }
 
             $hasLocation = true;
@@ -255,18 +271,22 @@ class MapController extends Controller
         if ($hasLocation && $latitude !== null && $longitude !== null) {
             // We must duplicate the distance calculation here because SQL doesn't allow
             // referencing column aliases (like 'distance') in the same SELECT clause
-            $distanceCalc = "(ST_Distance_Sphere(POINT(longitude, latitude), POINT({$longitude}, {$latitude})) / 1000)";
+            // Use parameter binding to prevent SQL injection
+            $distanceCalc = '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000)';
 
             // Inverse distance: closer = better
             // GREATEST ensures we don't go below 0
             $distanceScore = "GREATEST(0, 20 * (1 - (COALESCE({$distanceCalc}, 999999) / 20)))";
-        } else {
-            $distanceScore = '0';
-        }
 
-        // Combine all components into composite score
-        // Use addSelect() to append to existing columns instead of replacing them
-        $query->addSelect(\DB::raw("({$ratingScore} + {$reviewScore} + {$distanceScore}) as composite_score"));
+            // Combine all components into composite score with parameter binding
+            $query->selectRaw(
+                "({$ratingScore} + {$reviewScore} + {$distanceScore}) as composite_score",
+                [$longitude, $latitude]
+            );
+        } else {
+            // No distance score - only rating and reviews
+            $query->addSelect(\DB::raw("({$ratingScore} + {$reviewScore}) as composite_score"));
+        }
     }
 
     /**
