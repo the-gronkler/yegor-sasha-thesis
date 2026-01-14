@@ -36,19 +36,6 @@ const getLatLng = (restaurant: Restaurant): [number, number] | null => {
   return [restaurant.latitude, restaurant.longitude];
 };
 
-/**
- * Calculate search radius based on zoom level.
- * Higher zoom = smaller radius (more focused search)
- * Lower zoom = larger radius (broader search)
- */
-const calculateRadiusFromZoom = (zoomLevel: number): number => {
-  const baseRadius = 50; // km at zoom level 10
-  const radiusAtZoom = baseRadius / Math.pow(2, zoomLevel - 10);
-
-  // Clamp between 0.5km and 200km
-  return Math.max(0.5, Math.min(200, Math.round(radiusAtZoom * 10) / 10));
-};
-
 interface UseMapPageProps {
   restaurants: Restaurant[];
   filters: {
@@ -148,18 +135,16 @@ export function useMapPage({
   }, []);
 
   const searchInArea = useCallback(() => {
-    const { latitude, longitude, zoom } = viewState;
+    const { latitude, longitude } = viewState;
     setShowSearchInArea(false);
 
-    const searchRadius = calculateRadiusFromZoom(zoom);
-
-    // Use search_lat/search_lng to avoid setting user's actual location
+    // Backend handles radius calculation and expansion automatically
+    // Just send the search coordinates
     router.get(
       route('map.index'),
       {
         search_lat: latitude,
         search_lng: longitude,
-        radius: searchRadius,
         // Preserve existing user location if any
         ...(filters.lat !== null && filters.lng !== null
           ? {
@@ -269,11 +254,6 @@ export function useMapPage({
     return [...restaurantMarkers, ...userMarker];
   }, [filteredRestaurants, filters.lat, filters.lng]);
 
-  // Compute search radius based on current zoom level
-  const searchRadius = useMemo(() => {
-    return calculateRadiusFromZoom(viewState.zoom);
-  }, [viewState.zoom]);
-
   return {
     // Search
     query,
@@ -299,7 +279,6 @@ export function useMapPage({
     // Search in area
     showSearchInArea,
     searchInArea,
-    searchRadius,
     // Data / Actions
     mapMarkers,
     reloadMap,

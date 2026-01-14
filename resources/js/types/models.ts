@@ -108,6 +108,7 @@ export interface Restaurant {
   rank?: number;
   distance?: number | null; // Distance in kilometers when filtered by geolocation
   is_favorited?: boolean; // Whether the current user has favorited this restaurant
+  is_in_radius?: boolean; // Whether the restaurant is within the search radius
   images?: Image[];
   food_types?: FoodType[];
   restaurant_images?: Image[];

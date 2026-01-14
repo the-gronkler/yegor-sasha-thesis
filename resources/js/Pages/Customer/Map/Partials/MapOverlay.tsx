@@ -47,9 +47,6 @@ interface MapOverlayProps {
   onError: (error: string | null) => void;
   showSearchInArea?: boolean;
   onSearchInArea?: () => void;
-  searchRadius?: number;
-  radiusExpanded?: boolean;
-  requestedRadius?: number;
 }
 
 export default function MapOverlay({
@@ -66,9 +63,6 @@ export default function MapOverlay({
   onError,
   showSearchInArea = false,
   onSearchInArea,
-  searchRadius = 50,
-  radiusExpanded = false,
-  requestedRadius,
 }: MapOverlayProps) {
   // Collapsible overlay states
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -348,21 +342,10 @@ export default function MapOverlay({
             type="button"
             className="map-search-area-btn"
             onClick={onSearchInArea}
-            aria-label={`Search restaurants within ${searchRadius}km of this area`}
+            aria-label="Search restaurants in this area"
           >
-            🔍 Search in this area ({searchRadius}km)
+            🔍 Search in this area
           </button>
-        </div>
-      )}
-
-      {/* Radius expansion notification */}
-      {radiusExpanded && requestedRadius && currentRadius && (
-        <div className="map-radius-expanded-info">
-          <span className="info-icon">ℹ️</span>
-          <span className="info-text">
-            Search expanded from {requestedRadius}km to {currentRadius}km to
-            show more restaurants
-          </span>
         </div>
       )}
     </div>
