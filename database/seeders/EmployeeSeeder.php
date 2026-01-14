@@ -20,11 +20,12 @@ class EmployeeSeeder extends Seeder
         $min = min($minPerRestaurant, $maxPerRestaurant);
         $max = max($minPerRestaurant, $maxPerRestaurant);
 
-        $restaurants = Restaurant::all();
-        $total = $restaurants->count();
+        // Use lazy() to avoid loading all restaurants into memory at once
+        // This is critical for large datasets (e.g., 10k+ restaurants)
+        $total = Restaurant::count();
         $current = 0;
 
-        $restaurants->each(function ($restaurant) use ($min, $max, &$current, $total, $progressCallback) {
+        Restaurant::lazy()->each(function ($restaurant) use ($min, $max, &$current, $total, $progressCallback) {
             // One admin per restaurant
             Employee::factory()
                 ->admin()

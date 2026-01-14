@@ -11,14 +11,25 @@ class RestaurantSeeder extends Seeder
     {
         $count ??= config('seeding.restaurants');
 
-        for ($i = 1; $i <= $count; $i++) {
+        // Use batch creation for much better performance
+        // Create in batches of 100 to balance performance with progress updates
+        $created = 0;
+        $batchSize = 100;
+
+        while ($created < $count) {
+            $remaining = $count - $created;
+            $batchCount = min($batchSize, $remaining);
+
             Restaurant::factory()
                 ->center($lat ?? config('seeding.center_lat'), $lon ?? config('seeding.center_lon'))
                 ->radius($radius ?? config('seeding.radius'))
+                ->count($batchCount)
                 ->create();
 
+            $created += $batchCount;
+
             if ($progressCallback) {
-                $progressCallback($i, $count);
+                $progressCallback($created, $count);
             }
         }
     }

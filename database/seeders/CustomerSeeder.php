@@ -17,8 +17,18 @@ class CustomerSeeder extends Seeder
 
         $restaurantCount = Restaurant::count();
 
-        for ($i = 1; $i <= $count; $i++) {
+        // Use batch creation for better performance
+        // Use smaller batches (10) due to complex relationships (reviews, orders, favorites)
+        // This balances performance with memory usage and progress tracking
+        $created = 0;
+        $batchSize = 10;
+
+        while ($created < $count) {
+            $remaining = $count - $created;
+            $batchCount = min($batchSize, $remaining);
+
             Customer::factory()
+                ->count($batchCount)
                 ->hasOrders($ordersPerCustomer)
                 ->afterCreating(function (Customer $customer) use ($reviewsPerCustomer, $restaurantCount) {
                     if ($restaurantCount <= 0 || $reviewsPerCustomer <= 0) {
@@ -43,8 +53,10 @@ class CustomerSeeder extends Seeder
                 )
                 ->create();
 
+            $created += $batchCount;
+
             if ($progressCallback) {
-                $progressCallback($i, $count);
+                $progressCallback($created, $count);
             }
         }
     }

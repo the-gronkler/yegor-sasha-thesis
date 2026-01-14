@@ -147,7 +147,7 @@ class Mfs extends Command
 
         $task(function ($current, $total) use ($bar, $itemType) {
             $bar->setMessage("{$itemType} {$current}/{$total}");
-            $bar->advance();
+            $bar->setProgress($current); // Use setProgress for absolute position (handles batching)
         });
 
         $bar->setMessage('Complete');
