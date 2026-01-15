@@ -32,19 +32,17 @@ Typst - allows us to manage the thesis with the same approach as the codebase.
 == AI Use
 
 === AI in Research
-AI was used in the initial research phase to assist with exploring existing solutions and competitors, brainstorming potential features, and defining the project scope and estimating workloads during the early pre-planning stage.
+AI was used in the initial research phase to assist with exploring existing solutions and competitors, brainstorming potential features, defining the project scope, and estimating workloads during the pre-planning stage.
 
 This process helped identify key market trends, potential gaps in existing solutions, and specific project requirements essential for guiding the development phase. All findings were manually verified and appropriately cited.
 
 === AI in Development
-During development, AI was employed primarily for code review, as it can identify common mistakes and suggest improvements.
+During the development phase, AI tools were utilized to augment manual code reviews. The AI analyzed changes against the project's strict architecture and styling guidelines. It helped identify potential regressions, suggest optimizations, and ensure adherence to the defined coding standards before human review.
 
-To this end, a custom AI code review agent was developed, and added to the project's agent configuration file, #source_code_link("/AGENTS.md").
+To facilitate this, a custom context configuration was established in #source_code_link("/AGENTS.md"), enabling the AI to act as a specialized reviewer aware of the project's specific constraints.
 
 ==== Agent Instructions (AGENTS.md)
-The file #source_code_link("/AGENTS.md") contains project-specific instructions for AI agents. It ensures AI follows the same conventions as human code reviews.
-
-In this project, this file lists key rules that stay consistent, such as the technology stack, frontend structure, styling rules, testing requirements, and security guidelines.
+The #source_code_link("/AGENTS.md") file serves as a centralized repository of project-specific rules, ensuring consistent adherence to the technology stack, frontend architecture, styling conventions, testing requirements, and security protocols. This approach ensures that AI-generated suggestions follow the same rigorous standards as human code reviews.
 
 This follows GitHub Copilot's system, where `AGENTS.md` files provide agent instructions. The closest file in the directory structure takes priority @GitHubCopilotRepoInstructions.
 
@@ -71,13 +69,22 @@ Since the exact same processes are used for both code and thesis writing, AI was
 Additionally, AI was employed to generate initial drafts of _some_ sections, help with brainstorming, and aid in choosing relevant code examples from the project's codebase.
 
 === Ethical Considerations
-The use of AI in research, development, and academic writing raises several ethical considerations that must be addressed to maintain integrity and transparency. As AI is a tool, its application was guided by principles of academic honesty, ensuring that any and all AI-generated content was reviewed, verified, and augmented by human expertise.
+The integration of AI into research, development, and academic writing requires strict ethical boundaries to maintain integrity. As a tool, AI was applied under the principle of mandatory human oversight, ensuring that all machine-generated outputs were verified, critiqued, and approved by the authors.
 
-For thesis writing, AI was employed *solely* as an assistive tool for drafting and improvement suggestions, with *all* final content authored, curated, and approved by both authors.
+*Research Integrity:* In the context of research, findings derived from AI-assisted exploration were manually corroborated with primary sources to prevent reliance on hallucinations or biased data. AI served strictly as an accelerator for discovery, not a substitute for verification.
 
-The responsibility for structure, argumentation, and academic rigor remains with the authors, ensuring that AI did not supplant original thought or scholarly judgment.
+*Development Security:* For software development, use of the AI code review agent was governed by explicit guidelines prioritizing security and maintainability. Suggestions were treated as preliminary, requiring human validation to ensure no vulnerabilities or unintended biases were introduced into the codebase.
+
+*Academic Authorship:* Regarding thesis writing, AI functioned solely as an assistive drafting aid. The responsibility for the document's structure, argumentation, and final prose remains entirely with the human authors.
 
 Overall, these principles ensure that AI applications maintain essential human oversight, preventing over-reliance on automated systems and preserving the integrity of critical thinking and originality in both academic research and professional development.
 
+Transparency is maintained by properly citing the methodologies and tools used, aligning with emerging academic standards for AI usage.
 
+=== Impact and Limitations
 
+*Impact Assessment:*
+The integration of AI significantly enhanced the efficiency of the development cycle. Automated code reviews reduced the time spent on syntax and style verification, allowing human reviewers to focus on architectural logic and business requirements. In thesis writing, AI assistance accelerated the drafting of technical descriptions and improved the linguistic quality of the text, ensuring a consistent formal tone throughout the document.
+
+*Limitations:*
+Despite these benefits, AI tools demonstrated limitations, particularly in understanding complex, multi-file dependencies and specific business domain nuances. Contextual hallucinations were occasionally observed during research tasks. These limitations were mitigated by the strict human-in-the-loop policy and the use of the `AGENTS.md` context file, which provided the AI with necessary boundaries and project-specific knowledge.
