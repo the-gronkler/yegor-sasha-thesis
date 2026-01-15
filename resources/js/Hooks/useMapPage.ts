@@ -172,7 +172,7 @@ export function useMapPage({
         const latDiff = Math.abs(newViewState.latitude - initialLat);
         const lngDiff = Math.abs(newViewState.longitude - initialLng);
 
-        // Show button if moved more than ~0.01 degrees (~1km)
+        // Shows button if moved more than ~0.01 degrees (~1km)
         if (latDiff > 0.01 || lngDiff > 0.01) {
           setShowSearchInArea(true);
         }
