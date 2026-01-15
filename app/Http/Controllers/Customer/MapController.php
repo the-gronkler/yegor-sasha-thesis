@@ -95,9 +95,6 @@ class MapController extends Controller
             ? (float) $validated['radius']
             : GeoService::DEFAULT_RADIUS_KM;
 
-        // Adaptive radius expansion: If this is a search_lat/search_lng request (search in area),
-        // automatically expand small radii (< 5km) to ensure adequate coverage
-        // Expansion is unconditional for small radii, not based on result count
         $isSearchInArea = $searchLatitude !== null && $searchLongitude !== null;
         $actualRadius = $radius;
         $expandedRadius = false;
@@ -170,7 +167,7 @@ class MapController extends Controller
                 $query->whereBetween('latitude', [$bounds['latMin'], $bounds['latMax']])
                     ->whereBetween('longitude', [$bounds['lngMin'], $bounds['lngMax']]);
 
-                // Add is_in_radius column for original requested radius (not expanded)
+                // Add is_in_radius column for original requested radius
                 // This allows us to show restaurants outside the original radius but within expanded search
                 // Must repeat the distance calculation because SQL doesn't allow referencing column aliases
                 // in the same SELECT clause where they're defined
