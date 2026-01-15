@@ -49,7 +49,7 @@ class MapController extends Controller
      * Phase D: Fetch full models with relations (preserves order)
      *   - Uses FIELD(id, ...) to maintain phase C ordering
      *   - Loads images relation and favorite status
-     *   - Calculates is_in_radius for UI filtering
+     *   - Maps to final response format
      *
      * Composite score formula (applied in phases C & D):
      *   - Rating component: (rating / 5) * 50 = 0-50 points
@@ -64,11 +64,11 @@ class MapController extends Controller
      *     (hard limit enforced via SQL HAVING clause in Phase B)
      *   - When radius = 0: returns up to 250 nearest restaurants globally (no range limit)
      *   - Within the selected set, ordering is by quality (score DESC) with proximity tiebreaker
-     *   - No post-processing in PHP changes the order (no is_in_radius sorting)
+     *   - All ordering happens in the database; no post-processing in PHP changes the order
      *
      * @param  Request  $request  Query parameters: lat, lng, search_lat, search_lng, radius
      * @return Response Inertia response with restaurants array (sorted by score DESC, distance ASC)
-     *                  and filters object (lat, lng, radius, requested_radius, radius_expanded)
+     *                  and filters object (lat, lng, radius)
      */
     public function index(Request $request): Response
     {
@@ -108,8 +108,6 @@ class MapController extends Controller
                     'lat' => $validated['lat'] ?? null,
                     'lng' => $validated['lng'] ?? null,
                     'radius' => $radius,
-                    'requested_radius' => $radius,
-                    'radius_expanded' => false,
                 ],
             ]);
         }
@@ -118,7 +116,7 @@ class MapController extends Controller
         $orderedIds = $this->scoreAndOrderRestaurantIds($selectedIds, $centerLat, $centerLng);
 
         // PHASE D: Fetch full restaurant models with relations, preserving order
-        $restaurants = $this->fetchRestaurantsWithRelations($orderedIds, $customerId, $centerLat, $centerLng, $radius);
+        $restaurants = $this->fetchRestaurantsWithRelations($orderedIds, $customerId, $centerLat, $centerLng);
 
         return Inertia::render('Customer/Map/Index', [
             'restaurants' => $restaurants,
@@ -126,8 +124,6 @@ class MapController extends Controller
                 'lat' => $validated['lat'] ?? null,
                 'lng' => $validated['lng'] ?? null,
                 'radius' => $radius,
-                'requested_radius' => $radius,
-                'radius_expanded' => false,
             ],
         ]);
     }
@@ -298,7 +294,7 @@ class MapController extends Controller
      *   - Calculates distance and composite_score (for response transparency)
      *   - Detects favorite status via LEFT JOIN (if user authenticated)
      *   - Preserves Phase 2 ordering using FIELD() in ORDER BY
-     *   - Maps to response format with is_in_radius flag
+     *   - Maps to response format
      *
      * FIELD() ordering explanation:
      *   FIELD(id, 5, 12, 3, 8) returns 1 for id=5, 2 for id=12, etc.
@@ -308,10 +304,9 @@ class MapController extends Controller
      * @param  int|null  $customerId  Customer ID for favorite detection (null if not authenticated)
      * @param  float  $centerLat  Center latitude for distance calculation
      * @param  float  $centerLng  Center longitude for distance calculation
-     * @param  float  $radius  Original requested radius (for is_in_radius flag)
      * @return \Illuminate\Support\Collection Collection of formatted restaurant arrays
      */
-    private function fetchRestaurantsWithRelations(array $orderedIds, ?int $customerId, float $centerLat, float $centerLng, float $radius): \Illuminate\Support\Collection
+    private function fetchRestaurantsWithRelations(array $orderedIds, ?int $customerId, float $centerLat, float $centerLng): \Illuminate\Support\Collection
     {
         if (empty($orderedIds)) {
             return collect([]);
@@ -361,13 +356,7 @@ class MapController extends Controller
         $restaurants = $query->get();
 
         // Map to response format
-        return $restaurants->map(function (Restaurant $restaurant) use ($radius) {
-            // Calculate is_in_radius
-            $isInRadius = true;
-            if ($restaurant->distance !== null && $radius > 0) {
-                $isInRadius = $restaurant->distance <= $radius;
-            }
-
+        return $restaurants->map(function (Restaurant $restaurant) {
             return [
                 'id' => $restaurant->id,
                 'name' => $restaurant->name,
@@ -380,7 +369,6 @@ class MapController extends Controller
                 'distance' => $this->geoService->formatDistance($restaurant->distance),
                 'reviews_count' => $restaurant->reviews_count ?? 0,
                 'is_favorited' => (bool) ($restaurant->is_favorited ?? false),
-                'is_in_radius' => $isInRadius,
                 'score' => round($restaurant->composite_score ?? 0, 2),
                 'images' => $restaurant->images->map(fn ($img) => [
                     'id' => $img->id,
