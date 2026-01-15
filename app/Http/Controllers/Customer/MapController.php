@@ -38,9 +38,11 @@ class MapController extends Controller
      *   - Orders by distance ASC ONLY
      *   - Limits to 250 restaurants (protects payload size)
      *   - This ensures we get the CLOSEST restaurants, not the BEST
+     *   - HARD RADIUS LIMIT: If radius = 5km, NO restaurant beyond 5km can be selected
+     *     (the 250 limit is applied AFTER the radius filter)
      *
      * Phase C: Score-sort the selected restaurants (quality-based ordering)
-     *   - For the 250 closest restaurants, calculate composite_score
+     *   - For the selected closest restaurants (≤250, all within radius), calculate composite_score
      *   - Orders by composite_score DESC, distance ASC (tiebreaker)
      *   - Returns ordered IDs for next phase
      *
@@ -58,8 +60,10 @@ class MapController extends Controller
      * Key guarantees:
      *   - Switching between lat/lng and search_lat/search_lng produces identical behavior
      *     (only the center point changes, selection/sorting logic is the same)
-     *   - The returned set contains the 250 CLOSEST restaurants (not the 250 best-scored)
-     *   - Within those 250, ordering is by quality (score DESC) with proximity tiebreaker
+     *   - When radius > 0: returned set contains ONLY restaurants within that radius
+     *     (hard limit enforced via SQL HAVING clause in Phase B)
+     *   - When radius = 0: returns up to 250 nearest restaurants globally (no range limit)
+     *   - Within the selected set, ordering is by quality (score DESC) with proximity tiebreaker
      *   - No post-processing in PHP changes the order (no is_in_radius sorting)
      *
      * @param  Request  $request  Query parameters: lat, lng, search_lat, search_lng, radius
@@ -181,14 +185,22 @@ class MapController extends Controller
      *
      * Query strategy:
      * - Calculate distance using ST_Distance_Sphere
-     * - Apply bounding box prefilter if radius > 0
-     * - Apply exact radius filter if radius > 0
+     * - Apply bounding box prefilter if radius > 0 (performance optimization)
+     * - Apply exact radius filter if radius > 0 (HARD LIMIT via HAVING clause)
      * - Order by distance ASC only
-     * - Limit to MAX_RESTAURANTS_LIMIT
+     * - Limit to MAX_RESTAURANTS_LIMIT (only applied AFTER radius filter)
      * - Return only IDs (lightweight)
      *
-     * @param  float  $radius  Radius in km (0 = no limit)
-     * @return \Illuminate\Support\Collection Collection of restaurant IDs
+     * IMPORTANT GUARANTEE:
+     * When radius > 0 (e.g., 5km), the HAVING clause ensures that NO restaurant
+     * beyond that distance can be selected. The limit of 250 is applied AFTER
+     * the radius filter, so you get "up to 250 restaurants within 5km", never
+     * "250 restaurants regardless of distance".
+     *
+     * @param  float  $centerLat  Center latitude for distance calculation
+     * @param  float  $centerLng  Center longitude for distance calculation
+     * @param  float  $radius  Radius in km (0 = no limit, returns 250 nearest globally)
+     * @return \Illuminate\Support\Collection Collection of restaurant IDs (all within radius if radius > 0)
      */
     private function selectNearestRestaurantIds(float $centerLat, float $centerLng, float $radius): \Illuminate\Support\Collection
     {
