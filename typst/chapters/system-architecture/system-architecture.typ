@@ -6,5 +6,5 @@
 
 #include "real-time-events.typ"
 
-// #include "database-schema.typ"
+#include "database-schema.typ"
 

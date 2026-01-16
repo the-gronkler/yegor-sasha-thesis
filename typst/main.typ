@@ -25,7 +25,7 @@
 )
 
 // Main content of the thesis:
-#include "examples/content-example.typ"
+// #include "examples/content-example.typ"
 
 // Project overview:
 #include "chapters/glossary.typ"
