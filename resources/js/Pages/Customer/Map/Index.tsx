@@ -22,8 +22,6 @@ interface MapIndexProps extends PageProps {
     lat: number | null;
     lng: number | null;
     radius: number;
-    requested_radius?: number;
-    radius_expanded?: boolean;
   };
   mapboxPublicKey?: string;
 }
@@ -109,6 +107,7 @@ export default function MapIndex({
             onError={setLocationError}
             showSearchInArea={showSearchInArea}
             onSearchInArea={searchInArea}
+            mapCenter={viewState}
           />
           <Map
             viewState={viewState}
