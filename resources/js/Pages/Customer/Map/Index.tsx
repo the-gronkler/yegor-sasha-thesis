@@ -107,6 +107,7 @@ export default function MapIndex({
             onError={setLocationError}
             showSearchInArea={showSearchInArea}
             onSearchInArea={searchInArea}
+            mapCenter={viewState}
           />
           <Map
             viewState={viewState}

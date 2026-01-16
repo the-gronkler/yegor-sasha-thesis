@@ -75,6 +75,9 @@ class MapController extends Controller
         $this->authorize('viewAny', Restaurant::class);
 
         // Validate optional geolocation parameters
+        // Note: Both lat/lng and search_lat/search_lng can be provided simultaneously.
+        // search_lat/search_lng takes priority for center calculation (map click/search in area).
+        // lat/lng is preserved for user location context and session persistence.
         $validated = $request->validate([
             'lat' => 'nullable|numeric|between:-90,90',
             'lng' => 'nullable|numeric|between:-180,180',
@@ -235,6 +238,11 @@ class MapController extends Controller
      * IMPORTANT: This operates ONLY on the already-selected nearest restaurant IDs from Phase 1.
      * It does NOT re-select or filter restaurants - it only re-orders the closest ones.
      *
+     * Performance optimizations:
+     *   1. Distance calculated once via nested subquery (eliminates redundant ST_Distance_Sphere calls)
+     *   2. Review counts pre-aggregated via leftJoinSub with GROUP BY (eliminates correlated subqueries)
+     *   3. All scoring logic computed in a single pass
+     *
      * Composite score calculation:
      *   - rating_score: (COALESCE(rating, 0) / 5) * 50 = 0-50 points
      *   - review_score: LEAST(30, LOG10(review_count + 1) * 10) = 0-30 points
@@ -245,6 +253,10 @@ class MapController extends Controller
      *   - PRIMARY: composite_score DESC (best quality first)
      *   - SECONDARY: distance_km ASC (closer restaurants win ties)
      *
+     * Index requirement:
+     *   - reviews.restaurant_id must be indexed for efficient GROUP BY aggregation
+     *     (See migration: add_index_to_reviews_restaurant_id.php)
+     *
      * @param  \Illuminate\Support\Collection  $selectedIds  IDs from Phase 1 (closest restaurants)
      * @param  float  $centerLat  Center latitude for distance/score calculation
      * @param  float  $centerLng  Center longitude for distance/score calculation
@@ -252,30 +264,46 @@ class MapController extends Controller
      */
     private function scoreAndOrderRestaurantIds(\Illuminate\Support\Collection $selectedIds, float $centerLat, float $centerLng): array
     {
-        // Build composite score query for selected IDs only
-        $results = \DB::table('restaurants')
-            ->select('id')
-            ->whereIn('id', $selectedIds->toArray())
+        // Step 1: Build subquery for restaurants with distance (computed once per row)
+        $restaurantsWithDistance = \DB::table('restaurants')
+            ->select([
+                'id',
+                'latitude',
+                'longitude',
+                'rating',
+            ])
             ->selectRaw(
                 '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
                 [$centerLng, $centerLat]
             )
+            ->whereIn('id', $selectedIds->toArray());
+
+        // Step 2: Build subquery for review counts (aggregated once, limited to selected IDs only)
+        // Index on reviews.restaurant_id is critical here for GROUP BY performance
+        $reviewCounts = \DB::table('reviews')
+            ->select('restaurant_id')
+            ->selectRaw('COUNT(*) as review_count')
+            ->whereIn('restaurant_id', $selectedIds->toArray())
+            ->groupBy('restaurant_id');
+
+        // Step 3: Join distance subquery with review counts, calculate composite score
+        $results = \DB::query()
+            ->fromSub($restaurantsWithDistance, 'r')
+            ->leftJoinSub($reviewCounts, 'rc', 'r.id', '=', 'rc.restaurant_id')
+            ->select([
+                'r.id',
+                'r.distance_km',
+            ])
+            ->selectRaw('(COALESCE(r.rating, 0) / 5) * 50 AS rating_score')
+            ->selectRaw('LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) AS review_score')
+            ->selectRaw('GREATEST(0, 20 * (1 - (r.distance_km / 20))) AS distance_score')
             ->selectRaw(
-                '(COALESCE(rating, 0) / 5) * 50 AS rating_score'
-            )
-            ->selectRaw(
-                'LEAST(30, LOG10((SELECT COUNT(*) FROM reviews WHERE reviews.restaurant_id = restaurants.id) + 1) * 10) AS review_score'
-            )
-            ->selectRaw(
-                'GREATEST(0, 20 * (1 - (COALESCE((ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000), 999999) / 20))) AS distance_score',
-                [$centerLng, $centerLat]
-            )
-            ->selectRaw(
-                '((COALESCE(rating, 0) / 5) * 50 + LEAST(30, LOG10((SELECT COUNT(*) FROM reviews WHERE reviews.restaurant_id = restaurants.id) + 1) * 10) + GREATEST(0, 20 * (1 - (COALESCE((ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000), 999999) / 20)))) AS composite_score',
-                [$centerLng, $centerLat]
+                '((COALESCE(r.rating, 0) / 5) * 50 + '.
+                'LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) + '.
+                'GREATEST(0, 20 * (1 - (r.distance_km / 20)))) AS composite_score'
             )
             ->orderByDesc('composite_score')
-            ->orderBy('distance_km', 'asc')
+            ->orderBy('r.distance_km', 'asc')
             ->get();
 
         return $results->pluck('id')->toArray();
@@ -287,11 +315,17 @@ class MapController extends Controller
      * This is the final step that loads complete restaurant data with relations.
      * Uses FIELD(id, ...) to preserve the score-sorted order from Phase 2.
      *
+     * Performance optimizations:
+     *   1. Distance calculated once via derived table (eliminates redundant ST_Distance_Sphere calls)
+     *   2. Review counts pre-aggregated via grouped subquery (eliminates correlated SELECT COUNT(*))
+     *   3. Composite score computed once in SQL using pre-calculated distance and review_count
+     *   4. Scored data joined back to restaurants table for Eloquent model hydration
+     *
      * What this phase does:
-     *   - Fetches full Restaurant models for ordered IDs
-     *   - Loads 'images' relation (excludes heavy foodTypes.menuItems)
-     *   - Adds reviews_count via withCount()
-     *   - Calculates distance and composite_score (for response transparency)
+     *   - Builds derived table with distance_km and composite_score (computed once per restaurant)
+     *   - Joins scored data to restaurants table using joinSub()
+     *   - Eloquent still hydrates Restaurant models normally
+     *   - Eager-loads 'images' relation via with()
      *   - Detects favorite status via LEFT JOIN (if user authenticated)
      *   - Preserves Phase 2 ordering using FIELD() in ORDER BY
      *   - Maps to response format
@@ -299,6 +333,11 @@ class MapController extends Controller
      * FIELD() ordering explanation:
      *   FIELD(id, 5, 12, 3, 8) returns 1 for id=5, 2 for id=12, etc.
      *   This ensures results maintain the exact order from Phase 2.
+     *
+     * Index requirements:
+     *   - reviews.restaurant_id (for GROUP BY performance in review counts subquery)
+     *   - favorite_restaurants(customer_user_id, restaurant_id) composite index recommended
+     *     (for fast favorite lookups filtered by customer_user_id)
      *
      * @param  array  $orderedIds  Restaurant IDs in desired order (from Phase 2)
      * @param  int|null  $customerId  Customer ID for favorite detection (null if not authenticated)
@@ -312,11 +351,58 @@ class MapController extends Controller
             return collect([]);
         }
 
-        // Build FIELD() expression for order preservation
-        $fieldOrder = 'FIELD(restaurants.id, '.implode(',', $orderedIds).')';
+        // Step 1: Build subquery for review counts (aggregated once, limited to orderedIds only)
+        // Index on reviews.restaurant_id is critical here for GROUP BY performance
+        $reviewCounts = \DB::table('reviews')
+            ->select('restaurant_id')
+            ->selectRaw('COUNT(*) as review_count')
+            ->whereIn('restaurant_id', $orderedIds)
+            ->groupBy('restaurant_id');
 
-        $query = Restaurant::with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
-            ->withCount('reviews')
+        // Step 2a: Build inner subquery for restaurants with distance (computed ONCE per row)
+        $restaurantsWithDistance = \DB::table('restaurants')
+            ->select([
+                'id',
+                'latitude',
+                'longitude',
+                'rating',
+            ])
+            ->selectRaw(
+                '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
+                [$centerLng, $centerLat]
+            )
+            ->whereIn('id', $orderedIds);
+
+        // Step 2b: Build outer derived table that joins distance with review counts and computes composite score
+        // This reuses the pre-calculated distance_km instead of recalculating ST_Distance_Sphere
+        $scoredRestaurants = \DB::query()
+            ->fromSub($restaurantsWithDistance, 'rwd')
+            ->leftJoinSub($reviewCounts, 'rc', 'rwd.id', '=', 'rc.restaurant_id')
+            ->select([
+                'rwd.id',
+                'rwd.distance_km',
+            ])
+            ->selectRaw('COALESCE(rc.review_count, 0) as review_count')
+            ->selectRaw('(COALESCE(rwd.rating, 0) / 5) * 50 AS rating_score')
+            ->selectRaw('LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) AS review_score')
+            ->selectRaw('GREATEST(0, 20 * (1 - (rwd.distance_km / 20))) AS distance_score')
+            ->selectRaw(
+                '((COALESCE(rwd.rating, 0) / 5) * 50 + '.
+                'LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) + '.
+                'GREATEST(0, 20 * (1 - (rwd.distance_km / 20)))) AS composite_score'
+            );
+
+        // Build FIELD() expression for order preservation
+        // Sanitize IDs to integers for security and reindex array
+        $orderedIds = array_values(array_map('intval', $orderedIds));
+        $placeholders = implode(',', array_fill(0, count($orderedIds), '?'));
+        $fieldSql = "FIELD(restaurants.id, {$placeholders})";
+
+        // Step 3: Join scored data to restaurants table for Eloquent model hydration
+        // This allows with(['images']) to work normally while using pre-computed scores
+        $query = Restaurant::query()
+            ->joinSub($scoredRestaurants, 'scored', 'restaurants.id', '=', 'scored.id')
+            ->with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
             ->select([
                 'restaurants.id',
                 'restaurants.name',
@@ -326,22 +412,13 @@ class MapController extends Controller
                 'restaurants.rating',
                 'restaurants.description',
                 'restaurants.opening_hours',
-            ])
-            ->whereIn('restaurants.id', $orderedIds);
-
-        // Add distance calculation
-        $query->selectRaw(
-            '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance',
-            [$centerLng, $centerLat]
-        );
-
-        // Add composite score (for transparency in response)
-        $query->selectRaw(
-            '((COALESCE(restaurants.rating, 0) / 5) * 50 + LEAST(30, LOG10((SELECT COUNT(*) FROM reviews WHERE reviews.restaurant_id = restaurants.id) + 1) * 10) + GREATEST(0, 20 * (1 - (COALESCE((ST_Distance_Sphere(POINT(restaurants.longitude, restaurants.latitude), POINT(?, ?)) / 1000), 999999) / 20)))) AS composite_score',
-            [$centerLng, $centerLat]
-        );
+                'scored.distance_km as distance',
+                'scored.review_count as reviews_count',
+                'scored.composite_score',
+            ]);
 
         // Add favorite detection if user is authenticated
+        // Composite index on (customer_user_id, restaurant_id) recommended for performance
         if ($customerId) {
             $query->leftJoin('favorite_restaurants', function ($join) use ($customerId) {
                 $join->on('restaurants.id', '=', 'favorite_restaurants.restaurant_id')
@@ -351,7 +428,7 @@ class MapController extends Controller
         }
 
         // Preserve order using FIELD()
-        $query->orderByRaw($fieldOrder);
+        $query->orderByRaw($fieldSql, $orderedIds);
 
         $restaurants = $query->get();
 

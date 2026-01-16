@@ -138,8 +138,9 @@ export function useMapPage({
     const { latitude, longitude } = viewState;
     setShowSearchInArea(false);
 
-    // Backend handles radius calculation and expansion automatically
-    // Just send the search coordinates
+    // Backend uses search_lat/search_lng as the new center point for distance calculations.
+    // The radius comes from existing filters and is not automatically expanded.
+    // Just send the search coordinates.
     router.get(
       route('map.index'),
       {
