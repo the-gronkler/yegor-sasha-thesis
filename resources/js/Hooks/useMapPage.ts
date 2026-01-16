@@ -138,8 +138,9 @@ export function useMapPage({
     const { latitude, longitude } = viewState;
     setShowSearchInArea(false);
 
-    // Backend handles radius calculation and expansion automatically
-    // Just send the search coordinates
+    // Backend uses search_lat/search_lng as the new center point for distance calculations.
+    // The radius comes from existing filters and is not automatically expanded.
+    // Just send the search coordinates.
     router.get(
       route('map.index'),
       {
@@ -172,7 +173,7 @@ export function useMapPage({
         const latDiff = Math.abs(newViewState.latitude - initialLat);
         const lngDiff = Math.abs(newViewState.longitude - initialLng);
 
-        // Show button if moved more than ~0.01 degrees (~1km)
+        // Shows button if moved more than ~0.01 degrees (~1km)
         if (latDiff > 0.01 || lngDiff > 0.01) {
           setShowSearchInArea(true);
         }
