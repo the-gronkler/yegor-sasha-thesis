@@ -46,8 +46,8 @@ interface MapOverlayProps {
   setIsPickingLocation: (isPicking: boolean) => void;
   onManualLocation: (lat: number, lng: number) => void;
   onError: (error: string | null) => void;
-  showSearchInArea?: boolean;
-  onSearchInArea?: () => void;
+  showSearchInArea: boolean;
+  onSearchInArea: () => void;
   mapCenter: {
     latitude: number;
     longitude: number;
@@ -67,7 +67,7 @@ export default function MapOverlay({
   setIsPickingLocation,
   onManualLocation,
   onError,
-  showSearchInArea = false,
+  showSearchInArea,
   onSearchInArea,
   mapCenter,
 }: MapOverlayProps) {
@@ -343,7 +343,7 @@ export default function MapOverlay({
       )}
 
       {/* Search in this area button */}
-      {showSearchInArea && onSearchInArea && (
+      {showSearchInArea && (
         <div className="map-search-area-container">
           <button
             type="button"
