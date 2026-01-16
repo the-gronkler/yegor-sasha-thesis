@@ -38,8 +38,8 @@
 #include "chapters/non-functional-requirements.typ"
 
 // Technical chapters:
-#include "chapters/technologies.typ"  //Technologies used (for the app, not in development process)
-#include "chapters/system-architecture.typ"
+#include "chapters/technologies/technologies.typ"  //Technologies used (for the app, not in development process)
+#include "chapters/system-architecture/system-architecture.typ"
 #include "chapters/database-design.typ"
 #include "chapters/implementation/implementation-main.typ"
 #include "chapters/development-process/main.typ"

@@ -1,4 +1,4 @@
-= Technologies Used
+#import "../../config.typ": code_example, source_code_link
 
 == Real-Time Communication Technologies
 To meet the requirement for instant order updates (Kitchen Display System), the system employs a comprehensive real-time communication stack consisting of backend and frontend components.

@@ -1,7 +1,4 @@
-= System Architecture
-
-== Employee Customer Divide
-...
+#import "../../config.typ": code_example, source_code_link
 
 == Event-Driven Real-Time Topology
 The system employs an event-driven architecture to decouple action execution from interface updates, enabling real-time synchronization across distributed components.
