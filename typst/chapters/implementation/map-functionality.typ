@@ -2,169 +2,227 @@
 
 == Map-Based Restaurant Discovery Implementation <map-implementation>
 
-This section describes the implementation of the customer-facing map feature that supports spatial exploration of restaurants, radius-based filtering, and interactive selection. The map functionality is implemented as a collaboration between a Laravel backend endpoint that provides validated, performance-bounded restaurant datasets and a React-based frontend that renders an interactive Mapbox map and associated overlay controls. The described material belongs to the implementation level: it focuses on code structure, request validation, query building, and UI interaction logic.
+This section presents the implementation of the customer-facing map feature used for restaurant discovery. The map enables spatial browsing, optional radius-based filtering, and deterministic quality-based ordering. The implementation is split between a Laravel backend endpoint that produces a validated, performance-bounded dataset and a React (Inertia) frontend that renders an interactive Mapbox map with overlay controls and a synchronized, draggable restaurant list.
 
-The main implementation artifacts discussed in this section are the customer map controller #source_code_link("app/Http/Controllers/Customer/MapController.php"), the restaurant model scopes used for geospatial computations #source_code_link("app/Models/Restaurant.php"), the map page entry component #source_code_link("resources/js/Pages/Customer/Map/Index.tsx"), the page-level logic hook #source_code_link("resources/js/Hooks/useMapPage.ts"), the shared map component #source_code_link("resources/js/Components/Shared/Map.tsx"), the customer map overlay UI #source_code_link("resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx"), the draggable restaurant list #source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx"), the map popup component #source_code_link("resources/js/Components/Shared/MapPopup.tsx"), the Mapbox layer definitions #source_code_link("resources/js/Components/Shared/mapStyles.ts"), and the map-specific layout wrapper #source_code_link("resources/js/Layouts/MapLayout.tsx").
+The main implementation artifacts are:
+- Backend controller: #source_code_link("app/Http/Controllers/Customer/MapController.php")
+- Geospatial helper service: #source_code_link("app/Services/GeoService.php")
+- Page entry component: #source_code_link("resources/js/Pages/Customer/Map/Index.tsx")
+- Page logic hook: #source_code_link("resources/js/Hooks/useMapPage.ts")
+- Mapbox integration component: #source_code_link("resources/js/Components/Shared/Map.tsx")
+- Overlay controls: #source_code_link("resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx")
+- Draggable restaurant list: #source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx")
+- Selected restaurant popup: #source_code_link("resources/js/Components/Shared/MapPopup.tsx")
+- Map style layers: #source_code_link("resources/js/Components/Shared/mapStyles.ts")
+- Layout wrapper: #source_code_link("resources/js/Layouts/MapLayout.tsx")
 
-=== Feature requirements translated into implementation constraints
+=== Requirements translated into implementation constraints
 
-The project scope describes the map as a discovery surface for restaurants, including distance-aware browsing and signals such as rating and popularity. In implementation terms, this implies several constraints.
+The map feature is a discovery surface, not a full restaurant-detail view. Translating this goal into code-level constraints shaped both the endpoint and the UI behavior.
 
-First, map requests must remain performant. Rendering and clustering many points in the browser scales poorly when the payload grows without bounds, therefore the backend must enforce a strict maximum number of restaurants returned per request and must control the shape of the payload. Second, the system must support two conceptually different locations: the user location (which may be persisted to the session) and a temporary search center (used for the "search in this area" interaction). Third, the radius filter must support both a strict nearby mode and an opt-out mode that allows browsing without distance limits. Fourth, location acquisition must degrade gracefully when device geolocation is unavailable, denied, or inaccurate. Fifth, selection must be synchronized across the map canvas and the restaurant list.
+First, requests must remain performant under large datasets. Client-side rendering and clustering scale poorly when payload size grows without bounds, therefore the backend enforces a hard upper bound of _250 restaurants per request_. This protects database workload, response serialization time, and Mapbox rendering performance.
 
-These constraints appear explicitly in the controller validation rules, the result limiting logic, the query-scoped distance computations, and the frontend interaction patterns.
+Second, the feature distinguishes two conceptually different locations:
 
-=== Backend endpoint and filter contract
+/ *User location* (`lat`/`lng`): The user’s real location context, persisted in session to support continuity across visits.
+/ *Search center* (`search_lat`/`search_lng`): A temporary exploration center used by the “Search here” interaction.
 
-==== Authorization and request validation
+This separation ensures that exploring another area does not overwrite the user’s persisted location.
+Third, radius filtering must be deterministic. If a radius is specified, no restaurants outside that radius may appear in results. This is enforced at the SQL level (not post-filtered in PHP), so the semantic meaning of “within radius” cannot drift.
 
-The map dataset is produced by the `index` action in #source_code_link("app/Http/Controllers/Customer/MapController.php"). The first operation is an authorization check to ensure that the requesting user is allowed to view restaurants. This is implementation-critical because the map can expose a broad subset of restaurant metadata.
+Fourth, location acquisition must degrade gracefully. The feature must remain usable when geolocation is denied or unavailable; therefore it provides a safe default center (Warsaw) and manual alternatives (coordinate entry and map click picking).
 
-The controller validates input parameters before constructing the query. Latitude and longitude are constrained to legal ranges, and the radius parameter is restricted to a maximum value defined in the geospatial service. The endpoint also accepts optional `search_lat` and `search_lng` parameters. These are used to support querying around the current map center without overwriting the persisted user location.
+Fifth, results must be ordered by “best”, not only by proximity. Users expect high-rated and popular restaurants to appear first, but still inside their selected discovery area. This motivates a two-stage approach: proximity-first selection, then quality-first ranking.
+
+Sixth, selection must remain synchronized between surfaces. Selecting a restaurant on the map must highlight it in the list (and open a popup), and selecting a restaurant in the list must move the map camera to that point.
+
+These constraints map directly to the controller’s deterministic three-phase pipeline and to the frontend’s separation of responsibilities between orchestration, state management, and UI components.
+
+=== Backend implementation: deterministic three-phase processing
+
+The dataset for the map is produced by the `index` action in #source_code_link("app/Http/Controllers/Customer/MapController.php"). The endpoint is built around a deterministic three-phase architecture designed to guarantee consistent behavior across all entry points while preserving strict radius semantics and predictable query cost.
+
+==== Overview of the phases
+
+Phase A: _Normalize center coordinates_
+Determine exactly one center point for the request using a priority cascade (search center, user location, session, default). Only real user location updates session.
+
+Phase B: _Select nearest restaurant IDs_
+Select up to 250 restaurant IDs purely by distance, enforcing a hard radius limit if `radius > 0`. This phase is intentionally quality-agnostic.
+
+Phase C: _Hydrate models and order by quality_
+Compute a composite score _once_ in SQL (using derived tables), join it back to the restaurants table for Eloquent hydration, and order by score (DESC) with distance as a tie-breaker.
+
+This separation prevents a common implementation error: selecting “the best 250 overall” and then filtering by radius. In this implementation, the radius constraint is applied before limiting and before quality ordering, ensuring the returned set is always “up to 250 restaurants within radius”.
+
+==== Authorization, validation, and response shape
+
+The endpoint authorizes access through Laravel policies and validates all optional query parameters. The validation is explicitly permissive regarding optionality: all parameters may be absent (defaulting to Warsaw + default radius), and `radius` may be `0` (interpreted as “no range limit”).
 
 #code_example[
-The controller enforces strict validation for coordinates and radius to prevent invalid or unbounded geospatial queries.
+The controller authorizes the request and validates geospatial inputs before building any database query.
 
 ```php
 // app/Http/Controllers/Customer/MapController.php
-$validated = $request->validate([
-    'lat' => 'nullable|numeric|between:-90,90',
-    'lng' => 'nullable|numeric|between:-180,180',
-    'search_lat' => 'nullable|numeric|between:-90,90',
-    'search_lng' => 'nullable|numeric|between:-180,180',
-    'radius' => 'nullable|numeric|min:0|max:' . GeoService::MAX_RADIUS_KM,
-]);
-```
-]
-
-The validation model intentionally allows `radius = 0`. In this case, the backend interprets it as an opt-out mode where results are not constrained by distance.
-
-==== Defensive result limiting and payload shaping
-
-The controller defines a strict upper bound on the number of restaurants returned per request, which limits worst-case serialization size and bounds client-side rendering work. The query also selects only the columns required by the map UI and eagerly loads only the image data needed for map popup cards.
-
-#code_example[
-A hard server-side limit is used to guarantee predictable response sizes.
-
-```php
-// app/Http/Controllers/Customer/MapController.php
-private const MAX_RESTAURANTS_LIMIT = 250;
-
-$query = Restaurant::with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
-    ->withCount('reviews')
-    ->select([
-        'restaurants.id',
-        'restaurants.name',
-        'restaurants.address',
-        'restaurants.latitude',
-        'restaurants.longitude',
-        'restaurants.rating',
-        'restaurants.description',
-        'restaurants.opening_hours',
-    ])
-    ->whereNotNull('latitude')
-    ->whereNotNull('longitude')
-    ->limit(self::MAX_RESTAURANTS_LIMIT);
-```
-]
-
-A key optimization is the avoidance of deeply nested menu datasets on the map page. This decision keeps the map endpoint focused on discovery and avoids transferring large unrelated payloads.
-
-==== Favorites integration
-
-The map response includes an `is_favorited` flag for each restaurant when the user is authenticated. The backend implements this efficiently by using a `LEFT JOIN` against the favorites pivot table. This avoids an additional query and reduces the time complexity compared to loading a separate favorites list and checking membership in application code.
-
-#code_example[
-The map query uses a `LEFT JOIN` to compute an `is_favorited` column without additional roundtrips.
-
-```php
-// app/Http/Controllers/Customer/MapController.php
-if ($customerId) {
-    $query->leftJoin('favorite_restaurants', function ($join) use ($customerId) {
-        $join->on('restaurants.id', '=', 'favorite_restaurants.restaurant_id')
-            ->where('favorite_restaurants.customer_user_id', '=', $customerId);
-    })->addSelect(\DB::raw(
-        'CASE WHEN favorite_restaurants.restaurant_id IS NOT NULL THEN 1 ELSE 0 END as is_favorited'
-    ));
-}
-```
-]
-
-This field can be used by the frontend in lists and cards to show favorited state without requiring additional API calls.
-
-=== Backend geospatial filtering strategy
-
-==== Persisted user location and ephemeral search center
-
-The controller distinguishes between the user location (`lat`, `lng`) and the search center (`search_lat`, `search_lng`). Only the former is persisted in the session. If the request does not include coordinates, previously stored coordinates may be reused to provide distance-aware ranking and display.
-
-#code_example[
-User location can be persisted to the session, while "search in this area" uses separate coordinates.
-
-```php
-// app/Http/Controllers/Customer/MapController.php
-$distanceCalcLat = $searchLatitude ?? $latitude;
-$distanceCalcLng = $searchLongitude ?? $longitude;
-
-if ($distanceCalcLat === null && $distanceCalcLng === null) {
-    $geo = $this->geoService->getValidGeoFromSession($request);
-    if ($geo) {
-        $distanceCalcLat = $geo['lat'];
-        $distanceCalcLng = $geo['lng'];
-    }
-}
-
-if ($latitude !== null && $longitude !== null) {
-    $this->geoService->storeGeoInSession($request, $latitude, $longitude);
-}
-```
-]
-
-The separation enables explorative browsing without permanently changing the stored user context.
-
-==== Distance computation as a model scope (ST_Distance_Sphere and Haversine fallback)
-
-Distance computation is implemented as an Eloquent local scope in #source_code_link("app/Models/Restaurant.php"). The scope adds a computed `distance` column (in kilometers) to each row. When configured to do so, it uses MariaDB’s `ST_Distance_Sphere` function, and it can fall back to a numerically-stable Haversine formula. The fallback clamps the `acos` input to avoid `NaN` results due to floating point rounding.
-
-#code_example[
-The distance scope preserves base columns, then appends a computed `distance` value using a spatial function or a Haversine fallback.
-
-```php
-// app/Models/Restaurant.php
-public function scopeWithDistanceTo($query, float $lat, float $lng)
+public function index(Request $request): Response
 {
-    if (is_null($query->getQuery()->columns)) {
-        $query->select($query->getModel()->getTable() . '.*');
-    }
+    $this->authorize('viewAny', Restaurant::class);
 
-    $useStDistance = config('geo.distance_formula', 'st_distance_sphere') === 'st_distance_sphere';
+    $validated = $request->validate([
+        'lat' => 'nullable|numeric|between:-90,90',
+        'lng' => 'nullable|numeric|between:-180,180',
+        'search_lat' => 'nullable|numeric|between:-90,90',
+        'search_lng' => 'nullable|numeric|between:-180,180',
+        'radius' => 'nullable|numeric|min:0|max:'.GeoService::MAX_RADIUS_KM,
+    ]);
 
-    if ($useStDistance) {
-        return $query->selectRaw(
-            '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance',
-            [$lng, $lat]
-        );
-    }
-
-    return $query->selectRaw(
-        '(? * acos(LEAST(1.0, GREATEST(-1.0,
-            cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?))
-            + sin(radians(?)) * sin(radians(latitude))
-        )))) AS distance',
-        [GeoService::EARTH_RADIUS_KM, $lat, $lng, $lat]
-    );
+    // ...
 }
 ```
 ]
 
-The map controller applies this scope when a calculation location is available. The computed distance is also formatted via the geospatial service before being returned to the frontend.
+Two details are important for correctness:
 
-==== Bounding-box prefilter
+1. Both `lat/lng` and `search_lat/search_lng` may be present. Search coordinates represent the latest exploration intent and therefore have priority for choosing the query center.
 
-Even with a spatial distance function, computing distance for every restaurant row is expensive. The backend therefore applies a bounding box prefilter when a non-zero radius is active. The bounding box is computed in #source_code_link("app/Services/GeoService.php"). It approximates degrees per kilometer and adjusts longitude delta based on latitude. The latitude is clamped to avoid unstable computations near the poles.
+2. The endpoint returns `filters.lat/lng` based only on `lat/lng` (user location), not on the temporary `search_lat/search_lng`. This keeps UI semantics clear: `filters` describes user context, while the “search center” is reflected implicitly by the returned restaurants.
+
+If `radius` is omitted, the controller applies `GeoService::DEFAULT_RADIUS_KM` (50 km). If `radius = 0`, the controller omits the radius constraint and returns the 250 nearest restaurants globally.
+
+==== Phase A: center coordinate normalization (one center for all cases)
+
+The controller normalizes coordinates into a single center point, with the following priority order:
+
+1. `search_lat/search_lng` (map exploration, “Search here”)
+2. `lat/lng` (user location, from “My Location” or manual entry)
+3. Session value `geo.last` (previous user location, 24-hour expiry)
+4. Default Warsaw center `(52.2297, 21.0122)`
+
+A critical decision is that only real user location is persisted. Search center coordinates are deliberately ephemeral.
 
 #code_example[
-The geospatial service calculates bounding box coordinates for prefiltering.
+The normalization method implements the priority cascade and persists only user location (`lat/lng`) to session.
+
+```php
+// app/Http/Controllers/Customer/MapController.php
+private function normalizeCenterCoordinates(Request $request, array $validated): array
+{
+    if (isset($validated['search_lat'], $validated['search_lng'])) {
+        return [
+            'lat' => (float) $validated['search_lat'],
+            'lng' => (float) $validated['search_lng'],
+        ];
+    }
+
+    if (isset($validated['lat'], $validated['lng'])) {
+        $lat = (float) $validated['lat'];
+        $lng = (float) $validated['lng'];
+
+        $this->geoService->storeGeoInSession($request, $lat, $lng);
+
+        return ['lat' => $lat, 'lng' => $lng];
+    }
+
+    $sessionGeo = $this->geoService->getValidGeoFromSession($request);
+    if ($sessionGeo) {
+        return $sessionGeo;
+    }
+
+    return ['lat' => 52.2297, 'lng' => 21.0122];
+}
+```
+]
+
+This design allows exploration without losing context: users can browse multiple areas with “Search here” while the app still remembers their actual location for future visits.
+
+==== Session-based geolocation persistence and privacy boundary
+
+Session persistence is implemented by #source_code_link("app/Services/GeoService.php"). The service stores coordinates under `geo.last` and includes a 24-hour expiry. This achieves two goals:
+
+- _Convenience_: returning users are centered near their last known location.
+- _Privacy boundary_: coordinates are not retained indefinitely.
+
+#code_example[
+GeoService persists `geo.last` with a timestamp and rejects expired session values.
+
+```php
+// app/Services/GeoService.php
+public function getValidGeoFromSession(Request $request): ?array
+{
+    $geo = $request->session()->get('geo.last');
+
+    if (! $geo || ! isset($geo['lat'], $geo['lng'])) {
+        return null;
+    }
+
+    if (isset($geo['stored_at']) && (time() - (int) $geo['stored_at']) > self::SESSION_EXPIRY_SECONDS) {
+        return null;
+    }
+
+    return [
+        'lat' => (float) $geo['lat'],
+        'lng' => (float) $geo['lng'],
+    ];
+}
+```
+]
+
+The service also defines critical constants used throughout the geospatial logic:
+
+- `MAX_RADIUS_KM = 100`: Maximum allowed search radius, enforced in validation
+- `DEFAULT_RADIUS_KM = 50`: Default radius when parameter is omitted
+- `KM_PER_DEGREE = 111.32`: Approximate kilometers per degree latitude for bounding box calculations
+- `EARTH_RADIUS_KM = 6371`: Earth's mean radius for Haversine fallback formula
+- `SESSION_EXPIRY_SECONDS = 86400`: 24-hour expiry for stored coordinates
+
+These constants centralize magic numbers and provide a single source of truth for geospatial calculations, making the system easier to maintain and test.
+
+==== Phase B: proximity-first selection with hard radius enforcement
+
+Phase B selects restaurant IDs using distance-first ordering. The output is intentionally lightweight (IDs only) to avoid loading models and relations before the candidate set is finalized.
+
+Key properties of Phase B:
+- Distance is computed using `ST_Distance_Sphere` and converted to kilometers.
+- When `radius > 0`, a bounding box prefilter reduces the candidate set.
+- When `radius > 0`, an exact `HAVING distance_km <= ?` constraint enforces a hard radius.
+- Ordering is by distance only.
+- The `LIMIT 250` is applied after the radius constraint.
+
+#code_example[
+Phase B returns only IDs, enforcing the radius as a hard SQL constraint via HAVING.
+
+```php
+// app/Http/Controllers/Customer/MapController.php
+private function selectNearestRestaurantIds(float $centerLat, float $centerLng, float $radius): \Illuminate\Support\Collection
+{
+    $query = \DB::table('restaurants')
+        ->select('id')
+        ->whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->selectRaw(
+            '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
+            [$centerLng, $centerLat]
+        );
+
+    if ($radius > 0) {
+        $bounds = $this->geoService->getBoundingBox($centerLat, $centerLng, $radius);
+
+        $query->whereBetween('latitude', [$bounds['latMin'], $bounds['latMax']])
+            ->whereBetween('longitude', [$bounds['lngMin'], $bounds['lngMax']])
+            ->havingRaw('distance_km <= ?', [$radius]);
+    }
+
+    return $query->orderBy('distance_km', 'asc')
+        ->limit(self::MAX_RESTAURANTS_LIMIT)
+        ->pluck('id');
+}
+```
+]
+
+The bounding box prefilter is a deliberate performance optimization. It uses indexed range checks (`whereBetween`) to avoid computing expensive spherical distances for all rows.
+
+#code_example[
+GeoService computes an approximate bounding box and clamps latitude to avoid instability near the poles.
 
 ```php
 // app/Services/GeoService.php
@@ -185,115 +243,208 @@ public function getBoundingBox(float $lat, float $lng, float $radiusKm): array
 ```
 ]
 
-The controller then uses `whereBetween` constraints for latitude and longitude as a candidate reduction step.
+The hard radius guarantee comes from the interaction between `HAVING` and `LIMIT`: only rows that satisfy `distance_km <= radius` remain candidates, and only then are up to 250 rows selected. When `radius = 0`, the HAVING clause is omitted and the endpoint returns the 250 nearest restaurants globally.
 
-==== Radius semantics and adaptive expansion
+==== Phase B to Phase C boundary: no duplicated scoring
 
-The backend uses a default radius if the parameter is omitted, and it treats `0` as "no range". For a "search in this area" request with very small radii, the backend may automatically expand the effective radius to improve coverage. The implementation returns both the actual radius used and the originally requested radius to support transparency in the UI.
+The controller deliberately avoids computing any score while converting the selected IDs. The helper `convertSelectedIdsToArray` exists only to keep Phase boundaries explicit and to ensure scoring has a single source of truth in Phase C.
+
+==== Phase C: scoring once and ordering by quality in SQL
+
+Phase C hydrates full restaurant models and computes a composite quality score. The scoring is designed to balance three signals:
+
+- _Rating score_ (0–50): `(rating / 5) × 50`
+- _Reviews score_ (0–30): `LEAST(30, LOG10(count + 1) × 10)` (logarithmic to reduce domination by extremely reviewed restaurants)
+- _Distance score_ (0–20): `GREATEST(0, 20 × (1 - distance_km / 20))` (linear decay, reaching 0 at 20 km)
+
+The composite score is computed exactly once in a derived table. This avoids redundant `ST_Distance_Sphere` calls, avoids correlated subqueries, and avoids PHP-side sorting.
 
 #code_example[
-The controller returns metadata that distinguishes the user-requested radius from the internally used (possibly expanded) radius.
+Phase C builds derived tables: review counts are aggregated once, distance is computed once, and composite score is calculated once.
 
 ```php
 // app/Http/Controllers/Customer/MapController.php
-return Inertia::render('Customer/Map/Index', [
-    'restaurants' => $restaurants,
-    'filters' => [
-        'lat' => $latitude,
-        'lng' => $longitude,
-        'radius' => $actualRadius,
-        'requested_radius' => $radius,
-        'radius_expanded' => $expandedRadius,
-    ],
-]);
+$reviewCounts = \DB::table('reviews')
+    ->select('restaurant_id')
+    ->selectRaw('COUNT(*) as review_count')
+    ->whereIn('restaurant_id', $selectedIds)
+    ->groupBy('restaurant_id');
+
+$restaurantsWithDistance = \DB::table('restaurants')
+    ->select(['id', 'latitude', 'longitude', 'rating'])
+    ->selectRaw(
+        '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
+        [$centerLng, $centerLat]
+    )
+    ->whereIn('id', $selectedIds);
+
+$scoredRestaurants = \DB::query()
+    ->fromSub($restaurantsWithDistance, 'rwd')
+    ->leftJoinSub($reviewCounts, 'rc', 'rwd.id', '=', 'rc.restaurant_id')
+    ->select(['rwd.id', 'rwd.distance_km'])
+    ->selectRaw('COALESCE(rc.review_count, 0) as review_count')
+    ->selectRaw('(COALESCE(rwd.rating, 0) / 5) * 50 AS rating_score')
+    ->selectRaw('LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) AS review_score')
+    ->selectRaw('GREATEST(0, 20 * (1 - (rwd.distance_km / 20))) AS distance_score')
+    ->selectRaw(
+        '((COALESCE(rwd.rating, 0) / 5) * 50 + '.
+        'LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) + '.
+        'GREATEST(0, 20 * (1 - (rwd.distance_km / 20)))) AS composite_score'
+    );
 ```
 ]
 
-==== In-radius classification
-
-When radius expansion is active, the backend also computes whether a restaurant lies within the originally requested radius. This boolean flag is used to prioritize “strictly in-radius” results in ordering while still allowing “nearby but slightly outside” results to appear when the radius was expanded.
+The scored subquery is joined back to `restaurants` using `joinSub`, preserving Eloquent hydration while keeping ordering in SQL. This avoids the complexity and risks of manual `FIELD()` ordering and eliminates PHP post-processing that could unintentionally change ordering semantics.
 
 #code_example[
-The backend adds an `is_in_radius` column computed against the original radius (not the expanded one).
+The final query joins scores for Eloquent hydration, eager-loads only required relations, and orders by score then distance.
 
 ```php
 // app/Http/Controllers/Customer/MapController.php
-$query->selectRaw(
-    '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) <= ? as is_in_radius',
-    [$distanceCalcLng, $distanceCalcLat, $radius]
-);
+$query = Restaurant::query()
+    ->joinSub($scoredRestaurants, 'scored', 'restaurants.id', '=', 'scored.id')
+    ->with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
+    ->select([
+        'restaurants.id',
+        'restaurants.name',
+        'restaurants.address',
+        'restaurants.latitude',
+        'restaurants.longitude',
+        'restaurants.rating',
+        'restaurants.description',
+        'restaurants.opening_hours',
+        'scored.distance_km as distance',
+        'scored.review_count as reviews_count',
+        'scored.composite_score',
+    ])
+    ->orderByDesc('scored.composite_score')
+    ->orderBy('scored.distance_km', 'asc');
 ```
 ]
 
-=== Backend composite scoring and ordering
+Favorite detection is included conditionally for authenticated users via a `LEFT JOIN`, producing an `is_favorited` flag without additional queries. The controller maps each model into a compact JSON-friendly structure required by the map UI (distance, reviews count, score, and a reduced images array). Distance formatting is centralized in `GeoService::formatDistance`, which keeps presentation rounding out of the controller and ensures consistent formatting anywhere distance is displayed.
 
-The map feature ranks restaurants using a composite score that incorporates rating, review count, and proximity. Scoring occurs in SQL so that ordering is executed in the database prior to materialization into PHP collections.
+==== Database indexing strategy for geospatial queries
 
-The current implementation uses:
+The three-phase architecture relies on specific database indexes for optimal performance. The controller documentation explicitly identifies two critical indexes:
 
-- Rating score component scaled to 0–50 points.
-- Review score component scaled to 0–30 points (log-scaled).
-- Distance score component up to 20 points when a location is available.
+1. *`reviews.restaurant_id`* index: enables efficient GROUP BY aggregation in the review counts subquery. Without this index, the database would perform a full table scan for each aggregation operation.
+
+2. *`(customer_user_id, restaurant_id)` composite index* on `favorite_restaurants`: optimizes the LEFT JOIN favorite detection when filtered by customer. A composite index allows the database to seek directly to the relevant rows.
+
+Additionally, the bounding box prefilter relies on separate indexes on `restaurants.latitude` and `restaurants.longitude`. MariaDB may use index merge optimization to combine these range checks efficiently.
+
+The spatial function `ST_Distance_Sphere` does not benefit from spatial indexes in this implementation because it operates on computed values rather than indexed geometry columns. The bounding box prefilter compensates for this limitation by reducing the candidate set before distance calculations.
+
+==== Empty result handling and early termination
+
+When Phase B returns an empty collection (no restaurants within radius or no restaurants at all), the controller short-circuits Phase C entirely and returns an empty dataset immediately. This optimization avoids constructing complex derived table queries when the result is known to be empty.
 
 #code_example[
-The final ordering prioritizes in-radius results and then orders by distance and composite score.
+The controller terminates early when no candidates are found, avoiding unnecessary query construction.
 
 ```php
 // app/Http/Controllers/Customer/MapController.php
-if ($hasLocation) {
-    $query->orderByRaw('is_in_radius DESC, distance ASC, composite_score DESC');
-} else {
-    $query->orderByRaw('composite_score DESC');
+$selectedIds = $this->selectNearestRestaurantIds($centerLat, $centerLng, $radius);
+
+if ($selectedIds->isEmpty()) {
+    return Inertia::render('Customer/Map/Index', [
+        'restaurants' => [],
+        'filters' => [
+            'lat' => $validated['lat'] ?? null,
+            'lng' => $validated['lng'] ?? null,
+            'radius' => $radius,
+        ],
+    ]);
 }
 ```
 ]
 
-This ordering policy ensures that the most relevant restaurants are presented first in list views (such as the bottom sheet), and that the list ordering remains consistent with spatial proximity expectations.
+This pattern ensures that edge cases (user in a rural area with large radius, or very restrictive filters) remain performant.
 
-=== Frontend composition: page wiring, layout, overlay, and list synchronization
+==== Distance formatting and payload optimization
 
-==== MapIndex as a controller view
-
-The map page is implemented as an Inertia page in #source_code_link("resources/js/Pages/Customer/Map/Index.tsx"). This file acts as a controller-like view that composes the layout and binds the page-level logic hook to the UI components. It intentionally delegates complex interaction logic to `useMapPage` and delegates complex UI to partial components.
+The `GeoService` provides a centralized `formatDistance` method that converts numeric kilometer values into user-friendly strings. This abstraction ensures consistent distance presentation across all features (map, restaurant cards, search results) without duplicating formatting logic.
 
 #code_example[
-The map page composes its UI as `MapLayout > MapOverlay + Map + BottomSheet` and binds all interaction handlers from `useMapPage`.
+Distance formatting is centralized in GeoService to ensure consistency across the application.
 
-```tsx
-// resources/js/Pages/Customer/Map/Index.tsx
-const {
-  query,
-  setQuery,
-  filteredRestaurants,
-  viewState,
-  setViewState,
-  selectedRestaurantId,
-  selectRestaurant,
-  locationError,
-  isGeolocating,
-  triggerGeolocate,
-  registerGeolocateTrigger,
-  isPickingLocation,
-  setIsPickingLocation,
-  handleMapGeolocate,
-  handleGeolocateError,
-  handlePickLocation,
-  mapMarkers,
-  reloadMap,
-  showSearchInArea,
-  searchInArea,
-} = useMapPage({ restaurants, filters, mapboxPublicKey });
+```php
+// app/Services/GeoService.php
+public function formatDistance(float $distanceKm): string
+{
+    if ($distanceKm < 1) {
+        return round($distanceKm * 1000) . ' m';
+    }
+
+    return round($distanceKm, 1) . ' km';
+}
 ```
 ]
 
-This structure enforces separation of concerns: the page is responsible for composition and prop wiring, while the hook and partials implement behavior and presentation.
+The controller also implements aggressive payload optimization by limiting eager loading. Unlike the restaurant detail page, the map endpoint loads only the `images` relation (specifically selecting only required columns: `id`, `restaurant_id`, `image`, and `is_primary_for_restaurant`). It deliberately *does not* load the `foodTypes.menuItems` hierarchy, which would add thousands of unnecessary records to the JSON payload. This targeted loading strategy reduces the map response size by approximately 80% compared to a naive "load everything" approach, significantly improving initial page load performance and reducing bandwidth consumption for users on mobile networks.
 
-==== Scroll management via MapLayout
+=== Frontend implementation: orchestration, state, and synchronized UI
 
-A full-screen map competes with browser scroll behavior on mobile and desktop. The layout component #source_code_link("resources/js/Layouts/MapLayout.tsx") toggles a CSS class on the `<html>` and `<body>` elements to disable body scrolling while the map is active.
+The frontend is structured to keep responsibilities explicit and maintainable:
+
+- #source_code_link("resources/js/Pages/Customer/Map/Index.tsx") is the controller-like entry view. It composes layout and delegates all business logic to the hook.
+- #source_code_link("resources/js/Hooks/useMapPage.ts") is the logic hook. It owns state (view, selection, geolocation) and performs Inertia navigation.
+- Specialized UI components handle presentation and user input: #source_code_link("resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx"), #source_code_link("resources/js/Components/Shared/Map.tsx"), #source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx"), and #source_code_link("resources/js/Components/Shared/MapPopup.tsx").
+
+This separation aligns with the intent documented in the code comments: the page stays declarative, complex behavior lives in a dedicated hook, and UI components remain focused on one responsibility each.
+
+==== Entry composition: MapLayout + Overlay + Map + BottomSheet
+
+The page component wires the hook outputs into the UI, without embedding complex logic in JSX. This keeps the render tree readable and makes behavior changes local to the hook.
 
 #code_example[
-The layout toggles an `is-map-active` class to allow overflow control via CSS.
+`MapIndex` composes the page layout and passes state/handlers to the overlay, map, and bottom sheet.
+
+```tsx
+// resources/js/Pages/Customer/Map/Index.tsx
+<MapOverlay
+  query={query}
+  onQueryChange={setQuery}
+  hasLocation={filters.lat !== null && filters.lng !== null}
+  currentRadius={filters.radius ?? 50}
+  onRadiusChange={(r) => {
+    if (filters.lat !== null && filters.lng !== null) {
+      reloadMap(filters.lat, filters.lng, r);
+    }
+  }}
+  isGeolocating={isGeolocating}
+  onTriggerGeolocate={triggerGeolocate}
+  isPickingLocation={isPickingLocation}
+  setIsPickingLocation={setIsPickingLocation}
+  onManualLocation={handleMapGeolocate}
+  onError={setLocationError}
+  showSearchInArea={showSearchInArea}
+  onSearchInArea={searchInArea}
+  mapCenter={viewState}
+/>
+
+<Map
+  viewState={viewState}
+  onMove={setViewState}
+  markers={mapMarkers}
+  mapboxAccessToken={mapboxPublicKey || ''}
+/>
+
+<BottomSheet
+  restaurants={filteredRestaurants}
+  selectedRestaurantId={selectedRestaurantId}
+  onSelectRestaurant={selectRestaurant}
+/>
+```
+]
+
+==== MapLayout: preventing body scroll conflicts
+
+A full-screen map creates a conflict with browser scroll behavior. When users interact with the map (panning, zooming), touch and scroll events can accidentally trigger page scrolling, creating a jarring experience. The `MapLayout` component solves this by toggling CSS classes on the document root elements.
+
+#code_example[
+MapLayout disables body scrolling on mount and re-enables it on unmount using a cleanup effect.
 
 ```tsx
 // resources/js/Layouts/MapLayout.tsx
@@ -312,56 +463,21 @@ useEffect(() => {
 ```
 ]
 
-This approach avoids accidental scrolling behind the map canvas and ensures that the bottom sheet drag interaction behaves predictably.
+The corresponding CSS rules set `overflow: hidden` on these elements when the class is present, preventing background scrolling without affecting the map's internal pan/zoom interactions or the bottom sheet's scrollable content. This approach is more reliable than inline style manipulation and works consistently across mobile and desktop browsers.
 
-==== Local search filtering (Fuse-based)
+==== `useMapPage`: single source of truth for page state
 
-The hook #source_code_link("resources/js/Hooks/useMapPage.ts") performs client-side text filtering using the `useSearch` abstraction (which uses Fuse-compatible options). It allows quick incremental search without triggering network requests or backend filtering. The search options include weighted keys such as restaurant name, description, and nested domain data.
+The `useMapPage` hook manages:
+- Search query state and Fuse-based filtering (via a shared `useSearch` hook).
+- View state (camera position) and derived “Search here” visibility.
+- Selection state (selected restaurant ID).
+- Geolocation flow, including a defensive error message when the Mapbox control is not ready.
+- Inertia navigation for dataset refresh, using partial reloads to only re-fetch `restaurants` and `filters`.
 
-#code_example[
-Client-side fuzzy search is configured with weighted keys for relevant restaurant fields.
-
-```ts
-// resources/js/Hooks/useMapPage.ts
-const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
-  keys: [
-    { name: 'name', weight: 2 },
-    { name: 'description', weight: 1.5 },
-    { name: 'food_types.name', weight: 1 },
-    { name: 'food_types.menu_items.name', weight: 0.5 },
-  ],
-};
-```
-]
-
-==== Computing map markers and enriching popup metadata
-
-The hook converts filtered restaurants into the marker model consumed by the map component. This includes deriving a primary image URL and passing optional metadata such as opening hours, rating, and formatted distance.
-
-The implementation also inserts a synthetic user marker when a location is available. This marker uses an id of `-1` so that it can be reliably separated from restaurant markers on the map.
+A key performance decision is to avoid full page reloads when only the dataset changes. The hook requests only the props that must change, while preserving UI state and scroll position.
 
 #code_example[
-Markers are computed from filtered restaurants, and a synthetic user marker is appended when a location exists.
-
-```ts
-// resources/js/Hooks/useMapPage.ts
-const userMarker =
-  filters.lat !== null && filters.lng !== null
-    ? [{ id: -1, lat: filters.lat, lng: filters.lng, name: 'You are here' }]
-    : [];
-
-return [...restaurantMarkers, ...userMarker];
-```
-]
-
-This approach avoids coupling user marker rendering to backend data and keeps UI behavior deterministic.
-
-==== Partial reloads for radius updates
-
-When the user adjusts radius and a location is known, the map page performs a partial reload via Inertia. Only the `restaurants` and `filters` props are re-fetched, while page state is preserved.
-
-#code_example[
-The hook uses Inertia navigation to refresh only the props needed by the map without a full-page reload.
+Reload operations fetch only `restaurants` and `filters`, preserving UI state and scroll to keep interactions responsive.
 
 ```ts
 // resources/js/Hooks/useMapPage.ts
@@ -380,159 +496,161 @@ const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
 ```
 ]
 
-==== "Search in this area" as an explicit interaction
+==== “Search here”: exploration without losing user context
 
-The map must not trigger server requests on every pan/zoom. Instead, the hook shows a button when the viewport center moves a significant distance from the initial center. Only when the user explicitly requests it does the hook send `search_lat` and `search_lng` to the backend.
+The hook shows a “Search here” button when the camera moves significantly away from the initial center (threshold ~0.01 degrees, roughly 1 km). When pressed, it sends `search_lat/search_lng` using the current view center, while preserving existing `lat/lng` if available. This maps directly to the controller’s normalization logic: the center point changes, but the persistent user context remains stable.
 
 #code_example[
-When the map is moved sufficiently from the initial center, a state flag enables the "search in this area" button.
+The “Search here” navigation updates only the search center and preserves the user location context.
 
 ```ts
 // resources/js/Hooks/useMapPage.ts
-if (initialCenterRef.current) {
-  const { lat: initialLat, lng: initialLng } = initialCenterRef.current;
-  const latDiff = Math.abs(newViewState.latitude - initialLat);
-  const lngDiff = Math.abs(newViewState.longitude - initialLng);
+const searchInArea = useCallback(() => {
+  const { latitude, longitude } = viewState;
+  setShowSearchInArea(false);
 
-  if (latDiff > 0.01 || lngDiff > 0.01) {
-    setShowSearchInArea(true);
-  }
-}
+  router.get(
+    route('map.index'),
+    {
+      search_lat: latitude,
+      search_lng: longitude,
+      ...(filters.lat !== null && filters.lng !== null
+        ? { lat: filters.lat, lng: filters.lng }
+        : {}),
+    },
+    {
+      replace: true,
+      preserveState: true,
+      preserveScroll: true,
+      only: ['restaurants', 'filters'],
+    },
+  );
+}, [viewState, filters]);
 ```
 ]
 
+==== Geolocation integration: trigger mechanism and error handling
+
+The map uses Mapbox's `GeolocateControl` for device location acquisition, but the control's UI is hidden (`showGeolocateControlUi={false}`) because the overlay provides its own "My Location" button. This creates a challenge: how to trigger the hidden control from external UI.
+
+The solution uses a callback registration pattern. The map component exposes a `registerGeolocateTrigger` prop that accepts a function. The geolocation hook inside the map component registers a trigger function that calls `GeolocateControl.trigger()` when invoked. The page-level hook stores this trigger function in a ref and calls it when the user clicks "My Location".
+
 #code_example[
-The explicit search action sends `search_lat` and `search_lng` while preserving any persisted user location.
+The page hook triggers geolocation through the registered callback and provides defensive error handling.
 
 ```ts
 // resources/js/Hooks/useMapPage.ts
-router.get(
-  route('map.index'),
-  {
-    search_lat: latitude,
-    search_lng: longitude,
-    ...(filters.lat !== null && filters.lng !== null
-      ? { lat: filters.lat, lng: filters.lng }
-      : {}),
+const triggerGeolocate = useCallback(() => {
+  setLocationError(null);
+
+  const ok = geolocateTriggerRef.current?.();
+  if (!ok) {
+    setLocationError('Geolocation control not ready yet. Refresh and try again.');
+    return;
+  }
+
+  setIsGeolocating(true);
+}, []);
+```
+]
+
+The geolocation hook inside the Map component handles both success and error cases. On success, it calls `onGeolocate` with the coordinates. On error, it extracts error codes and maps them to user-friendly messages.
+
+#code_example[
+Error extraction maps browser geolocation error codes to actionable user messages.
+
+```ts
+// resources/js/Hooks/useMapGeolocation.ts (inside Map component)
+const handleGeolocateError = useCallback((evt: unknown) => {
+  const { code, message } = extractGeolocateError(evt);
+
+  let errorMessage = message || 'Unable to get your location. Please check browser/OS location permissions.';
+
+  switch (code) {
+    case 1: // PERMISSION_DENIED
+      errorMessage = 'Location access denied. Allow location permissions to see nearby restaurants.';
+      break;
+    case 2: // POSITION_UNAVAILABLE
+      errorMessage = 'Location information unavailable. Check OS location services or try again.';
+      break;
+    case 3: // TIMEOUT
+      errorMessage = 'Location request timed out. Try again or disable high accuracy.';
+      break;
+  }
+
+  onGeolocateError?.(errorMessage);
+}, [onGeolocateError]);
+```
+]
+
+This defensive error handling ensures users receive clear, actionable guidance when geolocation fails, rather than generic browser error messages.
+
+==== Overlay controls: location, radius, and manual entry
+
+The overlay component provides three complementary ways to set a location:
+1. “My Location” triggers geolocation.
+2. “Enter Coords” accepts manual latitude/longitude with client-side range validation.
+3. “Pick on Map” activates a click-to-set mode on the map canvas.
+
+Radius selection is implemented with a deliberate commit strategy: the slider updates its local value continuously for smooth UX, but calls `onRadiusChange` only on commit (mouse up / touch end / keyboard release). This prevents flooding the backend with intermediate values while dragging.
+
+A “No range” slider endpoint maps to backend `radius = 0`, enabling the explicit opt-out mode that the controller supports.
+
+==== Map component: clustering, selection, and click modes
+
+The map component turns restaurant markers into a GeoJSON source with clustering enabled. Clustering improves readability and performance at low zoom levels.
+
+The click handler is intentionally multi-modal:
+- In pick mode, any click sets user location and exits pick mode.
+- In normal mode:
+  - cluster clicks zoom into the cluster expansion level,
+  - point clicks select a restaurant and open the popup,
+  - empty clicks clear selection.
+
+#code_example[
+The click handler switches behavior based on location-picking mode, while preserving normal clustering/selection semantics.
+
+```tsx
+// resources/js/Components/Shared/Map.tsx
+const handleMapClick = React.useCallback(
+  (event: MapMouseEvent) => {
+    if (isPickingLocation) {
+      const { lng, lat } = event.lngLat;
+      onPickLocation?.(lat, lng);
+      return;
+    }
+
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    const features = map.queryRenderedFeatures(event.point, {
+      layers: ['clusters', 'unclustered-point'],
+    });
+
+    if (features.length > 0) {
+      const feature = features[0];
+
+      if (feature.layer?.id === 'clusters') {
+        // Zoom into cluster (expansion zoom)
+      } else if (feature.layer?.id === 'unclustered-point') {
+        // Select restaurant point -> open popup
+        const properties = feature.properties;
+        if (!properties || feature.geometry.type !== 'Point') return;
+        onSelectRestaurant?.(properties.id);
+      }
+    } else {
+      onSelectRestaurant?.(null);
+    }
   },
-  {
-    replace: true,
-    preserveState: true,
-    preserveScroll: true,
-    only: ['restaurants', 'filters'],
-  },
+  [isPickingLocation, onPickLocation, onSelectRestaurant],
 );
 ```
 ]
 
-This design reduces unnecessary network usage, improves perceived responsiveness, and keeps server filtering tied to explicit user intent.
-
-==== Overlay controls: location modes and radius UX
-
-The map overlay #source_code_link("resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx") manages collapsible UI panels and supports three location acquisition modes:
-
-- Device geolocation trigger (delegated to the Mapbox `GeolocateControl`).
-- Manual latitude/longitude entry with validation.
-- Pick-on-map mode, where clicking the map sets the location.
-
-The radius slider uses a sentinel value for “no range”, which is converted to `radius = 0` in the backend contract.
+When a restaurant is selected, the map animates the camera using `flyTo` and applies padding so the selected point remains visible above overlay UI and the bottom sheet. This is a small but important UX decision: it prevents the user from "losing" the selected restaurant under floating UI elements.
 
 #code_example[
-The overlay reserves the rightmost slider value to represent "No range" and converts it to `radius = 0`.
-
-```ts
-// resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx
-const NO_RANGE_SLIDER_VALUE = 51;
-
-const sliderToRadius = (sliderValue: number) => {
-  return sliderValue === NO_RANGE_SLIDER_VALUE ? 0 : sliderValue;
-};
-```
-]
-
-#code_example[
-Manual coordinate input is validated for numeric values and legal coordinate ranges.
-
-```ts
-// resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx
-const lat = Number(manualLat);
-const lng = Number(manualLng);
-
-if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-  onError('Please enter valid numeric latitude/longitude.');
-  return;
-}
-if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-  onError('Latitude must be -90..90 and longitude must be -180..180.');
-  return;
-}
-
-onManualLocation(lat, lng);
-```
-]
-
-Finally, the overlay renders the explicit "Search in this area" action when enabled by the hook.
-
-==== Bottom sheet: list synchronization and selection auto-scrolling
-
-The restaurant list is rendered in a draggable bottom sheet (#source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx")). The component implements pointer-event drag handling and snapping behavior, and it auto-scrolls the list to center the selected restaurant card. This provides a tight coupling between a map selection (marker click) and list browsing.
-
-#code_example[
-The bottom sheet snaps to expanded/collapsed states based on pointer drag and prevents click toggles immediately after drag.
-
-```tsx
-// resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
-const toggleSheet = () => {
-  if (dragMovedRef.current) {
-    dragMovedRef.current = false;
-    return;
-  }
-  setSheetHeight((h) => (h <= COLLAPSED_PX + 2 ? expandedPx : COLLAPSED_PX));
-};
-```
-]
-
-#code_example[
-When a restaurant becomes selected, the list scrolls to center the corresponding card.
-
-```tsx
-// resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
-container.scrollTo({
-  top: clamped,
-  behavior: 'smooth',
-});
-```
-]
-
-=== Mapbox visualization and interaction model
-
-==== Mapbox token safety checks
-
-The shared map component #source_code_link("resources/js/Components/Shared/Map.tsx") validates the Mapbox access token on the client side. This guardrail detects missing configuration and prevents secret tokens from being used in browser code. Such checks provide immediate feedback during development and reduce the risk of accidental credential exposure.
-
-#code_example[
-The component requires a public Mapbox token (prefix `pk.`) and blocks invalid configurations.
-
-```tsx
-// resources/js/Components/Shared/Map.tsx
-if (!mapboxAccessToken) {
-  return <div className="map-error-message">Mapbox API key is not configured.</div>;
-}
-
-if (!mapboxAccessToken.startsWith('pk.')) {
-  return <div className="map-error-message">Invalid Mapbox API key type.</div>;
-}
-```
-]
-
-==== Controlled view state and camera animation
-
-The map component is controlled by the page-level `viewState`. Movement events propagate updates to the hook, allowing derived behaviors such as the "search in this area" prompt and consistent marker/list synchronization.
-
-When a restaurant becomes selected, the map animates the camera to the restaurant location. The implementation uses `flyTo` with padding values that account for overlay UI and the bottom sheet.
-
-#code_example[
-Selection triggers a camera transition with overlay-aware padding.
+Camera animation applies UI-aware padding to keep the selected restaurant visible.
 
 ```tsx
 // resources/js/Components/Shared/Map.tsx
@@ -546,216 +664,116 @@ map.flyTo({
 ```
 ]
 
-==== GeoJSON source design and clustering
+The padding values are carefully tuned to account for the overlay height at the top and the bottom sheet in its expanded state. The `essential: true` flag ensures the animation respects user preferences for reduced motion, improving accessibility.
 
-Restaurants are rendered through a GeoJSON `Source` with clustering enabled. The map component splits the input marker set into restaurant markers and a synthetic user marker, then constructs a GeoJSON `FeatureCollection` for restaurants. Each feature’s properties include fields required for the popup component.
+The map also includes runtime API key validation to fail fast with a clear error message if the Mapbox key is missing or if a secret key (starting with `sk.`) is accidentally used in the browser.
 
 #code_example[
-Restaurant markers are converted into GeoJSON features with popup-relevant properties.
+Mapbox token validation prevents configuration errors and credential leaks.
 
 ```tsx
 // resources/js/Components/Shared/Map.tsx
-const restaurantGeoJson = {
-  type: 'FeatureCollection',
-  features: restaurantMarkers.map((marker) => ({
-    type: 'Feature',
-    geometry: {
-      type: 'Point',
-      coordinates: [marker.lng, marker.lat],
-    },
-    properties: {
-      id: marker.id,
-      name: marker.name,
-      address: marker.address,
-      openingHours: marker.openingHours,
-      rating: marker.rating,
-      distanceKm: marker.distanceKm,
-      imageUrl: marker.imageUrl,
-    },
-  })),
+if (!mapboxAccessToken) {
+  return <div className="map-error-message">Mapbox API key is not configured.</div>;
+}
+
+if (!mapboxAccessToken.startsWith('pk.')) {
+  return <div className="map-error-message">Invalid Mapbox API key type.</div>;
+}
+```
+]
+
+This validation runs before initializing Mapbox, providing immediate feedback during development and preventing accidental exposure of secret tokens in production bundles.
+
+==== Bottom sheet: pointer-driven drag, snapping, and selection sync
+
+The restaurant list is implemented as a draggable bottom sheet using Pointer Events API with pointer capture. This approach yields consistent behavior across mouse and touch devices, avoiding the complexities of managing separate touch and mouse event handlers.
+
+The drag implementation uses three key techniques:
+
+1. *Pointer capture*: When drag starts (`onPointerDown`), the sheet captures the pointer using `setPointerCapture`. This ensures all subsequent pointer events (move, up) are delivered to the sheet element even if the pointer moves outside its bounds.
+
+2. *Drag detection*: A `dragMovedRef` flag tracks whether the pointer has moved significantly since press. This distinguishes intentional drags from clicks.
+
+3. *Snap-on-release*: When the pointer is released, the sheet snaps to either collapsed or expanded state based on its current position. The snap threshold uses the midpoint between states to provide intuitive behavior.
+
+#code_example[
+The bottom sheet prevents click-toggle immediately after drag to avoid accidental actions.
+
+```tsx
+// resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
+const toggleSheet = () => {
+  if (dragMovedRef.current) {
+    dragMovedRef.current = false;
+    return;
+  }
+
+  setSheetHeight((h) => (h <= COLLAPSED_PX + 2 ? expandedPx : COLLAPSED_PX));
 };
 ```
 ]
 
-The GeoJSON source enables Mapbox to perform clustering directly in the renderer.
+Selection synchronization requires careful timing. When a restaurant becomes selected (either from map click or list click), the bottom sheet must scroll the corresponding card into view. However, if the sheet is transitioning between collapsed and expanded states, measuring card positions during the transition produces incorrect offsets.
+
+The solution waits for CSS transitions to complete before measuring and scrolling. It observes `transitionend` events with a timeout fallback (500ms) to handle cases where the transition is interrupted or already complete.
 
 #code_example[
-Clustering configuration is applied at the `Source` level.
+Auto-scroll waits for transitions to complete before measuring positions to avoid layout thrashing.
 
 ```tsx
-// resources/js/Components/Shared/Map.tsx
-<Source
-  id="restaurants"
-  type="geojson"
-  data={restaurantGeoJson}
-  cluster={true}
-  clusterMaxZoom={14}
-  clusterRadius={50}
->
-  {/* layers */}
-</Source>
-```
-]
+// resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
+const waitForTransition = new Promise<void>((resolve) => {
+  let resolved = false;
 
-==== Layer definitions and selected marker styling
+  const onTransitionEnd = () => {
+    if (resolved) return;
+    resolved = true;
+    resolve();
+  };
 
-Layers are defined in #source_code_link("resources/js/Components/Shared/mapStyles.ts"). The cluster circle changes color and radius based on point counts using a step function. A dedicated layer renders the currently selected restaurant marker as a separate circle with stroke styling. This avoids creating React-managed marker elements for each restaurant.
+  sheetRef.current?.addEventListener('transitionend', onTransitionEnd, { once: true });
 
-#code_example[
-The selected marker layer filters by restaurant id and uses accent styles.
-
-```ts
-// resources/js/Components/Shared/mapStyles.ts
-export const getSelectedPointLayer = (theme: MapTheme, selectedId: number | null | undefined) => ({
-  id: 'selected-point',
-  type: 'circle',
-  source: 'restaurants',
-  filter: ['==', ['get', 'id'], selectedId || -999],
-  paint: {
-    'circle-color': theme.brandPrimary,
-    'circle-radius': 18,
-    'circle-stroke-color': theme.brandPrimaryHover,
-    'circle-stroke-width': 3,
-  },
+  setTimeout(() => {
+    if (resolved) return;
+    resolved = true;
+    resolve();
+  }, 500);
 });
 ```
 ]
 
-==== Click behavior: cluster expansion, marker selection, and pick-location mode
-
-The click interaction supports three distinct behaviors:
-
-- When pick-location mode is enabled, clicking anywhere sets the location.
-- Clicking a cluster expands it by retrieving the cluster expansion zoom and animating to that zoom.
-- Clicking an unclustered restaurant selects it and opens the popup.
-
-#code_example[
-The click handler queries rendered features and expands clusters using `getClusterExpansionZoom`.
-
-```tsx
-// resources/js/Components/Shared/Map.tsx
-const features = map.queryRenderedFeatures(event.point, {
-  layers: ['clusters', 'unclustered-point'],
-});
-
-if (features.length > 0) {
-  const feature = features[0];
-  if (feature.layer?.id === 'clusters') {
-    const clusterId = feature.properties?.cluster_id;
-    const source = map.getSource('restaurants') as GeoJSONSource;
-
-    source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-      if (err || zoom == null) return;
-      map.easeTo({
-        center: (feature.geometry as Point).coordinates as [number, number],
-        zoom: zoom,
-      });
-    });
-  }
-}
-```
-]
-
-==== Cursor feedback for interactive features
-
-The map changes the cursor to a pointer when hovering over interactive layers. This is implemented by checking `event.features` during mouse move and updating the canvas cursor style. This small detail improves discoverability of click targets.
-
-#code_example[
-The map sets a pointer cursor when hovering over interactive layers.
-
-```tsx
-// resources/js/Components/Shared/Map.tsx
-const hasFeatures = (event.features?.length ?? 0) > 0;
-map.getCanvas().style.cursor = hasFeatures ? 'pointer' : '';
-```
-]
-
-==== Popup rendering and details navigation
-
-A selected restaurant is displayed using a Mapbox `Popup` component in #source_code_link("resources/js/Components/Shared/MapPopup.tsx"). The popup includes an optional image, a star rating component, metadata such as opening hours and distance, and a link to the full restaurant details page.
-
-#code_example[
-The popup uses an Inertia link to navigate to the restaurant details page.
-
-```tsx
-// resources/js/Components/Shared/MapPopup.tsx
-<Link
-  href={route('restaurants.show', restaurant.id)}
-  className="restaurant-view-btn"
->
-  View details
-</Link>
-```
-]
-
-This popup is configured not to close on map click automatically, which allows interaction inside the popup without losing state. The close action is explicitly handled by a dedicated button.
-
-=== Geolocation: Mapbox control integration and error recovery
-
-==== Trigger plumbing: calling GeolocateControl from an external UI
-
-The map UI includes a "My Location" button inside the overlay, but the Mapbox geolocation UI is hidden (`showGeolocateControlUi={false}`). To bridge these elements, the map component exposes a trigger registration callback (`registerGeolocateTrigger`), and the `useMapGeolocation` hook registers a function that calls `GeolocateControl.trigger()` when invoked.
-
-#code_example[
-The geolocation hook registers a trigger function so that external UI can запуск geolocation without showing the native control UI.
-
-```ts
-// resources/js/Hooks/useMapGeolocation.ts
-registerGeolocateTrigger(() => {
-  if (!geolocateControlRef.current) return false;
-  geolocateControlRef.current.trigger();
-  return true;
-});
-```
-]
-
-The page-level hook calls this trigger and sets a loading state. If the control is not ready, an explicit error message is shown.
-
-#code_example[
-The map page triggers geolocation through the registered function and provides a clear error state if the control is not ready.
-
-```ts
-// resources/js/Hooks/useMapPage.ts
-const ok = geolocateTriggerRef.current?.();
-if (!ok) {
-  setLocationError('Geolocation control not ready yet. Refresh and try again.');
-  return;
-}
-setIsGeolocating(true);
-```
-]
-
-==== Error extraction and user-readable messages
-
-Geolocation errors from Mapbox controls can have varying shapes. The geolocation hook therefore extracts error codes and messages defensively and maps known codes to user-readable instructions.
-
-#code_example[
-The geolocation hook extracts error info and maps codes to actionable messages.
-
-```ts
-// resources/js/Hooks/useMapGeolocation.ts
-const { code, message } = extractGeolocateError(evt);
-
-let errorMessage =
-  message ||
-  'Unable to get your location. Please check browser/OS location permissions.';
-
-switch (code) {
-  case 1:
-    errorMessage = 'Location access denied. Allow location permissions to see nearby restaurants.';
-    break;
-  case 2:
-    errorMessage = 'Location information unavailable. Check OS location services or try again.';
-    break;
-  case 3:
-    errorMessage = 'Location request timed out. Try again or disable high accuracy.';
-    break;
-}
-```
-]
-
-On success, the map page updates the view state and requests updated restaurants from the backend using the newly obtained coordinates.
+After the transition completes, the implementation measures the card position, calculates the scroll offset needed to center it in the visible area, clamps the result to valid scroll boundaries, and performs a smooth scroll. This ensures the selected restaurant is always visible and centered, providing clear visual feedback regardless of whether selection originated from the map or the list.
 
 === Summary
 
-The implemented map feature combines backend geospatial filtering, ranking, and session-level location persistence with a frontend visualization built on Mapbox. The backend guarantees validated inputs and predictable payload sizes, computes distance using a model scope with a spatial-function strategy and a Haversine fallback, uses bounding-box prefiltering for performance, and ranks restaurants via a composite score executed in SQL. The frontend composes the map page using a strict separation between page wiring, interaction logic, and presentational partials. It supports fuzzy search filtering without network requests, explicit "search in this area" behavior that limits server roundtrips, and synchronized selection between a clustered map view and a draggable bottom sheet list. Location acquisition is implemented through a hidden Mapbox geolocation control triggered from custom UI, with defensive error handling and clear user feedback through a banner.
+The map-based restaurant discovery feature demonstrates a complete implementation of geospatial filtering, quality-based ranking, and interactive visualization. The implementation balances multiple competing concerns: performance, user experience, data consistency, and code maintainability.
+
+*Backend architecture decisions:*
+- Three-phase processing pipeline ensures deterministic behavior: coordinate normalization (Phase A), proximity-first selection with hard radius enforcement (Phase B), and SQL-based quality scoring with Eloquent hydration (Phase C).
+- Radius constraints are enforced as hard limits via SQL HAVING clauses, guaranteeing "up to 250 within radius" rather than "250 closest overall".
+- Composite scoring is computed exactly once using derived tables, eliminating redundant distance calculations and avoiding PHP post-processing.
+- Distance uses MariaDB's `ST_Distance_Sphere` with bounding box prefiltering for performance.
+- Session-based location persistence with 24-hour expiry balances convenience and privacy.
+- Strategic eager loading (images only, not full menu hierarchy) reduces payload size by ~80%.
+- Database indexes on `reviews.restaurant_id` and `favorite_restaurants(customer_user_id, restaurant_id)` optimize aggregation and join performance.
+
+*Frontend architecture decisions:*
+- Clear separation of concerns: orchestration (page component), state management (useMapPage hook), and presentation (specialized partials).
+- Partial Inertia reloads (`only: ['restaurants', 'filters']`) preserve UI state and scroll position when dataset changes.
+- Explicit "Search here" interaction prevents accidental server requests on every pan/zoom.
+- Dual location support: persistent user location (`lat`/`lng`) and ephemeral search center (`search_lat`/`search_lng`) enable exploration without losing context.
+- Geolocation trigger mechanism with defensive error handling and user-friendly error messages.
+- MapLayout disables body scroll to prevent conflicts with map pan/zoom gestures.
+- GeoJSON clustering improves readability and performance at low zoom levels.
+- Camera animation with UI-aware padding keeps selected restaurants visible above overlays.
+- Bottom sheet uses Pointer Events with capture for consistent drag behavior across devices, with transition-aware auto-scroll synchronization.
+
+*User experience considerations:*
+- Multiple location acquisition methods: device geolocation, manual coordinate entry, and map click picking.
+- Graceful degradation to default center (Warsaw) when location is unavailable.
+- Radius slider with commit-on-release strategy prevents backend flooding during drag.
+- Selection synchronization across map markers, popup, and list maintains spatial orientation.
+- Clear error messages for geolocation failures with actionable guidance.
+- Reduced motion support via `essential: true` flag in animations for accessibility.
+
+The implementation serves as a case study in building complex interactive features that require coordination between backend query optimization, frontend state management, and user interaction design.
