@@ -36,6 +36,8 @@
 // Use Case Diagram
 // Use Case Scenarios
 #include "chapters/non-functional-requirements.typ"
+// Security
+// Backlog issues left (very optional)
 
 // Technical chapters:
 #include "chapters/technologies.typ"  //Technologies used (for the app, not in development process)
