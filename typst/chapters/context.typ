@@ -1,6 +1,6 @@
 = Context
 
-This project is set within the rapidly evolving food service industry, where small businesses—particularly fast food outlets—are under increasing pressure to adopt digital solutions to streamline operations and improve customer satisfaction.
+This project is set within the rapidly evolving food service industry, where small businesses - particularly fast food outlets - are under increasing pressure to adopt digital solutions to streamline operations and improve customer satisfaction.
 
 While larger restaurants and chains have access to proprietary systems or can afford to partner with third-party platforms like Uber Eats for example, small businesses often lack the resources or flexibility to implement such systems.
 

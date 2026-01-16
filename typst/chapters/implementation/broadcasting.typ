@@ -137,7 +137,7 @@ These specific hooks encapsulate the correct parameters and event handling logic
   ```
 ]
 
-This layered architecture—generic hook, specific wrappers, and page-level usage—ensures clean separation of concerns and ease of testing.
+This layered architecture - generic hook, specific wrappers, and page-level usage - ensures clean separation of concerns and ease of testing.
 
 #code_example[
   === Channel Security and Authorization
