@@ -7,11 +7,44 @@ The selection of the database management system (DBMS) was a critical architectu
 === Justification for MariaDB
 MariaDB, a community-developed fork of MySQL, was selected over competitors such as PostgreSQL and standard MySQL for several strategic reasons:
 
-- *Native Geospatial Support*: The application relies heavily on location-based services, specifically the `MapController` which filters restaurants by proximity. MariaDB provides efficient, native implementation of spatial functions such as `ST_Distance_Sphere`. This allows for accurate calculation of distances on the Earth's surface directly within the database engine, eliminating the need for expensive application-side processing or external geospatial libraries.
-- *Performance Characteristics*: MariaDB's thread pool handling and query optimizer are highly tuned for read-heavy workloads, which characterizes the majority of the application's traffic (e.g., browsing menus, viewing restaurant lists).
-- *JSON Compatibility*: The support for JSON column types allows for semi-structured data storage within the relational model. This capability is utilized for flexible attributes, such as storing complex opening hours configurations or varying menu item options, without necessitating a NoSQL solution.
-- *Licensing and Ecosystem*: As a fully open-source solution with a strong commitment to the GPL license, MariaDB aligns with the project's preference for open technologies. Its binary compatibility with MySQL ensures seamless integration with the Laravel framework, which treats it as a first-class citizen.
+==== Native Geospatial Support
+
+A key requirement, since the application performs extensive geospatial calculations that must execute within the database engine for performance.
+
+The application relies heavily on location-based services, including filtering establishments within a user-defined radius and calculating accurate distances on the Earth's surface.
+
+MariaDB meets this requirement with efficient, native spatial functions such as `ST_Distance_Sphere`, enabling these calculations directly within the database engine and eliminating the need for expensive application-side processing or external geospatial libraries.
+
+==== Performance Characteristics
+
+MariaDB's thread pool handling and query optimizer are highly tuned for read-heavy workloads, which characterizes the majority of the application's traffic (e.g., browsing menus, viewing restaurant lists). This ensures efficient handling of concurrent read operations without performance degradation.
+
+==== JSON Compatibility
+
+The support for JSON column types allows for semi-structured data storage within the relational model. While not currently utilized in the schema, this capability provides flexibility for future enhancements, such as storing complex opening hours configurations or varying menu item options, without necessitating a NoSQL solution.
+
+==== Multi-Master Replication
+
+MariaDB supports multi-master replication, enabling data synchronization across multiple database servers. Unlike traditional master-slave replication, which restricts writes to a single master server, multi-master allows writes on multiple nodes for greater flexibility in distributed environments.
+
+This feature facilitates future scaling by allowing geographic distribution of databases, which aligns with the application's geospatial nature where users _primarily_ access local restaurant data. Such distribution reduces latency for regional queries and maintains data consistency across the system.
+
+==== Licensing and Ecosystem
+
+As a fully open-source solution with a strong commitment to the GPL license, MariaDB aligns with the project's preference for open technologies. Its binary compatibility with MySQL ensures seamless integration with the Laravel framework, which treats it as a first-class citizen.
+
+==== Limitations
+
+While MariaDB excels in the areas outlined above, it has some limitations. As a fork of MySQL, it may lag behind in adopting the latest features from the broader MySQL ecosystem.
+
+MariaDB-specific deployment and hosting options are limited. Although it can be hosted on MySQL environments and use MySQL drivers, the application uses `ST_Distance_Sphere`, which is not available in all MySQL versions, requiring a MariaDB-specific configuration.
+
+Its community and ecosystem are also smaller than MySQL's, potentially affecting long-term support and third-party integrations.
+
+For highly specialized geospatial analyses beyond basic filtering and distance calculations, extensions like PostGIS in PostgreSQL offer more advanced capabilities.
 
 === Comparison with Alternatives
-- *PostgreSQL*: While PostgreSQL offers robust geospatial extentions via PostGIS, the complexity of configuring and maintaining PostGIS was deemed unnecessary for the project's specific scope (radius filtering and distance calculation). MariaDB's out-of-the-box spatial functions provided the required functionality with lower operational overhead.
-- *NoSQL (MongoDB)*: A document store was considered for the menu catalog but rejected due to the inherently relational nature of orders, customers, and payments. Maintaining ACID compliance (data integrity) for financial transactions was prioritized over schema flexibility.
+
+*PostgreSQL*: While PostgreSQL offers robust geospatial extentions via PostGIS, the complexity of configuring and maintaining PostGIS was deemed unnecessary for the project's specific scope (radius filtering and distance calculation). MariaDB's out-of-the-box spatial functions provided the required functionality with lower operational overhead.
+
+*NoSQL (MongoDB)*: A document store was considered for the menu catalog but rejected due to the inherently relational nature of orders, customers, and payments. Maintaining ACID compliance (data integrity) for financial transactions was prioritized over schema flexibility.
