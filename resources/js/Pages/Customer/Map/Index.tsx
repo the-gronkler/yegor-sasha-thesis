@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import MapLayout from '@/Layouts/MapLayout';
 import Map from '@/Components/Shared/Map';
@@ -31,6 +32,8 @@ export default function MapIndex({
   filters,
   mapboxPublicKey,
 }: MapIndexProps) {
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
   const {
     query,
     setQuery,
@@ -103,6 +106,8 @@ export default function MapIndex({
             setIsPickingLocation={setIsPickingLocation}
             onManualLocation={handleMapGeolocate}
             onError={setLocationError}
+            showHeatmap={showHeatmap}
+            onToggleHeatmap={setShowHeatmap}
           />
           <Map
             viewState={viewState}
@@ -119,6 +124,7 @@ export default function MapIndex({
             isPickingLocation={isPickingLocation}
             onPickLocation={handlePickLocation}
             showGeolocateControlUi={false}
+            showHeatmap={showHeatmap}
           />
           <BottomSheet
             restaurants={filteredRestaurants}

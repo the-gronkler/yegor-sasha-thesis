@@ -68,3 +68,61 @@ export const getUnclusteredPointLayer = (theme: MapTheme): LayerProps => ({
     'circle-radius': 14,
   },
 });
+
+export const getHeatmapLayer = (): LayerProps => ({
+  id: 'heatmap',
+  type: 'heatmap',
+  source: 'restaurants',
+  maxzoom: 17,
+  paint: {
+    // Increase the heatmap weight based on frequency and property magnitude
+    'heatmap-weight': [
+      'interpolate',
+      ['linear'],
+      ['coalesce', ['get', 'point_count'], 1],
+      0,
+      0,
+      1,
+      0.8,
+      10,
+      1,
+    ],
+    // Increase the heatmap color weight by zoom level
+    // heatmap-intensity is a multiplier on top of heatmap-weight
+    'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 5],
+    // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
+    // Begin color ramp at 0-stop with a 0-transparency color
+    // to create a blur-like effect.
+    'heatmap-color': [
+      'interpolate',
+      ['linear'],
+      ['heatmap-density'],
+      0,
+      'rgba(33,102,172,0)',
+      0.1,
+      'rgb(103,169,207)',
+      0.3,
+      'rgb(209,229,240)',
+      0.5,
+      'rgb(253,219,199)',
+      0.7,
+      'rgb(239,138,98)',
+      1,
+      'rgb(178,24,43)',
+    ],
+    // Adjust the heatmap radius by zoom level
+    'heatmap-radius': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      0,
+      20,
+      9,
+      80,
+      15,
+      120,
+    ],
+    // Transition from heatmap to circle layer by zoom level
+    'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 10, 1, 16, 0],
+  },
+});
