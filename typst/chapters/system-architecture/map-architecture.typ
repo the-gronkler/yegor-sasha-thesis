@@ -84,7 +84,7 @@ This design keeps the controller simple (request → service → fallback) while
 ==== Component Hierarchy and Separation of Concerns
 
 The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
-
+// TODO: Change the text diagram below to an actual diagram if needed.
 ```
 MapIndex (Page Component - Orchestration)
 ├── useMapPage (Hook - State & Business Logic)
