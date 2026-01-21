@@ -251,6 +251,8 @@ These guarantees reflect deliberate architectural choices that prioritize predic
 
 ==== Inertia.js Bridge Pattern
 
+// TODO: Check this once we write the general section about Inertia to avoid duplication and make sure thesis flows well.
+
 The architecture uses Inertia as a bridge between Laravel (server) and React (client), providing SPA-like navigation without API route duplication. Key architectural benefits:
 
 - Single routing definition (Laravel routes serve both HTML and JSON)
@@ -306,4 +308,3 @@ The map discovery architecture demonstrates several key patterns:
 - *Hybrid client-server* balances server authority (filtering, scoring) with client responsiveness (search, selection)
 
 These architectural choices prioritize deterministic behavior, maintainable code structure, and scalable performance while delivering a smooth user experience across desktop and mobile platforms.
-
