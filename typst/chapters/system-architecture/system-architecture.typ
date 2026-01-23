@@ -6,5 +6,4 @@
 
 #include "real-time-events.typ"
 
-#include "database-schema.typ"
-
+#include "data-persistence.typ"
