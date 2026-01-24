@@ -192,6 +192,21 @@ When working in the `typst/` directory, you **MUST** adhere to the guidelines de
 4.  **No Slang or Colloquialisms**: Avoid informal words like "guys", "huge", "okay", "a lot". Use precise vocabulary.
 5.  **Objective Tone**: Avoid emotional or subjective language. Present facts and evidence.
 
+6.  **Formatting of Bullet Points**: Avoid placing emphasis markers (such as `*bold*`) immediately after bullet point prefixes. Instead, prefer applying emphasis to the first significant word and consider using paragraph form instead of bullets for emphasized items.
+
+- _Bad_:
+  - _Lazy loading_ is used when related data is optional and not always required by a request.
+  - _Eager loading_ is used when pages require consistent traversal of relationships, reducing the risk of N+1 query patterns.
+
+- _Good (preferred)_:
+  _Lazy loading_ is used when related data is optional and not always required by a request.
+
+  _Eager loading_ is used when pages require consistent traversal of relationships, reducing the risk of N+1 query patterns.
+
+- _Alternative_:
+  - Lazy loading is used when related data is optional and not always required by a request.
+  - Eager loading is used when pages require consistent traversal of relationships, reducing the risk of N+1 query patterns.
+
 ## � Typst Functions and Source Code References (Strictly Enforced)
 
 > **CRITICAL RULE**: When referencing source code files or generating links, **ALWAYS** use the provided functions from `config.typ`. Failure to do so violates thesis standards and will result in broken or outdated references.
