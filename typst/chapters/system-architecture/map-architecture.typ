@@ -2,7 +2,7 @@
 
 == Map-Based Discovery Architecture <map-architecture>
 
-This section describes the high-level design and architectural patterns used in the map-based restaurant discovery feature. The focus is on component interactions, data flow, architectural patterns, and design decisions that shape the system structure—not implementation details or code-level specifics.
+This section describes the high-level design and architectural patterns used in the map-based restaurant discovery feature. The focus is on component interactions, data flow, architectural patterns, and design decisions that shape the system structure - not implementation details or code-level specifics.
 
 === Architectural Overview
 
@@ -120,7 +120,7 @@ Authoritative data from backend: restaurant array, filter metadata (lat, lng, ra
 
 *Page State (useMapPage Hook):*
 
-Manages client-side state: view state (camera position), selection state (active restaurant ID), geolocation state (loading/error), and search query (fuzzy filter). This state is ephemeral—it doesn't persist across page reloads and isn't sent to the server.
+Manages client-side state: view state (camera position), selection state (active restaurant ID), geolocation state (loading/error), and search query (fuzzy filter). This state is ephemeral - it doesn't persist across page reloads and isn't sent to the server.
 
 *Global State (React Context):*
 
@@ -168,7 +168,7 @@ This architecture enables:
 - Preserving camera position across dataset updates
 - Testability (mock view state in tests)
 
-The alternative—uncontrolled component with internal ref access—would scatter view state across components and make state synchronization fragile.
+The alternative - uncontrolled component with internal ref access - would scatter view state across components and make state synchronization fragile.
 
 ==== Geolocation Integration Pattern
 

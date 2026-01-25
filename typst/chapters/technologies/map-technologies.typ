@@ -79,7 +79,7 @@ Google Maps was seriously considered due to its ubiquity and familiarity to user
 - TypeScript type definitions
 - Controlled component pattern for view state synchronization
 
-The alternative—using Mapbox GL JS directly with `useEffect` hooks—would require manual imperative management of map instances, event listeners, and cleanup. The declarative wrapper reduces boilerplate and prevents common bugs (memory leaks from unremoved listeners, stale closures, race conditions in async initialization).
+The alternative - using Mapbox GL JS directly with `useEffect` hooks - would require manual imperative management of map instances, event listeners, and cleanup. The declarative wrapper reduces boilerplate and prevents common bugs (memory leaks from unremoved listeners, stale closures, race conditions in async initialization).
 
 === State Management Technologies
 
@@ -107,7 +107,7 @@ Context API was chosen because the cart state is simple (items array, derived to
 
 *Rationale:*
 
-When the map's radius or location changes, only the restaurant dataset needs updating—UI state (camera position, selected restaurant, scroll position) should persist. Three approaches were considered:
+When the map's radius or location changes, only the restaurant dataset needs updating - UI state (camera position, selected restaurant, scroll position) should persist. Three approaches were considered:
 
 / Full page reload: Simplest but loses all UI state and feels jarring.
 
@@ -147,7 +147,7 @@ Laravel session was chosen because it requires no additional infrastructure, res
 
 The bounding box prefilter uses range queries (`BETWEEN`) on latitude and longitude independently. MariaDB's query optimizer can use index merge to combine separate indexes efficiently. Spatial indexes (R-tree) would optimize geometric operations but aren't used because `ST_Distance_Sphere` operates on raw coordinates, not geometry columns. Composite `(latitude, longitude)` indexes don't benefit range queries on both columns.
 
-The chosen strategy—separate single-column indexes—allows MariaDB to use index merge optimization for bounding box filters, reducing the candidate set before expensive distance calculations.
+The chosen strategy - separate single-column indexes - allows MariaDB to use index merge optimization for bounding box filters, reducing the candidate set before expensive distance calculations.
 
 ==== Payload Reduction Strategy
 
@@ -155,9 +155,9 @@ The chosen strategy—separate single-column indexes—allows MariaDB to use ind
 
 *Rationale:*
 
-The map UI displays restaurant names, ratings, distances, and thumbnails—it does not need full menu data. Loading the complete menu hierarchy (food types → menu items → allergens → images) multiplies the JSON payload size by approximately 5x for large restaurants. The decision to load only `images` (selecting specific columns) reduces response size by ~80%, significantly improving initial page load on mobile networks.
+The map UI displays restaurant names, ratings, distances, and thumbnails - it does not need full menu data. Loading the complete menu hierarchy (food types → menu items → allergens → images) multiplies the JSON payload size by approximately 5x for large restaurants. The decision to load only `images` (selecting specific columns) reduces response size by ~80%, significantly improving initial page load on mobile networks.
 
-This follows the principle of "load only what you display"—menu data is loaded on-demand when users navigate to restaurant detail pages.
+This follows the principle of "load only what you display" - menu data is loaded on-demand when users navigate to restaurant detail pages.
 
 === Summary of Technology Decisions
 
