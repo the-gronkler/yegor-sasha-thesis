@@ -70,9 +70,11 @@ export function useMapPage({
   });
   const [isGeolocating, setIsGeolocating] = useState(false);
   const [isPickingLocation, setIsPickingLocation] = useState(false);
+  const [showSearchInArea, setShowSearchInArea] = useState(false);
 
   // --- Refs ---
   const geolocateTriggerRef = useRef<null | (() => boolean)>(null);
+  const initialCenterRef = useRef<{ lat: number; lng: number } | null>(null);
 
   // --- Callbacks & Handlers ---
 
@@ -132,6 +134,54 @@ export function useMapPage({
     setSelectedRestaurantId((prev) => (prev === id ? null : id));
   }, []);
 
+  const searchInArea = useCallback(() => {
+    const { latitude, longitude } = viewState;
+    setShowSearchInArea(false);
+
+    // Backend uses search_lat/search_lng as the new center point for distance calculations.
+    // The radius comes from existing filters and is not automatically expanded.
+    // Just send the search coordinates.
+    router.get(
+      route('map.index'),
+      {
+        search_lat: latitude,
+        search_lng: longitude,
+        // Preserve existing user location if any
+        ...(filters.lat !== null && filters.lng !== null
+          ? {
+              lat: filters.lat,
+              lng: filters.lng,
+            }
+          : {}),
+      },
+      {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        only: ['restaurants', 'filters'],
+      },
+    );
+  }, [viewState, filters]);
+
+  const handleViewStateChange = useCallback(
+    (newViewState: { longitude: number; latitude: number; zoom: number }) => {
+      setViewState(newViewState);
+
+      // Check if map has moved significantly from initial center
+      if (initialCenterRef.current) {
+        const { lat: initialLat, lng: initialLng } = initialCenterRef.current;
+        const latDiff = Math.abs(newViewState.latitude - initialLat);
+        const lngDiff = Math.abs(newViewState.longitude - initialLng);
+
+        // Shows button if moved more than ~0.01 degrees (~1km)
+        if (latDiff > 0.01 || lngDiff > 0.01) {
+          setShowSearchInArea(true);
+        }
+      }
+    },
+    [],
+  );
+
   // --- Effects ---
 
   // Validate API key
@@ -153,6 +203,9 @@ export function useMapPage({
         longitude: filters.lng!,
         latitude: filters.lat!,
       }));
+      // Update initial center reference when user location changes
+      initialCenterRef.current = { lat: filters.lat, lng: filters.lng };
+      setShowSearchInArea(false); // Hide button when user location is updated
     } else if (restaurants.length > 0) {
       const coords = getLatLng(restaurants[0]);
       if (coords) {
@@ -161,6 +214,9 @@ export function useMapPage({
           longitude: coords[1],
           latitude: coords[0],
         }));
+        if (!initialCenterRef.current) {
+          initialCenterRef.current = { lat: coords[0], lng: coords[1] };
+        }
       }
     }
   }, [filters.lat, filters.lng, restaurants]);
@@ -206,7 +262,7 @@ export function useMapPage({
     filteredRestaurants,
     // Map State
     viewState,
-    setViewState,
+    setViewState: handleViewStateChange,
     // Selection
     selectedRestaurantId,
     selectRestaurant,
@@ -221,6 +277,9 @@ export function useMapPage({
     handleMapGeolocate,
     handleGeolocateError,
     handlePickLocation,
+    // Search in area
+    showSearchInArea,
+    searchInArea,
     // Data / Actions
     mapMarkers,
     reloadMap,

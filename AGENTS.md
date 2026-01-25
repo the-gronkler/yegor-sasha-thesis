@@ -223,6 +223,7 @@ When working in the `typst/` directory, you **MUST** adhere to the guidelines de
   - **Purpose**: Ensures code examples and their explanations stay together on the same page. **ALWAYS USE THIS** when presenting code with surrounding text.
   - **Import Required**: Add `#import "../config.typ": source_code_link, code_example` at the top of each chapter file.
   - **When to Use**: **MANDATORY** whenever you have explanatory text followed by or preceding code blocks. Failure to use this results in poor document layout with awkward page breaks.
+  - **Structure Note**: Permitted and encouraged to place section headings (e.g., `=== Heading`) _inside_ the `#code_example[...]` block if the heading introduces the example or is tightly coupled with it. This keeps the heading attached to the content.
 
 ### Rules for Usage
 
