@@ -2,7 +2,7 @@
 
 == Database Implementation
 
-The implementation of the persistence layer conforms to the architectural decisions outlined in the System Architecture chapter, specifically adhering to the Active Record pattern via Laravel's Eloquent ORM. The implementation strategy prioritizes three non-functional requirements: data integrity, geospatial query performance, and strict strict type safety within the domain boundary.
+The implementation of the persistence layer conforms to the design decisions outlined in the System Architecture chapter, specifically adhering to the Active Record pattern via Laravel's Eloquent ORM. The implementation strategy prioritizes three non-functional requirements: data integrity, geospatial query performance, and strict strict type safety within the domain boundary.
 
 The database schema and its interactions are defined entirely through valid PHP code ("Code-First"), ensuring that the persistence state is version-controlled and reproducible across development, testing, and production environments.
 
@@ -108,7 +108,7 @@ To make this physical separation transparent to the application logic, the `User
 ==== Rich Association Implementation
 The system handles complex many-to-many relationships by elevating the intermediate table to a first-class domain citizen. This is exemplified by the `OrderItem` model.
 
-Unlike a standard pivoting relationship (which returns a generic `stdClass` or array), the `OrderItem` is a full Eloquent model. It extends the internal `Pivot` class but defines its own relationships back to the parent `Order` and `MenuItem`. This allows the implementation to place validation logic, state management (e.g., locking line item prices at the time of purchase), and accessors strictly within the association itself.
+Unlike a standard pivoting relationship (which returns a generic `stdClass` or array), the `OrderItem` is a full Eloquent model. It extends the internal `Pivot` class but defines its own relationships back to the parent `Order` and `MenuItem`. This allows the implementation to encapsulate relationship attributes, such as `quantity`, directly within the association model, providing a dedicated context for line-item specific logic.
 
 #code_example[
   The `OrderItem` #source_code_link("app/Models/OrderItem.php") encapsulates the state of the relationship, such as quantity, while maintaining traversal capability.
@@ -362,7 +362,7 @@ To mitigate Mass Assignment vulnerabilities, every model in the implementation s
   ```
 ]
 
-The implementation explicitly excludes administrative flags from these lists, forcing the developer to set them via explicit setters or specific administrative controllers, thus providing a code-level defense layer against privilege escalation attacks.
+The implementation defines strict mass-assignment rules via the `$fillable` property. While administrative flags like `is_admin` are included to facilitate internal provisioning, sensitive authentication artifacts such as `remember_token` are strictly excluded. This forces any modification of technical security fields to occur via explicit setters or dedicated authentication flows, preventing accidental exposure through mass-assignment.
 
 === Performance Optimization and Composite Scoring
 
@@ -370,47 +370,47 @@ A specific challenge of the implementation was the generation of the "Recommende
 
 Processing this in the application layer (PHP) would require an $O(N log N)$ sorting operation on the entire dataset. Instead, the implementation utilizes a "Composite Score" SQL injection directly in the `MapController`.
 
-==== Database-Side Composite Scoring
-The scoring logic is implemented as a raw SQL expression that normalizes the three metrics and applies weighting coefficients.
-- *Rating (50%)*: Direct linear contribution.
-- *Popularity (30%)*: A logarithmic dampening function `LOG10(count)` is applied to review counts. This prevents a statistically insignificant distinction (e.g., 5000 vs 5001 reviews) from outweighing quality metrics, while still distinguishing established venues from new ones.
-- *Proximity (20%)*: An inverse linear decay function.
+// ==== Database-Side Composite Scoring
+// The scoring logic is implemented as a raw SQL expression that normalizes the three metrics and applies weighting coefficients.
+// - *Rating (50%)*: Direct linear contribution.
+// - *Popularity (30%)*: A logarithmic dampening function `LOG10(count)` is applied to review counts. This prevents a statistically insignificant distinction (e.g., 5000 vs 5001 reviews) from outweighing quality metrics, while still distinguishing established venues from new ones.
+// - *Proximity (20%)*: An inverse linear decay function.
 
-#code_example[
-  The `MapController` #source_code_link("app/Http/Controllers/Customer/MapController.php") injects the mathematical scoring model directly into the query builder.
+// #code_example[
+//   The `MapController` #source_code_link("app/Http/Controllers/Customer/MapController.php") injects the mathematical scoring model directly into the query builder.
 
-  ```php
-  <?php
-  $query->selectRaw(
-      '(
-          (COALESCE(rating, 0) / 5.0 * 50) +           -- Quality Component
-          (LEAST(30, LOG10(reviews_count + 1) * 10)) + -- 30% Weight: Review Volume
-          (GREATEST(0, 20 * (1 - (distance / 20))))    -- Proximity Component
-      ) as composite_score'
-  );
+//   ```php
+//   <?php
+//   $query->selectRaw(
+//       '(
+//           (COALESCE(rating, 0) / 5.0 * 50) +           -- Quality Component
+//           (LEAST(30, LOG10(reviews_count + 1) * 10)) + -- 30% Weight: Review Volume
+//           (GREATEST(0, 20 * (1 - (distance / 20))))    -- Proximity Component
+//       ) as composite_score'
+//   );
 
-  $query->orderByRaw('composite_score DESC');
-  ```
+//   $query->orderByRaw('composite_score DESC');
+//   ```
 ]
 
-==== Payload Optimization
-To minimize network latency, especially for the mobile context, the implementation adheres to a strict "Column Projection" policy. The `select()` statement is used to retrieve only the columns necessary for the UI card presentation, significantly reducing the JSON payload size and memory usage compared to a generic `SELECT *`.
+// ==== Payload Optimization
+// To minimize network latency, especially for the mobile context, the implementation adheres to a strict "Column Projection" policy. The `select()` statement is used to retrieve only the columns necessary for the UI card presentation, significantly reducing the JSON payload size and memory usage compared to a generic `SELECT *`.
 
-Additionally, user-specific state—such as whether a restaurant is "Favorited"—is resolved via an optimized `LEFT JOIN` pattern. Rather than executing an N+1 query (checking the favorite status for each of the 50 results individually), the controller joins the `favorite_restaurants` table on the current user ID. This collapses the operation into a single constant-time check within the main database query.
+// Additionally, user-specific state—such as whether a restaurant is "Favorited"—is resolved via an optimized `LEFT JOIN` pattern. Rather than executing an N+1 query (checking the favorite status for each of the 50 results individually), the controller joins the `favorite_restaurants` table on the current user ID. This collapses the operation into a single constant-time check within the main database query.
 
-#code_example[
-  The "Favorited" status is efficiently resolved using a conditional join, avoiding N+1 query performance pitfalls.
+// #code_example[
+//   The "Favorited" status is efficiently resolved using a conditional join, avoiding N+1 query performance pitfalls.
 
-  ```php
-  <?php
-  if ($customerId) {
-      $query->leftJoin('favorite_restaurants', function ($join) use ($customerId) {
-          $join->on('restaurants.id', '=', 'favorite_restaurants.restaurant_id')
-               ->where('favorite_restaurants.customer_user_id', '=', $customerId);
-      })
-      ->addSelect(\DB::raw('CASE WHEN favorite_restaurants.restaurant_id IS NOT NULL
-                           THEN 1 ELSE 0 END as is_favorited'));
-  }
-  ```
-]
-#source_code_link("app/Http/Controllers/Customer/MapController.php") provides the complete context for these optimizations.
+//   ```php
+//   <?php
+//   if ($customerId) {
+//       $query->leftJoin('favorite_restaurants', function ($join) use ($customerId) {
+//           $join->on('restaurants.id', '=', 'favorite_restaurants.restaurant_id')
+//                ->where('favorite_restaurants.customer_user_id', '=', $customerId);
+//       })
+//       ->addSelect(\DB::raw('CASE WHEN favorite_restaurants.restaurant_id IS NOT NULL
+//                            THEN 1 ELSE 0 END as is_favorited'));
+//   }
+//   ```
+// ]
+// #source_code_link("app/Http/Controllers/Customer/MapController.php") provides the complete context for these optimizations.
