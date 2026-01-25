@@ -47,4 +47,8 @@ For highly specialized geospatial analyses beyond basic filtering and distance c
 
 *PostgreSQL*: While PostgreSQL offers robust geospatial extentions via PostGIS, the complexity of configuring and maintaining PostGIS was deemed unnecessary for the project's specific scope (radius filtering and distance calculation). MariaDB's out-of-the-box spatial functions provided the required functionality with lower operational overhead.
 
+*MySQL*: Although the foundation for MariaDB, MySQL is governed by Oracle. MariaDB was chosen primarily because it is a fully open-source project, whereas MySQL is not considered purely open-source due to its corporate ownership and dual-licensing model.
+
+*Microsoft SQL Server*: A robust enterprise solution, but its proprietary licensing model and cost barriers made it unsuitable for this project. Additionally, while compatible with PHP, the driver support and community resources for Laravel are less extensive than those for the MySQL/MariaDB ecosystem.
+
 *NoSQL (MongoDB)*: A document store was considered for the menu catalog but rejected due to the inherently relational nature of orders, customers, and payments. Maintaining ACID compliance (data integrity) for financial transactions was prioritized over schema flexibility.
