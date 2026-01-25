@@ -63,6 +63,7 @@ The endpoint authorizes access through Laravel policies and validates all option
 The controller authorizes the request and validates geospatial inputs before building any database query.
 
 ```php
+  <?php
 // app/Http/Controllers/Customer/MapController.php
 public function index(Request $request): Response
 {
@@ -104,6 +105,7 @@ A critical decision is that only real user location is persisted. Search center 
 The normalization method implements the priority cascade and persists only user location (`lat/lng`) to session.
 
 ```php
+  <?php
 // app/Http/Controllers/Customer/MapController.php
 private function normalizeCenterCoordinates(Request $request, array $validated): array
 {
@@ -146,6 +148,7 @@ Session persistence is implemented by #source_code_link("app/Services/GeoService
 GeoService persists `geo.last` with a timestamp and rejects expired session values.
 
 ```php
+  <?php
 // app/Services/GeoService.php
 public function getValidGeoFromSession(Request $request): ?array
 {
@@ -192,6 +195,7 @@ Key properties of Phase B:
 Phase B returns only IDs, enforcing the radius as a hard SQL constraint via HAVING.
 
 ```php
+  <?php
 // app/Http/Controllers/Customer/MapController.php
 private function selectNearestRestaurantIds(float $centerLat, float $centerLng, float $radius): \Illuminate\Support\Collection
 {
@@ -225,6 +229,7 @@ The bounding box prefilter is a deliberate performance optimization. It uses ind
 GeoService computes an approximate bounding box and clamps latitude to avoid instability near the poles.
 
 ```php
+  <?php
 // app/Services/GeoService.php
 public function getBoundingBox(float $lat, float $lng, float $radiusKm): array
 {
@@ -263,6 +268,7 @@ The composite score is computed exactly once in a derived table. This avoids red
 Phase C builds derived tables: review counts are aggregated once, distance is computed once, and composite score is calculated once.
 
 ```php
+  <?php
 // app/Http/Controllers/Customer/MapController.php
 $reviewCounts = \DB::table('reviews')
     ->select('restaurant_id')
@@ -300,6 +306,7 @@ The scored subquery is joined back to `restaurants` using `joinSub`, preserving 
 The final query joins scores for Eloquent hydration, eager-loads only required relations, and orders by score then distance.
 
 ```php
+  <?php
 // app/Http/Controllers/Customer/MapController.php
 $query = Restaurant::query()
     ->joinSub($scoredRestaurants, 'scored', 'restaurants.id', '=', 'scored.id')
@@ -344,6 +351,7 @@ When Phase B returns an empty collection (no restaurants within radius or no res
 The controller terminates early when no candidates are found, avoiding unnecessary query construction.
 
 ```php
+  <?php
 // app/Http/Controllers/Customer/MapController.php
 $selectedIds = $this->selectNearestRestaurantIds($centerLat, $centerLng, $radius);
 
@@ -370,6 +378,7 @@ The `GeoService` provides a centralized `formatDistance` method that converts nu
 Distance formatting is centralized in GeoService to ensure consistency across the application.
 
 ```php
+  <?php
 // app/Services/GeoService.php
 public function formatDistance(float $distanceKm): string
 {

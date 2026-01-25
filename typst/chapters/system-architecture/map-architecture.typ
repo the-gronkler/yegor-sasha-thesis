@@ -2,7 +2,7 @@
 
 == Map-Based Discovery Architecture <map-architecture>
 
-This section describes the high-level design and architectural patterns used in the map-based restaurant discovery feature. The focus is on component interactions, data flow, architectural patterns, and design decisions that shape the system structure—not implementation details or code-level specifics.
+This section describes the high-level design and architectural patterns used in the map-based restaurant discovery feature. The focus is on component interactions, data flow, architectural patterns, and design decisions that shape the system structure - not implementation details or code-level specifics.
 
 === Architectural Overview
 
@@ -84,7 +84,7 @@ This design keeps the controller simple (request → service → fallback) while
 ==== Component Hierarchy and Separation of Concerns
 
 The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
-
+// TODO: Change the text diagram below to an actual diagram if needed.
 ```
 MapIndex (Page Component - Orchestration)
 ├── useMapPage (Hook - State & Business Logic)
@@ -120,7 +120,7 @@ Authoritative data from backend: restaurant array, filter metadata (lat, lng, ra
 
 *Page State (useMapPage Hook):*
 
-Manages client-side state: view state (camera position), selection state (active restaurant ID), geolocation state (loading/error), and search query (fuzzy filter). This state is ephemeral—it doesn't persist across page reloads and isn't sent to the server.
+Manages client-side state: view state (camera position), selection state (active restaurant ID), geolocation state (loading/error), and search query (fuzzy filter). This state is ephemeral - it doesn't persist across page reloads and isn't sent to the server.
 
 *Global State (React Context):*
 
@@ -168,7 +168,7 @@ This architecture enables:
 - Preserving camera position across dataset updates
 - Testability (mock view state in tests)
 
-The alternative—uncontrolled component with internal ref access—would scatter view state across components and make state synchronization fragile.
+The alternative - uncontrolled component with internal ref access - would scatter view state across components and make state synchronization fragile.
 
 ==== Geolocation Integration Pattern
 
@@ -251,6 +251,8 @@ These guarantees reflect deliberate architectural choices that prioritize predic
 
 ==== Inertia.js Bridge Pattern
 
+// TODO: Check this once we write the general section about Inertia to avoid duplication and make sure thesis flows well.
+
 The architecture uses Inertia as a bridge between Laravel (server) and React (client), providing SPA-like navigation without API route duplication. Key architectural benefits:
 
 - Single routing definition (Laravel routes serve both HTML and JSON)
@@ -306,4 +308,3 @@ The map discovery architecture demonstrates several key patterns:
 - *Hybrid client-server* balances server authority (filtering, scoring) with client responsiveness (search, selection)
 
 These architectural choices prioritize deterministic behavior, maintainable code structure, and scalable performance while delivering a smooth user experience across desktop and mobile platforms.
-
