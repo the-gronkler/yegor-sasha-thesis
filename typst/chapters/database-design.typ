@@ -6,8 +6,6 @@ The database design constitutes the structural backbone of the platform, determi
 
 The design philosophy prioritizes normalization to eliminate data redundancy, coupled with a strategic indexing approach to support the application's dominant query patterns, particularly those involving geospatial filtering and complex relationship traversals. The following sections detail the schematic representation of the system through the Entity-Relationship Diagram (ERD) and provide an in-depth analysis of the key entity clusters and their architectural rationale.
 
-
-
 === Schema Overview and Integrity
 
 #figure(
@@ -48,14 +46,13 @@ Boolean flags (`is_primary_for_*`) are used to designate the main display image 
 ==== Reviews
 Restaurants are associated with customers through a 'Review' joining table, which in addition to the foreign keys also stores review-specific attributes such as rating, comments, as well as a one-to-many relationship to the review_images table. This design allows customers to provide feedback on multiple restaurants while ensuring that each review is uniquely tied to a specific customer-restaurant pair.
 
-
+==== Orders
 Orders are represented by the *Orders* table, linked to customers with a `1-*` relationship and having a many-to-many (`*-*`) relationship to menu items. The joining table *Order Items* captures the many-to-many relationship between orders and menu items, also storing the quantity of each menu item in the order.
 Orders are represented by the *Orders* table, linked to customers with a `1-*` relationship and to `*-*` to menu items. The joining table *Order Items* captures the many-to-many relationship between orders and menu items, also storing the quantity of each menu item in the order.
 
 Order status is tracked using a dedicated *Order Statuses* dictionary table, ensuring consistent status values and supporting future extensibility. The statuses include lifecycle stages such as "In Cart", "Placed", "Accepted", "Preparing", "Ready", "Cancelled", and "Fulfilled".
 
 Notably, the user's cart is not modeled as a separate table but as an order record with the "In Cart" status. This design choice simplifies the schema by avoiding duplication and reduces write operations when transitioning from cart to placed order, as it merely updates the status and sets the time_placed timestamp.
-
 
 === Spatial Data Representation
 The database schema handles geospatial data using standard double-precision floating-point columns for `latitude` and `longitude` within the `restaurants` table, rather than specialized geometric data types. This design prioritizes portability and eliminates dependencies on specific GIS database extensions. Usage of standard primitive types allows for the efficient execution of bounding-box queries directly through standard B-tree indices on the coordinate columns, ensuring that spatial lookups remain performant without introducing the complexity of spatial extension overhead.

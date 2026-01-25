@@ -2,7 +2,6 @@
 
 = Implementation
 
-
 #include "database.typ"
 #include "broadcasting.typ"
 #include "optimistic-updates.typ"

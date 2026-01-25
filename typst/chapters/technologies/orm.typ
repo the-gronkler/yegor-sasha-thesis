@@ -44,7 +44,7 @@ To further validate the technology choice, it is constructive to compare Eloquen
 
 *Convention over Configuration vs. Explicit Mapping*: Eloquent models rely on conventions (e.g., inferring `restaurants` table from `Restaurant` class). This eliminates the need for the extensive annotation metadata (`@Table`, `@Column`, `@JoinColumn`) or XML configuration files mandatory in Hibernate or older Entity Framework versions, thereby streamlining the codebase.
 
-*Handling Semi-Structured Data*: Data features like Attribute Casting allow seamless JSON-to-object conversion. Achieving this in strict environments like Java often mandates the creation of custom `AttributeConverter` classes to handle the serialization logic manually, whereas Eloquent handles it declaratively.
+*Handling Semi-Structured Data*: Features such as Eloquent's Attribute Casting allow seamless JSON-to-object conversion. Achieving this in strict environments like Java often mandates the creation of custom `AttributeConverter` classes to handle the serialization logic manually, whereas Eloquent handles it declaratively.
 
 *Simplified Relationship Handling*: Complex associations such as Polymorphic Relationships are defined with a single method call. In strongly-typed ORMs, achieving similar behavior typically forces a strict Table-Per-Hierarchy or Table-Per-Type inheritance strategy (using `@Inheritance`), introducing complex database schemas and deeper object hierarchies.
 

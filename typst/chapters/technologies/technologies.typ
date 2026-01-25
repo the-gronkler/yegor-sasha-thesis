@@ -7,5 +7,3 @@
 #include "database.typ"
 
 #include "orm.typ"
-
-
