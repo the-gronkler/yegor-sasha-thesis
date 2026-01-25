@@ -9,17 +9,17 @@ Key Eloquent features leveraged in this project include:
 
 *Relationship Management*: Eloquent's relationship methods (e.g., `hasMany`, `belongsTo`) enable seamless navigation between related models, such as linking restaurants to their menu items and orders. These relationships leverage PHP's magic methods for dynamic access and lazy loading.
 
-*Polymorphic Relationships*: The system utilizes polymorphic associations (e.g., `morphOne`, `morphMany`), allowing models like `Image` to belong to multiple parent types (e.g., `Restaurant` or `MenuItem`) dynamically, decoupling related entities from specific table foreign keys.
+*Global Scopes*: The system utilizes global scopes to enforce architectural constraints at the model level. For instance, the `User` model applies a scope to automatically load role relationships (`customer`, `employee`), enabling the implementation of the comprehensive "Identity Composition" strategy without repetitive query logic.
 
-*Model Events*: The system leverages model observers to trigger side effects - such as clearing caches or dispatching WebSocket events, i.e. whenever a record is created or updated.
+*Model Events*: The system leverages model lifecycle hooks (e.g., `booted`) to trigger side effects — exclusively for dispatching real-time updates via WebSockets (e.g., `OrderUpdated`) whenever a transactional state changes.
 
-*Soft Deletes*: Critical entities like `Restaurant` and `MenuItem` implement soft deletion, ensuring that data is never permanently lost from the database unless explicitly purged, which is vital for historical integrity and audit trails.
+*Custom Pivot Models*: Intermediate tables are promoted to first-class domain citizens by extending the `Pivot` class (e.g., `OrderItem`). This allows relationship-specific logic, such as quantity management, to be encapsulated directly within the association object rather than leaking into the parent models.
 
-*Query Scopes*: Local scopes (e.g., `scopeWithinRadiusKm`, `scopeOrderByDistance`) encapsulate reusable query logic, particularly for geospatial filtering and sorting, promoting code reusability and maintainability.
+*Query Scopes*: Local scopes (e.g., `scopeWithDistanceTo`) encapsulate complex raw SQL logic, particularly for geospatial filtering, exposing a clean, fluent interface to the rest of the application.
 
-*Accessors*: Computed attributes (e.g., `getUrlAttribute`, `getTotalAttribute`) provide dynamic properties, such as generating image URLs or calculating order totals on-the-fly.
+*Accessors*: Computed attributes (e.g., `getUrlAttribute`, `getTotalAttribute`) provide dynamic properties, such as generating signed storage URLs or calculating order totals on-the-fly, abstracting the underlying calculation or storage detail.
 
-*Attribute Casting*: Automatic type conversion (e.g., casting dates and JSON fields) ensures data integrity and simplifies data handling across the application.
+*Attribute Casting*: Automatic type conversion (e.g., casting `OrderStatus` enums and JSON fields) ensures data integrity and simplifies data handling across the application.
 
 
 === Architectural Context: Active Record vs. Data Mapper

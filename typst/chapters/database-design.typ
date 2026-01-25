@@ -36,8 +36,9 @@ The restaurant entity serves as the root aggregate for the catalog. Employees ar
 
 The menu structure employs a hierarchical categorization strategy. A Restaurant possesses multiple `FoodTypes` (categories), which in turn contain multiple `MenuItems`.
 
-- *Cardinality*: 1 Restaurant $->$ Many Food Types $->$ Many Menu Items.
-- *Normalization*: Menu items are not directly linked to the restaurant; they inherit this association transitively through their Food Type. This design strictly adheres to the Third Normal Form, eliminating update anomalies where a category's restaurant association might contradict its items'.
+*Cardinality*: 1 Restaurant $->$ Many Food Types $->$ Many Menu Items.
+
+*Normalization*: Menu items are not directly linked to the restaurant; they inherit this association transitively through their Food Type. This design strictly adheres to the Third Normal Form, eliminating update anomalies where a category's restaurant association might contradict its items'.
 
 ==== Images
 To support rich media while maintaining schema simplicity, the system utilizes a unified `images` table linked via explicit nullable foreign keys (`restaurant_id` and `menu_item_id`). Unlike polymorphic associations (which rely on string-based `model_type` columns and cannot enforce database-level referential integrity), explicit foreign keys allow the database to strictly enforce valid relationships and support `ON DELETE CASCADE` actions.
@@ -48,7 +49,7 @@ Boolean flags (`is_primary_for_*`) are used to designate the main display image 
 Restaurants are associated with customers through a 'Review' joining table, which in addition to the foreign keys also stores review-specific attributes such as rating, comments, as well as a one-to-many relationship to the review_images table. This design allows customers to provide feedback on multiple restaurants while ensuring that each review is uniquely tied to a specific customer-restaurant pair.
 
 
-==== Ordering and Status Tracking
+Orders are represented by the *Orders* table, linked to customers with a `1-*` relationship and having a many-to-many (`*-*`) relationship to menu items. The joining table *Order Items* captures the many-to-many relationship between orders and menu items, also storing the quantity of each menu item in the order.
 Orders are represented by the *Orders* table, linked to customers with a `1-*` relationship and to `*-*` to menu items. The joining table *Order Items* captures the many-to-many relationship between orders and menu items, also storing the quantity of each menu item in the order.
 
 Order status is tracked using a dedicated *Order Statuses* dictionary table, ensuring consistent status values and supporting future extensibility. The statuses include lifecycle stages such as "In Cart", "Placed", "Accepted", "Preparing", "Ready", "Cancelled", and "Fulfilled".
@@ -61,8 +62,7 @@ The database schema handles geospatial data using standard double-precision floa
 
 === Indexing and Constraint Strategy
 Indexing and constraints are applied to match the dominant access patterns while preserving integrity.
-
-*Primary keys*: Surrogate primary keys provide stable identifiers and predictable join behaviour.
+*Primary keys*: Surrogate primary keys provide stable identifiers and predictable join behavior.
 
 *Foreign keys*: Relationship columns are indexed to support joins and to keep integrity checks efficient.
 

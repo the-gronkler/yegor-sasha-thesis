@@ -45,7 +45,7 @@ For highly specialized geospatial analyses beyond basic filtering and distance c
 
 === Comparison with Alternatives
 
-*PostgreSQL*: While PostgreSQL offers robust geospatial extentions via PostGIS, the complexity of configuring and maintaining PostGIS was deemed unnecessary for the project's specific scope (radius filtering and distance calculation). MariaDB's out-of-the-box spatial functions provided the required functionality with lower operational overhead.
+*PostgreSQL*: While PostgreSQL offers robust geospatial extensions via PostGIS, the complexity of configuring and maintaining PostGIS was deemed unnecessary for the project's specific scope (radius filtering and distance calculation). MariaDB's out-of-the-box spatial functions provided the required functionality with lower operational overhead.
 
 *MySQL*: Although the foundation for MariaDB, MySQL is governed by Oracle. MariaDB was chosen primarily because it is a fully open-source project, whereas MySQL is not considered purely open-source due to its corporate ownership and dual-licensing model.
 
