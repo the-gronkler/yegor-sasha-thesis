@@ -22,6 +22,11 @@ The system identifies several primary actors, each with distinct privileges and 
 
 == Customer-Centric Functionality
 
+#figure(
+  image("../resources/RestaurantFinderUCD_customer.png", width: 100%),
+  caption: [Use case diagram focused on customer interactions.],
+) <fig:ucd-customer>
+
 As depicted in @fig:ucd-customer, customer interactions are grouped into distinct functional modules:
 
 === Account Creation and User Methods
@@ -35,12 +40,13 @@ The "Order" module encapsulates the detailed purchasing workflow. Key interactio
 - *Cart Management*: The "View Cart" use case serves as a central hub, extended by actions to add items, remove items, or modify item quantities.
 - *Checkout*: The "Checkout" process includes the "Pay" use case, enforcing payment as a mandatory step for order completion.
 
-#figure(
-  image("../resources/RestaurantFinderUCD_customer.png", width: 100%),
-  caption: [Use case diagram focused on customer interactions.],
-) <fig:ucd-customer>
 
 == Restaurant Management Functionality
+
+#figure(
+  image("../resources/RestaurantFinderUCD_restaurant.png", width: 90%),
+  caption: [Use case diagram focused on restaurant staff interactions.],
+) <fig:ucd-restaurant>
 
 The restaurant-side operations, shown in @fig:ucd-restaurant, are divided between operational duties and administrative management.
 
@@ -54,8 +60,3 @@ The "Restaurant admin management" module provides configuration tools for the Re
 The diagram also captures automated system behaviors:
 - *Order Notifications*: The system notifies workers to accept or decline when a new order is placed.
 - *Rating Updates*: A daily process updates restaurant ratings based on aggregate review data.
-
-#figure(
-  image("../resources/RestaurantFinderUCD_restaurant.png", width: 90%),
-  caption: [Use case diagram focused on restaurant staff interactions.],
-) <fig:ucd-restaurant>
