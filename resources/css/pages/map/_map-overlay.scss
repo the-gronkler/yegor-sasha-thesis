@@ -20,6 +20,85 @@
   }
 }
 
+/* Search in this area button */
+.map-search-area-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-search-area-btn {
+  background: color.change(main-colors.$brand-primary, $alpha: 0.5);
+  color: main-colors.$text-inverse;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: 0 4px 12px map-colors.$map-shadow;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+
+  &:hover {
+    background: color.change(main-colors.$brand-primary, $alpha: 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px map-colors.$map-shadow;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid main-colors.$overlay-white-medium;
+    outline-offset: 2px;
+  }
+
+  // Detailed version with coordinates
+  &--detailed {
+    padding: 12px 16px;
+    min-width: 180px;
+
+    .map-search-area-btn__content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-search-area-btn__icon {
+      flex-shrink: 0;
+      width: 24px;
+      color: main-colors.$text-inverse;
+    }
+
+    .map-search-area-btn__text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .map-search-area-btn__title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .map-search-area-btn__coords {
+      font-size: 0.7rem;
+      font-weight: 500;
+      opacity: 0.9;
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
 .map-controls-card {
   background: map-colors.$map-card-bg;
   border: 1px solid map-colors.$map-control-border;

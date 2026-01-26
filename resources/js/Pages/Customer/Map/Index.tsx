@@ -51,6 +51,8 @@ export default function MapIndex({
     handlePickLocation,
     mapMarkers,
     reloadMap,
+    showSearchInArea,
+    searchInArea,
   } = useMapPage({ restaurants, filters, mapboxPublicKey });
 
   return (
@@ -103,6 +105,9 @@ export default function MapIndex({
             setIsPickingLocation={setIsPickingLocation}
             onManualLocation={handleMapGeolocate}
             onError={setLocationError}
+            showSearchInArea={showSearchInArea}
+            onSearchInArea={searchInArea}
+            mapCenter={viewState}
           />
           <Map
             viewState={viewState}
