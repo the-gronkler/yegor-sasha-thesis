@@ -33,9 +33,11 @@
 #include "chapters/aims-and-objectives.typ"
 #include "chapters/context.typ"
 #include "chapters/functional-requirements.typ"
-// Use Case Diagram
-// Use Case Scenarios
+#include "chapters/use-case-diagram.typ"
+#include "chapters/use-case-scenarios.typ"
 #include "chapters/non-functional-requirements.typ"
+// Security
+// Backlog issues left (very optional)
 
 // Technical chapters:
 #include "chapters/technologies/technologies.typ"  //Technologies used (for the app, not in development process)
