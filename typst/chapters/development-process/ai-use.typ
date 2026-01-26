@@ -1,33 +1,5 @@
-//  I want to write this one (ㅅ´ ˘ `) pls
-#import "../../config.typ": *
 
-= Development Process
-
-== Overview
-This chapter outlines the development process for the...
-
-== Planning
-...
-
-== Version Control
-GIt
-Github
-Trunk based
-required pull requests and code review
-
-== Documentation
-...
-
-== deployment
-Azure vm
-ssh, docker compose
-
-== Automations
-husky formatting
-deployment github action
-
-== Thesis Documentation
-Typst - allows us to manage the thesis with the same approach as the codebase.
+#import "../../config.typ": source_code_link
 
 == AI Use
 
@@ -64,9 +36,9 @@ The following techniques were utilized in this file:
 This method aims to ensure the agent follows instructions, leading to higher-quality contributions and improved consistency across the codebase. These techniques align with Copilot's Markdown-based customization for directing AI in development @VSCodeCopilotCustomizeChat.
 
 === AI in Thesis Writing
-Since the exact same processes are used for both code and thesis writing, AI was utilized in a similar manner for thesis documentation. An additional academic writing agent was created to assist with this, incorporating a context switch to focus on academic writing style and proper citations. It was used to *suggest improvements* to phrasing, grammar, and structure of the thesis content, as well as to identify potential inconsistencies.
+Since the exact same processes are used for both code and thesis writing, AI was utilized in a similar manner for thesis documentation. Within the existing agent configuration, a dedicated academic writing context switch was incorporated to focus on academic writing style and proper citations. It was used to *suggest improvements* to phrasing, grammar, and structure of the thesis content, as well as to identify potential inconsistencies.
 
-Additionally, AI was employed to generate initial drafts of _some_ sections, help with brainstorming, and aid in choosing relevant code examples from the project's codebase.
+Additionally, AI was employed to generate initial drafts of certain sections, help with brainstorming, and aid in choosing relevant code examples from the project's codebase.
 
 === Ethical Considerations
 The integration of AI into research, development, and academic writing requires strict ethical boundaries to maintain integrity. As a tool, AI was applied under the principle of mandatory human oversight, ensuring that all machine-generated outputs were verified, critiqued, and approved by the authors.
