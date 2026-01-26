@@ -174,7 +174,7 @@ The service also defines critical constants used throughout the geospatial logic
 
 - `MAX_RADIUS_KM = 100`: Maximum allowed search radius, enforced in validation
 - `DEFAULT_RADIUS_KM = 50`: Default radius when parameter is omitted
-- `KM_PER_DEGREE = 111.32`: Approximate kilometers per degree latitude for bounding box calculations
+- `KM_PER_DEGREE = 111.0`: Approximate kilometers per degree latitude for bounding box calculations
 - `EARTH_RADIUS_KM = 6371`: Earth's mean radius for Haversine fallback formula
 - `SESSION_EXPIRY_SECONDS = 86400`: 24-hour expiry for stored coordinates
 
@@ -372,7 +372,7 @@ This pattern ensures that edge cases (user in a rural area with large radius, or
 
 ==== Distance formatting and payload optimization
 
-The `GeoService` provides a centralized `formatDistance` method that converts numeric kilometer values into user-friendly strings. This abstraction ensures consistent distance presentation across all features (map, restaurant cards, search results) without duplicating formatting logic.
+The `GeoService` provides a centralized `formatDistance` method that normalizes distance values to a consistent precision. This abstraction ensures consistent distance handling across all features (map, restaurant cards, search results) without duplicating rounding logic.
 
 #code_example[
 Distance formatting is centralized in GeoService to ensure consistency across the application.
@@ -380,13 +380,13 @@ Distance formatting is centralized in GeoService to ensure consistency across th
 ```php
   <?php
 // app/Services/GeoService.php
-public function formatDistance(float $distanceKm): string
+public function formatDistance(float|string|null $distance): ?float
 {
-    if ($distanceKm < 1) {
-        return round($distanceKm * 1000) . ' m';
+    if ($distance === null) {
+        return null;
     }
 
-    return round($distanceKm, 1) . ' km';
+    return round((float) $distance, 2);
 }
 ```
 ]
@@ -550,14 +550,13 @@ The page hook triggers geolocation through the registered callback and provides 
 ```ts
 // resources/js/Hooks/useMapPage.ts
 const triggerGeolocate = useCallback(() => {
-  setLocationError(null);
-
   const ok = geolocateTriggerRef.current?.();
   if (!ok) {
-    setLocationError('Geolocation control not ready yet. Refresh and try again.');
+    setLocationError(
+      'Geolocation control not ready yet. Refresh and try again.',
+    );
     return;
   }
-
   setIsGeolocating(true);
 }, []);
 ```
@@ -724,7 +723,7 @@ const toggleSheet = () => {
 
 Selection synchronization requires careful timing. When a restaurant becomes selected (either from map click or list click), the bottom sheet must scroll the corresponding card into view. However, if the sheet is transitioning between collapsed and expanded states, measuring card positions during the transition produces incorrect offsets.
 
-The solution waits for CSS transitions to complete before measuring and scrolling. It observes `transitionend` events with a timeout fallback (500ms) to handle cases where the transition is interrupted or already complete.
+The solution waits for CSS transitions to complete before measuring and scrolling. It observes `transitionend` events with a timeout fallback (300ms) to handle cases where the transition is interrupted or already complete.
 
 #code_example[
 Auto-scroll waits for transitions to complete before measuring positions to avoid layout thrashing.
