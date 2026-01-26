@@ -183,3 +183,38 @@
 
   body
 }
+
+/// A reusable use case scenario table with consistent styling.
+#let use-case-scenario(
+  title: "",
+  actor: "",
+  purpose: "",
+  assumptions: "",
+  preconditions: "",
+  initiating-event: "",
+  basic-flow: [],
+  alternative-flow: [],
+  postconditions: "",
+  font-size: 9pt,
+  leading: 0.4em,
+) = {
+  text(size: font-size)[
+    #set par(leading: leading)
+    #table(
+      columns: (auto, 1fr),
+      stroke: 0.5pt,
+      inset: 4pt,
+      align: (left, left),
+
+      table.cell(colspan: 2, fill: rgb("#e8e8e8"))[*#title*],
+      [*Actor*], [#actor],
+      [*Purpose and Context*], [#purpose],
+      [*Assumptions*], [#assumptions],
+      [*Pre-conditions*], [#preconditions],
+      [*Initiating Business Event*], [#initiating-event],
+      [*Basic Flow of Events*], [#basic-flow],
+      [*Alternative Flow of Events*], [#alternative-flow],
+      [*Post-conditions*], [#postconditions],
+    )
+  ]
+}
