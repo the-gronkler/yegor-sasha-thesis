@@ -2,29 +2,29 @@
 
 == Map-Based Discovery Architecture <map-architecture>
 
-This section describes the high-level design and architectural patterns used in the map-based restaurant discovery feature. The focus is on component interactions, data flow, architectural patterns, and design decisions that shape the system structure - not implementation details or code-level specifics.
+The map-based restaurant discovery feature presents unique architectural challenges: geospatial queries must be bounded for performance, client and server state must remain synchronized during interactive exploration, and the UI must respond instantly to user input while respecting server-authoritative filtering rules.
 
 === Architectural Overview
 
 The map feature is designed as a client-server system where the backend produces a filtered, scored dataset and the frontend renders an interactive visualization with synchronized controls. The architecture follows a clear separation between data acquisition (backend), presentation (frontend UI components), and orchestration (frontend state management).
 
-==== Component Topology
+==== Layer Topology
 
-The system consists of six primary components:
+The map feature is organized into six architectural layers:
 
-/ Backend Controller Layer: Handles HTTP requests, validates inputs, orchestrates the three-phase query pipeline, and returns JSON responses via Inertia.
+/ Map Controller Layer: Handles map discovery requests, validates geospatial inputs, orchestrates the three-phase query pipeline, and returns the filtered restaurant dataset.
 
-/ Geospatial Service Layer: Encapsulates domain logic for distance calculations, bounding box computation, coordinate validation, and session management.
+/ Geospatial Service Layer: Encapsulates distance calculations, bounding box computation, coordinate validation, and location session management for the map feature.
 
-/ Database Layer: Stores restaurant entities with geographic coordinates and supports spatial queries via MariaDB functions.
+/ Spatial Query Layer: Executes proximity-based restaurant selection using MariaDB spatial functions and indexed coordinate columns.
 
-/ Frontend Page Layer: Composes the UI from specialized components and delegates business logic to hooks.
+/ Map Page Layer: Composes the map UI from specialized partials (overlay, bottom sheet, popup) and delegates geospatial logic to the map hook.
 
-/ Frontend State Management: Manages view state (camera position), selection state (active restaurant), and geolocation state using React hooks.
+/ Map State Management: Manages camera state (position, zoom), selection state (active restaurant), and geolocation flow using a dedicated hook.
 
-/ Map Visualization Layer: Renders an interactive Mapbox map with clustering, popups, and marker layers.
+/ Map Visualization Layer: Renders the interactive Mapbox canvas with GeoJSON sources, clustering layers, and marker interactions.
 
-These components communicate through well-defined interfaces: the controller exposes a REST-like endpoint, the service provides stateless methods, and frontend components interact via props and callbacks.
+These layers communicate through well-defined interfaces: the controller exposes a REST-like endpoint, the service provides stateless methods, and frontend layers interact via props and callbacks.
 
 === Backend Architecture Patterns
 
@@ -58,7 +58,7 @@ Key guarantee: Scores are computed exactly once and ordering happens in the data
 
 ==== Service Layer Abstraction
 
-The geospatial logic is isolated in a `GeoService` class that provides stateless methods for domain-specific operations. This follows the Domain Service pattern from Domain-Driven Design: logic that doesn't naturally belong to an entity or value object is extracted into a service.
+The geospatial logic is isolated in a dedicated service class that provides stateless methods for domain-specific operations. This follows the Domain Service pattern from Domain-Driven Design: logic that does not naturally belong to an entity or value object is extracted into a service.
 
 The service exposes methods for:
 - Bounding box calculation (approximates lat/lng deltas from radius)
@@ -69,13 +69,20 @@ This abstraction allows controllers to remain focused on HTTP request handling w
 
 ==== Session-Based Location Persistence
 
-User location is persisted in the Laravel session under the key `geo.last`. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after 24 hours and is not permanently stored).
+User location is persisted in the server-side session with an expiry timestamp. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after a configurable period and is not permanently stored).
 
 The session pattern follows a read-through cache model:
-1. Controller requests location from service
-2. Service checks session for valid (non-expired) coordinates
-3. If present and fresh, return; otherwise return `null`
-4. Controller falls back to default center (Warsaw)
+
+```
+Controller                    Service                     Session
+    │                            │                           │
+    ├──── getLocation() ────────►│                           │
+    │                            ├──── read & validate ─────►│
+    │                            │◄─── coordinates/null ─────┤
+    │◄─── location/null ─────────┤                           │
+    │                            │                           │
+    ▼ (if null: use default)     │                           │
+```
 
 This design keeps the controller simple (request → service → fallback) while encapsulating session validation logic in the service layer.
 
@@ -105,28 +112,28 @@ MapIndex (Page Component - Orchestration)
     └── RestaurantCard (Component - List Item)
 ```
 
-This hierarchy enforces single responsibility:
+This hierarchy follows the single responsibility principle:
 - The page component composes layout and wires props
 - The hook owns state and performs side effects (Inertia navigation, geolocation)
 - Each UI component focuses on one interaction surface (overlay controls, map canvas, list)
 
-==== State Management Architecture
+=== State Management Architecture
 
-State is distributed across three layers, each with a specific responsibility:
+State in the map feature is distributed across three layers, each with a specific responsibility:
 
 *Server State (Inertia Props):*
 
 Authoritative data from backend: restaurant array, filter metadata (lat, lng, radius). Updated via Inertia partial reloads when filters change. The server is the single source of truth for the dataset.
 
-*Page State (useMapPage Hook):*
+*Page State (Map Hook):*
 
-Manages client-side state: view state (camera position), selection state (active restaurant ID), geolocation state (loading/error), and search query (fuzzy filter). This state is ephemeral - it doesn't persist across page reloads and isn't sent to the server.
+Manages client-side state: view state (camera position), selection state (active restaurant ID), geolocation state (loading/error), and search query (fuzzy filter). This state is ephemeral - it does not persist across page reloads and is not sent to the server.
 
 *Global State (React Context):*
 
-Cart state is shared globally via Context API. This state must be accessible from navigation, restaurant menus, and the cart page. The Context pattern avoids prop drilling while keeping state simple (no Redux boilerplate needed).
+Cart state is shared globally via Context API. This state must be accessible from navigation, restaurant menus, and the cart page. The Context pattern avoids prop drilling while keeping state simple (no external state library boilerplate needed).
 
-This layered approach follows the principle of state locality: keep state as close as possible to where it's used, but share globally only when necessary.
+This layered approach follows the principle of state locality: keep state as close as possible to where it is used, but share globally only when necessary.
 
 ==== Data Flow and Synchronization
 
@@ -208,7 +215,7 @@ The architecture uses a two-stage spatial filter:
 
 This reflects the architectural tradeoff between index efficiency and computation cost. Bounding box queries use simple indexed range scans, reducing the candidate set before expensive spherical distance calculations. The HAVING clause ensures accuracy while benefiting from the reduced dataset.
 
-Alternative architectures (spatial indexes on geometry columns, R-tree indexes) were not chosen because they require schema changes and don't benefit `ST_Distance_Sphere` on coordinate columns.
+Alternative architectures (spatial indexes on geometry columns, R-tree indexes) were not chosen because they require schema changes and do not benefit `ST_Distance_Sphere` on coordinate columns.
 
 ==== Payload Shaping and Lazy Loading
 
@@ -217,7 +224,7 @@ The architecture deliberately separates discovery data from detail data:
 - Map endpoint loads: restaurant metadata, single primary image, distance, score
 - Map endpoint omits: full menu hierarchy, all images, reviews
 
-This reflects the architectural principle of "load what you display". The map UI doesn't render menus, so loading them wastes bandwidth. When users click a restaurant, a separate detail page loads the full dataset.
+This reflects the architectural principle of "load what you display". The map UI does not render menus, so loading them wastes bandwidth. When users click a restaurant, a separate detail page loads the full dataset.
 
 This pattern follows a lazy loading architecture: load minimal data eagerly for browsing, fetch detailed data on-demand for interaction.
 
@@ -251,8 +258,6 @@ These guarantees reflect deliberate architectural choices that prioritize predic
 
 ==== Inertia.js Bridge Pattern
 
-// TODO: Check this once we write the general section about Inertia to avoid duplication and make sure thesis flows well.
-
 The architecture uses Inertia as a bridge between Laravel (server) and React (client), providing SPA-like navigation without API route duplication. Key architectural benefits:
 
 - Single routing definition (Laravel routes serve both HTML and JSON)
@@ -271,7 +276,7 @@ The map visualization uses a layered architecture:
 *Visual Layers:* Cluster circles, point circles, selected point overlay
 *Interaction Layer:* Click handlers, hover effects, popup management
 
-This separation allows independent control: data updates don't require re-configuring layers, and visual styling changes don't affect data structure. The architecture uses Mapbox's declarative layer system rather than imperative canvas drawing, enabling GPU-accelerated rendering.
+This separation allows independent control: data updates do not require re-configuring layers, and visual styling changes do not affect data structure. The architecture uses Mapbox's declarative layer system rather than imperative canvas drawing, enabling GPU-accelerated rendering.
 
 === Scalability and Performance Architecture
 

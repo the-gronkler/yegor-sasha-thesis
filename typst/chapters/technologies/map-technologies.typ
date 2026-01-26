@@ -2,7 +2,7 @@
 
 == Map-Based Discovery: Technology Selection <map-technologies>
 
-The map-based restaurant discovery feature required careful technology selection to address geospatial computation, interactive visualization, real-time user interaction, and performance at scale. This section discusses the strategic technology choices made for this feature, focusing on the rationale behind each decision and the alternatives considered.
+This section presents the technology choices for the map-based restaurant discovery feature and the rationale behind each decision.
 
 === Backend Geospatial Technologies
 
@@ -26,25 +26,9 @@ MariaDB's `ST_Distance_Sphere` was selected because it provides sufficient accur
 
 A numerically-stable Haversine implementation in SQL serves as a fallback for database engines lacking `ST_Distance_Sphere`. This ensures the application remains portable while preferring the optimized native function when available. The fallback uses `GREATEST`/`LEAST` clamping to prevent `NaN` results from floating-point rounding errors in the `ACOS` function.
 
-==== GeoService Abstraction Layer
+=== Frontend Technologies
 
-*Decision:* Centralize all geospatial logic in a dedicated `GeoService` class rather than scattering calculations across controllers and models.
-
-*Rationale:*
-
-Geospatial calculations involve domain-specific constants (Earth radius, kilometers per degree, coordinate clamping bounds) and reusable algorithms (bounding box computation, distance formatting, session management). Three architectural patterns were considered:
-
-/ Controller-level logic: Implement calculations directly in controllers. Simple but leads to duplication when multiple controllers need geospatial features.
-
-/ Model scopes: Implement as Eloquent scopes on the Restaurant model. Clean for queries but awkward for non-query operations like bounding box calculation and session management.
-
-/ Dedicated service class: Centralize all geospatial logic in a single service. Requires dependency injection but provides a single source of truth.
-
-The service pattern was chosen because it provides clear separation of concerns, makes testing easier (mock the service rather than database calls), and enables consistent configuration (all constants defined once). The service exposes methods for bounding box calculation, distance formatting, and session persistence, keeping controllers focused on request orchestration rather than domain logic.
-
-=== Frontend Visualization Technologies
-
-==== Mapbox GL JS
+==== Map Visualization: Mapbox GL JS
 
 *Decision:* Use Mapbox GL JS for interactive map rendering rather than Google Maps, Leaflet, or OpenLayers.
 
@@ -81,9 +65,7 @@ Google Maps was seriously considered due to its ubiquity and familiarity to user
 
 The alternative - using Mapbox GL JS directly with `useEffect` hooks - would require manual imperative management of map instances, event listeners, and cleanup. The declarative wrapper reduces boilerplate and prevents common bugs (memory leaks from unremoved listeners, stale closures, race conditions in async initialization).
 
-=== State Management Technologies
-
-==== React Context API for Cart State
+==== State Management: React Context API
 
 *Decision:* Use React Context API for global cart state rather than Redux, Zustand, or prop drilling.
 
@@ -99,9 +81,9 @@ The cart state must be accessible from multiple surfaces (navigation badge, rest
 
 / React Context API: Built-in React feature for sharing state across components. Zero dependencies, TypeScript-friendly, integrates naturally with hooks.
 
-Context API was chosen because the cart state is simple (items array, derived totals), updates are localized (not high-frequency), and React 18's optimizations minimize re-render concerns. The Context provides `addItem`, `removeItem`, and `updateQuantity` methods that handle Inertia requests with optimistic updates, giving a snappy UI without Redux complexity.
+Context API was chosen because the cart state is simple (items array, derived totals), updates are localized (not high-frequency), and React 18's optimizations minimize re-render concerns. The Context provides methods for adding, removing, and updating items that handle server requests with optimistic updates, providing a responsive UI without external state library complexity.
 
-==== Inertia.js Partial Reloads
+==== Data Fetching: Inertia.js Partial Reloads
 
 *Decision:* Use Inertia's `only` prop to reload specific page props rather than full page refreshes.
 
@@ -135,7 +117,7 @@ User location should persist across visits (for convenience) but expire after 24
 
 / Laravel session: Built-in, database-backed (or file/Redis-backed), expires automatically, accessible in controllers via `$request->session()`.
 
-Laravel session was chosen because it requires no additional infrastructure, respects existing session expiry configuration, and keeps location data server-authoritative (preventing client-side tampering). The session key `geo.last` stores latitude, longitude, and timestamp, allowing the controller to validate freshness before use.
+Laravel session was chosen because it requires no additional infrastructure, respects existing session expiry configuration, and keeps location data server-authoritative (preventing client-side tampering). The session stores latitude, longitude, and timestamp, allowing the controller to validate freshness before use.
 
 === Performance Optimization Technologies
 
@@ -145,7 +127,7 @@ Laravel session was chosen because it requires no additional infrastructure, res
 
 *Rationale:*
 
-The bounding box prefilter uses range queries (`BETWEEN`) on latitude and longitude independently. MariaDB's query optimizer can use index merge to combine separate indexes efficiently. Spatial indexes (R-tree) would optimize geometric operations but aren't used because `ST_Distance_Sphere` operates on raw coordinates, not geometry columns. Composite `(latitude, longitude)` indexes don't benefit range queries on both columns.
+The bounding box prefilter uses range queries (`BETWEEN`) on latitude and longitude independently. MariaDB's query optimizer can use index merge to combine separate indexes efficiently. Spatial indexes (R-tree) would optimize geometric operations but are not used because `ST_Distance_Sphere` operates on raw coordinates, not geometry columns. Composite `(latitude, longitude)` indexes do not benefit range queries on both columns.
 
 The chosen strategy - separate single-column indexes - allows MariaDB to use index merge optimization for bounding box filters, reducing the candidate set before expensive distance calculations.
 
@@ -171,5 +153,5 @@ This follows the principle of "load only what you display" - menu data is loaded
 
 / Performance: Separate lat/lng indexes for bounding box queries, strategic eager loading to minimize payload size.
 
-These choices prioritize developer productivity (leveraging built-in framework features), user experience (smooth interactions, fast loads), and maintainability (single source of truth for geospatial logic, declarative UI components).
+These choices prioritize developer productivity (leveraging built-in framework features), user experience (smooth interactions, fast loads), and maintainability (declarative UI components, minimal external dependencies).
 
