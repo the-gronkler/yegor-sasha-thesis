@@ -39,7 +39,7 @@
     number-align: right,
   )
   // Use a modern, professional sans-serif font for the whole document
-  set text(font: ("Segoe UI", "Arial", "Calibri"), lang: "en", size: 12pt)
+  set text(font: ("Segoe UI", "Arial", "Calibri"), lang: "en", size: 12pt, hyphenate: false)
 
   // Title page.
   page(
@@ -139,6 +139,17 @@
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
     it
+  }
+
+  // Styling for lower-level headings to be less pronounced
+  show heading: it => {
+    if it.level >= 4 {
+      set text(weight: "semibold", size: 1em)
+      set align(left)
+      it
+    } else {
+      it
+    }
   }
 
   // Links
