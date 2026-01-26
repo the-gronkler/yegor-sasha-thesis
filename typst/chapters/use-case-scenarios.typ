@@ -1,17 +1,18 @@
 = Use Case Scenarios
 
 This chapter briefly describes the main scenarios supported by the system.
- The scenarios complement the use case diagrams in the previous chapter by explaining typical user flows and key alternatives.
+The scenarios complement the use case diagrams in the previous chapter by explaining typical user flows and key alternatives.
 
 == UC1: Finding a Restaurant
 
-The following scenario describes how a customer can find a restaurant using the map-based index page.
-As it can be seen from the digram assumptions (@fig:ucs-finding-restaurant), the customer does not need to be logged in to search for restaurants and view their details in order to find a restaurant of interest.
-In the main flow, the customer can use the map to locate restaurants in their area, click on a restaurant marker to view a brief overview, and then navigate to the restaurant's detail page for more information.
-However, if the customer does not want to give the system access to their location, they can search for the restaurants on the map as displayed in the first alternative flow.
- The alternative geolocation flow allows the customer to manually enter a location (e.g., city or address) to center the map and find nearby restaurants, or click to select a location on the map (was excluded from the scenario for simplicity).
-Also it should be possible to find restaurants using the collapsible list view instead of the map, as indicated in the second alternative flow in the diagram.
- In addition to that, the customer can use the search bar to filter restaurants by name, but this is not explicitly shown in the diagram for simplicity.
+The following scenario describes the process through which a restaurant is identified using the map-based index page.
+As indicated by the diagram assumptions (@fig:ucs-finding-restaurant), authentication is not required to search for restaurants and view their details when identifying a restaurant of interest.
+In the main flow, restaurants are located via the map, a restaurant marker is selected to display a brief overview, and the restaurant detail page is then opened to obtain additional information.
+If geolocation permission is not granted, restaurants are searched on the map as illustrated in the first alternative flow.
+In the alternative geolocation flow, the user centers the map in a location of his interest and identify nearby restaurants with the use of "Search here" button.
+Alternatively, a location may be selected directly on the map by clicking or by writing the cordinates (omitted for simplicity).
+Restaurants may also be identified via the collapsible list view rather than the map, as shown in the second alternative flow in the diagram.
+Additionally, filtering by restaurant name is supported via the search bar; this option is omitted from the diagram for simplicity.
 
 #figure(
   image("../resources/FindingRestaurantUCScenario.png", width: 95%),
@@ -21,13 +22,15 @@ Also it should be possible to find restaurants using the collapsible list view i
 
 == UC2: Creating an Order
 
-This scenario covers the typical ordering flow: selecting a restaurant, adding items to the cart, adjusting quantities, proceeding to checkout, and paying via the payment provider.
-In the main flow, the customer browses the restaurant's menu, adds desired items to the cart, reviews the order in the cart page, and then proceeds to checkout where they provide payment details (which is mocked right now) and confirms all the details of the order.
-If the customer is not logged in, they are prompted to log in or register before proceeding to checkout, which is not shown in the diagram for simplicity (we assume the customer is logged in in the main flow).
-- The first alternative flow describes how the customer is able to view the menu items separately in the menu-item detail page, where they can also add items to the cart.
-- Then, the second alternative flow illustrates how the customer can modify the order in the cart by adjusting item quantities or removing items before proceeding to checkout.
-- The third alternative flow shows that the customer can add a special note (instructions) to the order during checkout.
-- Finally, the last alternative flow indicates how the system hadles a case where an item in the cart becomes unavailable before the order is confirmed (e.g., due to stock issues); in this case, the customer is prompted to adjust their order accordingly.
+This scenario describes the typical ordering flow, including restaurant selection, item addition to the cart, quantity adjustment, checkout, and a mocked payment via the payment provider.
+In the main flow, the restaurant menu is browsed, selected items are added to the cart, the order is reviewed on the cart page, and checkout is initiated.
+During checkout, payment details are provided (currently mocked) and the order details are confirmed.
+If the customer is not authenticated, log in or register is required before proceeding to checkout,
+which is not shown in the diagram for simplicity (it is assumed the customer is logged in in the main flow).
+- In the first alternative flow, menu items are viewed on the menu-item detail page, and items are added to the cart from that page.
+- In the second alternative flow, the order is modified in the cart by adjusting item quantities or removing items prior to checkout.
+- In the third alternative flow, a special note (instructions) is added to the order during checkout.
+- In the final alternative flow, unavailability of an item prior to order confirmation (e.g., due to stock issues) is handled by prompting for order adjustments before confirmation can proceed.
 
 #figure(
   image("../resources/CreatingAnOrderUCScenario.png", width: 95%),
@@ -36,7 +39,7 @@ If the customer is not logged in, they are prompted to log in or register before
 
 == UC3: Order Management
 
-*TODO: Finalize this scenario description and align it with the implemented order lifecycle (e.g., accept/decline, preparing, ready, completed/cancelled).*
+This scenario outlines the process of managing incoming orders from the perspective of restaurant staff.
 
 #figure(
   image("../resources/OrderManagementUCScenario.png", width: 95%),
