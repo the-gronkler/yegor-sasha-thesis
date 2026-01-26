@@ -1,6 +1,6 @@
 = Use Case Diagram
 
-This chapter presents the system's use cases from the perspective of its primary actors. The use case diagram provides a high-level view of the main functionalities described in the "Functional Requirements" chapter and serves as a bridge between requirements and technical design.
+This chapter presents the system's use cases from the perspective of its primary actors. The use case diagram provides a high-level view of the main functionalities described in the #link(<chap:functional-requirements>)[Functional Requirements] chapter and serves as a bridge between requirements and technical design.
 
 @fig:ucd-full illustrates the comprehensive set of interactions for both customers and restaurant staff. For clarity, the diagram is further decomposed into two focused views: @fig:ucd-customer, which highlights customer-facing operations, and @fig:ucd-restaurant, which details restaurant management workflows.
 
