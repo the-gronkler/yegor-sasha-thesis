@@ -24,7 +24,9 @@ MariaDB's `ST_Distance_Sphere` was selected because it provides sufficient accur
 
 *Fallback Strategy:*
 
-A numerically-stable Haversine implementation in SQL serves as a fallback for database engines lacking `ST_Distance_Sphere`. This ensures the application remains portable while preferring the optimized native function when available. The fallback uses `GREATEST`/`LEAST` clamping to prevent `NaN` results from floating-point rounding errors in the `ACOS` function.
+The application provides a configurable distance calculation mechanism through the `geo.distance_formula` configuration option. The Restaurant model's `scopeWithDistanceTo` method respects this setting and can switch between MariaDB's `ST_Distance_Sphere` function and a numerically-stable Haversine implementation (using `GREATEST`/`LEAST` clamping around trigonometric operations to prevent `NaN` results from floating-point rounding errors in the `ACOS` function).
+
+However, the map discovery feature's current implementation uses `ST_Distance_Sphere` directly in its query pipeline for performance optimization reasons (avoiding scope overhead in multi-phase queries with derived tables). This means the map feature assumes MariaDB 10.1+ availability. Portability to database engines lacking `ST_Distance_Sphere` would require refactoring the MapController's distance calculations to leverage the configurable scope mechanism or implement an equivalent conditional expression within the controller's raw SQL queries.
 
 === Frontend Technologies
 

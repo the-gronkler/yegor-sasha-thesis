@@ -2,7 +2,7 @@
 
 == Map-Based Discovery Architecture <map-architecture>
 
-The map-based restaurant discovery feature presents unique architectural challenges: geospatial queries must be bounded for performance, client and server state must remain synchronized during interactive exploration, and the UI must respond instantly to user input while respecting server-authoritative filtering rules.
+This section outlines the architectural design of the map-based restaurant discovery feature, covering the component topology, backend processing pipeline, frontend state management, data flow patterns, architectural guarantees, integration with Inertia and Mapbox, and scalability considerations.
 
 === Architectural Overview
 
@@ -30,31 +30,19 @@ These layers communicate through well-defined interfaces: the controller exposes
 
 ==== Three-Phase Processing Pipeline
 
-The backend controller implements a deterministic three-phase architecture that separates concerns and enforces strict semantic guarantees:
+The map-based restaurant discovery feature requires a backend processing strategy that balances conflicting requirements: results must prioritize geographic proximity (respecting user-defined radius constraints), while simultaneously ranking restaurants by quality indicators (ratings, review counts). Additionally, the system must handle multiple input sources for the center point (explicit search coordinates, persistent user location, or default fallback) and ensure consistent, deterministic behavior across requests.
 
-*Phase A: Input Normalization*
+To address these requirements, a deterministic three-phase processing pipeline was developed. This architecture separates input normalization, proximity-based filtering, and quality-based ranking into distinct sequential phases, ensuring that geographic constraints are enforced before quality scoring is applied. This separation prevents high-rated distant restaurants from displacing lower-rated nearby options, maintaining spatial coherence in the result set.
 
-Responsibility: Resolve a single center point from multiple possible input sources.
+The three phases serve distinct architectural responsibilities:
 
-Design rationale: Different user interactions provide coordinates through different request parameters (search center, user location, session). Rather than scattering priority logic across the controller, Phase A centralizes it in a dedicated normalization method. This ensures consistent behavior regardless of how the request originated.
+*Phase A: Input Normalization* - Resolves a single center point from multiple possible input sources (search center, user location, session, default) using a deterministic priority cascade. This centralization ensures consistent behavior regardless of how the request originated.
 
-Key guarantee: Exactly one center point emerges, with a clear priority order that prioritizes explicit user intent (search) over persistent context (session).
+*Phase B: Proximity-First Selection* — Selects up to 250 restaurant IDs based solely on distance from center, enforcing radius as a hard SQL constraint. This phase is quality-agnostic: it ignores restaurant ratings, review counts, and popularity metrics, establishing a geographically-bounded candidate set before any quality-based ranking occurs.
 
-*Phase B: Proximity-First Selection*
+*Phase C: Quality-Based Ranking* - Hydrates full restaurant models and computes composite quality scores entirely in SQL using derived tables. Within the geographically-bounded set from Phase B, restaurants are ordered by quality (rating 50%, review count 30%, proximity 20%) with distance as a tiebreaker.
 
-Responsibility: Select up to 250 restaurant IDs based solely on distance from center, enforcing radius as a hard limit.
-
-Design rationale: If selection and ranking happened simultaneously, high-rated distant restaurants could displace lower-rated nearby restaurants, violating user expectations about radius filters. By selecting purely on proximity first, Phase B establishes a geographically-bounded candidate set. The use of SQL `HAVING` ensures the radius limit is enforced *before* the result limit, guaranteeing "up to N within radius" semantics rather than "N closest overall".
-
-Key guarantee: When `radius > 0`, no restaurant beyond that distance can appear in results, regardless of its quality score.
-
-*Phase C: Quality-Based Ranking*
-
-Responsibility: Hydrate full restaurant models, compute composite quality scores, and order by score with distance as a tiebreaker.
-
-Design rationale: Within the geographically-bounded set from Phase B, users want to see the "best" restaurants first. Phase C computes a weighted composite score (rating 50%, review count 30%, proximity 20%) entirely in SQL using derived tables. This approach avoids N+1 queries, eliminates redundant distance calculations, and leverages database query optimization for ordering.
-
-Key guarantee: Scores are computed exactly once and ordering happens in the database, ensuring no PHP post-processing can accidentally change result order.
+This separation enforces the architectural guarantee that radius constraints are absolute: when `radius > 0`, no restaurant beyond that distance can appear in results, regardless of its quality score. The three-phase boundary prevents implementation drift where quality-based filtering could accidentally violate geographic constraints.
 
 ==== Service Layer Abstraction
 
@@ -71,6 +59,7 @@ This abstraction allows controllers to remain focused on HTTP request handling w
 
 User location is persisted in the server-side session with an expiry timestamp. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after a configurable period and is not permanently stored).
 
+#block(breakable: false)[
 The session pattern follows a read-through cache model:
 
 ```
@@ -85,11 +74,13 @@ Controller                    Service                     Session
 ```
 
 This design keeps the controller simple (request → service → fallback) while encapsulating session validation logic in the service layer.
+]
 
 === Frontend Architecture Patterns
 
 ==== Component Hierarchy and Separation of Concerns
 
+#block(breakable: false)[
 The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
 // TODO: Change the text diagram below to an actual diagram if needed.
 ```
@@ -116,6 +107,7 @@ This hierarchy follows the single responsibility principle:
 - The page component composes layout and wires props
 - The hook owns state and performs side effects (Inertia navigation, geolocation)
 - Each UI component focuses on one interaction surface (overlay controls, map canvas, list)
+]
 
 === State Management Architecture
 

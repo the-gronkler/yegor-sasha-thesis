@@ -20,23 +20,24 @@ The main implementation artifacts are:
 
 The map feature is a discovery surface, not a full restaurant-detail view. Translating this goal into code-level constraints shaped both the endpoint and the UI behavior.
 
-First, requests must remain performant under large datasets. Client-side rendering and clustering scale poorly when payload size grows without bounds, therefore the backend enforces a hard upper bound of _250 restaurants per request_. This protects database workload, response serialization time, and Mapbox rendering performance.
+*Performance bounds:* Client-side rendering and clustering scale poorly when payload size grows without bounds, therefore the backend enforces a hard upper bound of _250 restaurants per request_. This protects database workload, response serialization time, and Mapbox rendering performance.
 
-Second, the feature distinguishes two conceptually different locations:
+*Dual location semantics:* The feature distinguishes two conceptually different locations:
 
-/ *User location* (`lat`/`lng`): The user’s real location context, persisted in session to support continuity across visits.
-/ *Search center* (`search_lat`/`search_lng`): A temporary exploration center used by the “Search here” interaction.
+/ *User location* (`lat`/`lng`): The user's real location context, persisted in session to support continuity across visits.
+/ *Search center* (`search_lat`/`search_lng`): A temporary exploration center used by the "Search here" interaction.
 
-This separation ensures that exploring another area does not overwrite the user’s persisted location.
-Third, radius filtering must be deterministic. If a radius is specified, no restaurants outside that radius may appear in results. This is enforced at the SQL level (not post-filtered in PHP), so the semantic meaning of “within radius” cannot drift.
+This separation ensures that exploring another area does not overwrite the user's persisted location.
 
-Fourth, location acquisition must degrade gracefully. The feature must remain usable when geolocation is denied or unavailable; therefore it provides a safe default center (Warsaw) and manual alternatives (coordinate entry and map click picking).
+*Deterministic radius filtering:* If a radius is specified, no restaurants outside that radius may appear in results. This is enforced at the SQL level (not post-filtered in PHP), so the semantic meaning of "within radius" cannot drift.
 
-Fifth, results must be ordered by “best”, not only by proximity. Users expect high-rated and popular restaurants to appear first, but still inside their selected discovery area. This motivates a two-stage approach: proximity-first selection, then quality-first ranking.
+*Graceful location degradation:* The feature must remain usable when geolocation is denied or unavailable; therefore it provides a safe default center (Warsaw) and manual alternatives (coordinate entry and map click picking).
 
-Sixth, selection must remain synchronized between surfaces. Selecting a restaurant on the map must highlight it in the list (and open a popup), and selecting a restaurant in the list must move the map camera to that point.
+*Quality-first ordering within proximity bounds:* Users expect high-rated and popular restaurants to appear first, but still inside their selected discovery area. This motivates a two-stage approach: proximity-first selection, then quality-first ranking.
 
-These constraints map directly to the controller’s deterministic three-phase pipeline and to the frontend’s separation of responsibilities between orchestration, state management, and UI components.
+*Synchronized selection across surfaces:* Selecting a restaurant on the map must highlight it in the list (and open a popup), and selecting a restaurant in the list must move the map camera to that point.
+
+These constraints map directly to the controller's deterministic three-phase pipeline and to the frontend's separation of responsibilities between orchestration, state management, and UI components.
 
 === Backend implementation: deterministic three-phase processing
 
@@ -48,7 +49,7 @@ Phase A: _Normalize center coordinates_
 Determine exactly one center point for the request using a priority cascade (search center, user location, session, default). Only real user location updates session.
 
 Phase B: _Select nearest restaurant IDs_
-Select up to 250 restaurant IDs purely by distance, enforcing a hard radius limit if `radius > 0`. This phase is intentionally quality-agnostic.
+Select up to 250 restaurant IDs purely by distance, enforcing a hard radius limit if `radius > 0`. This phase is intentionally quality-agnostic: it does not consider restaurant ratings, review counts, or popularity metrics. Selection is based exclusively on geographic proximity to ensure the radius constraint is enforced before any quality-based filtering occurs.
 
 Phase C: _Hydrate models and order by quality_
 Compute a composite score _once_ in SQL (using derived tables), join it back to the restaurants table for Eloquent hydration, and order by score (DESC) with distance as a tie-breaker.
@@ -397,11 +398,11 @@ The controller also implements aggressive payload optimization by limiting eager
 
 The frontend is structured to keep responsibilities explicit and maintainable:
 
-- #source_code_link("resources/js/Pages/Customer/Map/Index.tsx") is the controller-like entry view. It composes layout and delegates all business logic to the hook.
+- #source_code_link("resources/js/Pages/Customer/Map/Index.tsx") is the orchestrator entry view. It composes layout and delegates all business logic to the hook.
 - #source_code_link("resources/js/Hooks/useMapPage.ts") is the logic hook. It owns state (view, selection, geolocation) and performs Inertia navigation.
 - Specialized UI components handle presentation and user input: #source_code_link("resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx"), #source_code_link("resources/js/Components/Shared/Map.tsx"), #source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx"), and #source_code_link("resources/js/Components/Shared/MapPopup.tsx").
 
-This separation aligns with the intent documented in the code comments: the page stays declarative, complex behavior lives in a dedicated hook, and UI components remain focused on one responsibility each.
+This separation ensures that the page remains declarative, complex behavior is handled by a dedicated hook, and UI components focus on one responsibility each, aligning with the separation of concerns principle.
 
 ==== Entry composition: MapLayout + Overlay + Map + BottomSheet
 
