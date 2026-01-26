@@ -1,2 +1,4 @@
+ #import "../../config.typ": *
+
 == Planning
 ...

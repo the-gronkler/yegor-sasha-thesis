@@ -37,10 +37,10 @@ Compared to visual editors like Microsoft Word or Google Docs, Typst aligns with
 
 The thesis source code resides in the `typst/` directory within the main project repository. This co-location ensures that the documentation evolves in lockstep with the application. The structure mirrors a modular software architecture:
 - *main.typ*: The entry point that orchestrates the compilation of chapters.
-- *config.typ*: Centralized configuration for macros and accepted constants.
+- *config.typ*: Centralized configuration for helper functions and shared constants.
 - *template.typ*: Defines the visual styling, layout, and typography rules.
 - #strong("chapters/"): Individual chapters are separated into distinct files to minimize merge conflicts and facilitate parallel writing.
 
 === Workflow and Versioning
 
-Strictly adhering to the protocols outlined in the Version Control section, the thesis manuscript is managed with the same rigorous Git workflow as the application codebase. All textual modifications are isolated in feature branches (e.g., #raw("docs/chapter-name")) and submitted via Pull Requests. This ensures that the academic content is subject to mandatory quality assurance - including automated formatting checks and most importantly  *peer review* - prior to integration. This discipline guarantees a transparent history of the document's evolution and facilitates structured collaboration between authors.
+Strictly adhering to the protocols outlined in the Version Control section, the thesis manuscript is managed with the same rigorous Git workflow as the application codebase. All textual modifications are isolated in feature branches (e.g., #raw("docs/chapter-name")) and submitted via Pull Requests. This ensures that the academic content is subject to mandatory quality assurance - including automated formatting checks and most importantly *peer review* - prior to integration. This discipline guarantees a transparent history of the document's evolution and facilitates structured collaboration between authors.

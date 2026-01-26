@@ -62,7 +62,7 @@ Where:
   - Specific feature names or subscopes (e.g., `FE/menu-card`, `BE/order-processing`)
 - *description* provides a concise, imperative summary of the change
 
-While the standard Conventional Commit format is preferred, the slash-delimited alternative (`type/scope/description`) is also accepted. It is accepted mainly because it aligns with *tooling defaults* - platforms like GitHub and VS Code often suggest the branch name as the default Pull Request title, ensuring the suggestion is automatically a valid commit message. Additionally, this format improves *typing efficiency* by eliminating the need for shift-keyed characters and offers *hierarchical clarity* by representing feature contexts as paths (e.g., `feat/FE/auth/login`) that map logically to the modular directory structure.
+While the standard Conventional Commit format is preferred, the slash-delimited alternative (`type/scope/description`) is also accepted. This alternative format is accepted mainly because it aligns with *tooling defaults* - platforms like GitHub and VS Code often suggest the branch name as the default Pull Request title, ensuring the suggestion is automatically a valid commit message. Additionally, this format improves *typing efficiency* by eliminating the need for shift-keyed characters and offers *hierarchical clarity* by representing feature contexts as paths (e.g., `feat/FE/auth/login`) that map logically to the modular directory structure.
 
 Examples include:
 - `feat(FE): implement restaurant menu card component`
