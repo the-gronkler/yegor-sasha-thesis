@@ -2,9 +2,10 @@
 
 = System Architecture
 
+
+#include "data-persistence.typ"
+
 #include "employee-customer.typ"
 
 #include "real-time-events.typ"
-
-// #include "database-schema.typ"
 
