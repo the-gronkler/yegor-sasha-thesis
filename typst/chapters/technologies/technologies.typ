@@ -4,6 +4,8 @@
 
 #include "laravel-backend.typ"
 
+#include "react-frontend.typ"
+
 #include "realtime.typ"
 
 // #include "mariadb.typ"
