@@ -2,6 +2,8 @@
 
 = Technologies Used
 
+#include "laravel-backend.typ"
+
 #include "realtime.typ"
 
 // #include "mariadb.typ"
