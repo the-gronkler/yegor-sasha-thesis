@@ -18,6 +18,14 @@ When selecting a backend framework, three primary candidates were evaluated: Lar
 
 *Learning Curve and Team Familiarity* — The development team possessed prior experience with PHP and Laravel conventions. Leveraging existing knowledge reduced ramp-up time and minimized the risk of architectural missteps common when adopting unfamiliar frameworks.
 
+=== Addressing PHP Misconceptions
+
+A common criticism in developer communities characterizes PHP as an outdated or poorly designed language. While early PHP versions lacked modern language features and encouraged inconsistent practices, PHP 8.x represents a fundamentally different language. Modern PHP includes strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties — features comparable to those in contemporary languages.
+
+Laravel amplifies these improvements through its documentation and ecosystem. The Laravel documentation is widely regarded as among the best in the web development industry, providing comprehensive guides, practical examples, and clear explanations for every framework feature. This documentation quality significantly reduces onboarding time and enables developers to implement complex features without extensive external research.
+
+The Laravel community further strengthens the ecosystem. Laracasts, the official learning platform, offers thousands of video tutorials covering Laravel and adjacent technologies. The Laravel News portal aggregates ecosystem updates, package announcements, and best practices. Active forums, Discord communities, and Stack Overflow presence ensure that developers can find solutions to most problems within minutes. This community infrastructure rivals or exceeds that of frameworks built on languages traditionally considered more "enterprise-ready."
+
 === Inertia.js: Server-Side Rendering Bridge
 
 *Inertia.js 2.0* serves as the bridge between the Laravel backend and the React 19 frontend. Unlike traditional API-driven architectures where the backend exposes JSON endpoints consumed by a separate single-page application, Inertia allows the backend to render pages directly while still providing a modern, reactive user experience.
@@ -34,11 +42,19 @@ Complementing Inertia, the *Ziggy* package exposes Laravel's named routes to the
 
 === Eloquent ORM and Database Abstraction
 
-*Eloquent*, Laravel's object-relational mapper, handles all database interactions. Each database table corresponds to a model class that encapsulates query logic, relationships, and business rules.
+*Eloquent*, Laravel's object-relational mapper, handles all database interactions. Each database table corresponds to a model class that encapsulates query logic, relationships, and business rules. Eloquent follows the Active Record pattern, where model instances represent database rows and provide methods for persistence operations.
 
-The system employs Eloquent's relationship system extensively. Restaurants have many menu items, which in turn have many allergens through a pivot table. Orders belong to both customers and restaurants while containing many order items. These relationships are defined declaratively, allowing complex queries to be expressed concisely.
+The syntax prioritizes developer convenience and readability. Finding a restaurant by ID requires only `Restaurant::find($id)`, while filtering restaurants within a geographic radius uses fluent method chaining like `Restaurant::withinRadiusKm($lat, $lng, 10)->get()`. This expressiveness eliminates the verbose query builders or XML mappings common in Java-based ORMs like Hibernate.
+
+The system employs Eloquent's relationship system extensively. Restaurants have many menu items, which in turn have many allergens through a pivot table. Orders belong to both customers and restaurants while containing many order items. These relationships are defined declaratively using methods like `hasMany()`, `belongsTo()`, and `belongsToMany()`, allowing complex queries to be expressed concisely. Accessing related data becomes as simple as property access: `$restaurant->menuItems` automatically loads associated menu items.
 
 To prevent performance degradation from excessive database queries, the codebase uses eager loading via the `with()` method. This technique retrieves related records in a single query rather than issuing separate queries for each relationship, addressing the common N+1 query problem.
+
+==== Database Seeding and Factories
+
+Eloquent integrates with Laravel's *Factory* and *Seeder* system for generating test and development data. Model factories define blueprints for creating realistic fake records using the Faker library. A restaurant factory, for example, generates plausible names, addresses, coordinates, and ratings without manual data entry.
+
+Seeders orchestrate factory execution to populate the database with a complete dataset. The project includes a custom seeder that accepts parameters for customization — running `php artisan mfs --restaurants=50` generates fifty restaurants with associated menu items, employees, customers, and orders. This capability proves invaluable during development and testing, allowing the team to reset the database to a known state within seconds.
 
 === Authentication with Laravel Sanctum
 
