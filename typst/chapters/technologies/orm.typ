@@ -11,7 +11,7 @@ Key Eloquent features leveraged in this project include:
 
 *Global Scopes*: The system utilizes global scopes to enforce architectural constraints at the model level. For instance, the `User` model applies a scope to automatically load role relationships (`customer`, `employee`), enabling the implementation of the comprehensive "Identity Composition" strategy without repetitive query logic.
 
-*Model Events*: The system leverages model lifecycle hooks (e.g., `booted`) to trigger side effects — exclusively for dispatching real-time updates via WebSockets (e.g., `OrderUpdated`) whenever a transactional state changes.
+*Model Events*: The system leverages model lifecycle hooks (e.g., `booted`) to trigger side effects  -  exclusively for dispatching real-time updates via WebSockets (e.g., `OrderUpdated`) whenever a transactional state changes.
 
 *Custom Pivot Models*: Intermediate tables are promoted to first-class domain citizens by extending the `Pivot` class (e.g., `OrderItem`). This allows relationship-specific logic, such as quantity management, to be encapsulated directly within the association object rather than leaking into the parent models.
 
