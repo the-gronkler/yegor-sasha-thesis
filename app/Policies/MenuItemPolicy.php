@@ -56,7 +56,7 @@ class MenuItemPolicy
      */
     public function update(User $user, MenuItem $menuItem): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id && $user->employee->is_admin);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id == $menuItem->restaurant_id && $user->employee->is_admin);
     }
 
     /**
@@ -64,7 +64,7 @@ class MenuItemPolicy
      */
     public function updateStatus(User $user, MenuItem $menuItem): bool
     {
-        return $user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id;
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id == $menuItem->restaurant_id);
     }
 
     /**
@@ -72,7 +72,7 @@ class MenuItemPolicy
      */
     public function delete(User $user, MenuItem $menuItem): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id == $menuItem->restaurant_id);
     }
 
     /**
@@ -80,7 +80,7 @@ class MenuItemPolicy
      */
     public function restore(User $user, MenuItem $menuItem): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id == $menuItem->restaurant_id);
     }
 
     /**
@@ -88,6 +88,6 @@ class MenuItemPolicy
      */
     public function forceDelete(User $user, MenuItem $menuItem): bool
     {
-        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id === $menuItem->restaurant_id);
+        return $user->is_admin || ($user->isEmployee() && $user->employee?->restaurant_id == $menuItem->restaurant_id);
     }
 }

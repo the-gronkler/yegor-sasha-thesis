@@ -78,34 +78,34 @@ class EmployeeMenuItemController extends Controller
         return redirect()->route('employee.menu.index')->with('success', 'Menu item updated successfully.');
     }
 
-    public function updateStatus(Request $request, MenuItem $menu_item)
+    public function updateStatus(Request $request, MenuItem $item)
     {
-        $this->authorize('updateStatus', $menu_item);
+        $this->authorize('updateStatus', $item);
 
         $validated = $request->validate([
             'is_available' => ['required', 'boolean'],
         ]);
 
-        $menu_item->update($validated);
+        $item->update($validated);
 
         return back();
     }
 
-    public function updatePhoto(Request $request, MenuItem $menu_item)
+    public function updatePhoto(Request $request, MenuItem $item)
     {
-        $this->authorize('update', $menu_item);
+        $this->authorize('update', $item);
 
         $validated = $request->validate([
             'image_id' => [
                 'nullable',
-                Rule::exists('images', 'id')->where(function ($query) use ($menu_item) {
-                    $query->where('restaurant_id', $menu_item->restaurant_id);
+                Rule::exists('images', 'id')->where(function ($query) use ($item) {
+                    $query->where('restaurant_id', $item->restaurant_id);
                 }),
             ],
         ]);
 
         // Update the menu item's selected image
-        $menu_item->update([
+        $item->update([
             'image_id' => $validated['image_id'],
         ]);
 
