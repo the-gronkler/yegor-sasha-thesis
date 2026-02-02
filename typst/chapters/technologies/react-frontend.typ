@@ -8,43 +8,39 @@ The frontend of the system is built on *React 19*, a JavaScript library for buil
 
 When selecting a frontend framework, three primary candidates were evaluated: React, Vue.js, and Angular. Each framework has proven capable of building complex single-page applications, but React was chosen for the following reasons:
 
-*Ecosystem Maturity and Flexibility* — React offers the largest ecosystem of libraries, tools, and community resources among frontend frameworks. Unlike Angular's opinionated structure or Vue's more integrated approach, React provides flexibility in choosing complementary libraries for routing, state management, and styling. This flexibility proved valuable when integrating with Laravel via Inertia.js, which offers first-class React support.
+*Ecosystem Maturity and Community Support* — React's ecosystem significantly surpasses both Vue.js and Angular in size and diversity. While Vue.js offers excellent official packages (Vue Router, Pinia), its third-party ecosystem remains smaller, limiting options for specialized requirements such as advanced data visualization, complex form handling, or specific UI component libraries. Angular's ecosystem, though mature, remains tightly coupled to the framework's opinionated architecture, requiring developers to adopt Angular-specific solutions rather than leveraging the broader JavaScript ecosystem. React's flexibility allows integration with any compatible library, providing greater adaptability as project requirements evolve.
 
-*Component-Based Architecture* — React's component model aligns naturally with the application's UI requirements. The restaurant discovery interface, order management screens, and employee dashboards share common elements (cards, buttons, forms) that benefit from React's composable component approach. Components encapsulate both structure and behavior, enabling consistent reuse across customer and employee interfaces.
+*Inertia.js Integration Quality* — Inertia.js was originally developed alongside Laravel with React as the primary frontend target. While Inertia adapters exist for Vue.js and Angular, the React implementation receives the most attention, documentation, and community support. The Vue.js adapter, though functional, has fewer real-world examples and community-contributed patterns available. Angular's Inertia support remains experimental and lacks the production-ready stability required for a reliable application. Choosing React ensures access to the most mature Inertia integration, reducing integration risks and development overhead.
 
-*Hooks and Functional Patterns* — React's hooks API enables clean separation of concerns without class-based complexity. Custom hooks extract reusable logic for authentication, cart management, geolocation, and real-time updates. This pattern reduces code duplication and improves testability compared to traditional lifecycle methods.
+*Component Model and Reusability* — React's component model emphasizes composition over configuration, aligning well with the application's UI requirements. The restaurant discovery interface, order management screens, and employee dashboards share common elements (cards, buttons, forms, modals) that benefit from React's composable approach. Vue.js achieves similar composability, but its single-file component structure combines template, logic, and styling in one file, which can complicate component reuse when styling needs differ across contexts. Angular's component model, while powerful, requires understanding directives, pipes, and dependency injection before achieving similar levels of reusability, increasing the learning curve for new developers joining the project.
 
-*Industry Adoption and Hiring* — React remains the most widely adopted frontend framework in the industry. This adoption ensures long-term maintainability, as future developers are more likely to possess React experience than expertise in less common frameworks.
+*Hooks API vs. Alternatives* — React's hooks API provides a functional programming approach to state management and side effects without the complexity of class-based components. Custom hooks enable extraction of reusable logic for authentication, cart management, geolocation, and real-time updates, reducing code duplication across components. Vue 3's Composition API offers similar capabilities and was directly inspired by React hooks, but Vue's ecosystem had less mature patterns for hook-based development at the time of technology selection. Angular's reliance on services and dependency injection requires more boilerplate code to achieve similar separation of concerns, particularly when sharing stateful logic between components.
 
-*TypeScript Integration* — While all major frameworks support TypeScript, React's type definitions and community patterns for typed components have matured significantly. The strict typing requirements outlined in the project guidelines integrate seamlessly with React's functional component patterns.
+*Developer Experience and Tooling* — React's developer tools and debugging capabilities surpass those of competing frameworks. The React DevTools browser extension provides detailed component hierarchy inspection, prop and state analysis, and performance profiling. While Vue Devtools offer comparable functionality for Vue applications, the React tools benefit from wider adoption and more frequent updates. Angular's debugging tools, though comprehensive, require understanding Angular's zone-based change detection and dependency injection system, adding cognitive overhead during development and troubleshooting.
+
+*TypeScript Integration* — While all three frameworks support TypeScript, their approaches differ significantly. Angular mandates TypeScript usage, which ensures type safety but removes flexibility for teams preferring gradual adoption. Vue.js supports TypeScript but historically had weaker type inference, particularly with the Options API (Vue 3's Composition API improved this considerably). React treats TypeScript as optional, allowing gradual adoption while providing excellent type inference through community-maintained type definitions. This flexibility proved valuable during initial development, enabling rapid prototyping in JavaScript before adding type safety to critical components.
+
+*Industry Adoption and Hiring Considerations* — React remains the most widely adopted frontend framework in the industry. According to Stack Overflow's developer surveys and npm download statistics, React consistently shows higher usage than Vue.js and Angular. This widespread adoption ensures future maintainability, as developers joining the project are statistically more likely to possess React experience than expertise in Vue or Angular. Additionally, the abundance of React developers in the job market reduces hiring friction compared to frameworks with smaller talent pools.
 
 === TypeScript: Type Safety for JavaScript
 
-The frontend uses *TypeScript 5.9* with strict compiler settings. TypeScript adds static type checking to JavaScript, catching errors during development rather than at runtime.
-
-The project enforces strict typing rules: the `any` type is prohibited, all component props require explicit interfaces, and shared data models are imported from a centralized location rather than redefined locally. These constraints prevent common JavaScript errors such as accessing properties on undefined values or passing incorrect argument types.
-
-Type definitions for backend models (restaurants, orders, menu items) ensure consistency between Laravel's data structures and React's component expectations. When the backend adds or modifies a field, TypeScript compilation fails if the frontend does not account for the change, providing an additional layer of integration verification.
+The frontend uses *TypeScript 5.9* with strict compiler settings. TypeScript adds static type checking to JavaScript, catching errors during development rather than at runtime. This reduces debugging time and prevents entire categories of errors that would otherwise only surface in production environments. TypeScript's integration with modern code editors provides intelligent autocompletion, inline documentation, and refactoring support, significantly improving developer productivity when working with large codebases.
 
 === Map Library: Mapbox GL
 
-The restaurant discovery feature requires an interactive map for browsing nearby establishments. *Mapbox GL* was selected over alternatives such as Google Maps and Leaflet for its balance of features, performance, and cost structure. Mapbox provides vector-based rendering that maintains visual quality at any zoom level, while its free tier accommodates the project's expected usage volume. The *React Map GL* wrapper integrates Mapbox with React's component model, enabling declarative map configuration consistent with the rest of the frontend.
+The restaurant discovery feature requires an interactive map for browsing nearby establishments. When selecting a mapping library, three primary options were evaluated: Google Maps, Leaflet, and Mapbox GL.
 
-=== Styling with SCSS
+*Google Maps* dominates the mapping market and offers comprehensive documentation, familiar UI patterns, and reliable geocoding services. However, Google's pricing structure becomes prohibitively expensive at scale, with costs increasing significantly once free tier limits are exceeded. Additionally, Google Maps' terms of service impose restrictions on caching, data extraction, and UI customization that limit flexibility for custom features.
+
+*Leaflet* provides a lightweight, open-source alternative with no usage costs. While Leaflet excels at basic mapping needs and offers extensive plugin ecosystem, its raster-based tile rendering suffers from visual quality degradation at non-standard zoom levels. Leaflet's integration with React requires additional wrapper libraries, and its performance degrades when rendering large numbers of markers simultaneously.
+
+*Mapbox GL* was ultimately selected for its optimal balance of features, performance, and cost structure. Mapbox provides vector-based rendering that maintains visual quality at any zoom level, unlike raster-based alternatives. Its free tier accommodates the project's expected usage volume while offering predictable, reasonable pricing for future growth. The *React Map GL* wrapper provides first-class React integration, enabling declarative map configuration consistent with the rest of the frontend architecture. Mapbox's customizable styling system allows the map's appearance to align with the application's design language, ensuring visual consistency across all interfaces.
+
+=== Styling: SCSS Over Utility-First CSS
 
 All styling uses *SCSS* (Sass) with semantic class names following BEM-like conventions. Despite Tailwind CSS being present in the project dependencies, utility classes are prohibited in component files per project guidelines.
 
-The SCSS architecture organizes styles into logical partials:
-
-- *Variables* — Centralized color, spacing, and typography definitions. Changing a brand color in one file updates the entire application consistently.
-
-- *Components* — Styles scoped to specific UI components. Each component's styles reside in a dedicated partial, preventing unintended cascade effects.
-
-- *Layouts* — Structural styles for page layouts, navigation, and content areas.
-
-- *Pages* — Page-specific overrides when component styles require contextual adjustments.
-
-SCSS variables generate CSS custom properties at build time, making theme values accessible to JavaScript when needed for dynamic styling or third-party library integration.
+SCSS was selected over utility-first approaches (Tailwind CSS) and plain CSS for several reasons. SCSS's variables, mixins, and nesting capabilities enable maintainable, DRY (Don't Repeat Yourself) stylesheets without the verbose class lists common in utility-first frameworks. Semantic class names provide clearer intent than utility combinations, improving code readability and maintainability. SCSS's ability to generate CSS custom properties at build time makes theme values accessible to JavaScript when needed for dynamic styling or third-party library integration, providing flexibility that pure utility frameworks lack.
 
 === Build Tooling with Vite
 
