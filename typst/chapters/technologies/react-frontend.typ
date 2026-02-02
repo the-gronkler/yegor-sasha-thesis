@@ -26,55 +26,9 @@ The project enforces strict typing rules: the `any` type is prohibited, all comp
 
 Type definitions for backend models (restaurants, orders, menu items) ensure consistency between Laravel's data structures and React's component expectations. When the backend adds or modifies a field, TypeScript compilation fails if the frontend does not account for the change, providing an additional layer of integration verification.
 
-=== Component Architecture
+=== Map Library: Mapbox GL
 
-The component structure follows atomic design principles, organizing components by their scope and reusability:
-
-- *UI Components* — Generic, reusable elements such as buttons, inputs, modals, and cards. These components accept customization through props but contain no domain-specific logic. A button component, for example, handles styling variants and click events without knowledge of whether it submits an order or navigates to a restaurant.
-
-- *Shared Components* — Domain-specific components that combine UI elements with business logic. A restaurant card component displays restaurant information, handles favorite toggling, and navigates to the restaurant detail page. These components understand the application domain but remain reusable across different pages.
-
-- *Page Components* — Full-page views corresponding to Laravel routes. Inertia.js renders these components with data passed from controllers. Page components compose UI and shared components into complete interfaces, handling page-level state and interactions.
-
-- *Layout Components* — Wrappers providing consistent structure across pages. The customer layout includes navigation, footer, and authentication state. The map layout provides the full-screen map interface with overlay controls. Pages declare which layout they use, ensuring visual consistency without code duplication.
-
-=== Custom Hooks for Logic Reuse
-
-React hooks encapsulate reusable logic outside of components. The project employs custom hooks extensively:
-
-- *useAuth* — Provides access to the authenticated user and authentication state. Components use this hook to conditionally render authenticated-only features or redirect unauthenticated users.
-
-- *useCart* — Manages shopping cart state including item addition, removal, and quantity updates. The hook implements optimistic updates, immediately reflecting changes in the UI while synchronizing with the server in the background.
-
-- *useSearch* — Wraps the Fuse.js fuzzy search library, providing filtered results based on user input. The menu page uses this hook to filter menu items as customers type, improving discoverability in large menus.
-
-- *useMapGeolocation* — Abstracts browser geolocation APIs, handling permission requests, error states, and coordinate caching. Map components use this hook without managing geolocation complexity directly.
-
-- *useChannelUpdates* — Subscribes to WebSocket channels for real-time updates. This hook abstracts Laravel Echo configuration, channel authentication, and event handling, allowing components to receive updates with minimal boilerplate.
-
-=== State Management with React Context
-
-The application uses React's built-in Context API for state that spans multiple components. Rather than introducing external state management libraries, the project employs context providers for specific domains:
-
-- *CartContext* — Shopping cart state accessible throughout the ordering flow. The context provider wraps customer pages, enabling any component to access cart contents, add items, or proceed to checkout.
-
-- *LoginModalContext* — Controls the login modal visibility across the application. When unauthenticated users attempt protected actions, any component can trigger the login modal through this context.
-
-A utility function composes multiple providers, avoiding deeply nested JSX when multiple contexts are required. This pattern keeps the component tree readable while providing necessary state access.
-
-For local component state and form handling, the project uses React's `useState` and Inertia's `useForm` hook rather than global state. This approach keeps state close to where it is used, improving component isolation and reducing unnecessary re-renders.
-
-=== Map Integration with Mapbox GL
-
-The restaurant discovery feature centers on an interactive map powered by *Mapbox GL* and its React wrapper, *React Map GL*. The map implementation includes:
-
-- *Marker Clustering* — Restaurants are displayed as markers that cluster at lower zoom levels. As users zoom in, clusters expand to reveal individual restaurant locations. This approach maintains performance even with hundreds of restaurant markers.
-
-- *Geolocation Control* — Users can center the map on their current location with a single tap. The browser's geolocation API provides coordinates, which the map animates to smoothly.
-
-- *Interactive Popups* — Selecting a restaurant marker displays a popup with basic information and a link to the full restaurant page. This preview reduces navigation friction when browsing multiple restaurants.
-
-- *Location Picking* — Restaurant administrators can set their establishment's coordinates by clicking directly on the map. This interaction mode simplifies address entry for locations that may not have precise geocoding results.
+The restaurant discovery feature requires an interactive map for browsing nearby establishments. *Mapbox GL* was selected over alternatives such as Google Maps and Leaflet for its balance of features, performance, and cost structure. Mapbox provides vector-based rendering that maintains visual quality at any zoom level, while its free tier accommodates the project's expected usage volume. The *React Map GL* wrapper integrates Mapbox with React's component model, enabling declarative map configuration consistent with the rest of the frontend.
 
 === Styling with SCSS
 
@@ -91,20 +45,6 @@ The SCSS architecture organizes styles into logical partials:
 - *Pages* — Page-specific overrides when component styles require contextual adjustments.
 
 SCSS variables generate CSS custom properties at build time, making theme values accessible to JavaScript when needed for dynamic styling or third-party library integration.
-
-=== Form Handling with Inertia
-
-Forms throughout the application use Inertia's `useForm` hook rather than external form libraries. This hook provides:
-
-- *Type-Safe Form Data* — Form fields are defined with TypeScript types, ensuring compile-time checks for field names and value types.
-
-- *Validation Error Display* — Laravel validation errors automatically populate the form's error state. Components display these errors alongside their corresponding fields without manual error mapping.
-
-- *Processing State* — The hook tracks submission state, enabling loading indicators and preventing duplicate submissions while requests are in flight.
-
-- *Server Communication* — Form submission uses Inertia's router, maintaining the server-driven architecture. Successful submissions can redirect, refresh page data, or preserve scroll position as needed.
-
-This approach eliminates the configuration overhead of dedicated form libraries while integrating seamlessly with Laravel's validation system.
 
 === Build Tooling with Vite
 
