@@ -18,13 +18,17 @@ When selecting a backend framework, three primary candidates were evaluated: Lar
 
 *Learning Curve and Team Familiarity* — The development team possessed prior experience with PHP and Laravel conventions. Leveraging existing knowledge reduced ramp-up time and minimized the risk of architectural missteps common when adopting unfamiliar frameworks.
 
-=== Addressing PHP Misconceptions
+=== PHP 8.x Language Evolution
 
-A common criticism in developer communities characterizes PHP as an outdated or poorly designed language. While early PHP versions lacked modern language features and encouraged inconsistent practices, PHP 8.x represents a fundamentally different language. Modern PHP includes strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties — features comparable to those in contemporary languages.
+PHP 8.x introduces substantial language improvements over earlier versions. The language now supports strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties. These features align PHP with capabilities available in other statically-typed languages commonly used for web application development, addressing historical limitations associated with earlier PHP versions.
 
-Laravel amplifies these improvements through its documentation and ecosystem. The Laravel documentation is widely regarded as among the best in the web development industry, providing comprehensive guides, practical examples, and clear explanations for every framework feature. This documentation quality significantly reduces onboarding time and enables developers to implement complex features without extensive external research.
+The evolution of PHP influences framework selection. When evaluating backend technologies, the language's current feature set and ecosystem maturity proved more relevant than its historical reputation. PHP 8.3 provides the type safety, performance characteristics, and developer tooling necessary for building maintainable enterprise applications.
 
-The Laravel community further strengthens the ecosystem. Laracasts, the official learning platform, offers thousands of video tutorials covering Laravel and adjacent technologies. The Laravel News portal aggregates ecosystem updates, package announcements, and best practices. Active forums, Discord communities, and Stack Overflow presence ensure that developers can find solutions to most problems within minutes. This community infrastructure rivals or exceeds that of frameworks built on languages traditionally considered more "enterprise-ready."
+=== Documentation and Community Resources
+
+Laravel provides extensive documentation covering framework features, architectural patterns, and integration points. The official documentation includes practical examples and detailed API references, reducing dependency on external resources during development.
+
+The Laravel ecosystem includes structured learning resources through Laracasts, which offers video tutorials covering framework features and related technologies. Community support channels, including forums, Discord servers, and Stack Overflow, provide accessible problem-solving resources. This ecosystem maturity contributed to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
 
 === Inertia.js: Server-Side Rendering Bridge
 
@@ -40,23 +44,6 @@ This approach offers several advantages for this project:
 
 Complementing Inertia, the *Ziggy* package exposes Laravel's named routes to the JavaScript frontend. This allows React components to generate URLs using the same route names defined in Laravel, ensuring consistency between backend and frontend navigation without hardcoding paths.
 
-=== Authentication with Laravel Sanctum
-
-*Laravel Sanctum* provides the authentication layer. Sanctum offers session-based authentication for web requests and token-based authentication for API consumers, though this project primarily uses the session-based approach given its web-first nature.
-
-The authentication system distinguishes between two user types: customers and employees. Both share a common user record but maintain separate profile tables with role-specific attributes. This design allows unified login while supporting divergent functionality based on user role.
-
-=== Request Validation with Form Requests
-
-All incoming data undergoes validation through *Form Request* classes. These dedicated classes encapsulate validation rules, authorization checks, and error messages for specific operations.
-
-This pattern removes validation logic from controllers, keeping them focused on orchestrating responses. It also centralizes validation rules, making them easier to maintain and test. The system implements rate limiting within login requests to mitigate brute-force attacks.
-
-=== Authorization with Policies
-
-*Policy* classes govern access control throughout the application. Each major resource (orders, restaurants, menu items, reviews) has an associated policy defining which users may perform which actions.
-
-The order policy, for example, ensures that customers can only view and modify their own orders, while employees can only manage orders belonging to their restaurant. These checks occur automatically when controllers invoke authorization methods, providing consistent security enforcement without repetitive conditional logic.
 
 === Queue System for Background Processing
 
