@@ -18,13 +18,17 @@ When selecting a backend framework, three primary candidates were evaluated: Lar
 
 *Learning Curve and Team Familiarity* — The development team possessed prior experience with PHP and Laravel conventions. Leveraging existing knowledge reduced ramp-up time and minimized the risk of architectural missteps common when adopting unfamiliar frameworks.
 
-=== Addressing PHP Misconceptions
+=== PHP Language Maturity and Framework Ecosystem
 
-A common criticism in developer communities characterizes PHP as an outdated or poorly designed language. While early PHP versions lacked modern language features and encouraged inconsistent practices, PHP 8.x represents a fundamentally different language. Modern PHP includes strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties — features comparable to those in contemporary languages.
+A common perception in software development discussions positions PHP as lacking the sophistication of more modern languages. This perception largely stems from earlier PHP versions (pre-7.0), which indeed lacked many features now considered standard in contemporary programming languages. However, PHP 8.x represents a substantial evolution from its earlier iterations.
 
-Laravel amplifies these improvements through its documentation and ecosystem. The Laravel documentation is widely regarded as among the best in the web development industry, providing comprehensive guides, practical examples, and clear explanations for every framework feature. This documentation quality significantly reduces onboarding time and enables developers to implement complex features without extensive external research.
+Modern PHP 8.x includes strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties. These features provide capabilities comparable to those found in Java, `C#`, and other statically-typed languages commonly employed for enterprise web applications. The language's evolution directly addresses the historical limitations that informed earlier criticisms, positioning PHP 8.x as a viable foundation for type-safe, maintainable application development.
 
-The Laravel community further strengthens the ecosystem. Laracasts, the official learning platform, offers thousands of video tutorials covering Laravel and adjacent technologies. The Laravel News portal aggregates ecosystem updates, package announcements, and best practices. Active forums, Discord communities, and Stack Overflow presence ensure that developers can find solutions to most problems within minutes. This community infrastructure rivals or exceeds that of frameworks built on languages traditionally considered more "enterprise-ready."
+When evaluating backend technologies for this project, the language's current feature set and ecosystem maturity proved more relevant than its historical reputation. PHP 8.3 provides the type safety, performance characteristics, and developer tooling necessary for building reliable, maintainable enterprise applications. This modern feature set, combined with Laravel's framework abstractions, reduces the gap between PHP-based development and alternatives built on languages traditionally favored for enterprise systems.
+
+Laravel's documentation and community resources further strengthen the framework's suitability for production applications. The official Laravel documentation provides comprehensive coverage of framework features, architectural patterns, and integration points, with practical examples and detailed API references. This documentation quality reduces dependency on external resources during development and enables developers to implement complex features with minimal research overhead.
+
+The Laravel ecosystem extends beyond official documentation. Laracasts offers structured video tutorials covering framework features and related technologies. Community support channels—including forums, Discord servers, and Stack Overflow—provide accessible problem-solving resources. This ecosystem maturity contributed significantly to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
 
 === Authentication with Laravel Sanctum
 
