@@ -26,36 +26,6 @@ Laravel amplifies these improvements through its documentation and ecosystem. Th
 
 The Laravel community further strengthens the ecosystem. Laracasts, the official learning platform, offers thousands of video tutorials covering Laravel and adjacent technologies. The Laravel News portal aggregates ecosystem updates, package announcements, and best practices. Active forums, Discord communities, and Stack Overflow presence ensure that developers can find solutions to most problems within minutes. This community infrastructure rivals or exceeds that of frameworks built on languages traditionally considered more "enterprise-ready."
 
-=== Inertia.js: Server-Side Rendering Bridge
-
-*Inertia.js 2.0* serves as the bridge between the Laravel backend and the React 19 frontend. Unlike traditional API-driven architectures where the backend exposes JSON endpoints consumed by a separate single-page application, Inertia allows the backend to render pages directly while still providing a modern, reactive user experience.
-
-This approach offers several advantages for this project:
-
-- *Simplified Routing* — Routes are defined once on the backend. The frontend receives fully rendered page components with their required data, eliminating the need for duplicate route definitions or client-side data fetching logic.
-
-- *Shared Data Patterns* — Common data such as the authenticated user, flash messages, and shopping cart contents are shared automatically with every page response through Inertia middleware.
-
-- *Form Handling* — Inertia provides utilities for form submission that integrate directly with Laravel's validation system, enabling seamless error display without custom API error handling.
-
-Complementing Inertia, the *Ziggy* package exposes Laravel's named routes to the JavaScript frontend. This allows React components to generate URLs using the same route names defined in Laravel, ensuring consistency between backend and frontend navigation without hardcoding paths.
-
-=== Eloquent ORM and Database Abstraction
-
-*Eloquent*, Laravel's object-relational mapper, handles all database interactions. Each database table corresponds to a model class that encapsulates query logic, relationships, and business rules. Eloquent follows the Active Record pattern, where model instances represent database rows and provide methods for persistence operations.
-
-The syntax prioritizes developer convenience and readability. Finding a restaurant by ID requires only `Restaurant::find($id)`, while filtering restaurants within a geographic radius uses fluent method chaining like `Restaurant::withinRadiusKm($lat, $lng, 10)->get()`. This expressiveness eliminates the verbose query builders or XML mappings common in Java-based ORMs like Hibernate.
-
-The system employs Eloquent's relationship system extensively. Restaurants have many menu items, which in turn have many allergens through a pivot table. Orders belong to both customers and restaurants while containing many order items. These relationships are defined declaratively using methods like `hasMany()`, `belongsTo()`, and `belongsToMany()`, allowing complex queries to be expressed concisely. Accessing related data becomes as simple as property access: `$restaurant->menuItems` automatically loads associated menu items.
-
-To prevent performance degradation from excessive database queries, the codebase uses eager loading via the `with()` method. This technique retrieves related records in a single query rather than issuing separate queries for each relationship, addressing the common N+1 query problem.
-
-==== Database Seeding and Factories
-
-Eloquent integrates with Laravel's *Factory* and *Seeder* system for generating test and development data. Model factories define blueprints for creating realistic fake records using the Faker library. A restaurant factory, for example, generates plausible names, addresses, coordinates, and ratings without manual data entry.
-
-Seeders orchestrate factory execution to populate the database with a complete dataset. The project includes a custom seeder that accepts parameters for customization — running `php artisan mfs --restaurants=50` generates fifty restaurants with associated menu items, employees, customers, and orders. This capability proves invaluable during development and testing, allowing the team to reset the database to a known state within seconds.
-
 === Authentication with Laravel Sanctum
 
 *Laravel Sanctum* provides the authentication layer. Sanctum offers session-based authentication for web requests and token-based authentication for API consumers, though this project primarily uses the session-based approach given its web-first nature.
@@ -73,12 +43,6 @@ This pattern removes validation logic from controllers, keeping them focused on 
 *Policy* classes govern access control throughout the application. Each major resource (orders, restaurants, menu items, reviews) has an associated policy defining which users may perform which actions.
 
 The order policy, for example, ensures that customers can only view and modify their own orders, while employees can only manage orders belonging to their restaurant. These checks occur automatically when controllers invoke authorization methods, providing consistent security enforcement without repetitive conditional logic.
-
-=== Service Classes for Business Logic
-
-Complex operations are delegated to *service classes* rather than residing in controllers or models. The review service, for instance, handles review creation including image uploads to cloud storage, error tracking for failed uploads, and cleanup operations on deletion.
-
-This separation keeps controllers thin and focused on HTTP concerns while encapsulating business logic in testable, reusable units. The geo service similarly abstracts location-based calculations, providing distance computations and bounding box queries used throughout the restaurant discovery features.
 
 === Queue System for Background Processing
 
