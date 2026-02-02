@@ -173,8 +173,6 @@ class EmployeeMenuItemController extends Controller
             ],
         ]);
 
-        $validated['restaurant_id'] = $restaurant->id;
-
         $menuItem = MenuItem::create($validated);
 
         if (isset($validated['allergens'])) {

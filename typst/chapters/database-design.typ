@@ -39,18 +39,17 @@ The menu structure employs a hierarchical categorization strategy. A Restaurant 
 *Normalization*: Menu items are not directly linked to the restaurant; they inherit this association transitively through their Food Type. This design strictly adheres to the Third Normal Form, eliminating update anomalies where a category's restaurant association might contradict its items'.
 
 ==== Images
-To support rich media while maintaining schema simplicity, the system utilizes a unified `images` table linked via explicit nullable foreign keys (`restaurant_id` and `menu_item_id`). Unlike polymorphic associations (which rely on string-based `model_type` columns and cannot enforce database-level referential integrity), explicit foreign keys allow the database to strictly enforce valid relationships and support `ON DELETE CASCADE` actions.
+To support rich media while maintaining schema simplicity, the system utilizes a unified `images` table linked via explicit nullable foreign keys (`restaurant_id` and `menu_item_id`). Unlike polymorphic associations (which rely on string-based `model_type` columns and cannot enforce database-level referential integrity), explicit foreign keys allow the database to strictly enforce valid relationships. The foreign keys use `ON DELETE SET NULL` behavior, preserving image records even when their associated entity is deleted, which allows for potential orphan cleanup or administrative review.
 
-Boolean flags (`is_primary_for_*`) are used to designate the main display image for lists and thumbnails. The table stores only the resource path (e.g., `restaurants/1/cover.jpg`), delegating the actual binary storage to an external object storage service to keep the database lightweight and performant.
+Boolean flags (`is_primary_for_restaurant`, `is_primary_for_menu_item`) designate the main display image for lists and thumbnails. The table stores image data directly as `MEDIUMBLOB` binary fields, simplifying deployment by eliminating dependencies on external object storage services while accepting the trade-off of increased database size.
 
 ==== Reviews
 Restaurants are associated with customers through a 'Review' joining table, which in addition to the foreign keys also stores review-specific attributes such as rating, comments, as well as a one-to-many relationship to the review_images table. This design allows customers to provide feedback on multiple restaurants while ensuring that each review is uniquely tied to a specific customer-restaurant pair.
 
 ==== Orders
-Orders are represented by the *Orders* table, linked to customers with a `1-*` relationship and having a many-to-many (`*-*`) relationship to menu items. The joining table *Order Items* captures the many-to-many relationship between orders and menu items, also storing the quantity of each menu item in the order.
-Orders are represented by the *Orders* table, linked to customers with a `1-*` relationship and to `*-*` to menu items. The joining table *Order Items* captures the many-to-many relationship between orders and menu items, also storing the quantity of each menu item in the order.
+Orders are represented by the *Orders* table, linked to customers with a one-to-many relationship and having a many-to-many relationship to menu items. The joining table *Order Items* captures this many-to-many relationship, also storing the quantity of each menu item in the order.
 
-Order status is tracked using a dedicated *Order Statuses* dictionary table, ensuring consistent status values and supporting future extensibility. The statuses include lifecycle stages such as "In Cart", "Placed", "Accepted", "Preparing", "Ready", "Cancelled", and "Fulfilled".
+Order status is tracked using a dedicated *Order Statuses* dictionary table, ensuring consistent status values and supporting future extensibility. The statuses include lifecycle stages: "In Cart", "Placed", "Accepted", "Declined", "Preparing", "Ready", "Cancelled", and "Fulfilled".
 
 Notably, the user's cart is not modeled as a separate table but as an order record with the "In Cart" status. This design choice simplifies the schema by avoiding duplication and reduces write operations when transitioning from cart to placed order, as it merely updates the status and sets the time_placed timestamp.
 
