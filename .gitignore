@@ -32,3 +32,7 @@ env.production
 /resources/js/ziggy.js
 
 /typst/*.pdf
+.claude/settings.local.json
+.junie/mcp/mcp.json
+.mcp.json
+.vscode/mcp.json
