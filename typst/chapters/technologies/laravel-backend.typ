@@ -30,24 +30,6 @@ Laravel's documentation and community resources further strengthen the framework
 
 The Laravel ecosystem extends beyond official documentation. Laracasts offers structured video tutorials covering framework features and related technologies. Community support channels—including forums, Discord servers, and Stack Overflow—provide accessible problem-solving resources. This ecosystem maturity contributed significantly to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
 
-=== Authentication with Laravel Sanctum
-
-*Laravel Sanctum* provides the authentication layer. Sanctum offers session-based authentication for web requests and token-based authentication for API consumers, though this project primarily uses the session-based approach given its web-first nature.
-
-The authentication system distinguishes between two user types: customers and employees. Both share a common user record but maintain separate profile tables with role-specific attributes. This design allows unified login while supporting divergent functionality based on user role.
-
-=== Request Validation with Form Requests
-
-All incoming data undergoes validation through *Form Request* classes. These dedicated classes encapsulate validation rules, authorization checks, and error messages for specific operations.
-
-This pattern removes validation logic from controllers, keeping them focused on orchestrating responses. It also centralizes validation rules, making them easier to maintain and test. The system implements rate limiting within login requests to mitigate brute-force attacks.
-
-=== Authorization with Policies
-
-*Policy* classes govern access control throughout the application. Each major resource (orders, restaurants, menu items, reviews) has an associated policy defining which users may perform which actions.
-
-The order policy, for example, ensures that customers can only view and modify their own orders, while employees can only manage orders belonging to their restaurant. These checks occur automatically when controllers invoke authorization methods, providing consistent security enforcement without repetitive conditional logic.
-
 === Queue System for Background Processing
 
 Laravel's *queue system* handles operations that should not block user requests. When an order status changes, for example, the system dispatches a broadcast event to the queue rather than sending WebSocket messages synchronously. A background worker process consumes these jobs, ensuring responsive user interactions even during high-traffic periods.
