@@ -3,18 +3,22 @@
 namespace App\Models;
 
 use App\Events\MenuItemUpdated;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
+/**
+ * @property-read int|null $restaurant_id Derived from foodType relationship
+ */
 class MenuItem extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'restaurant_id',
         'name',
         'price',
         'description',
@@ -30,9 +34,45 @@ class MenuItem extends Model
         ];
     }
 
-    public function restaurant(): BelongsTo
+    protected static function booted()
     {
-        return $this->belongsTo(Restaurant::class);
+        // Always eager load foodType to make restaurant_id accessor efficient
+        static::addGlobalScope('withFoodType', function (Builder $builder) {
+            $builder->with('foodType');
+        });
+
+        static::created(function ($menuItem) {
+            MenuItemUpdated::dispatch($menuItem);
+        });
+
+        static::updated(function ($menuItem) {
+            MenuItemUpdated::dispatch($menuItem);
+        });
+    }
+
+    /**
+     * Accessor for restaurant_id - derives from foodType relationship.
+     * Maintains backward compatibility with existing code using $menuItem->restaurant_id
+     */
+    public function getRestaurantIdAttribute(): ?int
+    {
+        return $this->foodType?->restaurant_id;
+    }
+
+    /**
+     * Get the restaurant through foodType.
+     * Uses HasOneThrough for proper relationship definition.
+     */
+    public function restaurant(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Restaurant::class,
+            FoodType::class,
+            'id',           // Foreign key on FoodType table (food_types.id)
+            'id',           // Foreign key on Restaurant table (restaurants.id)
+            'food_type_id', // Local key on MenuItem table
+            'restaurant_id' // Local key on FoodType table
+        );
     }
 
     public function foodType(): BelongsTo
@@ -60,16 +100,5 @@ class MenuItem extends Model
         return $this->belongsToMany(Order::class, 'order_items', 'order_items')
             ->withPivot('quantity')
             ->withTimestamps();
-    }
-
-    protected static function booted()
-    {
-        static::created(function ($menuItem) {
-            MenuItemUpdated::dispatch($menuItem);
-        });
-
-        static::updated(function ($menuItem) {
-            MenuItemUpdated::dispatch($menuItem);
-        });
     }
 }
