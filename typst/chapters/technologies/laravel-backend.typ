@@ -30,20 +30,23 @@ Laravel's documentation and community resources further strengthen the framework
 
 The Laravel ecosystem extends beyond official documentation. Laracasts offers structured video tutorials covering framework features and related technologies. Community support channels—including forums, Discord servers, and Stack Overflow—provide accessible problem-solving resources. This ecosystem maturity contributed significantly to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
 
-=== Inertia.js: Server-Side Rendering Bridge
+=== Authentication with Laravel Sanctum
 
-*Inertia.js 2.0* serves as the bridge between the Laravel backend and the React 19 frontend. Unlike traditional API-driven architectures where the backend exposes JSON endpoints consumed by a separate single-page application, Inertia allows the backend to render pages directly while still providing a modern, reactive user experience.
+*Laravel Sanctum* provides the authentication layer. Sanctum offers session-based authentication for web requests and token-based authentication for API consumers, though this project primarily uses the session-based approach given its web-first nature.
 
-This approach offers several advantages for this project:
+The authentication system distinguishes between two user types: customers and employees. Both share a common user record but maintain separate profile tables with role-specific attributes. This design allows unified login while supporting divergent functionality based on user role.
 
-- *Simplified Routing* — Routes are defined once on the backend. The frontend receives fully rendered page components with their required data, eliminating the need for duplicate route definitions or client-side data fetching logic.
+=== Request Validation with Form Requests
 
-- *Shared Data Patterns* — Common data such as the authenticated user, flash messages, and shopping cart contents are shared automatically with every page response through Inertia middleware.
+All incoming data undergoes validation through *Form Request* classes. These dedicated classes encapsulate validation rules, authorization checks, and error messages for specific operations.
 
-- *Form Handling* — Inertia provides utilities for form submission that integrate directly with Laravel's validation system, enabling seamless error display without custom API error handling.
+This pattern removes validation logic from controllers, keeping them focused on orchestrating responses. It also centralizes validation rules, making them easier to maintain and test. The system implements rate limiting within login requests to mitigate brute-force attacks.
 
-Complementing Inertia, the *Ziggy* package exposes Laravel's named routes to the JavaScript frontend. This allows React components to generate URLs using the same route names defined in Laravel, ensuring consistency between backend and frontend navigation without hardcoding paths.
+=== Authorization with Policies
 
+*Policy* classes govern access control throughout the application. Each major resource (orders, restaurants, menu items, reviews) has an associated policy defining which users may perform which actions.
+
+The order policy, for example, ensures that customers can only view and modify their own orders, while employees can only manage orders belonging to their restaurant. These checks occur automatically when controllers invoke authorization methods, providing consistent security enforcement without repetitive conditional logic.
 
 === Queue System for Background Processing
 

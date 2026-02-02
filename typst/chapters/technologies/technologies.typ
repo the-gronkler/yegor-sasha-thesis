@@ -4,6 +4,10 @@
 
 #include "laravel-backend.typ"
 
+#include "inertia.typ"
+
+#include "react-frontend.typ"
+
 #include "realtime.typ"
 
 // #include "mariadb.typ"
