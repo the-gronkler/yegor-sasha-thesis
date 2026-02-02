@@ -9,3 +9,5 @@
 
 #include "real-time-events.typ"
 
+#include "media-storage.typ"
+

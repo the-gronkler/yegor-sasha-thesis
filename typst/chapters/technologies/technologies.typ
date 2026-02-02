@@ -7,3 +7,5 @@
 #include "database.typ"
 
 #include "orm.typ"
+
+#include "blob-storage.typ"
