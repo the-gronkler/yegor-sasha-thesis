@@ -38,7 +38,7 @@ The restaurant discovery feature requires an interactive map for browsing nearby
 
 === Styling: SCSS Over Utility-First CSS
 
-All styling uses *SCSS* (Sass) with semantic class names following BEM-like conventions. Despite Tailwind CSS being present in the project dependencies, utility classes are prohibited in component files per project guidelines.
+All styling uses *SCSS* (Sass) with semantic class names following BEM-like conventions. Although Tailwind CSS is included in the project dependencies to support Inertia.js architecture, utility classes are not used in any React components
 
 SCSS was selected over utility-first approaches (Tailwind CSS) and plain CSS for several reasons. SCSS's variables, mixins, and nesting capabilities enable maintainable, DRY (Don't Repeat Yourself) stylesheets without the verbose class lists common in utility-first frameworks. Semantic class names provide clearer intent than utility combinations, improving code readability and maintainability. SCSS's ability to generate CSS custom properties at build time makes theme values accessible to JavaScript when needed for dynamic styling or third-party library integration, providing flexibility that pure utility frameworks lack.
 
