@@ -18,17 +18,17 @@ When selecting a backend framework, three primary candidates were evaluated: Lar
 
 *Learning Curve and Team Familiarity* — The development team possessed prior experience with PHP and Laravel conventions. Leveraging existing knowledge reduced ramp-up time and minimized the risk of architectural missteps common when adopting unfamiliar frameworks.
 
-=== PHP 8.x Language Evolution
+=== PHP Language Maturity and Framework Ecosystem
 
-PHP 8.x introduces substantial language improvements over earlier versions. The language now supports strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties. These features align PHP with capabilities available in other statically-typed languages commonly used for web application development, addressing historical limitations associated with earlier PHP versions.
+A common perception in software development discussions positions PHP as lacking the sophistication of more modern languages. This perception largely stems from earlier PHP versions (pre-7.0), which indeed lacked many features now considered standard in contemporary programming languages. However, PHP 8.x represents a substantial evolution from its earlier iterations.
 
-The evolution of PHP influences framework selection. When evaluating backend technologies, the language's current feature set and ecosystem maturity proved more relevant than its historical reputation. PHP 8.3 provides the type safety, performance characteristics, and developer tooling necessary for building maintainable enterprise applications.
+Modern PHP 8.x includes strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties. These features provide capabilities comparable to those found in Java, `C#`, and other statically-typed languages commonly employed for enterprise web applications. The language's evolution directly addresses the historical limitations that informed earlier criticisms, positioning PHP 8.x as a viable foundation for type-safe, maintainable application development.
 
-=== Documentation and Community Resources
+When evaluating backend technologies for this project, the language's current feature set and ecosystem maturity proved more relevant than its historical reputation. PHP 8.3 provides the type safety, performance characteristics, and developer tooling necessary for building reliable, maintainable enterprise applications. This modern feature set, combined with Laravel's framework abstractions, reduces the gap between PHP-based development and alternatives built on languages traditionally favored for enterprise systems.
 
-Laravel provides extensive documentation covering framework features, architectural patterns, and integration points. The official documentation includes practical examples and detailed API references, reducing dependency on external resources during development.
+Laravel's documentation and community resources further strengthen the framework's suitability for production applications. The official Laravel documentation provides comprehensive coverage of framework features, architectural patterns, and integration points, with practical examples and detailed API references. This documentation quality reduces dependency on external resources during development and enables developers to implement complex features with minimal research overhead.
 
-The Laravel ecosystem includes structured learning resources through Laracasts, which offers video tutorials covering framework features and related technologies. Community support channels, including forums, Discord servers, and Stack Overflow, provide accessible problem-solving resources. This ecosystem maturity contributed to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
+The Laravel ecosystem extends beyond official documentation. Laracasts offers structured video tutorials covering framework features and related technologies. Community support channels—including forums, Discord servers, and Stack Overflow—provide accessible problem-solving resources. This ecosystem maturity contributed significantly to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
 
 === Inertia.js: Server-Side Rendering Bridge
 
