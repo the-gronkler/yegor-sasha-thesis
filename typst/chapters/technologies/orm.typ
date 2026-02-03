@@ -4,22 +4,16 @@
 
 To abstract the complexity of raw database interactions and accelerate development, the system utilizes *Eloquent*, Laravel's native Object-Relational Mapper. Eloquent implements the Active Record pattern, where each database table is represented by a corresponding "Model" class (e.g., `Restaurant`, `Order`). Alternative ORM solutions were not considered as primary candidates, as Eloquent is intrinsically integrated with Laravel, making it the default and optimal choice for the framework. However, a contextual comparison with other ORM patterns is provided later in this section to further justify this architectural choice.
 
-=== Integrated Capabilities
-Key Eloquent features leveraged in this project include:
+=== Key Technical Advantages
+The decision to utilize Eloquent is reinforced by its comprehensive feature set, which supports the project's requirements for rapid iteration and maintainable code structure:
 
-*Relationship Management*: Eloquent's relationship methods (e.g., `hasMany`, `belongsTo`) enable seamless navigation between related models, such as linking restaurants to their menu items and orders. These relationships leverage PHP's magic methods for dynamic access and lazy loading.
+*Fluent Query Builder*: Eloquent provides an expressive, chainable interface for database interaction. This abstraction layer enables the construction of complex queries—including those required for geospatial filtering—using readable, object-oriented syntax rather than raw SQL, thereby enhancing code maintainability.
 
-*Global Scopes*: The system utilizes global scopes to enforce architectural constraints at the model level. For instance, the `User` model applies a scope to automatically load role relationships (`customer`, `employee`), enabling the implementation of the comprehensive "Identity Composition" strategy without repetitive query logic.
+*Reactive Event Hooks*: The ORM includes specific lifecycle hooks that fire automatically on state changes. This capability is essential for the system's real-time requirements, functioning as the data-layer trigger for WebSocket broadcasts without requiring manual event dispatching in business logic services.
 
-*Model Events*: The system leverages model lifecycle hooks (e.g., `booted`) to trigger side effects  -  exclusively for dispatching real-time updates via WebSockets (e.g., `OrderUpdated`) whenever a transactional state changes.
+*Encapsulation of Business Logic*: Through features such as *Accessors* and *Attribute Casting*, data transformation logic is centralized within the domain model. This ensures that data formatting (e.g., JSON serialization or computed properties) is consistent across the application, adhering to the DRY (Don't Repeat Yourself) principle.
 
-*Custom Pivot Models*: Intermediate tables are promoted to first-class domain citizens by extending the `Pivot` class (e.g., `OrderItem`). This allows relationship-specific logic, such as quantity management, to be encapsulated directly within the association object rather than leaking into the parent models.
-
-*Query Scopes*: Local scopes (e.g., `scopeWithDistanceTo`) encapsulate complex raw SQL logic, particularly for geospatial filtering, exposing a clean, fluent interface to the rest of the application.
-
-*Accessors*: Computed attributes (e.g., `getUrlAttribute`, `getTotalAttribute`) provide dynamic properties, such as generating signed storage URLs or calculating order totals on-the-fly, abstracting the underlying calculation or storage detail.
-
-*Attribute Casting*: Automatic type conversion (e.g., casting `OrderStatus` enums and JSON fields) ensures data integrity and simplifies data handling across the application.
+*Advanced Relationship Modeling*: Beyond standard foreign key associations, Eloquent supports complex interactions such as polymorphic relationships and many-to-many associations with intermediate state. This flexibility allows for a nuanced representation of the domain's relational complexities directly within the object graph.
 
 
 === Architectural Context: Active Record vs. Data Mapper

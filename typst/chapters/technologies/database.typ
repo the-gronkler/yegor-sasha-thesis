@@ -37,9 +37,10 @@ As a fully open-source solution with a strong commitment to the GPL license, Mar
 
 While MariaDB excels in the areas outlined above, it has some limitations. As a fork of MySQL, it may lag behind in adopting the latest features from the broader MySQL ecosystem.
 
-MariaDB-specific deployment and hosting options are limited. Although it can be hosted on MySQL environments and use MySQL drivers, the application uses `ST_Distance_Sphere`, which is not available in all MySQL versions, requiring a MariaDB-specific configuration.
+MariaDB-specific deployment and hosting options are more limited than MySQL. However, its binary compatibility with MySQL means it can typically be hosted on MySQL-compatible environments and use MySQL drivers.
 
-Its community and ecosystem are also smaller than MySQL's, potentially affecting long-term support and third-party integrations.
+
+Its community and ecosystem are smaller than MySQL's, potentially affecting long-term support and third-party integrations.
 
 For highly specialized geospatial analyses beyond basic filtering and distance calculations, extensions like PostGIS in PostgreSQL offer more advanced capabilities.
 
