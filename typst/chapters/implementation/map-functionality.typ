@@ -360,8 +360,8 @@ The controller also implements the payload optimization strategy described in @m
 
 The frontend implements the component hierarchy and separation of concerns described in @map-arch-component-hierarchy. The main implementation artifacts are:
 
-- #source_code_link("resources/js/Pages/Customer/Map/Index.tsx") — the orchestrator entry view that composes layout and delegates business logic to the hook.
-- #source_code_link("resources/js/Hooks/useMapPage.ts") — the logic hook that owns state (view, selection, geolocation) and performs Inertia navigation.
+- #source_code_link("resources/js/Pages/Customer/Map/Index.tsx") - the orchestrator entry view that composes layout and delegates business logic to the hook.
+- #source_code_link("resources/js/Hooks/useMapPage.ts") - the logic hook that owns state (view, selection, geolocation) and performs Inertia navigation.
 - Specialized UI components: #source_code_link("resources/js/Pages/Customer/Map/Partials/MapOverlay.tsx"), #source_code_link("resources/js/Components/Shared/Map.tsx"), #source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx"), and #source_code_link("resources/js/Components/Shared/MapPopup.tsx").
 
 ==== Entry composition: MapLayout + Overlay + Map + BottomSheet

@@ -35,7 +35,7 @@ _Leaflet with OpenStreetMap_ was considered as an open-source alternative requir
 
 The library supports the controlled component pattern used in the map architecture (see @map-architecture), enabling programmatic camera control and view state synchronization.
 
-The alternative—using Mapbox GL JS directly with `useEffect` hooks—would require manual imperative management of map initialization, event listener registration, and cleanup, increasing complexity and bug potential.
+The alternative-using Mapbox GL JS directly with `useEffect` hooks-would require manual imperative management of map initialization, event listener registration, and cleanup, increasing complexity and bug potential.
 
 === Client-Side Search <map-tech-client-search>
 
@@ -77,13 +77,13 @@ _Cookies_ were considered but add bandwidth overhead by being sent with every HT
 
 MariaDB's query optimizer uses index merge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
 
-Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently—the query optimizer cannot efficiently use a composite index when both columns have range conditions.
+Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently-the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 
 === Payload Optimization <map-tech-payload>
 
 *Strategic eager loading* minimizes response size for the map endpoint. Only the `images` relation is loaded (selecting specific columns: `id`, `restaurant_id`, `image`, `is_primary_for_restaurant`), while the full `foodTypes.menuItems` hierarchy is deliberately excluded.
 
-This approach reduces response size by approximately 80% compared to loading complete restaurant data with nested menu items. The map UI displays only restaurant cards with thumbnails, ratings, and distances—menu data is unnecessary for discovery and is loaded on-demand when users navigate to individual restaurant pages.
+This approach reduces response size by approximately 80% compared to loading complete restaurant data with nested menu items. The map UI displays only restaurant cards with thumbnails, ratings, and distances-menu data is unnecessary for discovery and is loaded on-demand when users navigate to individual restaurant pages.
 
 This follows the principle of loading only what is displayed, which is particularly important for mobile users on bandwidth-constrained networks.
 

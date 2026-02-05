@@ -38,7 +38,7 @@ The three phases serve distinct architectural responsibilities:
 
 *Phase A: Input Normalization* - Resolves a single center point from multiple possible input sources (search center, user location, session, default) using a deterministic priority cascade. This centralization ensures consistent behavior regardless of how the request originated.
 
-*Phase B: Proximity-First Selection* — Selects up to 250 restaurant IDs based solely on distance from center, enforcing radius as a hard SQL constraint. This phase is quality-agnostic: it ignores restaurant ratings, review counts, and popularity metrics, establishing a geographically-bounded candidate set before any quality-based ranking occurs.
+*Phase B: Proximity-First Selection* - Selects up to 250 restaurant IDs based solely on distance from center, enforcing radius as a hard SQL constraint. This phase is quality-agnostic: it ignores restaurant ratings, review counts, and popularity metrics, establishing a geographically-bounded candidate set before any quality-based ranking occurs.
 
 *Phase C: Quality-Based Ranking* - Hydrates full restaurant models and computes composite quality scores entirely in SQL using derived tables. Within the geographically-bounded set from Phase B, restaurants are ordered by quality (rating 50%, review count 30%, proximity 20%) with distance as a tiebreaker.
 
