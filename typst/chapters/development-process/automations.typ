@@ -22,5 +22,5 @@
 //   ```
 // ]
 
-husky formatting
-deployment github action
+// husky formatting
+// deployment github action

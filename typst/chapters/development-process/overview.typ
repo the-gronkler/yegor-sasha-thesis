@@ -10,7 +10,7 @@ The chapter is structured to cover the following core components of the workflow
 
 - *Planning and Tracking*: The strategies used to manage requirements and track progress.
 - *Version Control*: The branching models and code review policies enforced to maintain repository health.
-- *Quality Assurance*: The automated systems for static analysis, formatting, and testing.
+- *Automations*: The automation systems and workflows that support the development process.
 - *Deployment*: The infrastructure and release pipelines used to host the application on the Microsoft Azure platform.
 - *Documentation Engineering*: The application of software development tools (Typst, Git) to the writing of this thesis.
 - *AI Augmentation*: The ethical and technical utilization of AI assistants in the development process.

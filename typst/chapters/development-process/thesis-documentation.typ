@@ -2,7 +2,7 @@
 
 == Thesis Documentation
 
-The documentation methodology for this thesis adheres to the "Docs-as-Code" philosophy, treating the manuscript as a software artifact rather than a static document. The thesis is authored using *Typst*, a modern, programmable typesetting system that offers significant advantages over traditional tools like LaTeX or Microsoft Word in the context of software engineering documentation.
+The documentation methodology for this thesis is grounded in the "Docs-as-Code" philosophy, whereby the manuscript is treated as a software artifact rather than a static document. The thesis is authored using *Typst*, a modern, programmable typesetting system that offers significant advantages over traditional tools like LaTeX or Microsoft Word in the context of software engineering documentation.
 
 === Typst Integration
 
@@ -12,7 +12,7 @@ While Typst simplifies this separation, it technically allows users to mix styli
 - *Document-wide styling* is exclusively defined in `template.typ` and applied via the `main.typ` entry point.
 - *Helper functions and constants* used within chapters are centralized in `config.typ`.
 
-Unlike LaTeX, which relies on complex macros, Typst uses a consistent, functional scripting language. This allows for the creation of custom abstractions, such as the `code_example` and `source_code_link` functions used throughout this document, which dynamically generate links to the specific commit version of the codebase.
+Unlike LaTeX, which relies on complex macros, Typst uses a consistent, functional scripting language. This enables the creation of custom abstractions, such as the `code_example` and `source_code_link` functions used throughout this document, which dynamically generate links to the specific commit version of the codebase.
 
 === Comparative Technology Analysis
 
@@ -43,4 +43,4 @@ The thesis source code resides in the `typst/` directory within the main project
 
 === Workflow and Versioning
 
-Strictly adhering to the protocols outlined in the Version Control section, the thesis manuscript is managed with the same rigorous Git workflow as the application codebase. All textual modifications are isolated in feature branches (e.g., #raw("docs/chapter-name")) and submitted via Pull Requests. This ensures that the academic content is subject to mandatory quality assurance - including automated formatting checks and most importantly *peer review* - prior to integration. This discipline guarantees a transparent history of the document's evolution and facilitates structured collaboration between authors.
+As detailed in the Version Control section, the thesis manuscript is managed with the same rigorous Git workflow as the application codebase. Textual modifications are isolated in feature branches (e.g., #raw("docs/chapter-name")) and submitted via Pull Requests, ensuring that the academic content is subjected to the same mandatory quality assurance -- including automated formatting checks and peer review -- as the application code.

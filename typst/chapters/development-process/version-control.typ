@@ -6,9 +6,9 @@ Version control systems form the foundation of collaborative software developmen
 
 === Git Workflow
 
-The development follows a trunk-based development model, where all developers work on short-lived feature branches that are regularly merged back to the main branch. This approach minimizes merge conflicts and ensures continuous integration of changes.
+The development follows a trunk-based development model, a source-control branching strategy where developers integrate small, frequent updates directly into a shared main branch (the "trunk"). Unlike long-lived feature branches common in Git Flow, trunk-based development emphasizes keeping branches short-lived—ideally merged within a few days—to reduce integration complexity and maintain a continuously releasable codebase.
 
-Feature branches are created for each discrete unit of work, typically corresponding to a single feature, bug fix, or documentation update. Branch names follow the pattern `feat/feature-name`, `fix/bug-description`, or `docs/update-section`, providing clear semantic meaning.
+Feature branches are created for each discrete unit of work, typically corresponding to a single feature, bug fix, or documentation update. Branch names follow the pattern `feat/feature-name`, `fix/bug-description`, or `docs/update-section`, providing clear semantic meaning. Once complete, these branches are merged back to the trunk via pull requests and promptly deleted.
 
 === Pull Request Process
 
@@ -62,7 +62,7 @@ Where:
   - Specific feature names or subscopes (e.g., `FE/menu-card`, `BE/order-processing`)
 - *description* provides a concise, imperative summary of the change
 
-While the standard Conventional Commit format is preferred, the slash-delimited alternative (`type/scope/description`) is also accepted. This alternative format is accepted mainly because it aligns with *tooling defaults* - platforms like GitHub and VS Code often suggest the branch name as the default Pull Request title, ensuring the suggestion is automatically a valid commit message. Additionally, this format improves *typing efficiency* by eliminating the need for shift-keyed characters and offers *hierarchical clarity* by representing feature contexts as paths (e.g., `feat/FE/auth/login`) that map logically to the modular directory structure.
+While the standard Conventional Commit format is preferred, the slash-delimited alternative (`type/scope/description`) is also accepted. This alternative format is accepted mainly because it aligns with *tooling defaults* - the branch name is often suggested by platforms like GitHub and VS Code as the default Pull Request title, ensuring that the suggestion is automatically a valid commit message. Additionally, this format improves *typing efficiency* by eliminating the need for shift-keyed characters and offers *hierarchical clarity* by representing feature contexts as paths (e.g., `feat/FE/auth/login`) that map logically to the modular directory structure.
 
 Examples include:
 - `feat(FE): implement restaurant menu card component`
