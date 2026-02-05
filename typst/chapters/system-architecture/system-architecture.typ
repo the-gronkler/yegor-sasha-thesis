@@ -5,6 +5,8 @@
 
 #include "data-persistence.typ"
 
+#include "frontend-architecture.typ"
+
 #include "employee-customer.typ"
 
 #include "real-time-events.typ"
