@@ -141,7 +141,7 @@ The chosen strategy - separate single-column indexes - allows MariaDB to use ind
 
 The map UI displays restaurant names, ratings, distances, and thumbnails - it does not need full menu data. Loading the complete menu hierarchy (food types → menu items → allergens → images) multiplies the JSON payload size by approximately 5x for large restaurants. The decision to load only `images` (selecting specific columns) reduces response size by ~80%, significantly improving initial page load on mobile networks.
 
-This follows the principle of "load only what you display" - menu data is loaded on-demand when users navigate to restaurant detail pages.
+This follows the principle of loading only what is displayed - menu data is loaded on-demand when users navigate to restaurant detail pages.
 
 === Summary of Technology Decisions
 

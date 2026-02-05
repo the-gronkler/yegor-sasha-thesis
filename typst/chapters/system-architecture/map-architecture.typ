@@ -2,7 +2,7 @@
 
 == Map-Based Discovery Architecture <map-architecture>
 
-This section outlines the architectural design of the map-based restaurant discovery feature, covering the component topology, backend processing pipeline, frontend state management, data flow patterns, architectural guarantees, integration with Inertia and Mapbox, and scalability considerations.
+The architectural design of the map-based restaurant discovery feature is outlined in this section, covering the component topology, backend processing pipeline, frontend state management, data flow patterns, architectural guarantees, integration with Inertia and Mapbox, and scalability considerations.
 
 === Architectural Overview
 
@@ -216,7 +216,7 @@ The architecture deliberately separates discovery data from detail data:
 - Map endpoint loads: restaurant metadata, single primary image, distance, score
 - Map endpoint omits: full menu hierarchy, all images, reviews
 
-This reflects the architectural principle of "load what you display". The map UI does not render menus, so loading them wastes bandwidth. When users click a restaurant, a separate detail page loads the full dataset.
+This reflects the architectural principle of loading only what is displayed. The map UI does not render menus, so loading them wastes bandwidth. When users click a restaurant, a separate detail page loads the full dataset.
 
 This pattern follows a lazy loading architecture: load minimal data eagerly for browsing, fetch detailed data on-demand for interaction.
 
