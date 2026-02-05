@@ -41,7 +41,7 @@ These constraints map directly to the controller's deterministic three-phase pip
 
 === Backend implementation: deterministic three-phase processing
 
-The dataset for the map is produced by the `index` action in #source_code_link("app/Http/Controllers/Customer/MapController.php"). As described in @map-architecture, the endpoint implements a deterministic three-phase architecture (input normalization, proximity-first selection, and quality-based ranking). The following sections present the concrete implementation of each phase.
+The dataset for the map is produced by the `index` action in #source_code_link("app/Http/Controllers/Customer/MapController.php"). As described in @map-arch-three-phase, the endpoint implements a deterministic three-phase architecture (input normalization, proximity-first selection, and quality-based ranking). The following sections present the concrete implementation of each phase.
 
 ==== Authorization, validation, and response shape
 
@@ -127,7 +127,7 @@ This design allows exploration without losing context: users can browse multiple
 
 ==== Session-based geolocation persistence
 
-The session persistence architecture described in @map-architecture is implemented by #source_code_link("app/Services/GeoService.php"). The service stores coordinates under `geo.last` with a 24-hour expiry timestamp.
+The session persistence architecture described in @map-arch-session-persistence is implemented by #source_code_link("app/Services/GeoService.php"). The service stores coordinates under `geo.last` with a 24-hour expiry timestamp.
 
 #code_example[
 GeoService persists `geo.last` with a timestamp and rejects expired session values.
@@ -167,7 +167,7 @@ These constants centralize magic numbers and provide a single source of truth fo
 
 ==== Phase B: proximity-first selection with hard radius enforcement
 
-Phase B implements the proximity-first selection described in @map-architecture. The output is intentionally lightweight (IDs only) to avoid loading models and relations before the candidate set is finalized.
+Phase B implements the proximity-first selection described in @map-arch-three-phase. The output is intentionally lightweight (IDs only) to avoid loading models and relations before the candidate set is finalized.
 
 #code_example[
 Phase B returns only IDs, enforcing the radius as a hard SQL constraint via HAVING.
@@ -201,7 +201,7 @@ private function selectNearestRestaurantIds(float $centerLat, float $centerLng, 
 ```
 ]
 
-The bounding box prefilter pattern described in @map-architecture is implemented using indexed range checks (`whereBetween`).
+The bounding box prefilter pattern described in @map-arch-bounding-box is implemented using indexed range checks (`whereBetween`).
 
 #code_example[
 GeoService computes an approximate bounding box and clamps latitude to avoid instability near the poles.
@@ -226,7 +226,7 @@ public function getBoundingBox(float $lat, float $lng, float $radiusKm): array
 ```
 ]
 
-The `HAVING` clause enforces the hard radius guarantee (as specified in @map-architecture): only rows satisfying `distance_km <= radius` remain candidates, and only then is the limit applied. When `radius = 0`, the `HAVING` clause is omitted and the 250 nearest restaurants globally are returned.
+The `HAVING` clause enforces the hard radius guarantee (as specified in @map-arch-guarantees): only rows satisfying `distance_km <= radius` remain candidates, and only then is the limit applied. When `radius = 0`, the `HAVING` clause is omitted and the 250 nearest restaurants globally are returned.
 
 ==== Phase B to Phase C boundary: no duplicated scoring
 
@@ -234,7 +234,7 @@ The controller deliberately avoids computing any score while converting the sele
 
 ==== Phase C: scoring once and ordering by quality in SQL
 
-Phase C implements the single-pass SQL computation strategy described in @map-architecture. Full restaurant models are hydrated and a composite quality score is computed exactly once in a derived table using three weighted signals: rating (0–50 points), review count (0–30 points, logarithmic scale), and proximity (0–20 points, linear decay).
+Phase C implements the single-pass SQL computation strategy described in @map-arch-query-optimization. Full restaurant models are hydrated and a composite quality score is computed exactly once in a derived table using three weighted signals: rating (0–50 points), review count (0–30 points, logarithmic scale), and proximity (0–20 points, linear decay).
 
 #code_example[
 Phase C builds derived tables: review counts are aggregated once, distance is computed once, and composite score is calculated once.
@@ -367,7 +367,7 @@ The controller also implements aggressive payload optimization by limiting eager
 
 === Frontend implementation: orchestration, state, and synchronized UI
 
-The frontend implements the component hierarchy and separation of concerns described in @map-architecture. The main implementation artifacts are:
+The frontend implements the component hierarchy and separation of concerns described in @map-arch-component-hierarchy. The main implementation artifacts are:
 
 - #source_code_link("resources/js/Pages/Customer/Map/Index.tsx") — the orchestrator entry view that composes layout and delegates business logic to the hook.
 - #source_code_link("resources/js/Hooks/useMapPage.ts") — the logic hook that owns state (view, selection, geolocation) and performs Inertia navigation.
@@ -453,7 +453,7 @@ The `useMapPage` hook manages:
 - Geolocation flow, including a defensive error message when the Mapbox control is not ready.
 - Inertia navigation for dataset refresh, using partial reloads to only re-fetch `restaurants` and `filters`.
 
-Following the hybrid client-server architecture described in @map-architecture, the hook requests only the props that must change, while preserving UI state and scroll position.
+Following the hybrid client-server architecture described in @map-arch-data-flow, the hook requests only the props that must change, while preserving UI state and scroll position.
 
 #code_example[
 Reload operations fetch only `restaurants` and `filters`, preserving UI state and scroll to keep interactions responsive.
@@ -477,7 +477,7 @@ const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
 
 ==== "Search here": exploration without losing user context
 
-The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-architecture: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available.
+The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available.
 
 #code_example[
 The “Search here” navigation updates only the search center and preserves the user location context.
@@ -510,7 +510,7 @@ const searchInArea = useCallback(() => {
 
 ==== Geolocation integration: trigger mechanism and error handling
 
-The geolocation integration pattern described in @map-architecture is implemented using Mapbox's `GeolocateControl`. The control's UI is hidden (`showGeolocateControlUi={false}`) because the overlay provides its own "My Location" button, with a callback registration pattern bridging the two.
+The geolocation integration pattern described in @map-arch-geolocation-pattern is implemented using Mapbox's `GeolocateControl`. The control's UI is hidden (`showGeolocateControlUi={false}`) because the overlay provides its own "My Location" button, with a callback registration pattern bridging the two.
 
 #code_example[
 The page hook triggers geolocation through the registered callback and provides defensive error handling.

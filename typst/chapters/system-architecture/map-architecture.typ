@@ -28,7 +28,7 @@ These layers communicate through well-defined interfaces: the controller exposes
 
 === Backend Architecture Patterns
 
-==== Three-Phase Processing Pipeline
+==== Three-Phase Processing Pipeline <map-arch-three-phase>
 
 The map-based restaurant discovery feature requires a backend processing strategy that balances conflicting requirements: results must prioritize geographic proximity (respecting user-defined radius constraints), while simultaneously ranking restaurants by quality indicators (ratings, review counts). Additionally, the system must handle multiple input sources for the center point (explicit search coordinates, persistent user location, or default fallback) and ensure consistent, deterministic behavior across requests.
 
@@ -55,7 +55,7 @@ The service exposes methods for:
 
 This abstraction allows controllers to remain focused on HTTP request handling while delegating geospatial domain logic to a specialized component. The service is stateless and side-effect-free (except for session writes), making it straightforward to test and reason about.
 
-==== Session-Based Location Persistence
+==== Session-Based Location Persistence <map-arch-session-persistence>
 
 User location is persisted in the server-side session with an expiry timestamp. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after a configurable period and is not permanently stored).
 
@@ -78,7 +78,7 @@ This design keeps the controller simple (request → service → fallback) while
 
 === Frontend Architecture Patterns
 
-==== Component Hierarchy and Separation of Concerns
+==== Component Hierarchy and Separation of Concerns <map-arch-component-hierarchy>
 
 #block(breakable: false)[
 The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
@@ -127,7 +127,7 @@ Cart state is shared globally via Context API. This state must be accessible fro
 
 This layered approach follows the principle of state locality: keep state as close as possible to where it is used, but share globally only when necessary.
 
-==== Data Flow and Synchronization
+==== Data Flow and Synchronization <map-arch-data-flow>
 
 The map feature implements bidirectional data flow between server and client:
 
@@ -169,7 +169,7 @@ This architecture enables:
 
 The alternative - uncontrolled component with internal ref access - would scatter view state across components and make state synchronization fragile.
 
-==== Geolocation Integration Pattern
+==== Geolocation Integration Pattern <map-arch-geolocation-pattern>
 
 Geolocation uses a callback registration pattern to bridge the gap between the Mapbox `GeolocateControl` (which has its own UI and lifecycle) and the custom overlay controls.
 
@@ -185,7 +185,7 @@ This pattern decouples the UI (custom button in overlay) from the implementation
 
 === Data Architecture and Flow Patterns
 
-==== Query Optimization Strategy
+==== Query Optimization Strategy <map-arch-query-optimization>
 
 The backend query architecture prioritizes single-pass computation:
 
@@ -198,7 +198,7 @@ This strategy reflects the architectural principle of "compute once, use many ti
 
 The derived table pattern (`fromSub`, `joinSub`) allows complex scoring while still returning Eloquent models. This hybrid approach balances SQL efficiency with Laravel's ORM convenience.
 
-==== Bounding Box Prefilter Pattern
+==== Bounding Box Prefilter Pattern <map-arch-bounding-box>
 
 The architecture uses a two-stage spatial filter:
 
@@ -220,7 +220,7 @@ This reflects the architectural principle of loading only what is displayed. The
 
 This pattern follows a lazy loading architecture: load minimal data eagerly for browsing, fetch detailed data on-demand for interaction.
 
-=== Architectural Guarantees and Invariants
+=== Architectural Guarantees and Invariants <map-arch-guarantees>
 
 The map architecture enforces several key invariants:
 
@@ -248,7 +248,7 @@ These guarantees reflect deliberate architectural choices that prioritize predic
 
 === Integration Architecture
 
-==== Inertia.js Bridge Pattern
+==== Inertia.js Bridge Pattern <map-arch-inertia-bridge>
 
 The architecture uses Inertia as a bridge between Laravel (server) and React (client), providing SPA-like navigation without API route duplication. Key architectural benefits:
 
