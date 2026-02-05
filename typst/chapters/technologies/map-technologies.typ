@@ -38,6 +38,7 @@ The library supports the controlled component pattern used in the map architectu
 The alternative-using Mapbox GL JS directly with `useEffect` hooks-would require manual imperative management of map initialization, event listener registration, and cleanup, increasing complexity and bug potential.
 
 === Client-Side Search <map-tech-client-search>
+// TODO: we should probably describe fuse.js as a global technology used in multiple features, not just map-based discovery, and then link to it from here. (probably we should do that with all other technologies in final revision)
 
 *Fuse.js* provides fuzzy search filtering for the restaurant list on the client side. When users type in the search box, Fuse.js filters the restaurant dataset locally without requiring server requests.
 
