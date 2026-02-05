@@ -6,7 +6,7 @@ Version control systems form the foundation of collaborative software developmen
 
 === Git Workflow
 
-The development follows a trunk-based development model, a source-control branching strategy where developers integrate small, frequent updates directly into a shared main branch (the "trunk"). Unlike long-lived feature branches common in Git Flow, trunk-based development emphasizes keeping branches short-lived—ideally merged within a few days—to reduce integration complexity and maintain a continuously releasable codebase.
+The development follows a trunk-based development model, a source-control branching strategy where developers integrate small, frequent updates directly into a shared main branch (the "trunk"). Unlike long-lived feature branches common in Git Flow, trunk-based development emphasizes keeping branches short-lived - ideally merged within a few days - to reduce integration complexity and maintain a continuously releasable codebase.
 
 Feature branches are created for each discrete unit of work, typically corresponding to a single feature, bug fix, or documentation update. Branch names follow the pattern `feat/feature-name`, `fix/bug-description`, or `docs/update-section`, providing clear semantic meaning. Once complete, these branches are merged back to the trunk via pull requests and promptly deleted.
 

@@ -10,7 +10,18 @@ The production environment is hosted on an Azure Virtual Machine. The decision t
 
 === Container Orchestration
 
-The system utilizes Docker Compose to define and manage the multi-container application. This approach ensures operational simplicity by encapsulating the entire technology stack, effectively treating the host VM as a generic execution environment. This abstraction eliminates configuration drift, as the deployment logic is decoupled from the underlying infrastructure. The architecture constitutes a cohesive ecosystem where each service has a distinct role.
+The system utilizes Docker Compose to define and manage the multi-container application. While Docker provides the containerization runtime, Docker Compose adds a declarative orchestration layer: a single YAML file defines multiple interdependent services, their networking, and their shared volumes. This allows the entire stack to be started, stopped, and rebuilt with a single command.
+
+The architecture separates concerns into distinct services - application logic, reverse proxy, and database - each running in its own isolated container. This approach represents a middle ground between two alternatives:
+
+- *Single-container deployment* - bundles all components (web server, application, database) into one image. While simpler to deploy, this approach sacrifices isolation: a database crash can terminate the web server, updates require rebuilding everything, and resource limits cannot be set per-component.
+- *Distributed deployment* - runs each service on separate physical or virtual machines. This provides maximum isolation and independent scaling but introduces network latency between components, operational complexity in managing multiple hosts, and significantly higher infrastructure costs.
+
+The multi-container approach on a single host combines the benefits of both: services remain isolated with independent lifecycles and resource limits, yet communicate over a low-latency virtual network without the overhead of managing multiple machines.
+
+In production systems, databases are typically hosted on dedicated managed services (e.g., Azure Database for MySQL) to ensure automated backups, replication, and independent scaling; however, for this academic project, co-locating the database within the Compose stack - with data persistence ensured via Docker volumes, as detailed in the Database Service section - provides sufficient reliability while minimizing infrastructure costs.
+
+By encapsulating the entire technology stack in container definitions, the host VM functions as a generic execution environment, greatly reducing configuration drift between development and production. The following sections detail the individual services and their roles.
 
 ==== Application Service (`app`)
 The `app` service functions as the central logic unit, purposely deviating from the standard "single process per container" paradigm to prioritize consistency and deployment simplicity. By utilizing *Supervisor* as an internal process manager, this service packages the entire application runtime -- PHP-FPM, the Nginx web server, and asynchronous workers -- into a cohesive artifact.
@@ -33,6 +44,6 @@ The `caddy` service acts as the dedicated ingress gateway, decoupling public acc
 - *Infrastructure Abstraction*: By serving as the single entry point, Caddy abstracts the complexity of the internal network. The application container can listen on a simple, unencrypted port, unaware of the external domain configuration, while Caddy handles the translation from secure public requests to internal traffic.
 
 ==== Database Service (`db`)
-A persistent MariaDB 10.11 instance provides the relational data storage for the application. While industry best practices for larger-scale systems often favor dedicated, managed database services to ensure high availability, hosting the database as a container within the Docker Compose network significantly reduces architectural complexity and network latency for the project's current scope. Data integrity is preserved through the use of Docker volumes, which ensure that database files persist independently of the container's lifecycle.
+A MariaDB 10.11 instance provides the relational data storage for the application. As discussed above, co-locating the database within the Compose stack is a deliberate trade-off for this academic project. Data integrity is preserved through a Docker volume mounted to the container's data directory, ensuring that database files persist independently of the container's lifecycle. This means the database can be stopped, upgraded, or rebuilt without losing data - the volume remains on the host filesystem and is reattached when the container restarts.
 
 
