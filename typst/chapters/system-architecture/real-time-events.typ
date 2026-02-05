@@ -1,6 +1,6 @@
 #import "../../config.typ": code_example, source_code_link
 
-== Event-Driven Real-Time Topology
+== Event-Driven Real-Time Topology <real-time-events>
 The system employs an event-driven architecture to decouple action execution from interface updates, enabling real-time synchronization across distributed components.
 
 - *Event Sources*: Actions such as "Order Placed" or "Menu Item Updated" dispatch strongly typed Events within the Laravel backend, encapsulating data changes and triggering downstream processes.

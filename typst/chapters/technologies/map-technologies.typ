@@ -121,27 +121,13 @@ User location should persist across visits (for convenience) but expire after 24
 
 Laravel session was chosen because it requires no additional infrastructure, respects existing session expiry configuration, and keeps location data server-authoritative (preventing client-side tampering). The session stores latitude, longitude, and timestamp, allowing the controller to validate freshness before use.
 
-=== Performance Optimization Technologies
+=== Performance Optimization Decisions
 
-==== Database Indexing Strategy
+The map feature requires performance-conscious technology decisions to ensure responsive interaction on mobile devices. Two key decisions affect query performance and payload size:
 
-*Decision:* Use separate indexes on `latitude` and `longitude` rather than spatial indexes or composite indexes.
+*Database Indexing:* Separate single-column indexes on `latitude` and `longitude` were chosen over spatial indexes (R-tree) or composite indexes. This decision enables MariaDB's index merge optimization for bounding box range queries while remaining compatible with `ST_Distance_Sphere` coordinate operations. The architectural implementation of this indexing strategy is detailed in @map-architecture.
 
-*Rationale:*
-
-The bounding box prefilter uses range queries (`BETWEEN`) on latitude and longitude independently. MariaDB's query optimizer can use index merge to combine separate indexes efficiently. Spatial indexes (R-tree) would optimize geometric operations but are not used because `ST_Distance_Sphere` operates on raw coordinates, not geometry columns. Composite `(latitude, longitude)` indexes do not benefit range queries on both columns.
-
-The chosen strategy - separate single-column indexes - allows MariaDB to use index merge optimization for bounding box filters, reducing the candidate set before expensive distance calculations.
-
-==== Payload Reduction Strategy
-
-*Decision:* Deliberately exclude `foodTypes.menuItems` relations from map endpoint eager loading.
-
-*Rationale:*
-
-The map UI displays restaurant names, ratings, distances, and thumbnails - it does not need full menu data. Loading the complete menu hierarchy (food types → menu items → allergens → images) multiplies the JSON payload size by approximately 5x for large restaurants. The decision to load only `images` (selecting specific columns) reduces response size by ~80%, significantly improving initial page load on mobile networks.
-
-This follows the principle of "load only what you display" - menu data is loaded on-demand when users navigate to restaurant detail pages.
+*Selective Data Loading:* The map endpoint deliberately excludes nested menu hierarchies from eager loading, reducing JSON payload size by approximately 80% compared to full relation loading. This "load what you display" approach defers detailed restaurant data to dedicated detail pages. The data flow patterns implementing this strategy are described in @map-architecture.
 
 === Summary of Technology Decisions
 

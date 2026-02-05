@@ -30,8 +30,14 @@ Laravel's documentation and community resources further strengthen the framework
 
 The Laravel ecosystem extends beyond official documentation. Laracasts offers structured video tutorials covering framework features and related technologies. Community support channels—including forums, Discord servers, and Stack Overflow—provide accessible problem-solving resources. This ecosystem maturity contributed significantly to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
 
-=== Queue System for Background Processing
+=== Queue System Selection
 
-Laravel's *queue system* handles operations that should not block user requests. When an order status changes, for example, the system dispatches a broadcast event to the queue rather than sending WebSocket messages synchronously. A background worker process consumes these jobs, ensuring responsive user interactions even during high-traffic periods.
+Laravel's built-in *queue system* was selected over external message brokers such as RabbitMQ or Amazon SQS for background task processing. The primary considerations driving this decision were:
 
-The project uses the database queue driver, storing pending jobs in a dedicated table. This approach requires no additional infrastructure beyond the existing database, simplifying deployment for resource-constrained environments.
+*Infrastructure Simplicity* — Laravel's queue abstraction supports multiple backends, including database-driven queues that require no additional services. For a restaurant ordering application targeting small operators, avoiding external dependencies reduces deployment complexity and operational overhead.
+
+*Framework Integration* — The queue system integrates natively with Laravel's event broadcasting, job dispatching, and failure handling. This tight coupling eliminates the need for custom adapters or serialization logic that would be required when using standalone message brokers.
+
+*Scalability Path* — While the database driver suffices for moderate workloads, Laravel's queue abstraction allows transparent migration to Redis or dedicated queue services without code changes. This provides a scalability path should throughput requirements increase beyond database queue capacity.
+
+The architectural integration of queues with real-time broadcasting is detailed in @real-time-events.
