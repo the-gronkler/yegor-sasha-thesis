@@ -20,14 +20,9 @@ The main implementation artifacts are:
 
 The map feature is a discovery surface, not a full restaurant-detail view. Translating this goal into code-level constraints shaped both the endpoint and the UI behavior.
 
-*Performance bounds:* Client-side rendering and clustering scale poorly when payload size grows without bounds, therefore the backend enforces a hard upper bound of _250 restaurants per request_. This protects database workload, response serialization time, and Mapbox rendering performance.
+*Performance bounds:* The backend enforces the 250-restaurant limit described in @map-arch-scalability, protecting database workload, response serialization time, and Mapbox rendering performance.
 
-*Dual location semantics:* The feature distinguishes two conceptually different locations:
-
-/ *User location* (`lat`/`lng`): The user's real location context, persisted in session to support continuity across visits.
-/ *Search center* (`search_lat`/`search_lng`): A temporary exploration center used by the "Search here" interaction.
-
-This separation ensures that exploring another area does not overwrite the user's persisted location.
+*Dual location semantics:* The feature distinguishes user location (`lat`/`lng`) from search center (`search_lat`/`search_lng`), implementing the session isolation guarantee described in @map-arch-guarantees. This ensures that exploring another area does not overwrite the user's persisted location.
 
 *Deterministic radius filtering:* If a radius is specified, no restaurants outside that radius may appear in results. This is enforced at the SQL level (not post-filtered in PHP), so the semantic meaning of "within radius" cannot drift.
 
@@ -305,15 +300,11 @@ Favorite detection is included conditionally for authenticated users via a `LEFT
 
 ==== Database indexing strategy for geospatial queries
 
-The three-phase architecture relies on specific database indexes for optimal performance. The controller documentation explicitly identifies two critical indexes:
+The three-phase architecture relies on specific database indexes for optimal performance, as described in @map-tech-indexing. The controller documentation explicitly identifies two critical indexes beyond the latitude/longitude indexes:
 
-1. *`reviews.restaurant_id`* index: enables efficient GROUP BY aggregation in the review counts subquery. Without this index, the database would perform a full table scan for each aggregation operation.
+1. *`reviews.restaurant_id`* index: enables efficient GROUP BY aggregation in the review counts subquery.
 
-2. *`(customer_user_id, restaurant_id)` composite index* on `favorite_restaurants`: optimizes the LEFT JOIN favorite detection when filtered by customer. A composite index allows the database to seek directly to the relevant rows.
-
-Additionally, the bounding box prefilter relies on separate indexes on `restaurants.latitude` and `restaurants.longitude`. MariaDB may use index merge optimization to combine these range checks efficiently.
-
-The spatial function `ST_Distance_Sphere` does not benefit from spatial indexes in this implementation because it operates on computed values rather than indexed geometry columns. The bounding box prefilter compensates for this limitation by reducing the candidate set before distance calculations.
+2. *`(customer_user_id, restaurant_id)` composite index* on `favorite_restaurants`: optimizes the LEFT JOIN favorite detection when filtered by customer.
 
 ==== Empty result handling and early termination
 
@@ -363,7 +354,7 @@ public function formatDistance(float|string|null $distance): ?float
 ```
 ]
 
-The controller also implements aggressive payload optimization by limiting eager loading. Unlike the restaurant detail page, the map endpoint loads only the `images` relation (specifically selecting only required columns: `id`, `restaurant_id`, `image`, and `is_primary_for_restaurant`). It deliberately *does not* load the `foodTypes.menuItems` hierarchy, which would add thousands of unnecessary records to the JSON payload. This targeted loading strategy reduces the map response size by approximately 80% compared to a naive "load everything" approach, significantly improving initial page load performance and reducing bandwidth consumption for users on mobile networks.
+The controller also implements the payload optimization strategy described in @map-tech-payload, loading only the `images` relation with specific column selection while deliberately excluding the `foodTypes.menuItems` hierarchy.
 
 === Frontend implementation: orchestration, state, and synchronized UI
 
@@ -722,34 +713,21 @@ After the transition completes, the implementation measures the card position, c
 
 === Summary
 
-The map-based restaurant discovery feature demonstrates a complete implementation of geospatial filtering, quality-based ranking, and interactive visualization. The implementation balances multiple competing concerns: performance, user experience, data consistency, and code maintainability.
+The map-based restaurant discovery feature demonstrates a complete implementation combining the architectural patterns from @map-architecture with the technology choices from @map-technologies.
 
-*Backend architecture decisions:*
-- Three-phase processing pipeline ensures deterministic behavior: coordinate normalization (Phase A), proximity-first selection with hard radius enforcement (Phase B), and SQL-based quality scoring with Eloquent hydration (Phase C).
-- Radius constraints are enforced as hard limits via SQL HAVING clauses, guaranteeing "up to 250 within radius" rather than "250 closest overall".
-- Composite scoring is computed exactly once using derived tables, eliminating redundant distance calculations and avoiding PHP post-processing.
-- Distance uses MariaDB's `ST_Distance_Sphere` with bounding box prefiltering for performance.
-- Session-based location persistence with 24-hour expiry balances convenience and privacy.
-- Strategic eager loading (images only, not full menu hierarchy) reduces payload size by ~80%.
-- Database indexes on `reviews.restaurant_id` and `favorite_restaurants(customer_user_id, restaurant_id)` optimize aggregation and join performance.
+*Backend implementation highlights:*
+- The three-phase processing pipeline (@map-arch-three-phase) is realized through distinct controller methods that enforce phase boundaries
+- SQL-level radius enforcement via HAVING clauses guarantees the architectural invariants (@map-arch-guarantees)
+- Single-pass score computation (@map-arch-query-optimization) is implemented using Laravel's `fromSub` and `joinSub` query builder methods
 
-*Frontend architecture decisions:*
-- Clear separation of concerns: orchestration (page component), state management (useMapPage hook), and presentation (specialized partials).
-- Partial Inertia reloads (`only: ['restaurants', 'filters']`) preserve UI state and scroll position when dataset changes.
-- Explicit "Search here" interaction prevents accidental server requests on every pan/zoom.
-- Dual location support: persistent user location (`lat`/`lng`) and ephemeral search center (`search_lat`/`search_lng`) enable exploration without losing context.
-- Geolocation trigger mechanism with defensive error handling and user-friendly error messages.
-- MapLayout disables body scroll to prevent conflicts with map pan/zoom gestures.
-- GeoJSON clustering improves readability and performance at low zoom levels.
-- Camera animation with UI-aware padding keeps selected restaurants visible above overlays.
-- Bottom sheet uses Pointer Events with capture for consistent drag behavior across devices, with transition-aware auto-scroll synchronization.
+*Frontend implementation highlights:*
+- The component hierarchy (@map-arch-component-hierarchy) is implemented with clear separation between the page orchestrator, logic hook, and UI partials
+- The geolocation callback registration pattern (@map-arch-geolocation-pattern) bridges the hidden Mapbox control with custom overlay buttons
+- Bottom sheet drag behavior uses Pointer Events API with capture for cross-device consistency
+- Transition-aware auto-scroll prevents layout measurement errors during CSS animations
 
-*User experience considerations:*
-- Multiple location acquisition methods: device geolocation, manual coordinate entry, and map click picking.
-- Graceful degradation to default center (Warsaw) when location is unavailable.
-- Radius slider with commit-on-release strategy prevents backend flooding during drag.
-- Selection synchronization across map markers, popup, and list maintains spatial orientation.
-- Clear error messages for geolocation failures with actionable guidance.
-- Reduced motion support via `essential: true` flag in animations for accessibility.
-
-The implementation serves as a case study in building complex interactive features that require coordination between backend query optimization, frontend state management, and user interaction design.
+*User experience refinements:*
+- Multiple location acquisition methods (geolocation, manual entry, map click) provide fallback options
+- Commit-on-release radius slider prevents backend flooding during drag interactions
+- Camera animation with UI-aware padding keeps selected restaurants visible above overlays
+- Error messages map browser geolocation codes to actionable user guidance

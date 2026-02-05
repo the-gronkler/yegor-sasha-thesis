@@ -270,7 +270,7 @@ The map visualization uses a layered architecture:
 
 This separation allows independent control: data updates do not require re-configuring layers, and visual styling changes do not affect data structure. The architecture uses Mapbox's declarative layer system rather than imperative canvas drawing, enabling GPU-accelerated rendering.
 
-=== Scalability and Performance Architecture
+=== Scalability and Performance Architecture <map-arch-scalability>
 
 The architecture incorporates several design decisions that support scalability:
 
@@ -284,11 +284,11 @@ All scoring and ordering happens in SQL, leveraging MariaDB's query optimizer. T
 
 *Client-Side Search:*
 
-The fuzzy search filter runs entirely in the browser using Fuse.js. This offloads computation to the client and avoids network latency for interactive search.
+The fuzzy search filter runs entirely in the browser, as described in @map-tech-client-search. This offloads computation to the client and avoids network latency for interactive search.
 
 *Strategic Indexing:*
 
-Separate indexes on `latitude` and `longitude` enable efficient bounding box filters. The index merge optimization allows MariaDB to combine them without a composite index.
+The database indexing strategy described in @map-tech-indexing enables efficient bounding box filters through index merge optimization.
 
 These patterns reflect an architecture designed for predictable resource consumption: capped result sizes, database-offloaded computation, and index-supported queries.
 

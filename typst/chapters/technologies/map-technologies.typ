@@ -1,159 +1,106 @@
 #import "../../config.typ": source_code_link
 
-== Map-Based Discovery: Technology Selection <map-technologies>
+== Map-Based Discovery Technologies <map-technologies>
 
-This section presents the technology choices for the map-based restaurant discovery feature and the rationale behind each decision.
+The map-based restaurant discovery feature requires accurate geospatial calculations, interactive visualization, client-side filtering, and responsive data fetching. This section describes the technology choices that support these requirements.
 
-=== Backend Geospatial Technologies
+=== Geospatial Computation <map-tech-geospatial>
 
-==== MariaDB with Spatial Functions
+*MariaDB Spatial Functions* are used for all distance calculations on the backend. The `ST_Distance_Sphere` function computes geodesic distance on a spherical Earth model, providing acceptable accuracy for restaurant discovery (error < 0.5% for distances under 100 km).
 
-*Decision:* Use MariaDB's built-in spatial functions (`ST_Distance_Sphere`) for distance calculations rather than application-level computation or dedicated geospatial databases.
+This approach was selected over two alternatives:
 
-*Rationale:*
+_PostGIS (PostgreSQL extension)_ offers comprehensive GIS capabilities including spatial indexing and advanced geometric operations. However, adopting PostGIS would require migrating the entire application from MariaDB to PostgreSQL, adding significant infrastructure complexity for a feature that needs only distance calculations.
 
-The primary requirement was accurate geodesic distance calculation between geographic coordinates. Several options were evaluated:
+_Application-level Haversine_ (computing distances in PHP) provides maximum database portability but moves computation to the application tier. This approach increases network round-trips and prevents database-level query optimization, as the database cannot filter or sort by a value computed outside the query.
 
-/ Application-level Haversine: Implement the Haversine formula in PHP/Laravel code. This approach offers maximum portability but moves computation to the application tier, increasing network round-trips and preventing database-level query optimization.
+MariaDB's native function executes entirely in the database engine, enabling efficient use in `WHERE`, `HAVING`, and `ORDER BY` clauses. A configurable Haversine fallback is provided for environments lacking `ST_Distance_Sphere`, with numerical stability safeguards (clamping trigonometric inputs to prevent `NaN` results from floating-point edge cases).
 
-/ PostGIS (PostgreSQL extension): Industry-standard geospatial database extension with comprehensive GIS capabilities including spatial indexing, geometric operations, and routing algorithms. However, this would require migrating the entire application from MariaDB to PostgreSQL.
+=== Map Visualization <map-tech-visualization>
 
-/ MariaDB ST_Distance_Sphere: Native spatial function available in MariaDB 10.1+ that computes geodesic distance on a spherical Earth model. Returns distance in meters with acceptable accuracy for restaurant discovery use cases (error < 0.5% for distances under 100 km).
+*Mapbox GL JS* provides interactive map rendering using WebGL-accelerated vector tiles. This technology was selected for several reasons:
 
-MariaDB's `ST_Distance_Sphere` was selected because it provides sufficient accuracy for the restaurant discovery domain while keeping the technology stack consistent (no database migration required). The function executes entirely in the database engine, enabling efficient use in `WHERE`, `HAVING`, and `ORDER BY` clauses. For the use case of finding restaurants within a few kilometers, the spherical Earth approximation (rather than full ellipsoidal calculations) provides adequate precision without the overhead of PostGIS.
+- *Rendering Performance*: Vector-based rendering delivers smooth 60fps interactions even with hundreds of markers, outperforming raster-tile approaches that require downloading pre-rendered images at each zoom level.
+- *Native Clustering*: Built-in point clustering groups nearby markers at low zoom levels, improving both visual clarity and rendering performance without additional libraries.
+- *Style Customization*: Mapbox Studio enables granular control over map appearance, allowing the map to match the application's design system.
+- *Cost Structure*: The free tier (50,000 map loads per month) is sufficient for development and moderate production traffic.
 
-*Fallback Strategy:*
+_Google Maps_ was considered due to its ubiquity and user familiarity. However, Mapbox offered more generous free-tier limits, finer style control, and a more modern JavaScript API designed for React integration.
 
-The application provides a configurable distance calculation mechanism through the `geo.distance_formula` configuration option. The Restaurant model's `scopeWithDistanceTo` method respects this setting and can switch between MariaDB's `ST_Distance_Sphere` function and a numerically-stable Haversine implementation (using `GREATEST`/`LEAST` clamping around trigonometric operations to prevent `NaN` results from floating-point rounding errors in the `ACOS` function).
+_Leaflet with OpenStreetMap_ was considered as an open-source alternative requiring no API key. However, Leaflet uses raster tiles by default (resulting in slower rendering), and vector tile support requires additional plugins. Clustering also requires plugin integration rather than being built-in.
 
-However, the map discovery feature's current implementation uses `ST_Distance_Sphere` directly in its query pipeline for performance optimization reasons (avoiding scope overhead in multi-phase queries with derived tables). This means the map feature assumes MariaDB 10.1+ availability. Portability to database engines lacking `ST_Distance_Sphere` would require refactoring the MapController's distance calculations to leverage the configurable scope mechanism or implement an equivalent conditional expression within the controller's raw SQL queries.
+=== React Integration <map-tech-react-integration>
 
-=== Frontend Technologies
+*react-map-gl* wraps Mapbox GL JS with React-friendly bindings, providing a declarative component model (`<Map>`, `<Source>`, `<Layer>`, `<Popup>`) that integrates naturally with React's lifecycle. The library handles automatic cleanup of event listeners and map instances, preventing memory leaks that commonly occur when managing Mapbox imperatively.
 
-==== Map Visualization: Mapbox GL JS
+The library supports the controlled component pattern used in the map architecture (see @map-architecture), enabling programmatic camera control and view state synchronization.
 
-*Decision:* Use Mapbox GL JS for interactive map rendering rather than Google Maps, Leaflet, or OpenLayers.
+The alternative—using Mapbox GL JS directly with `useEffect` hooks—would require manual imperative management of map initialization, event listener registration, and cleanup, increasing complexity and bug potential.
 
-*Rationale:*
+=== Client-Side Search <map-tech-client-search>
 
-Several mapping libraries were evaluated based on rendering performance, clustering capabilities, style customization, and licensing:
+*Fuse.js* provides fuzzy search filtering for the restaurant list on the client side. When users type in the search box, Fuse.js filters the restaurant dataset locally without requiring server requests.
 
-/ Google Maps JavaScript API: Industry-standard with excellent documentation and reliability. However, pricing is based on map loads and requires a credit card even for free tier. Styling options are more limited, and custom clustering requires additional work.
+This approach was selected because the map endpoint already returns a bounded dataset (up to 250 restaurants within the selected radius). Performing fuzzy search on this pre-filtered set is computationally trivial for the browser and provides instant feedback as users type. Server-side search would introduce unnecessary latency for each keystroke and complicate the interaction between search queries and geographic filters.
 
-/ Leaflet with OpenStreetMap: Open-source, no API key required, large ecosystem. However, Leaflet uses raster tiles by default (slower rendering, less smooth), and vector tile support requires additional plugins. Clustering works but requires plugin integration.
+Fuse.js supports weighted keys, allowing restaurant names to rank higher than descriptions in search relevance. The library's configurable threshold parameter controls match strictness, balancing typo tolerance against false positives.
 
-/ OpenLayers: Powerful open-source library with vector tile support. However, it has a steeper learning curve and more verbose API compared to modern alternatives.
+=== Data Fetching <map-tech-data-fetching>
 
-/ Mapbox GL JS: Vector-based rendering using WebGL for smooth 60fps interactions. Built-in clustering, extensive style customization through Mapbox Studio, and a generous free tier (50,000 loads/month). Designed for React integration through `react-map-gl`.
+*Inertia.js partial reloads* are used to update the restaurant dataset when filters change. The `only: ['restaurants', 'filters']` option re-fetches specific page props while preserving client-side state (camera position, selected restaurant, scroll position).
 
-Mapbox was selected for its superior rendering performance (vector tiles + WebGL), native clustering support, and modern API that integrates cleanly with React's component model. The free tier is sufficient for development and moderate production traffic, and the style customization allows the map to match the application's design system. The decision to use the public token type (`pk.`) rather than secret tokens prevents accidental credential exposure in client bundles.
+This approach was selected over two alternatives:
 
-*Alternative Considered:*
+_Full page reloads_ would be simplest to implement but would lose all UI state on each filter change, creating a jarring user experience.
 
-Google Maps was seriously considered due to its ubiquity and familiarity to users. The decision came down to cost predictability (Mapbox's free tier is more generous for the expected traffic) and style flexibility (Mapbox Studio provides more granular control over visual appearance).
+_Manual AJAX with state merging_ (using `fetch()` to retrieve data and manually merging it into React state) would provide fine-grained control but would duplicate Inertia's routing logic, break browser history integration, and require manual handling of loading states and error conditions.
 
-==== React-Map-GL Integration
+Partial reloads preserve the seamless feel of a single-page application while maintaining Inertia's server-side routing benefits. The `replace: true` option prevents intermediate filter states from polluting browser history.
 
-*Decision:* Use the `react-map-gl` wrapper library rather than vanilla Mapbox GL JS.
+=== Location Persistence <map-tech-location-persistence>
 
-*Rationale:*
+*Laravel Session* is used to persist user location between visits. When users grant geolocation permission, their coordinates are stored server-side with a 24-hour expiry timestamp.
 
-`react-map-gl` provides React-friendly bindings for Mapbox, including:
+This approach was selected for several reasons:
 
-- Declarative component model (`<Map>`, `<Source>`, `<Layer>`, `<Popup>`)
-- Automatic cleanup and lifecycle management
-- TypeScript type definitions
-- Controlled component pattern for view state synchronization
+- *Server Authority*: Session data cannot be tampered with from the client, preventing manipulation of location coordinates.
+- *Automatic Expiry*: Laravel's session management handles expiry automatically, balancing convenience (returning users see their neighborhood) with privacy (stale location data is not retained indefinitely).
+- *No Additional Infrastructure*: The existing session store (database-backed) is reused without requiring schema migrations or additional services.
 
-The alternative - using Mapbox GL JS directly with `useEffect` hooks - would require manual imperative management of map instances, event listeners, and cleanup. The declarative wrapper reduces boilerplate and prevents common bugs (memory leaks from unremoved listeners, stale closures, race conditions in async initialization).
+_localStorage_ was considered but cannot be read during server-side rendering or in controller logic, limiting its usefulness for a feature that requires location data on the backend.
 
-==== State Management: React Context API
+_Cookies_ were considered but add bandwidth overhead by being sent with every HTTP request, even when location data is not needed.
 
-*Decision:* Use React Context API for global cart state rather than Redux, Zustand, or prop drilling.
+=== Database Indexing <map-tech-indexing>
 
-*Rationale:*
+*Separate single-column indexes* on `latitude` and `longitude` columns support the bounding box prefilter that reduces the candidate set before expensive distance calculations.
 
-The cart state must be accessible from multiple surfaces (navigation badge, restaurant menu, cart page) without deep prop drilling. Several state management solutions were evaluated:
+MariaDB's query optimizer uses index merge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
 
-/ Prop drilling: Pass cart state down component tree. Simple but becomes unwieldy beyond 2-3 levels and makes refactoring difficult.
+Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently—the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 
-/ Redux: Industry-standard global state with time-travel debugging and middleware. However, Redux involves significant boilerplate (actions, reducers, store configuration) and is overkill for a single cart slice.
+=== Payload Optimization <map-tech-payload>
 
-/ Zustand: Lightweight state management with minimal boilerplate. Clean API but adds another dependency for a problem React Context solves natively.
+*Strategic eager loading* minimizes response size for the map endpoint. Only the `images` relation is loaded (selecting specific columns: `id`, `restaurant_id`, `image`, `is_primary_for_restaurant`), while the full `foodTypes.menuItems` hierarchy is deliberately excluded.
 
-/ React Context API: Built-in React feature for sharing state across components. Zero dependencies, TypeScript-friendly, integrates naturally with hooks.
+This approach reduces response size by approximately 80% compared to loading complete restaurant data with nested menu items. The map UI displays only restaurant cards with thumbnails, ratings, and distances—menu data is unnecessary for discovery and is loaded on-demand when users navigate to individual restaurant pages.
 
-Context API was chosen because the cart state is simple (items array, derived totals), updates are localized (not high-frequency), and React 18's optimizations minimize re-render concerns. The Context provides methods for adding, removing, and updating items that handle server requests with optimistic updates, providing a responsive UI without external state library complexity.
+This follows the principle of loading only what is displayed, which is particularly important for mobile users on bandwidth-constrained networks.
 
-==== Data Fetching: Inertia.js Partial Reloads
+=== Summary
 
-*Decision:* Use Inertia's `only` prop to reload specific page props rather than full page refreshes.
+The map-based discovery feature employs a layered technology stack:
 
-*Rationale:*
+/ Backend geospatial: MariaDB `ST_Distance_Sphere` provides accurate distance calculations entirely in SQL, with Haversine fallback for portability.
 
-When the map's radius or location changes, only the restaurant dataset needs updating - UI state (camera position, selected restaurant, scroll position) should persist. Three approaches were considered:
+/ Map rendering: Mapbox GL JS delivers WebGL-accelerated vector maps with native clustering, wrapped by react-map-gl for React integration.
 
-/ Full page reload: Simplest but loses all UI state and feels jarring.
+/ Client-side search: Fuse.js enables instant fuzzy filtering without server round-trips.
 
-/ Manual AJAX with state merge: Fetch new data via `fetch()` and manually merge into React state. Flexible but duplicates Inertia's routing logic and breaks browser history.
+/ Data synchronization: Inertia.js partial reloads update the dataset while preserving UI state.
 
-/ Inertia partial reloads: Use `only: ['restaurants', 'filters']` to re-fetch only specified props while preserving component state.
+/ Location persistence: Laravel Session stores user coordinates server-side with automatic expiry.
 
-Partial reloads provide the best user experience: the dataset updates seamlessly while camera position, selection, and overlay state remain intact. The `preserveScroll: true` option prevents scroll jumps, and `replace: true` avoids polluting browser history with intermediate filter states.
+/ Query optimization: Bounding box prefilters with indexed columns reduce the candidate set before distance calculations.
 
-=== Session Storage Technologies
-
-==== Laravel Session for Location Persistence
-
-*Decision:* Use Laravel's default session storage (database-backed) for persisting user location rather than cookies, localStorage, or dedicated geolocation database.
-
-*Rationale:*
-
-User location should persist across visits (for convenience) but expire after 24 hours (for privacy). Options considered:
-
-/ Cookies: Accessible from both client and server but limited to 4KB and sent with every request (bandwidth overhead).
-
-/ LocalStorage: 5-10MB limit, accessible only from JavaScript. Cannot be read during server-side rendering or controller logic.
-
-/ Database table: Maximum flexibility but requires schema migrations, additional queries, and cleanup jobs.
-
-/ Laravel session: Built-in, database-backed (or file/Redis-backed), expires automatically, accessible in controllers via `$request->session()`.
-
-Laravel session was chosen because it requires no additional infrastructure, respects existing session expiry configuration, and keeps location data server-authoritative (preventing client-side tampering). The session stores latitude, longitude, and timestamp, allowing the controller to validate freshness before use.
-
-=== Performance Optimization Technologies
-
-==== Database Indexing Strategy
-
-*Decision:* Use separate indexes on `latitude` and `longitude` rather than spatial indexes or composite indexes.
-
-*Rationale:*
-
-The bounding box prefilter uses range queries (`BETWEEN`) on latitude and longitude independently. MariaDB's query optimizer can use index merge to combine separate indexes efficiently. Spatial indexes (R-tree) would optimize geometric operations but are not used because `ST_Distance_Sphere` operates on raw coordinates, not geometry columns. Composite `(latitude, longitude)` indexes do not benefit range queries on both columns.
-
-The chosen strategy - separate single-column indexes - allows MariaDB to use index merge optimization for bounding box filters, reducing the candidate set before expensive distance calculations.
-
-==== Payload Reduction Strategy
-
-*Decision:* Deliberately exclude `foodTypes.menuItems` relations from map endpoint eager loading.
-
-*Rationale:*
-
-The map UI displays restaurant names, ratings, distances, and thumbnails - it does not need full menu data. Loading the complete menu hierarchy (food types → menu items → allergens → images) multiplies the JSON payload size by approximately 5x for large restaurants. The decision to load only `images` (selecting specific columns) reduces response size by ~80%, significantly improving initial page load on mobile networks.
-
-This follows the principle of loading only what is displayed - menu data is loaded on-demand when users navigate to restaurant detail pages.
-
-=== Summary of Technology Decisions
-
-/ Geospatial computation: MariaDB `ST_Distance_Sphere` for accuracy and performance, with Haversine fallback for portability.
-
-/ Map visualization: Mapbox GL JS for WebGL-based vector rendering, native clustering, and style flexibility via React-Map-GL wrapper.
-
-/ State management: React Context API for cart state (simple, zero-dependency), Inertia partial reloads for seamless dataset updates.
-
-/ Session storage: Laravel session for location persistence (built-in, secure, automatic expiry).
-
-/ Performance: Separate lat/lng indexes for bounding box queries, strategic eager loading to minimize payload size.
-
-These choices prioritize developer productivity (leveraging built-in framework features), user experience (smooth interactions, fast loads), and maintainability (declarative UI components, minimal external dependencies).
-
+These choices prioritize user experience (smooth interactions, instant search, preserved state), performance (database-level computation, strategic eager loading), and maintainability (leveraging framework features over custom implementations).
