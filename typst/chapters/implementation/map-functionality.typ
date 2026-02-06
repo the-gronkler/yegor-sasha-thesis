@@ -354,7 +354,7 @@ public function formatDistance(float|string|null $distance): ?float
 ```
 ]
 
-The controller also implements the payload optimization strategy described in @map-tech-payload, loading only the `images` relation with specific column selection while deliberately excluding the `foodTypes.menuItems` hierarchy.
+The controller also implements a payload optimization strategy to minimize the data sent to the frontend. Since the map UI displays only restaurant cards with thumbnails, ratings, and distances, the full menu hierarchy is unnecessary at this stage. The controller therefore eager-loads only the `images` relation, selecting specific columns (`id`, `restaurant_id`, `image`, `is_primary_for_restaurant`), while deliberately excluding the `foodTypes.menuItems` hierarchy that would otherwise include every food type, menu item, and associated metadata. This reduces response size significantly compared to loading the complete restaurant model with nested relations. Detailed menu data is instead loaded on-demand when users navigate to an individual restaurant page.
 
 === Frontend implementation: orchestration, state, and synchronized UI
 

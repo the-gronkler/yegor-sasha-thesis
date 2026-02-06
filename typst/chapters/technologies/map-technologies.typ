@@ -14,7 +14,7 @@ _PostGIS (PostgreSQL extension)_ offers comprehensive GIS capabilities including
 
 _Application-level Haversine_ (computing distances in PHP) provides maximum database portability but moves computation to the application tier. This approach increases network round-trips and prevents database-level query optimization, as the database cannot filter or sort by a value computed outside the query.
 
-MariaDB's native function executes entirely in the database engine, enabling efficient use in `WHERE`, `HAVING`, and `ORDER BY` clauses. A configurable Haversine fallback is provided for environments lacking `ST_Distance_Sphere`, with numerical stability safeguards (clamping trigonometric inputs to prevent `NaN` results from floating-point edge cases).
+MariaDB's native function executes entirely in the database engine, enabling efficient use in `WHERE`, `HAVING`, and `ORDER BY` clauses. For environments lacking `ST_Distance_Sphere`, a Haversine-based fallback ensures database portability without sacrificing the in-database computation advantage.
 
 === Map Visualization <map-tech-visualization>
 
@@ -46,18 +46,6 @@ This approach was selected because the map endpoint already returns a bounded da
 
 Fuse.js supports weighted keys, allowing restaurant names to rank higher than descriptions in search relevance. The library's configurable threshold parameter controls match strictness, balancing typo tolerance against false positives.
 
-=== Data Fetching <map-tech-data-fetching>
-
-*Inertia.js partial reloads* are used to update the restaurant dataset when filters change. The `only: ['restaurants', 'filters']` option re-fetches specific page props while preserving client-side state (camera position, selected restaurant, scroll position).
-
-This approach was selected over two alternatives:
-
-_Full page reloads_ would be simplest to implement but would lose all UI state on each filter change, creating a jarring user experience.
-
-_Manual AJAX with state merging_ (using `fetch()` to retrieve data and manually merging it into React state) would provide fine-grained control but would duplicate Inertia's routing logic, break browser history integration, and require manual handling of loading states and error conditions.
-
-Partial reloads preserve the seamless feel of a single-page application while maintaining Inertia's server-side routing benefits. The `replace: true` option prevents intermediate filter states from polluting browser history.
-
 === Location Persistence <map-tech-location-persistence>
 
 *Laravel Session* is used to persist user location between visits. When users grant geolocation permission, their coordinates are stored server-side with a 24-hour expiry timestamp.
@@ -80,14 +68,6 @@ MariaDB's query optimizer uses index merge to combine separate indexes for range
 
 Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently-the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 
-=== Payload Optimization <map-tech-payload>
-
-*Strategic eager loading* minimizes response size for the map endpoint. Only the `images` relation is loaded (selecting specific columns: `id`, `restaurant_id`, `image`, `is_primary_for_restaurant`), while the full `foodTypes.menuItems` hierarchy is deliberately excluded.
-
-This approach reduces response size by approximately 80% compared to loading complete restaurant data with nested menu items. The map UI displays only restaurant cards with thumbnails, ratings, and distances-menu data is unnecessary for discovery and is loaded on-demand when users navigate to individual restaurant pages.
-
-This follows the principle of loading only what is displayed, which is particularly important for mobile users on bandwidth-constrained networks.
-
 === Summary
 
 The map-based discovery feature employs a layered technology stack:
@@ -98,10 +78,8 @@ The map-based discovery feature employs a layered technology stack:
 
 / Client-side search: Fuse.js enables instant fuzzy filtering without server round-trips.
 
-/ Data synchronization: Inertia.js partial reloads update the dataset while preserving UI state.
-
 / Location persistence: Laravel Session stores user coordinates server-side with automatic expiry.
 
 / Query optimization: Bounding box prefilters with indexed columns reduce the candidate set before distance calculations.
 
-These choices prioritize user experience (smooth interactions, instant search, preserved state), performance (database-level computation, strategic eager loading), and maintainability (leveraging framework features over custom implementations).
+These choices prioritize user experience (smooth interactions, instant search, preserved state), performance (database-level computation, indexed queries), and maintainability (leveraging framework features over custom implementations).
