@@ -6,13 +6,18 @@ This chapter discusses the strategic technology choices made during the developm
 
 #include "database.typ"
 #include "orm.typ"
+#include "blob-storage.typ"
 
 #include "backend-technologies.typ"
 #include "inertia.typ"
 #include "react-frontend.typ"
 
+#include "realtime.typ"
+
 #include "map-technologies.typ"
 
-#include "realtime.typ"
+
+
+
 
 
