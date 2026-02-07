@@ -1,6 +1,6 @@
 #import "../../config.typ": code_example, source_code_link
 
-== Frontend-Backend Integration: Inertia.js
+== Frontend-Backend Integration: Inertia.js <inertia-technology>
 
 Modern web applications typically choose between two architectural approaches: traditional server-rendered applications with full page reloads, or single-page applications (SPAs) that consume a separate API. Each approach involves trade-offs between developer experience, performance, and complexity. *Inertia.js 2.0* offers a third option that combines advantages of both approaches.
 
@@ -25,6 +25,8 @@ Inertia.js was selected for the following reasons:
 *Simplified Data Flow* — Controllers pass data directly to page components as props. There is no need for frontend data fetching libraries, loading state management for initial page loads, or caching strategies. The page component receives its data before rendering, similar to traditional server-rendered applications but with client-side navigation.
 
 *Laravel Ecosystem Integration* — Inertia was developed alongside Laravel and maintains first-class integration. Laravel's middleware, session handling, CSRF protection, and validation errors work seamlessly. The Laravel community provides extensive documentation, tutorials, and support specifically for the Inertia integration.
+
+*Partial Reloads* — Interactive pages frequently need to refresh a subset of data without discarding client-side state (scroll position, open menus, selected items). In a traditional server-rendered application, this requires a full page reload that destroys all UI state. In a conventional SPA, it requires a manually implemented AJAX layer with custom state merging. Inertia's partial reload mechanism solves this by allowing components to request only specific props via the `only` option - the server re-executes only the requested prop closures and returns a minimal JSON payload, which Inertia merges into the existing page state without a full re-render. The `replace: true` option further prevents intermediate states from polluting browser history when filters change rapidly. This capability was a significant factor in selecting Inertia, as several application features (map filter adjustments, list sorting, search refinement) rely on frequent data updates that must preserve surrounding UI state.
 
 *Progressive Enhancement Path* — While Inertia handles the primary application flow, it does not prevent using traditional API endpoints where needed. Real-time features, background updates, or third-party integrations can still use conventional HTTP or WebSocket communication alongside Inertia's page-based navigation.
 
