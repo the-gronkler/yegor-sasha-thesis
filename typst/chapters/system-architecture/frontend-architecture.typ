@@ -1,6 +1,6 @@
 #import "../../config.typ": code_example, source_code_link
 
-== Frontend Architecture
+== Frontend Architecture <frontend-architecture>
 
 The frontend architecture organizes React components into a layered hierarchy that promotes reusability and separation of concerns. This structure establishes clear boundaries between abstraction levels and defines patterns for state management and component communication.
 
