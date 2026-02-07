@@ -16,7 +16,7 @@ _Reusable Components_ split into two categories. UI Components (Atoms) provide g
 
 _Custom Hooks_ serve two purposes. Reusable hooks encapsulate shared logic across components—authentication utilities, configurable search, real-time update subscriptions. Component-specific hooks extract complex logic from individual components when complexity warrants separation, transforming components into purely presentational elements.
 
-The directory structure mirrors this hierarchy: pages organize by user role mirroring backend routes, layouts provide structural wrappers, components separate into generic UI elements and domain-specific shared components, and hooks encapsulate stateful logic. This organization enables locating components through URL patterns.
+The directory structure mirrors this hierarchy, enabling developers to locate components through URL patterns. The concrete directory layout and file organization are detailed in @frontend-implementation.
 
 === State & Data Flow
 
@@ -24,7 +24,7 @@ The application employs local state as the default, elevating to global contexts
 
 _Local State_ serves most components through React's state hooks. Components manage UI toggles, form inputs, and view-specific data locally. Custom hooks encapsulate complex local state logic.
 
-_Global State_ uses React Context when multiple unrelated components require shared access. Context providers wrap the component tree, exposing state and mutation functions to any descendant. Components consume context directly without receiving props through intermediate layers. For example, the shopping cart uses a CartContext provider that holds cart items and exposes functions to add, update, or remove items. Menu buttons, the cart page, and the navigation badge all consume this context independently. The cart initializes from server data via Inertia shared props, updates optimistically for immediate feedback, then persists changes through server requests.
+_Global State_ uses React Context when multiple unrelated components require shared access. Context providers wrap the component tree, exposing state and mutation functions to any descendant. Components consume context directly without receiving props through intermediate layers. This pattern is applied where state must be accessible from structurally distant components — for example, shopping cart data consumed by menu buttons, the cart page, and the navigation badge simultaneously. Context providers initialize from server-provided data and synchronize with Inertia navigation events to maintain server authority over client state. The concrete implementation of this pattern is detailed in @frontend-implementation.
 
 _Server State_ flows through Inertia's shared props mechanism. Authentication state, user profiles, and application data arrive as page props rather than client-side fetches. This maintains the server as the authoritative data source.
 
