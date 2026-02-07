@@ -7,13 +7,15 @@ To abstract the complexity of raw database interactions and accelerate developme
 === Key Technical Advantages
 The decision to utilize Eloquent is reinforced by its comprehensive feature set, which supports the project's requirements for rapid iteration and maintainable code structure:
 
-*Fluent Query Builder*: Eloquent provides an expressive, chainable interface for database interaction. This abstraction layer enables the construction of complex queries—including those required for geospatial filtering—using readable, object-oriented syntax rather than raw SQL, thereby enhancing code maintainability.
+*Relationship Definitions*: Eloquent supports the full spectrum of relational patterns (one-to-one, one-to-many, and many-to-many) through simple method declarations on the model class. Many-to-many relationships can carry additional attributes on the intermediate pivot table (e.g., quantities or rankings) without requiring a separate model class. This capability is particularly relevant for an ordering system where associations between entities frequently carry contextual data. Eloquent also provides eager loading, a mechanism that preloads related records in a single query batch, preventing the N+1 query problem that commonly arises when iterating over collections with lazy-loaded relationships.
 
-*Reactive Event Hooks*: The ORM includes specific lifecycle hooks that fire automatically on state changes. This capability is essential for the system's real-time requirements, functioning as the data-layer trigger for WebSocket broadcasts without requiring manual event dispatching in business logic services.
+*Attribute Casting*: Eloquent's casting system automatically transforms raw database values into appropriate PHP types upon model retrieval. Supported transformations include date strings to Carbon date objects, integer columns to PHP enumerations, and plaintext values to hashed representations. This declarative approach ensures type consistency across the application without requiring manual transformation logic at each point of access, reducing the surface area for type-related errors.
 
-*Encapsulation of Business Logic*: Through features such as *Accessors* and *Attribute Casting*, data transformation logic is centralized within the domain model. This ensures that data formatting (e.g., JSON serialization or computed properties) is consistent across the application, adhering to the DRY (Don't Repeat Yourself) principle.
+*Query Scopes*: Eloquent allows the definition of reusable query constraints as named scope methods on the model class. These scopes encapsulate domain-specific filtering logic (e.g., geospatial proximity calculations or availability checks) behind a clean, chainable interface. This mechanism keeps controllers and services free of raw query construction while allowing complex constraints to be composed fluently, improving both readability and reusability.
 
-*Advanced Relationship Modeling*: Beyond standard foreign key associations, Eloquent supports complex interactions such as polymorphic relationships and many-to-many associations with intermediate state. This flexibility allows for a nuanced representation of the domain's relational complexities directly within the object graph.
+*Computed Attributes*: Eloquent's accessor feature enables models to expose derived values as virtual properties that do not correspond to physical database columns. This allows domain concepts (e.g., order totals computed dynamically from related records) to be accessed as simple model properties, centralizing calculation logic and preventing duplication of business formulas across the application.
+
+*Lifecycle Events*: Eloquent models emit events at key points in their lifecycle (creation, update, deletion), which can be observed by event listener classes. This decouples the persistence layer from side effects such as notifications or real-time broadcasts. When combined with Laravel's broadcasting system, model events can propagate state changes to connected WebSocket clients automatically, as detailed in @real-time-broadcasting.
 
 
 === Architectural Context: Active Record vs. Data Mapper
@@ -51,3 +53,7 @@ _Mitigation_: This risk is managed through the consistent use of PHPDoc annotati
 *Separation of Concerns*: Eloquent models, by design, mix domain logic with persistence logic. While beneficial for speed, this violates the Single Responsibility Principle, whereas strict Data Mapper implementations keep domain entities pure.
 
 _Mitigation_: To prevent "fat models," the architecture enforces a separation of duties: complex business logic is delegated to *Service classes*, and complex validation is handled by *FormRequests*. This ensures Models remain focused solely on data access and relationship definitions, with controllers orchestrating the transformation of data for Inertia responses.
+
+=== Enumeration Support
+
+PHP 8.1 introduced backed enumerations, providing type-safe representation of fixed value sets as first-class language constructs. Eloquent integrates with this feature through its casting system, allowing enum-backed database columns to be automatically hydrated into their corresponding PHP enum instances. This eliminates the use of raw integer constants or string literals for representing states such as order lifecycle stages, enabling IDE autocompletion, preventing invalid state assignments at the type level, and making conditional logic self-documenting throughout the codebase.
