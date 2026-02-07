@@ -31,7 +31,7 @@ The authentication flow relies on Laravel's default `web` guard with session sto
 The system distinguishes between two user types - customers and employees - while maintaining a unified authentication mechanism. This is achieved through a shared `User` model with separate profile tables for role-specific attributes.
 
 The architectural pattern is as follows:
-
+// TODO: theres probably duplication with one of the database sections, make sure this make sense to explain.
 / Base User Record: The `users` table stores common authentication data (email, password, name) and a global `is_admin` flag for system administrators.
 
 / Customer Profile: The `customers` table uses `user_id` as its primary key (a one-to-one relationship), storing customer-specific attributes. A user with an associated customer record is considered a customer.
@@ -44,22 +44,26 @@ The User model defined in #source_code_link("app/Models/User.php") automatically
 
 === Request Validation Architecture
 
-==== Form Request Pattern
+==== Validation Strategy
 
-All incoming data undergoes validation through dedicated Form Request classes. These classes extend Laravel's `FormRequest` base and encapsulate validation rules, authorization checks, and custom error messages for specific operations.
+The application employs a two-tier validation strategy, choosing the mechanism based on complexity and reuse requirements.
 
-This pattern provides several architectural benefits:
+For the majority of controller methods, validation is performed inline using Laravel's `$request->validate()` method directly within the controller action. This approach keeps simple validation rules co-located with the handling logic, reducing indirection for straightforward operations such as CRUD actions, status updates, and form submissions.
 
-- *Separation of Concerns*: Validation logic is removed from controllers, keeping them focused on request orchestration.
-- *Reusability*: Common validation rules are centralized and consistently applied.
-- *Testability*: Validation logic can be tested independently of controller behavior.
-- *Self-Documentation*: Form Request classes serve as documentation of expected input formats.
+For operations involving complex validation logic --- such as authentication with rate limiting or registration with custom error messages and attribute aliases --- dedicated Form Request classes are used. These classes extend Laravel's `FormRequest` base and encapsulate validation rules, authorization checks, custom messages, and additional business logic (such as the rate-limited authentication method in `LoginRequest`) into a single reusable object.
+
+This pragmatic approach balances two concerns:
+
+- *Locality*: Simple validation rules remain visible at the point of use, keeping controllers self-contained for straightforward operations.
+- *Encapsulation and Reusability*: Complex or security-critical validation is extracted into dedicated classes that can be reused across multiple controller actions, preventing controller methods from becoming cluttered with validation logic that would obscure their primary orchestration responsibility.
 
 ==== Rate Limiting for Security
 
-The authentication system implements rate limiting within the login Form Request to mitigate brute-force attacks. The `LoginRequest` class defined in #source_code_link("app/Http/Requests/Auth/LoginRequest.php") enforces a limit of five authentication attempts per email/IP combination.
+Form Request classes can extend beyond input validation to incorporate security concerns such as rate limiting.
 
-When the limit is exceeded, a `Lockout` event is fired and the user receives a validation error indicating the remaining cooldown period. The throttle key combines the transliterated email address with the client IP address, preventing both credential stuffing (many IPs, one email) and IP-based attacks (one IP, many emails) while avoiding false positives from legitimate users behind shared networks.
+For example, the #source_code_link("app/Http/Requests/Auth/LoginRequest.php") embeds throttling logic within the validation layer, ensuring brute-force protection is enforced before authentication is attempted.
+
+The throttle strategy identifies requests by a combination of user identity and client origin, mitigating both credential stuffing and IP-based brute-force attacks. This keeps security-specific logic out of the controller while co-locating it with the related validation rules, reinforcing the separation of concerns that the Form Request pattern provides.
 
 === Authorization Architecture
 
@@ -77,13 +81,13 @@ When `Gate::before()` returns `true`, all subsequent policy checks are skipped, 
 
 ==== Context-Aware Authorization
 
-Policies implement context-aware checks that consider the user's relationship to the resource. The order policy defined in #source_code_link("app/Policies/OrderPolicy.php") demonstrates this pattern:
+Policies evaluate the user's relationship to the resource being accessed. The order policy defined in #source_code_link("app/Policies/OrderPolicy.php") demonstrates this pattern:
 
-- *View*: Permitted for the owning customer, employees of the associated restaurant, or administrators.
-- *Update*: Permitted for restaurant employees (for status changes), or customers only when the order status is `InCart`.
-- *Delete*: Permitted for customers only when the order status is `InCart`, preventing deletion of placed orders.
+- View is permitted for the owning customer, employees of the associated restaurant, or administrators.
+- Update is permitted for restaurant employees (for status changes), or customers only when the order status is `InCart`.
+- Delete is permitted for customers only when the order status is `InCart`, preventing deletion of placed orders.
 
-These checks enforce multi-tenancy boundaries, ensuring employees can only access orders belonging to their restaurant and customers can only access their own orders. The pattern prevents cross-restaurant data leakage through explicit relationship verification rather than implicit trust.
+These checks enforce multi-tenancy boundaries, ensuring employees can only access orders belonging to their restaurant and customers can only access their own orders.
 
 ==== Custom Gate Definitions
 
@@ -104,6 +108,8 @@ Business logic, data transformation, and side effects (such as file uploads or e
 
 The `ReviewController` defined in #source_code_link("app/Http/Controllers/Customer/ReviewController.php") exemplifies this pattern: it receives a `ReviewService` through constructor injection and delegates all create, update, and delete operations to the service, handling only authorization, validation, and response formatting.
 
+When business logic is sufficiently simple --- such as straightforward CRUD operations or single-model updates --- it may remain in the controller rather than being extracted into a dedicated service. Service classes are introduced when the logic grows complex enough that it would obscure the controller's orchestration responsibility, involves multiple models or external systems, or benefits from reuse across different entry points.
+
 ==== Domain-Organized Controllers
 
 Controllers are organized by user domain rather than resource type. Customer-facing controllers reside in `App\Http\Controllers\Customer`, while employee-facing controllers reside in `App\Http\Controllers\Employee`. This organization reflects the architectural separation between user journeys and aligns with route grouping and middleware application.
@@ -122,29 +128,17 @@ The `ReviewService` defined in #source_code_link("app/Services/ReviewService.php
 
 The service returns a `ReviewOperationResult` data transfer object that encapsulates both the resulting review and any upload errors, allowing the controller to provide appropriate feedback without exposing service internals.
 
-==== Geospatial Service
+==== Cross-Cutting Utility Services
 
-The `GeoService` defined in #source_code_link("app/Services/GeoService.php") provides geospatial utilities used across the application:
-
-- *Session Persistence*: Stores and retrieves user location coordinates with 24-hour expiry.
-- *Bounding Box Calculation*: Computes latitude/longitude bounds for a given radius, accounting for spherical geometry.
-- *Distance Formatting*: Normalizes distance values for consistent display.
-
-By centralizing geospatial logic in a dedicated service, controllers and models remain focused on their primary responsibilities while sharing consistent coordinate handling.
+Beyond domain-specific operations, services also encapsulate cross-cutting technical concerns that are shared across multiple controllers and models. For example, the #source_code_link("app/Services/GeoService.php") centralizes geospatial logic --- session-based location persistence, bounding box calculation, and distance formatting --- so that coordinate handling remains consistent throughout the application without duplicating spatial algorithms across consumers.
 
 === Middleware Architecture
 
 ==== Role-Based Route Protection
 
-Access to protected routes is enforced through custom middleware classes that verify user roles before allowing request processing. Three middleware classes implement this pattern:
+Custom middleware classes enforce role membership at the route group level, rejecting requests from users who lack the required profile (customer or employee) before controller logic executes. This provides early rejection and prevents users from reaching endpoints outside their role entirely.
 
-/ EnsureUserIsEmployee: Defined in #source_code_link("app/Http/Middleware/EnsureUserIsEmployee.php"), this middleware aborts with HTTP 403 if the authenticated user lacks an employee profile. It is applied to all employee-facing routes.
-
-/ EnsureUserIsCustomer: Aborts with HTTP 403 if the authenticated user lacks a customer profile. Applied to customer-only routes requiring authentication.
-
-/ BlockEmployees: Prevents employees from accessing customer-facing pages, ensuring role separation in the user interface.
-
-These middleware classes complement policy-based authorization: middleware enforces coarse-grained access (which route groups a user may access), while policies enforce fine-grained access (which specific resources a user may manipulate).
+This complements the policy-based authorization described earlier: middleware answers "may this user access employee routes at all?" while policies (invoked from controllers) answer "may this user modify this specific order?"
 
 ==== Inertia Request Handling
 
@@ -156,53 +150,6 @@ The `HandleInertiaRequests` middleware defined in #source_code_link("app/Http/Mi
 
 This middleware ensures consistent data availability across all pages without repetitive controller logic.
 
-=== Model Architecture
-
-==== Eloquent Relationship Patterns
-
-Models define relationships using Eloquent's relationship methods, establishing the object graph that represents the domain. Common patterns include:
-
-- *One-to-One*: User to Customer/Employee profiles, using shared primary keys.
-- *One-to-Many*: Restaurant to Employees, Orders, MenuItems, Reviews.
-- *Many-to-Many*: Orders to MenuItems through pivot table with quantity, Customers to FavoriteRestaurants with rank.
-
-Relationships are defined with appropriate foreign key specifications, enabling eager loading to prevent N+1 query problems.
-
-==== Attribute Casting
-
-Models leverage Laravel's attribute casting to ensure type consistency:
-
-- *Password Hashing*: The User model casts `password` as `hashed`, ensuring automatic hashing on assignment.
-- *Enum Casting*: The Order model casts `order_status_id` to the `OrderStatus` enum, enabling type-safe status comparisons.
-- *DateTime Casting*: Timestamp fields are cast to Carbon instances for consistent date manipulation.
-
-==== Computed Attributes
-
-Models define computed attributes using accessors, exposing derived values as properties. The Order model's `total` attribute, for example, calculates the sum of menu item prices multiplied by their quantities from the pivot table.
-
-==== Query Scopes
-
-Local scopes encapsulate reusable query constraints. The Restaurant model defined in #source_code_link("app/Models/Restaurant.php") provides geospatial scopes:
-
-- `scopeWithDistanceTo`: Adds a computed `distance` column using `ST_Distance_Sphere` or a Haversine fallback.
-- `scopeWithinRadiusKm`: Filters restaurants within a radius using bounding box prefiltering and exact distance constraints.
-- `scopeOrderByDistance`: Orders results by the computed distance.
-
-These scopes enable composable query building while encapsulating geospatial complexity.
-
-==== Model Events and Broadcasting
-
-Models dispatch events through the `booted` method to trigger side effects without coupling to specific implementations. The Order model defined in #source_code_link("app/Models/Order.php") dispatches an `OrderUpdated` event on creation and status changes.
-
-The event class implements `ShouldBroadcast`, causing Laravel to forward it to the Reverb WebSocket server for real-time client notification. This integration is detailed in @real-time-events.
-
-=== Enumeration Pattern
-
-PHP 8.1 backed enums provide type-safe representation of fixed value sets. The `OrderStatus` enum defined in #source_code_link("app/Enums/OrderStatus.php") represents the order lifecycle:
-
-- `InCart` → `Placed` → `Accepted`/`Declined` → `Preparing` → `Ready` → `Fulfilled`/`Cancelled`
-
-The enum provides a `label()` method for human-readable display names. Using enums rather than integer constants or string values enables IDE autocompletion, prevents invalid state assignments, and makes status checks self-documenting in policy and controller code.
 
 === Summary
 
@@ -211,9 +158,6 @@ The Laravel backend architecture demonstrates several key patterns:
 - *Layered Separation*: Routing, controllers, services, and models have distinct responsibilities.
 - *Dual User Types*: Unified authentication with profile-based role differentiation.
 - *Multi-Layered Authorization*: Middleware for route protection, policies for resource access, gates for custom rules, with admin bypass.
-- *Thin Controllers*: HTTP concerns only, delegating business logic to services.
+- *Thin Controllers*: HTTP concerns only, with service delegation for complex business logic.
 - *Domain Services*: Stateless classes encapsulating complex operations.
-- *Rich Models*: Relationships, scopes, casting, computed attributes, and event dispatching.
-- *Type Safety*: Backed enums for fixed value sets, attribute casting for consistency.
-
 These patterns support maintainability, testability, and security while providing the flexibility needed for a multi-tenant restaurant ordering system.
