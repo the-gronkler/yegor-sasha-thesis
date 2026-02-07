@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Events\MenuItemUpdated;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +26,12 @@ class MenuItem extends Model
         'image_id',
     ];
 
+    /**
+     * Default relationships to eager load.
+     * Eager loading foodType makes the restaurant_id accessor efficient.
+     */
+    protected $with = ['foodType'];
+
     protected function casts(): array
     {
         return [
@@ -36,10 +41,6 @@ class MenuItem extends Model
 
     protected static function booted()
     {
-        // Always eager load foodType to make restaurant_id accessor efficient
-        static::addGlobalScope('withFoodType', function (Builder $builder) {
-            $builder->with('foodType');
-        });
 
         static::created(function ($menuItem) {
             MenuItemUpdated::dispatch($menuItem);

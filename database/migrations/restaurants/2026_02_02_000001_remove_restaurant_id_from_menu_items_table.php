@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Don't need to reverse this migration as adding the column back =)
+        throw new \RuntimeException('Rollback is not supported for 2026_02_02_000001_remove_restaurant_id_from_menu_items_table: the restaurant_id column was permanently removed. Data normalization is irreversible.');
     }
 };
