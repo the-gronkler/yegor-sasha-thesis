@@ -140,6 +140,35 @@
   }
 }
 
+.sheet-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+
+  .empty-icon {
+    width: 3rem;
+    height: 3rem;
+    color: main-colors.$text-secondary;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: main-colors.$text-inverse;
+    margin: 0 0 0.35rem 0;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: main-colors.$text-secondary;
+    margin: 0;
+  }
+}
+
 .map-card {
   display: grid;
   grid-template-columns: 96px 1fr auto;
