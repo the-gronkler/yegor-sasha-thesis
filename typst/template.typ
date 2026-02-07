@@ -188,8 +188,10 @@
       inset: (x: 4pt, y: 2pt),
       radius: 3pt,
       stroke: rgb("#d1d9e0"),
-      text(fill: rgb("#24292f"), font: "Consolas", weight: "semibold", spacing: 0.05em, size: 12pt, it),
-    )
+    )[
+      #set text(fill: rgb("#24292f"), font: "Consolas", size: 12pt)
+      #it
+    ]
   }
 
   body
