@@ -48,15 +48,12 @@ Fuse.js supports weighted keys, allowing restaurant names to rank higher than de
 
 === Location Persistence <map-tech-location-persistence>
 
-*Laravel Session* is used to persist user location between visits. When users grant geolocation permission, their coordinates are stored server-side with a 24-hour expiry timestamp.
-
-This approach was selected for several reasons:
+*Laravel Session* was selected to persist user location between visits. This approach was chosen over client-side alternatives for the following reasons:
 
 - *Server Authority*: Session data cannot be tampered with from the client, preventing manipulation of location coordinates.
-- *Automatic Expiry*: Laravel's session management handles expiry automatically, balancing convenience (returning users see their neighborhood) with privacy (stale location data is not retained indefinitely).
-- *No Additional Infrastructure*: The existing session store (database-backed) is reused without requiring schema migrations or additional services.
+- *No Additional Infrastructure*: The existing database-backed session store is reused without requiring schema migrations or additional services.
 
-_localStorage_ was considered but cannot be read during server-side rendering or in controller logic, limiting its usefulness for a feature that requires location data on the backend.
+_localStorage_ was considered but cannot be read in controller logic, limiting its usefulness for a feature that requires location data on the backend.
 
 _Cookies_ were considered but add bandwidth overhead by being sent with every HTTP request, even when location data is not needed.
 

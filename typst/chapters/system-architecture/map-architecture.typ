@@ -62,20 +62,20 @@ This abstraction allows controllers to remain focused on HTTP request handling w
 User location is persisted in the server-side session with an expiry timestamp. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after a configurable period and is not permanently stored).
 
 #block(breakable: false)[
-The session pattern follows a read-through cache model:
+  The session pattern follows a read-through cache model:
 
-```
-Controller                    Service                     Session
-    │                            │                           │
-    ├──── getLocation() ────────►│                           │
-    │                            ├──── read & validate ─────►│
-    │                            │◄─── coordinates/null ─────┤
-    │◄─── location/null ─────────┤                           │
-    │                            │                           │
-    ▼ (if null: use default)     │                           │
-```
+  ```
+  Controller                    Service                     Session
+      │                            │                           │
+      ├──── getLocation() ────────►│                           │
+      │                            ├──── read & validate ─────►│
+      │                            │◄─── coordinates/null ─────┤
+      │◄─── location/null ─────────┤                           │
+      │                            │                           │
+      ▼ (if null: use default)     │                           │
+  ```
 
-This design keeps the controller simple (request → service → fallback) while encapsulating session validation logic in the service layer.
+  This design keeps the controller simple (request → service → fallback) while encapsulating session validation logic in the service layer.
 ]
 
 === Frontend Architecture Patterns
@@ -83,32 +83,32 @@ This design keeps the controller simple (request → service → fallback) while
 ==== Component Hierarchy and Separation of Concerns <map-arch-component-hierarchy>
 
 #block(breakable: false)[
-The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
-// TODO: Change the text diagram below to an actual diagram if needed.
-```
-MapIndex (Page Component - Orchestration)
-├── useMapPage (Hook - State & Business Logic)
-├── MapLayout (Layout - Scroll Management)
-├── MapOverlay (Component - Controls)
-│   ├── Search Input
-│   ├── Radius Slider
-│   ├── Location Controls
-│   └── "Search Here" Button
-├── Map (Component - Visualization)
-│   ├── GeoJSON Source (Restaurants)
-│   ├── Cluster Layer
-│   ├── Point Layer
-│   ├── Selected Point Layer
-│   └── User Marker Layer
-├── MapPopup (Component - Selection Detail)
-└── BottomSheet (Component - List Sync)
-    └── RestaurantCard (Component - List Item)
-```
+  The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
+  // TODO: Change the text diagram below to an actual diagram if needed.
+  ```
+  MapIndex (Page Component - Orchestration)
+  ├── useMapPage (Hook - State & Business Logic)
+  ├── MapLayout (Layout - Scroll Management)
+  ├── MapOverlay (Component - Controls)
+  │   ├── Search Input
+  │   ├── Radius Slider
+  │   ├── Location Controls
+  │   └── "Search Here" Button
+  ├── Map (Component - Visualization)
+  │   ├── GeoJSON Source (Restaurants)
+  │   ├── Cluster Layer
+  │   ├── Point Layer
+  │   ├── Selected Point Layer
+  │   └── User Marker Layer
+  ├── MapPopup (Component - Selection Detail)
+  └── BottomSheet (Component - List Sync)
+      └── RestaurantCard (Component - List Item)
+  ```
 
-This hierarchy follows the single responsibility principle:
-- The page component composes layout and wires props
-- The hook owns state and performs side effects (Inertia navigation, geolocation)
-- Each UI component focuses on one interaction surface (overlay controls, map canvas, list)
+  This hierarchy follows the single responsibility principle:
+  - The page component composes layout and wires props
+  - The hook owns state and performs side effects (Inertia navigation, geolocation)
+  - Each UI component focuses on one interaction surface (overlay controls, map canvas, list)
 ]
 
 === State Management Architecture
@@ -252,14 +252,11 @@ These guarantees reflect deliberate architectural choices that prioritize predic
 
 ==== Inertia.js Bridge Pattern <map-arch-inertia-bridge>
 
-The architecture uses Inertia as a bridge between Laravel (server) and React (client), providing SPA-like navigation without API route duplication. Key architectural benefits:
+The map feature relies on the Inertia.js integration described in @inertia-technology, which provides SPA-like navigation with server-authoritative routing and data.
 
-- Single routing definition (Laravel routes serve both HTML and JSON)
-- Automatic CSRF protection without manual token handling
-- Progressive enhancement (works without JavaScript via server-side rendering)
-- Type-safe props via TypeScript interfaces
+Of particular importance for the map architecture is Inertia's partial reload capability: when the user changes filters, only the restaurant dataset is re-fetched from the server, while the rest of the page state (camera position, selection, overlay) is preserved.
 
-The map feature leverages Inertia's partial reload capability to update only the dataset while preserving component state. This reflects a hybrid architecture: server-authoritative data combined with client-side UI state.
+This allows the map to maintain user context (e.g., zoom level, selected restaurant) while updating the underlying data. The architecture leverages this capability to create a responsive, stateful UI without sacrificing server-side control over routing and data.
 
 ==== Mapbox Integration Architecture
 
