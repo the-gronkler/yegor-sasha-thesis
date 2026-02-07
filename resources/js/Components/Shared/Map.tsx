@@ -47,6 +47,7 @@ interface Props {
   isPickingLocation?: boolean;
   onPickLocation?: (lat: number, lng: number) => void;
   showGeolocateControlUi?: boolean;
+  onReady?: () => void;
 }
 
 export default function MapComponent({
@@ -65,6 +66,7 @@ export default function MapComponent({
   isPickingLocation,
   onPickLocation,
   showGeolocateControlUi = true,
+  onReady,
 }: Props) {
   const mapRef = React.useRef<MapRef>(null);
 
@@ -268,6 +270,8 @@ export default function MapComponent({
             'star-intensity': 0.25,
             'horizon-blend': 0.15,
           });
+
+          onReady?.();
         }}
         ref={mapRef}
         onClick={handleMapClick}
