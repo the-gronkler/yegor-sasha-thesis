@@ -125,6 +125,7 @@ The `ReviewService` defined in #source_code_link("app/Services/ReviewService.php
 - Review creation with optional image uploads to cloud storage (R2)
 - Review updates with image addition and deletion coordination
 - Review deletion with storage cleanup and error logging
+- Automatic recalculation of the parent restaurant's aggregate rating after every create, update, or delete operation, ensuring the displayed rating always reflects current review data
 
 The service returns a `ReviewOperationResult` data transfer object that encapsulates both the resulting review and any upload errors, allowing the controller to provide appropriate feedback without exposing service internals.
 

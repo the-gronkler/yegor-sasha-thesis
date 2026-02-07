@@ -59,4 +59,4 @@ The "Restaurant admin management" module provides configuration tools for the Re
 === System Actions
 The diagram also captures automated system behaviors:
 - *Order Notifications*: The system notifies workers to accept or decline when a new order is placed.
-- *Rating Updates*: A daily process updates restaurant ratings based on aggregate review data.
+- *Rating Updates*: Restaurant ratings are recalculated in real time whenever a review is created, updated, or deleted. The recalculation computes the average of all associated review ratings and updates the restaurant's stored rating immediately.
