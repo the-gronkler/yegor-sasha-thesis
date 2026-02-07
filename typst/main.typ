@@ -25,7 +25,7 @@
 )
 
 // Main content of the thesis:
-#include "examples/content-example.typ"
+// #include "examples/content-example.typ"
 
 // Project overview:
 #include "chapters/glossary.typ"
@@ -44,6 +44,7 @@
 #include "chapters/development-process/development-process-main.typ"
 #include "chapters/system-architecture/system-architecture.typ"
 #include "chapters/database-design.typ"
+#include "chapters/system-architecture/system-architecture.typ"
 #include "chapters/implementation/implementation-main.typ"
 #include "chapters/testing-and-validation.typ"
 
