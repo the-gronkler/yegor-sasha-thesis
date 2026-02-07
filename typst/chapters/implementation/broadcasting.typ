@@ -1,6 +1,6 @@
 #import "../../config.typ": code_example, source_code_link
 
-== Real-Time Broadcasting
+== Real-Time Broadcasting <real-time-broadcasting>
 
 To allow for instant feedback without manual page reloads, the system implements a real-time broadcasting layer. This is particularly crucial for order status tracking and menu item availability where latency directly impacts user experience.
 

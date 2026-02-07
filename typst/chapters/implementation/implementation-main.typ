@@ -2,6 +2,7 @@
 
 = Implementation
 
+#include "database.typ"
 #include "map-functionality.typ"
 #include "broadcasting.typ"
 #include "optimistic-updates.typ"
