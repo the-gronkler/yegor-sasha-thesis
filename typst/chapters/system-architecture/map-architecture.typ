@@ -281,9 +281,6 @@ The 250-restaurant limit protects against unbounded queries, excessive JSON payl
 
 All scoring and ordering happens in SQL, leveraging MariaDB's query optimizer. This scales better than fetching all candidates and sorting in PHP.
 
-==== Client-Side Search
-The fuzzy search filter runs entirely in the browser, as described in @map-tech-client-search. This offloads computation to the client and avoids network latency for interactive search.
-
 ==== Strategic Indexing
 <map-arch-indexing>
 

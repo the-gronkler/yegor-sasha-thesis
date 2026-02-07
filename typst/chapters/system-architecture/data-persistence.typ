@@ -1,6 +1,6 @@
 #import "../../config.typ": code_example, source_code_link
 
-== Data Persistence
+== Data Persistence <data-persistence>
 
 The system persists domain state in a relational database. Any and all interactions, including schema modifications, with the underlying data store are mediated exclusively through the Object-Relational Mapping (ORM) layer. This ensures that all data access operations are managed within a unified architectural boundary. The persistence layer is designed to prioritise data integrity and data access performance through explicit constraints and predictable query patterns.
 

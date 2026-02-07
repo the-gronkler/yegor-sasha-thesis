@@ -8,13 +8,8 @@ This chapter describes the high-level design and structure of the restaurant ord
 #include "data-persistence.typ"
 #include "media-storage.typ"
 #include "backend-architecture.typ"
+#include "frontend-architecture.typ"
 #include "map-architecture.typ"
 #include "real-time-events.typ"
-
-
-
-
-
-
 
 

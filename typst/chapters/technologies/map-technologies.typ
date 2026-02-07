@@ -37,15 +37,6 @@ The library supports the controlled component pattern used in the map architectu
 
 The alternative-using Mapbox GL JS directly with `useEffect` hooks-would require manual imperative management of map initialization, event listener registration, and cleanup, increasing complexity and bug potential.
 
-=== Client-Side Search <map-tech-client-search>
-// TODO: we should probably describe fuse.js as a global technology used in multiple features, not just map-based discovery, and then link to it from here. (probably we should do that with all other technologies in final revision)
-
-*Fuse.js* provides fuzzy search filtering for the restaurant list on the client side. When users type in the search box, Fuse.js filters the restaurant dataset locally without requiring server requests.
-
-This approach was selected because the map endpoint already returns a bounded dataset (up to 250 restaurants within the selected radius). Performing fuzzy search on this pre-filtered set is computationally trivial for the browser and provides instant feedback as users type. Server-side search would introduce unnecessary latency for each keystroke and complicate the interaction between search queries and geographic filters.
-
-Fuse.js supports weighted keys, allowing restaurant names to rank higher than descriptions in search relevance. The library's configurable threshold parameter controls match strictness, balancing typo tolerance against false positives.
-
 === Location Persistence <map-tech-location-persistence>
 
 *Laravel Session* was selected to persist user location between visits. This approach was chosen over client-side alternatives for the following reasons:

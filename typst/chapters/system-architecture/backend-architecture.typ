@@ -59,7 +59,7 @@ The throttle strategy identifies requests by a combination of user identity and 
 
 ==== Policy-Based Access Control
 
-Access control is implemented through Policy classes, with each major resource (orders, restaurants, menu items, reviews) having an associated policy that defines which users may perform which actions. Policies are registered in #source_code_link("app/Providers/AuthServiceProvider.php"), which maps fifteen model classes to their corresponding policy classes.
+Access control is implemented through Policy classes, with each major resource (orders, restaurants, menu items, reviews) having an associated policy that defines which users may perform which actions. Policies are registered centrally in the authentication service provider, mapping model classes to their corresponding policy classes.
 
 Policy methods receive the authenticated user and (optionally) the resource being accessed, returning a boolean indicating whether the action is permitted. Standard Laravel authorization methods (`view`, `create`, `update`, `delete`) are implemented alongside custom methods for domain-specific actions.
 
@@ -96,7 +96,7 @@ Controllers in this application follow the thin controller pattern, focusing exc
 
 Business logic, data transformation, and side effects (such as file uploads or event dispatching) are delegated to service classes or handled through model events. This separation ensures controllers remain testable and maintainable as the application grows.
 
-The `ReviewController` defined in #source_code_link("app/Http/Controllers/Customer/ReviewController.php") exemplifies this pattern: it receives a `ReviewService` through constructor injection and delegates all create, update, and delete operations to the service, handling only authorization, validation, and response formatting.
+For example, a review controller receives a review service through constructor injection and delegates all create, update, and delete operations to the service, handling only authorization, validation, and response formatting.
 
 When business logic is sufficiently simple --- such as straightforward CRUD operations or single-model updates --- it may remain in the controller rather than being extracted into a dedicated service. Service classes are introduced when the logic grows complex enough that it would obscure the controller's orchestration responsibility, involves multiple models or external systems, or benefits from reuse across different entry points.
 

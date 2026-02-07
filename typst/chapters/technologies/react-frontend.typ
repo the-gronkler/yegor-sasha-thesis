@@ -43,3 +43,23 @@ SCSS was selected over utility-first approaches (Tailwind CSS) and plain CSS for
 - *Optimized Production Builds* — Production builds use Rollup for efficient code splitting, tree shaking, and minification. The resulting bundles load quickly even on slower connections.
 
 - *Laravel Integration* — The Laravel Vite plugin coordinates asset compilation with Laravel's asset versioning and path resolution, ensuring correct asset URLs in both development and production environments.
+
+=== Client-Side Search with Fuse.js <tech-fuse>
+
+*Fuse.js* provides fuzzy search filtering for client-side datasets across multiple features including restaurant discovery, menu browsing, and order lists. When users type in search boxes, Fuse.js filters data locally without requiring server requests, providing instant feedback.
+
+This client-side approach was selected because many features work with bounded datasets already loaded to the client (restaurants within a geographic radius, menu items for a single restaurant, a customer's order history). Performing fuzzy search on these pre-loaded sets is computationally trivial for modern browsers and eliminates network latency that would occur with server-side search on every keystroke.
+
+Fuse.js offers several capabilities that make it well-suited for this use case:
+
+- *Fuzzy Matching* — Tolerates typos and partial matches, improving search success rates when users misspell restaurant or menu item names.
+
+- *Weighted Keys* — Allows prioritizing certain fields over others in search relevance. For example, restaurant names can rank higher than descriptions, ensuring exact name matches appear first even if descriptions contain the search term.
+
+- *Configurable Threshold* — The threshold parameter controls match strictness, balancing typo tolerance against false positives. A threshold of 0.3 (requiring 70% match quality) has proven effective across different feature contexts.
+
+- *Nested Property Search* — Supports searching within nested objects and arrays, enabling searches across relationships like "search menu items within food types within restaurants" without flattening data structures.
+
+The library integrates naturally with React through custom hooks that encapsulate Fuse.js configuration and memoization patterns, providing a reusable search abstraction across the application. The implementation details of this integration pattern are described in @frontend-implementation.
+
+The trade-off of client-side search is that it operates only on data already loaded to the browser. For comprehensive search across entire databases (useful in administrative interfaces or global search features), server-side search with database indexing would be necessary. However, for feature-specific search within already-filtered datasets, client-side filtering provides superior user experience through instant feedback.

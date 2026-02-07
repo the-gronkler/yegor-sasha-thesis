@@ -15,9 +15,3 @@ This chapter discusses the strategic technology choices made during the developm
 #include "realtime.typ"
 
 #include "map-technologies.typ"
-
-
-
-
-
-
