@@ -26,8 +26,8 @@ The connection to Cloudflare R2 is defined in the filesystem configuration. To e
   ```
 ]
 
-=== Image Entity and Virtual Attributes (Accessors)
-The `Image` model serves as the logic layer for media assets. A key implementation detail is the utilization of a virtual attribute - implemented in Laravel as an "Accessor" - to dynamically generate full URLs at runtime. Virtual attributes are computed properties that do not exist as physical database columns but are calculated on-demand when the model is accessed. This pattern ensures that the database remains agnostic of the actual storage domain (e.g., `pub-REDACTED.r2.dev`), allowing for easier migration or CDN changes in the future.
+=== Image Entity and URL Resolution
+Using the Accessor pattern described in @sec:orm, the `Image` model computes full URLs at runtime. The database stores only relative paths as part of the path-based persistence strategy described in @sec:media-storage; the Accessor resolves these into absolute URLs using the active storage configuration.
 
 #code_example[
   The `getUrlAttribute` accessor in #source_code_link("app/Models/Image.php") resolves the full URL based on the active storage disk.
