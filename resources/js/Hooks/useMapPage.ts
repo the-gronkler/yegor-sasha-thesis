@@ -241,6 +241,7 @@ export function useMapPage({
           address: r.address,
           openingHours: r.opening_hours,
           rating: r.rating,
+          reviewsCount: r.reviews_count ?? null,
           distanceKm: r.distance ?? null,
           imageUrl: primaryImage?.url ?? null,
         };

@@ -46,6 +46,8 @@ Boolean flags (`is_primary_for_*`) are used to designate the main display image 
 ==== Reviews
 Restaurants are associated with customers through a 'Review' joining table, which in addition to the foreign keys also stores review-specific attributes such as rating, comments, as well as a one-to-many relationship to the review_images table. This design allows customers to provide feedback on multiple restaurants while ensuring that each review is uniquely tied to a specific customer-restaurant pair.
 
+The `rating` column on the `restaurants` table stores the aggregate average of all associated review ratings. This value is recalculated whenever a review is created, updated, or deleted, ensuring that the displayed rating always reflects the current state of customer feedback. The review count is derived at query time using the reviews relationship rather than being stored as a denormalized column.
+
 ==== Orders
 Orders are represented by the *Orders* table, linked to customers with a one-to-many relationship and having a many-to-many relationship to menu items. The joining table *Order Items* captures this many-to-many relationship, also storing the quantity of each menu item in the order.
 

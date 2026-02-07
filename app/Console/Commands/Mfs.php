@@ -16,7 +16,6 @@ class Mfs extends Command
                            {--customers= : Number of customers to seed}
                            {--employees-min= : Minimum employees per restaurant}
                            {--employees-max= : Maximum employees per restaurant}
-                           {--reviews-per-customer= : Number of reviews per customer}
                            {--orders-per-customer= : Number of orders per customer}
                            {--radius= : Radius in km for restaurant distribution}';
 
@@ -49,7 +48,6 @@ class Mfs extends Command
         $customers = $this->option('customers') ? (int) $this->option('customers') : config('seeding.customers');
         $employeesMin = $this->option('employees-min') ? (int) $this->option('employees-min') : config('seeding.employees_min');
         $employeesMax = $this->option('employees-max') ? (int) $this->option('employees-max') : config('seeding.employees_max');
-        $reviewsPerCustomer = $this->option('reviews-per-customer') ? (int) $this->option('reviews-per-customer') : config('seeding.reviews_per_customer');
         $ordersPerCustomer = $this->option('orders-per-customer') ? (int) $this->option('orders-per-customer') : config('seeding.orders_per_customer');
         $radius = $this->option('radius') ? (float) $this->option('radius') : config('seeding.radius');
 
@@ -58,7 +56,6 @@ class Mfs extends Command
             'customers' => $customers,
             'employees_min' => $employeesMin,
             'employees_max' => $employeesMax,
-            'reviews_per_customer' => $reviewsPerCustomer,
             'orders_per_customer' => $ordersPerCustomer,
             'radius' => $radius,
         ], [
@@ -66,7 +63,6 @@ class Mfs extends Command
             'customers' => 'required|integer|min:1',
             'employees_min' => 'required|integer|min:1',
             'employees_max' => 'required|integer|min:1|gte:employees_min',
-            'reviews_per_customer' => 'required|integer|min:1',
             'orders_per_customer' => 'required|integer|min:1',
             'radius' => 'required|numeric|gt:0',
         ]);
@@ -83,7 +79,6 @@ class Mfs extends Command
             'customers' => $customers,
             'employees_min' => $employeesMin,
             'employees_max' => $employeesMax,
-            'reviews_per_customer' => $reviewsPerCustomer,
             'orders_per_customer' => $ordersPerCustomer,
             'radius' => $radius,
         ];
@@ -122,6 +117,7 @@ class Mfs extends Command
         $this->createAdminUser($service);
         $this->seedCustomers($service, $params);
         $this->seedEmployees($service, $params);
+        $this->seedReviews($service, $params);
         $this->createDefaultEmployee($service);
     }
 
@@ -152,10 +148,10 @@ class Mfs extends Command
     private function seedCustomers(DatabaseSeederService $service, array $params): void
     {
         $this->outputHelper->runWithProgressBar(
-            "👥 Seeding {$params['customers']} customers (with reviews & orders)",
+            "👥 Seeding {$params['customers']} customers (with orders)",
             $params['customers'],
             'Customer',
-            fn ($callback) => $service->seedCustomers($params['customers'], $params['reviews_per_customer'], $params['orders_per_customer'], $callback)
+            fn ($callback) => $service->seedCustomers($params['customers'], $params['orders_per_customer'], $callback)
         );
     }
 
@@ -167,6 +163,17 @@ class Mfs extends Command
             $restaurantCount,
             'Restaurant',
             fn ($callback) => $service->seedEmployees($params['employees_min'], $params['employees_max'], $callback)
+        );
+    }
+
+    private function seedReviews(DatabaseSeederService $service, array $params): void
+    {
+        $restaurantCount = \App\Models\Restaurant::count();
+        $this->outputHelper->runWithProgressBar(
+            '⭐ Seeding reviews (2-14 per restaurant)',
+            $restaurantCount,
+            'Restaurant',
+            fn ($callback) => $service->seedReviews($callback)
         );
     }
 
@@ -191,7 +198,7 @@ class Mfs extends Command
                 ['Restaurants', $params['restaurants']],
                 ['Customers', $params['customers']],
                 ['Employees', "{$params['employees_min']}-{$params['employees_max']} per restaurant"],
-                ['Reviews per customer', $params['reviews_per_customer']],
+                ['Reviews', '2-14 per restaurant'],
                 ['Orders per customer', $params['orders_per_customer']],
             ]
         );

@@ -43,6 +43,12 @@ export default function MapPopup({ restaurant, onClose }: Props) {
           {typeof restaurant.rating === 'number' ? (
             <div className="map-popup-rating">
               <StarRating rating={restaurant.rating} />
+              {restaurant.reviewsCount != null &&
+                restaurant.reviewsCount > 0 && (
+                  <span className="reviews-count">
+                    ({restaurant.reviewsCount})
+                  </span>
+                )}
             </div>
           ) : null}
         </div>

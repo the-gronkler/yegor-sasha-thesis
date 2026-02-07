@@ -37,8 +37,10 @@
 - Options to customize menu items (e.g., selecting toppings or choosing portion sizes).
 
 ==== Restaurant Ratings and Reviews
-- Users can leave ratings and reviews for restaurants after placing an order.
-- Display aggregate ratings and reviews for each restaurant to help users make informed choices.
+- Authenticated customers can leave ratings and reviews for restaurants they have visited.
+- Each customer may submit one review per restaurant; reviews include a star rating (1--5), an optional title, text content, and optional images.
+- The restaurant's displayed rating is automatically recalculated as the average of all its review ratings whenever a review is created, updated, or deleted.
+- The total number of reviews is displayed alongside the aggregate rating for each restaurant to help users make informed choices.
 
 ==== Order Sharing
 - Enable group order sharing where multiple users can contribute to a single order and split payment.

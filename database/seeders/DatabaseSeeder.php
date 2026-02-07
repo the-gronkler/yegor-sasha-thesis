@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             RestaurantSeeder::class,
             EmployeeSeeder::class,
             CustomerSeeder::class,
+            ReviewSeeder::class,
         ]);
 
         // Create a default employee for testing

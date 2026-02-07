@@ -25,6 +25,8 @@ class ReviewService
             $uploadErrors = $this->uploadImages($review, $images);
         }
 
+        $review->restaurant->recalculateRating();
+
         return new ReviewOperationResult($review, $uploadErrors);
     }
 
@@ -45,11 +47,14 @@ class ReviewService
             $uploadErrors = $this->uploadImages($review, $newImages);
         }
 
+        $review->restaurant->recalculateRating();
+
         return new ReviewOperationResult($review, $uploadErrors);
     }
 
     public function deleteReview(Review $review): void
     {
+        $restaurant = $review->restaurant;
         $failedDeletions = [];
 
         // Delete all associated images from storage
@@ -67,6 +72,8 @@ class ReviewService
         }
 
         $review->delete();
+
+        $restaurant->recalculateRating();
     }
 
     protected function uploadImages(Review $review, array $images): array

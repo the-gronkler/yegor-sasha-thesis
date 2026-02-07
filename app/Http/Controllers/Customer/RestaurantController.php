@@ -34,6 +34,7 @@ class RestaurantController extends Controller
         // Fetch restaurant with optional distance calculation in one query
         $restaurant = Restaurant::query()
             ->whereKey($restaurant->getKey())
+            ->withCount('reviews')
             ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
             ->with([
                 'foodTypes.menuItems' => fn ($q) => $q->orderBy('name'),
@@ -122,6 +123,7 @@ class RestaurantController extends Controller
             'latitude' => $restaurant->latitude,
             'longitude' => $restaurant->longitude,
             'rating' => $restaurant->rating,
+            'reviews_count' => $restaurant->reviews_count ?? 0,
             'description' => $restaurant->description,
             'opening_hours' => $restaurant->opening_hours,
             'distance' => isset($restaurant->distance) ? $this->geoService->formatDistance($restaurant->distance) : null,

@@ -107,6 +107,7 @@ export default function MapComponent({
           address: marker.address,
           openingHours: marker.openingHours,
           rating: marker.rating,
+          reviewsCount: marker.reviewsCount,
           distanceKm: marker.distanceKm,
           imageUrl: marker.imageUrl,
         },
@@ -167,6 +168,7 @@ export default function MapComponent({
             address: properties.address,
             openingHours: properties.openingHours,
             rating: properties.rating,
+            reviewsCount: properties.reviewsCount,
             distanceKm: properties.distanceKm,
             imageUrl: properties.imageUrl,
           };
