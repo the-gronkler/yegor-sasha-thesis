@@ -1,6 +1,6 @@
 #import "../../config.typ": code_example, source_code_link
 
-== Frontend-Backend Integration: Inertia.js
+== Frontend-Backend Integration: Inertia.js <inertia-technology>
 
 Modern web applications typically choose between two architectural approaches: traditional server-rendered applications with full page reloads, or single-page applications (SPAs) that consume a separate API. Each approach involves trade-offs between developer experience, performance, and complexity. *Inertia.js 2.0* offers a third option that combines advantages of both approaches.
 

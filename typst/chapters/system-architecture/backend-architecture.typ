@@ -28,19 +28,9 @@ The authentication flow relies on Laravel's default `web` guard with session sto
 
 ==== Dual User Type Architecture
 
-The system distinguishes between two user types - customers and employees - while maintaining a unified authentication mechanism. This is achieved through a shared `User` model with separate profile tables for role-specific attributes.
+The system distinguishes between two user types — customers and employees — while maintaining a unified authentication mechanism. The underlying schema (a shared `users` table with separate `customers` and `employees` profile tables) is described in @database-design. From an authentication perspective, this design enables unified login regardless of user type, while supporting divergent functionality based on the associated profile.
 
-The architectural pattern is as follows:
-// TODO: theres probably duplication with one of the database sections, make sure this make sense to explain.
-/ Base User Record: The `users` table stores common authentication data (email, password, name) and a global `is_admin` flag for system administrators.
-
-/ Customer Profile: The `customers` table uses `user_id` as its primary key (a one-to-one relationship), storing customer-specific attributes. A user with an associated customer record is considered a customer.
-
-/ Employee Profile: The `employees` table similarly uses `user_id` as its primary key, with an additional `restaurant_id` foreign key binding the employee to a specific restaurant. Employees may also have an `is_admin` flag granting restaurant-level administrative privileges.
-
-This design enables unified login regardless of user type, while supporting divergent functionality based on the associated profile. A user may theoretically hold both profiles, though the application enforces separation through distinct registration flows.
-
-The User model defined in #source_code_link("app/Models/User.php") automatically eager-loads both profile relationships via a global scope, ensuring that role checks (`isCustomer()`, `isEmployee()`) execute without additional queries.
+The User model defined in #source_code_link("app/Models/User.php") automatically eager-loads both profile relationships via a global scope, ensuring that role checks (`isCustomer()`, `isEmployee()`) execute without additional queries. This determines which middleware groups, controller namespaces, and authorization policies apply to the authenticated user.
 
 === Request Validation Architecture
 
