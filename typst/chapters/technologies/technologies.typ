@@ -10,8 +10,6 @@ This chapter discusses the strategic technology choices made during the developm
 
 #include "react-frontend.typ"
 
-#include "map-technologies.typ"
-
 #include "realtime.typ"
 
 // #include "mariadb.typ"

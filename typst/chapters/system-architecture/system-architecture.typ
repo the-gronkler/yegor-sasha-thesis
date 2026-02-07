@@ -8,8 +8,6 @@ This chapter describes the high-level design and structure of the restaurant ord
 
 #include "employee-customer.typ"
 
-#include "map-architecture.typ"
-
 #include "real-time-events.typ"
 
 // #include "database-schema.typ"
