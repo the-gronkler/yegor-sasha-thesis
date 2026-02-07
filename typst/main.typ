@@ -44,7 +44,7 @@
 #include "chapters/development-process/development-process-main.typ"
 #include "chapters/system-architecture/system-architecture.typ"
 #include "chapters/database-design.typ"
-#include "chapters/system-architecture/system-architecture.typ"
+
 #include "chapters/implementation/implementation-main.typ"
 #include "chapters/testing-and-validation.typ"
 
