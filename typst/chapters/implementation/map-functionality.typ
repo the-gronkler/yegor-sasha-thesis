@@ -300,7 +300,7 @@ Favorite detection is included conditionally for authenticated users via a `LEFT
 
 ==== Database indexing strategy for geospatial queries
 
-The three-phase architecture relies on specific database indexes for optimal performance, as described in @map-tech-indexing. The controller documentation explicitly identifies two critical indexes beyond the latitude/longitude indexes:
+The three-phase architecture relies on specific database indexes for optimal performance, as described in @map-arch-indexing. The controller documentation explicitly identifies two critical indexes beyond the latitude/longitude indexes:
 
 1. *`reviews.restaurant_id`* index: enables efficient GROUP BY aggregation in the review counts subquery.
 

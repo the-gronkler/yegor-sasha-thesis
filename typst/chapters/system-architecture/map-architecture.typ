@@ -276,21 +276,25 @@ This separation allows independent control: data updates do not require re-confi
 
 The architecture incorporates several design decisions that support scalability:
 
-*Hard Result Limit:*
+==== Hard Result Limit:
 
 The 250-restaurant limit protects against unbounded queries, excessive JSON payloads, and client-side rendering costs. This is an architectural safeguard, not a temporary optimization.
 
-*Database-Level Computation:*
+==== Database-Level Computation
 
 All scoring and ordering happens in SQL, leveraging MariaDB's query optimizer. This scales better than fetching all candidates and sorting in PHP.
 
-*Client-Side Search:*
-
+==== Client-Side Search
 The fuzzy search filter runs entirely in the browser, as described in @map-tech-client-search. This offloads computation to the client and avoids network latency for interactive search.
 
-*Strategic Indexing:*
+==== Strategic Indexing
+<map-arch-indexing>
 
-The database indexing strategy described in @map-tech-indexing enables efficient bounding box filters through index merge optimization.
+Separate single-column indexes on `latitude` and `longitude` columns support the bounding box prefilter that reduces the candidate set before expensive distance calculations.
+
+MariaDB's query optimizer uses index merge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
+
+Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently-the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 
 These patterns reflect an architecture designed for predictable resource consumption: capped result sizes, database-offloaded computation, and index-supported queries.
 

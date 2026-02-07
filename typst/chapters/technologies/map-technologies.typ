@@ -60,13 +60,6 @@ _localStorage_ was considered but cannot be read during server-side rendering or
 
 _Cookies_ were considered but add bandwidth overhead by being sent with every HTTP request, even when location data is not needed.
 
-=== Database Indexing <map-tech-indexing>
-
-*Separate single-column indexes* on `latitude` and `longitude` columns support the bounding box prefilter that reduces the candidate set before expensive distance calculations.
-
-MariaDB's query optimizer uses index merge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
-
-Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently-the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 
 === Summary
 
@@ -76,10 +69,7 @@ The map-based discovery feature employs a layered technology stack:
 
 / Map rendering: Mapbox GL JS delivers WebGL-accelerated vector maps with native clustering, wrapped by react-map-gl for React integration.
 
-/ Client-side search: Fuse.js enables instant fuzzy filtering without server round-trips.
-
 / Location persistence: Laravel Session stores user coordinates server-side with automatic expiry.
 
-/ Query optimization: Bounding box prefilters with indexed columns reduce the candidate set before distance calculations.
 
 These choices prioritize user experience (smooth interactions, instant search, preserved state), performance (database-level computation, indexed queries), and maintainability (leveraging framework features over custom implementations).
