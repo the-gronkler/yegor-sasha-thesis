@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property int $id
@@ -36,9 +37,19 @@ class Restaurant extends Model
         return $this->hasMany(Employee::class);
     }
 
-    public function menuItems(): HasMany
+    /**
+     * Get all menu items for this restaurant through food types.
+     */
+    public function menuItems(): HasManyThrough
     {
-        return $this->hasMany(MenuItem::class);
+        return $this->hasManyThrough(
+            MenuItem::class,
+            FoodType::class,
+            'restaurant_id', // Foreign key on FoodType table
+            'food_type_id',  // Foreign key on MenuItem table
+            'id',            // Local key on Restaurant table
+            'id'             // Local key on FoodType table
+        );
     }
 
     public function reviews(): HasMany

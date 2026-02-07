@@ -21,6 +21,13 @@ class FoodType extends Model
         'restaurant_id',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'restaurant_id' => 'integer',
+        ];
+    }
+
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
