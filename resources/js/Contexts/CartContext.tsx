@@ -139,7 +139,6 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
       },
       {
         preserveScroll: true,
-        preserveState: true,
         onSuccess: () => {
           setIsLoading(false);
         },
@@ -179,7 +178,6 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
         },
         {
           preserveScroll: true,
-          preserveState: true,
           onSuccess: () => {
             setIsLoading(false);
           },
@@ -224,7 +222,6 @@ export function CartProvider({ children, initialCart }: CartProviderProps) {
         },
         {
           preserveScroll: true,
-          preserveState: true,
           onSuccess: () => {
             setIsLoading(false);
           },
