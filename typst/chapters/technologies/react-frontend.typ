@@ -26,16 +26,6 @@ When selecting a frontend framework, three primary candidates were evaluated: Re
 
 The frontend uses *TypeScript 5.9* with strict compiler settings. TypeScript adds static type checking to JavaScript, catching errors during development rather than at runtime. This reduces debugging time and prevents entire categories of errors that would otherwise only surface in production environments. TypeScript's integration with modern code editors provides intelligent autocompletion, inline documentation, and refactoring support, significantly improving developer productivity when working with large codebases.
 
-=== Map Library: Mapbox GL
-
-The restaurant discovery feature requires an interactive map for browsing nearby establishments. When selecting a mapping library, three primary options were evaluated: Google Maps, Leaflet, and Mapbox GL.
-
-*Google Maps* dominates the mapping market and offers comprehensive documentation, familiar UI patterns, and reliable geocoding services. However, Google's pricing structure becomes prohibitively expensive at scale, with costs increasing significantly once free tier limits are exceeded. Additionally, Google Maps' terms of service impose restrictions on caching, data extraction, and UI customization that limit flexibility for custom features.
-
-*Leaflet* provides a lightweight, open-source alternative with no usage costs. While Leaflet excels at basic mapping needs and offers extensive plugin ecosystem, its raster-based tile rendering suffers from visual quality degradation at non-standard zoom levels. Leaflet's integration with React requires additional wrapper libraries, and its performance degrades when rendering large numbers of markers simultaneously.
-
-*Mapbox GL* was ultimately selected for its optimal balance of features, performance, and cost structure. Mapbox provides vector-based rendering that maintains visual quality at any zoom level, unlike raster-based alternatives. Its free tier accommodates the project's expected usage volume while offering predictable, reasonable pricing for future growth. The *React Map GL* wrapper provides first-class React integration, enabling declarative map configuration consistent with the rest of the frontend architecture. Mapbox's customizable styling system allows the map's appearance to align with the application's design language, ensuring visual consistency across all interfaces.
-
 === Styling: SCSS Over Utility-First CSS
 
 All styling uses *SCSS* (Sass) with semantic class names following BEM-like conventions. Although Tailwind CSS is included in the project dependencies to support Inertia.js architecture, utility classes are not used in any React components
