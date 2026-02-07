@@ -17,6 +17,12 @@ The decision to utilize Eloquent is reinforced by its comprehensive feature set,
 
 *Lifecycle Events*: Eloquent models emit events at key points in their lifecycle (creation, update, deletion), which can be observed by event listener classes. This decouples the persistence layer from side effects such as notifications or real-time broadcasts. When combined with Laravel's broadcasting system, model events can propagate state changes to connected WebSocket clients automatically, as detailed in @real-time-broadcasting.
 
+*Enumeration Support*: PHP 8.1 introduced backed enumerations, providing type-safe representation of fixed value sets as first-class language constructs. Eloquent integrates with this feature through its casting system, allowing enum-backed database columns to be automatically hydrated into their corresponding PHP enum instances.
+
+This eliminates the use of raw integer constants or string literals for representing states such as order lifecycle stages, enabling IDE autocompletion, preventing invalid state assignments at the type level, and making conditional logic self-documenting throughout the codebase.
+
+In comparison, Entity Framework and JPA require explicit value converters or annotation-based configuration to achieve equivalent enum hydration, making Eloquent's single-line cast definition a notably lower-friction approach.
+
 
 === Architectural Context: Active Record vs. Data Mapper
 
@@ -52,8 +58,4 @@ _Mitigation_: This risk is managed through the consistent use of PHPDoc annotati
 
 *Separation of Concerns*: Eloquent models, by design, mix domain logic with persistence logic. While beneficial for speed, this violates the Single Responsibility Principle, whereas strict Data Mapper implementations keep domain entities pure.
 
-_Mitigation_: To prevent "fat models," the architecture enforces a separation of duties: complex business logic is delegated to *Service classes*, and complex validation is handled by *FormRequests*. This ensures Models remain focused solely on data access and relationship definitions, with controllers orchestrating the transformation of data for Inertia responses.
-
-=== Enumeration Support
-
-PHP 8.1 introduced backed enumerations, providing type-safe representation of fixed value sets as first-class language constructs. Eloquent integrates with this feature through its casting system, allowing enum-backed database columns to be automatically hydrated into their corresponding PHP enum instances. This eliminates the use of raw integer constants or string literals for representing states such as order lifecycle stages, enabling IDE autocompletion, preventing invalid state assignments at the type level, and making conditional logic self-documenting throughout the codebase.
+_Mitigation_: To prevent "fat models," the architecture enforces a separation of duties: complex business logic is delegated to *Service classes*, and complex validation is handled by *FormRequests*. This ensures Models remain focused solely on data access and relationship definitions, with controllers orchestrating the transformation of data for Inertia responses
