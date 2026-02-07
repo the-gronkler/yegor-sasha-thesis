@@ -28,6 +28,8 @@ _Global State_ uses React Context when multiple unrelated components require sha
 
 _Server State_ flows through Inertia's shared props mechanism. Authentication state, user profiles, and application data arrive as page props rather than client-side fetches. This maintains the server as the authoritative data source.
 
+_Route Configuration_ uses Ziggy to expose Laravel's named routes to JavaScript. Components navigate using `route('restaurants.show', restaurantId)` rather than hardcoded paths like `/restaurants/${restaurantId}`. This approach maintains URL consistency between server and client—when backend routes change, the frontend automatically uses updated paths without manual synchronization. Route configuration arrives as shared props through Inertia, providing access to all named routes and current location information.
+
 Components communicate through props for parent-child relationships, with callbacks propagating user actions upward. Real-time updates integrate Laravel broadcasting with Inertia—hooks subscribe to channels and trigger prop refreshes when events occur, providing reactivity without polling.
 
 === Styling Architecture
