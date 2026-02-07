@@ -41,10 +41,11 @@
 
 // Technical chapters:
 #include "chapters/technologies/technologies.typ"  //Technologies used (for the app, not in development process)
+#include "chapters/development-process/development-process-main.typ"
+#include "chapters/system-architecture/system-architecture.typ"
 #include "chapters/database-design.typ"
 #include "chapters/system-architecture/system-architecture.typ"
 #include "chapters/implementation/implementation-main.typ"
-#include "chapters/development-process/main.typ"
 #include "chapters/testing-and-validation.typ"
 
 // Final chapters:
