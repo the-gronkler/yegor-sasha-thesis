@@ -106,7 +106,6 @@ The menu structure implements the transitive categorization strategy through `fo
   <?php
   Schema::create('menu_items', function (Blueprint $table) {
       $table->id();
-      $table->unsignedBigInteger('restaurant_id');
       $table->string('name');
       $table->double('price');
       $table->string('description', 512)->nullable();
