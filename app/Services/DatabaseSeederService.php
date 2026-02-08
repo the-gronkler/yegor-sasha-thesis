@@ -91,6 +91,21 @@ class DatabaseSeederService
                 'user_id' => $employeeUser->id,
             ]);
 
+        // Create a non-admin worker for testing
+        $workerUser = User::factory()->create([
+            'name' => 'John',
+            'surname' => 'Worker',
+            'email' => 'worker@example.com',
+            'password' => bcrypt('admin'),
+        ]);
+
+        Employee::factory()
+            ->forRestaurant($restaurant)
+            ->create([
+                'user_id' => $workerUser->id,
+                'is_admin' => false,
+            ]);
+
         return $employeeUser;
     }
 }
