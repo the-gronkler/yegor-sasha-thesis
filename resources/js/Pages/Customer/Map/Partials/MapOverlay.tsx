@@ -8,6 +8,7 @@ import {
   CursorArrowRaysIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
+  FireIcon,
 } from '@heroicons/react/24/outline';
 
 /**
@@ -247,14 +248,16 @@ export default function MapOverlay({
             </div>
 
             <div className="map-layer-controls">
-              <label className="map-toggle-label">
-                <input
-                  type="checkbox"
-                  checked={showHeatmap}
-                  onChange={(e) => onToggleHeatmap(e.target.checked)}
-                />
+              <button
+                type="button"
+                className={`map-heatmap-toggle ${showHeatmap ? 'is-active' : ''}`}
+                onClick={() => onToggleHeatmap(!showHeatmap)}
+                aria-label={showHeatmap ? 'Hide heatmap' : 'Show heatmap'}
+                aria-pressed={showHeatmap}
+              >
+                <FireIcon className="btn-icon" aria-hidden="true" />
                 Heatmap
-              </label>
+              </button>
             </div>
 
             {manualOpen && (

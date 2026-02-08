@@ -408,6 +408,29 @@
   }
 }
 
+.map-layer-controls {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid map-colors.$map-control-border;
+}
+
+.map-heatmap-toggle {
+  @extend .location-control-btn;
+  gap: 6px;
+  color: main-colors.$text-inverse;
+
+  &.is-active {
+    color: main-colors.$text-inverse;
+    background: color.change(main-colors.$brand-primary, $alpha: 0.22);
+    border-color: color.change(main-colors.$brand-primary, $alpha: 0.45);
+  }
+
+  &.is-active:hover {
+    background: color.change(main-colors.$brand-primary, $alpha: 0.3);
+    border-color: color.change(main-colors.$brand-primary, $alpha: 0.55);
+  }
+}
+
 .map-overlay-toggle--close {
   background: map-colors.$map-shadow;
 
@@ -453,57 +476,5 @@
     background: color.change(main-colors.$text-primary, $alpha: 0.4);
     backdrop-filter: blur(8px);
     border-color: color.change(main-colors.$text-inverse, $alpha: 0.15);
-  }
-}
-
-.map-layer-controls {
-  @extend .map-controls-card;
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  padding: 12px;
-}
-
-.map-toggle-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: main-colors.$text-inverse;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-
-  input[type='checkbox'] {
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 2px solid map-colors.$map-control-border;
-    border-radius: 4px;
-    background: map-colors.$map-control-bg;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.2s ease;
-
-    &:checked {
-      background: main-colors.$brand-primary;
-      border-color: main-colors.$brand-primary;
-
-      &::after {
-        content: '';
-        position: absolute;
-        left: 5px;
-        top: 1px;
-        width: 6px;
-        height: 12px;
-        border: solid white;
-        border-width: 0 2px 2px 0;
-        transform: rotate(45deg);
-      }
-    }
-
-    &:hover {
-      border-color: main-colors.$brand-primary;
-    }
   }
 }

@@ -69,13 +69,9 @@ export const getUnclusteredPointLayer = (theme: MapTheme): LayerProps => ({
   },
 });
 
-export const getHeatmapLayer = (): LayerProps => ({
-  id: 'heatmap',
-  type: 'heatmap',
-  source: 'restaurants',
-  maxzoom: 17,
-  paint: {
-    // Increase the heatmap weight based on frequency and property magnitude
+export const getHeatmapLayer = (visible: boolean): LayerProps => {
+  const paint: Record<string, unknown> = {
+    // Weight: amplify dense clusters so tightly packed areas glow hotter
     'heatmap-weight': [
       'interpolate',
       ['linear'],
@@ -83,46 +79,91 @@ export const getHeatmapLayer = (): LayerProps => ({
       0,
       0,
       1,
-      0.8,
-      10,
+      0.4,
+      5,
+      0.75,
+      15,
+      0.9,
+      50,
       1,
     ],
-    // Increase the heatmap color weight by zoom level
-    // heatmap-intensity is a multiplier on top of heatmap-weight
-    'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 5],
-    // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
-    // Begin color ramp at 0-stop with a 0-transparency color
-    // to create a blur-like effect.
+    // Intensity multiplier: stronger at low zoom so zoomed-out view is vivid
+    'heatmap-intensity': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      0,
+      2,
+      5,
+      2.5,
+      9,
+      3.5,
+      13,
+      4.5,
+      15,
+      5,
+    ],
+    'heatmap-intensity-transition': { duration: 300, delay: 0 },
+    // Vibrant color ramp optimized for dark map backgrounds:
+    // transparent → deep blue → purple → orange → yellow → white
     'heatmap-color': [
       'interpolate',
       ['linear'],
       ['heatmap-density'],
       0,
-      'rgba(33,102,172,0)',
-      0.1,
-      'rgb(103,169,207)',
+      'rgba(0,0,0,0)',
+      0.05,
+      'rgba(31,72,165,0.3)',
+      0.15,
+      'rgba(77,105,204,0.6)',
       0.3,
-      'rgb(209,229,240)',
-      0.5,
-      'rgb(253,219,199)',
-      0.7,
-      'rgb(239,138,98)',
+      'rgba(139,89,191,0.85)',
+      0.45,
+      'rgb(217,100,89)',
+      0.6,
+      'rgb(237,141,52)',
+      0.75,
+      'rgb(251,185,56)',
+      0.9,
+      'rgb(255,232,116)',
       1,
-      'rgb(178,24,43)',
+      'rgb(255,255,255)',
     ],
-    // Adjust the heatmap radius by zoom level
+    // Radius: larger at low zoom so blobs overlap and density builds up
     'heatmap-radius': [
       'interpolate',
       ['linear'],
       ['zoom'],
       0,
       20,
-      9,
-      80,
-      15,
-      120,
+      3,
+      30,
+      5,
+      40,
+      8,
+      55,
+      10,
+      70,
+      12,
+      85,
+      14,
+      110,
+      16,
+      140,
     ],
-    // Transition from heatmap to circle layer by zoom level
-    'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 10, 1, 16, 0],
-  },
-});
+    'heatmap-radius-transition': { duration: 300, delay: 0 },
+    // Smooth fade in/out when toggling; fade out at high zoom for circle layer
+    'heatmap-opacity': visible
+      ? ['interpolate', ['linear'], ['zoom'], 0, 1, 7, 0.95, 15, 0.6, 17, 0]
+      : 0,
+    'heatmap-opacity-transition': { duration: 250, delay: 0 },
+  };
+
+  return {
+    id: 'heatmap',
+    type: 'heatmap',
+    source: 'restaurants',
+    maxzoom: 17,
+    paint,
+  } as LayerProps;
+};

@@ -205,6 +205,47 @@ export default function MapComponent({
     });
   }, [selectedRestaurant?.id]);
 
+  // Breathing pulse animation for the heatmap layer
+  React.useEffect(() => {
+    if (!showHeatmap) return;
+
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    // Base intensity stops: [zoom, value, zoom, value, ...]
+    const baseStops = [
+      [0, 2],
+      [5, 2.5],
+      [9, 3.5],
+      [13, 4.5],
+      [15, 5],
+    ];
+
+    let animationId: number;
+
+    const animate = (): void => {
+      const t = performance.now() / 1000;
+      // ~0.12 Hz breathing cycle (~8s period), ±20% amplitude
+      const pulse = 1 + 0.2 * Math.sin(t * 0.25 * Math.PI);
+
+      try {
+        map.setPaintProperty('heatmap', 'heatmap-intensity', [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          ...baseStops.flatMap(([z, v]) => [z, v * pulse]),
+        ]);
+      } catch {
+        // Layer may not exist yet on first render
+      }
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, [showHeatmap]);
+
   // Handle map mouse move for cursor changes
   const handleMapMouseMove = React.useCallback((event: MapMouseEvent) => {
     const map = mapRef.current?.getMap();
@@ -326,7 +367,7 @@ export default function MapComponent({
           clusterMaxZoom={14}
           clusterRadius={50}
         >
-          {showHeatmap && <Layer {...getHeatmapLayer()} />}
+          <Layer {...getHeatmapLayer(showHeatmap)} />
           <Layer {...getClusterLayer(THEME)} />
           <Layer {...getClusterCountLayer()} />
           <Layer {...getSelectedPointLayer(THEME, selectedRestaurantId)} />
