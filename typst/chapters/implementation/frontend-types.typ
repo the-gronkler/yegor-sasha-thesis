@@ -9,7 +9,7 @@ The type system provides compile-time verification of data flow between backend 
 The file #source_code_link("resources/js/types/models.ts") defines interfaces for all domain entities, mirroring the structure of Laravel Eloquent models. This alignment ensures that data serialized by Laravel controllers matches the shape expected by TypeScript components.
 
 #code_example[
-  Model interfaces define exact property names and types matching database columns and Eloquent relationships. Key fields from each interface are shown below.
+  Model interfaces define exact property names and types matching database columns and Eloquent relationships.
 
   ```typescript
   export interface MenuItem {
