@@ -11,14 +11,14 @@ This chapter presents the system's use cases from the perspective of its primary
 
 == Actors and Roles
 
-The system identifies several primary actors, each with distinct privileges and responsibilities:
+The system identifies several primary actors:
 
-- *Unregistered Customer*: A guest user restricted to read-only discovery features, specifically viewing the map and selecting restaurants to view details.
-- *Customer*: A registered entity interacting with the system. This actor inherits the capabilities of the Unregistered Customer and gains access to transactional features such as ordering, reviewing, and profile management.
-- *Restaurant Worker*: A staff member responsible for day-to-day operations, including order processing and menu availability updates.
-- *Restaurant Admin*: A managerial role inheriting from the Restaurant Worker. This actor possesses elevated privileges for managing restaurant details, menu composition, and staff accounts.
-- *Payment System*: An external service (transaction processing is mocked in the current scope) that interacts with the checkout process.
-- *System Actions*: Automated triggers initiated by temporal events, such as new order notifications and daily rating updates.
+- *Unregistered Customer*: Guest with read-only discovery access (map and restaurant details).
+- *Customer*: Registered user with full transactional access (ordering, reviewing, profile management).
+- *Restaurant Worker*: Staff managing daily operations (order processing, inventory updates).
+- *Restaurant Admin*: Manager with elevated privileges (restaurant configuration, menu management, staff accounts).
+- *Payment System*: External service for transaction processing (mocked in current implementation).
+- *System Actions*: Automated triggers for notifications and updates.
 
 == Customer-Centric Functionality
 
@@ -27,18 +27,7 @@ The system identifies several primary actors, each with distinct privileges and 
   caption: [Use case diagram focused on customer interactions.],
 ) <fig:ucd-customer>
 
-As depicted in @fig:ucd-customer, customer interactions are grouped into distinct functional modules:
-
-=== Account Creation and User Methods
-Entry into the full system requires authentication via the "Account creation" module, comprising registration and login. Once logged in, the "User methods" module enables the Customer to manage their profile and view current orders and history.
-
-=== Map Discovery
-Discovery features available to the Unregistered Customer include viewing the map, applying filters, and selecting restaurants. The Customer actor extends these capabilities with personalized features, specifically "Add to favourites" and "Leave review". These actions are explicitly protected and accessible only to authenticated users.
-
-=== Order Management
-The "Order" module encapsulates the detailed purchasing workflow. Key interactions include:
-- *Cart Management*: The "View Cart" use case serves as a central hub, extended by actions to add items, remove items, or modify item quantities.
-- *Checkout*: The "Checkout" process includes the "Pay" use case, enforcing payment as a mandatory step for order completion.
+As depicted in @fig:ucd-customer, customer interactions encompass account management (registration/login), map-based restaurant discovery with filters, personalized features (favorites and reviews), and order management with cart operations and checkout.
 
 
 == Restaurant Management Functionality
@@ -48,15 +37,4 @@ The "Order" module encapsulates the detailed purchasing workflow. Key interactio
   caption: [Use case diagram focused on restaurant staff interactions.],
 ) <fig:ucd-restaurant>
 
-The restaurant-side operations, shown in @fig:ucd-restaurant, are divided between operational duties and administrative management.
-
-=== Worker Duties
-Restaurant Workers interact with the "Worker duties" module to manage the immediate flow of business. This includes updating the status of active orders and flagging specific menu items as available or unavailable based on inventory.
-
-=== Restaurant Admin Management
-The "Restaurant admin management" module provides configuration tools for the Restaurant Admin. This includes editing the restaurant's profile, managing the menu structure (adding or editing items), and overseeing the workforce by adding or removing Worker accounts.
-
-=== System Actions
-The diagram also captures automated system behaviors:
-- *Order Notifications*: The system notifies workers to accept or decline when a new order is placed.
-- *Rating Updates*: Restaurant ratings are recalculated in real time whenever a review is created, updated, or deleted. The recalculation computes the average of all associated review ratings and updates the restaurant's stored rating immediately.
+The restaurant-side operations, shown in @fig:ucd-restaurant, enable Workers to manage order status and inventory, provide Admins with tools for restaurant and menu configuration, and automate system notifications and rating updates.

@@ -7,17 +7,8 @@ The scenarios complement the use case diagrams in the previous chapter by explai
 
 == UC1: Finding a Restaurant
 
-The following scenario describes how a customer finds a restaurant using the map-based index page.
-As @fig:ucs-finding-restaurant shows, the system does not require authentication to search for restaurants and view their details.
-
-In the main flow, the customer locates restaurants via the map, selects a restaurant marker to display a brief overview, and opens the restaurant detail page for additional information.
-
-If the customer does not grant geolocation permission, they search for restaurants on the map as the first alternative flow illustrates.
-In the alternative geolocation flow, the user centers the map on a location of interest and identifies nearby restaurants using the "Search here" button.
-
-Alternatively, the user can select a location directly on the map by clicking or entering coordinates (omitted for simplicity).
-Customers can also identify restaurants via the collapsible list view rather than the map, as the second alternative flow shows.
-Additionally, the search bar supports filtering by restaurant name; we omit this option from the table for simplicity.
+This scenario describes how a customer finds a restaurant using the map-based interface.
+As @fig:ucs-finding-restaurant shows, the system supports both geolocation-based discovery and manual map navigation without requiring authentication.
 
 #figure(
   use-case-scenario(
@@ -56,20 +47,7 @@ Additionally, the search bar supports filtering by restaurant name; we omit this
 
 == UC2: Creating an Order
 
-This scenario describes the typical ordering flow, including restaurant selection, item addition to the cart, quantity adjustment, checkout, and a mocked payment via the payment provider.
-
-In the main flow, the customer browses the restaurant menu, adds selected items to the cart, reviews the order on the cart page, and initiates checkout.
-
-During checkout, the customer provides payment details (mocked for this implementation). and confirms the order details.
-
-If the customer has not authenticated, they must log in or register before proceeding to checkout, which we do not show in the table for simplicity (we assume the customer has logged in in the main flow).
-
-- In the first alternative flow, the customer views menu items on the menu-item detail page and adds items to the cart from that page.
-
-- In the second alternative flow, the customer modifies the order in the cart by adjusting item quantities or removing items prior to checkout.
-
-- In the third alternative flow, the customer adds a special note (instructions) to the order during checkout.
-- In the final alternative flow, if an item becomes unavailable prior to order confirmation (e.g., due to stock issues), the system prompts the customer for order adjustments before confirmation can proceed.
+This scenario describes the typical ordering flow, including menu browsing, cart management, and checkout with payment confirmation.
 
 #figure(
   use-case-scenario(
@@ -117,14 +95,7 @@ If the customer has not authenticated, they must log in or register before proce
 == UC3: Order Management
 
 This scenario describes the order management workflow from the perspective of restaurant staff, including order acceptance, preparation tracking, and fulfillment.
-As @fig:ucs-order-management shows, the system requires staff authentication to access the order management features.
-
-In the main flow, the worker receives a notification about a new order, assigns it for preparation, updates the status through the preparation stages, and marks it as fulfilled once the customer receives it.
-The system notifies the customer in real-time as the order status changes.
-
-- In the first alternative flow, the worker declines the order before preparation begins (e.g., due to ingredient unavailability or capacity issues).
-
-- In the second alternative flow, the worker cancels an already-accepted order if a problem occurs after preparation starts.
+As @fig:ucs-order-management shows, the system requires staff authentication and notifies customers in real-time as order status changes.
 
 #figure(
   use-case-scenario(
