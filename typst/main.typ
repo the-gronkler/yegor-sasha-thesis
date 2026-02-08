@@ -61,6 +61,8 @@
 // Final chapters:
 #include "chapters/conclusions-and-future-work.typ"
 
+// Appendices:
+#include "appendices/typescript-types.typ"
 
 
 

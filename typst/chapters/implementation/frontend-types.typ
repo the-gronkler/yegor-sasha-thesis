@@ -6,99 +6,17 @@ The type system provides compile-time verification of data flow between backend 
 
 ===== Centralized Model Definitions
 
-The file #source_code_link("resources/js/types/models.ts") defines interfaces for all domain entities, mirroring the structure of Laravel Eloquent models. This alignment ensures that data serialized by Laravel controllers matches the shape expected by TypeScript components.
-
-#code_example[
-  Model interfaces define exact property names and types matching database columns and Eloquent relationships.
-
-  ```typescript
-  export interface MenuItem {
-    id: number;
-    restaurant_id: number;
-    food_type_id: number;
-    name: string;
-    price: number;
-    description: string | null;
-    is_available: boolean;
-    image_id: number | null;
-    image?: Image;
-    allergens?: Allergen[];
-    pivot?: { quantity: number };
-    created_at: string;
-    updated_at: string;
-  }
-
-  export interface Restaurant {
-    id: number;
-    name: string;
-    address: string;
-    latitude: number | null;
-    longitude: number | null;
-    description: string | null;
-    rating: number | null;
-    opening_hours: string | null;
-    distance?: number | null;
-    is_favorited?: boolean;
-    images?: Image[];
-    food_types?: FoodType[];
-    created_at: string;
-    updated_at: string;
-  }
-  ```
-]
+The file #source_code_link("resources/js/types/models.ts") defines interfaces for all domain entities, mirroring the structure of Laravel Eloquent models. These strongly-typed interfaces (MenuItem, Restaurant, OrderStatusEnum, PaginatedResponse, and others) ensure that data serialized by Laravel controllers matches the shape expected by TypeScript components. Complete type definitions are provided in Appendix A.
 
 Optional properties use TypeScript's `?` syntax combined with explicit `| null` union types for fields that may be absent or explicitly null. This distinction matters for type guards and conditional rendering logic. Relationship properties like `images` and `food_types` are optional because these relations may not be eager-loaded depending on the endpoint.
 
 ===== Enumerations for Finite States
 
-Discrete state values use TypeScript numeric enums matching database integer columns. This provides both type safety and semantic clarity.
-
-#code_example[
-  The `OrderStatusEnum` maps database integer status codes to named constants.
-
-  ```typescript
-  export enum OrderStatusEnum {
-    InCart = 1,
-    Placed = 2,
-    Accepted = 3,
-    Declined = 4,
-    Preparing = 5,
-    Ready = 6,
-    Cancelled = 7,
-    Fulfilled = 8,
-  }
-  ```
-]
-
-Components use enum members instead of magic numbers, making status checks explicit and preventing invalid values. For example, `order.order_status_id === OrderStatusEnum.Ready` is more maintainable than `order.order_status_id === 6`.
+Discrete state values use TypeScript numeric enums matching database integer columns, providing both type safety and semantic clarity (see Appendix A for complete definitions). Components use enum members instead of magic numbers, making status checks explicit and preventing invalid values. For example, `order.order_status_id === OrderStatusEnum.Ready` is more maintainable than `order.order_status_id === 6`.
 
 ===== Generic Pagination Interface
 
-Laravel pagination responses follow a consistent structure. Rather than duplicating this shape across multiple interfaces, a generic type captures the pattern once.
-
-#code_example[
-  The `PaginatedResponse` interface wraps any model type with Laravel pagination metadata.
-
-  ```typescript
-  export interface PaginatedResponse<T> {
-    data: T[];
-    current_page: number;
-    first_page_url: string;
-    from: number;
-    last_page: number;
-    last_page_url: string;
-    links: { url: string | null; label: string; active: boolean }[];
-    next_page_url: string | null;
-    path: string;
-    per_page: number;
-    prev_page_url: string | null;
-    to: number;
-    total: number;
-  }
-  ```
-]
-
-Pages receiving paginated data declare their props as `PaginatedResponse<Restaurant>` or `PaginatedResponse<Order>`, automatically receiving correct types for all pagination properties including the navigation links array and page URLs.
+Laravel pagination responses follow a consistent structure captured by the generic `PaginatedResponse<T>` interface (see Appendix A). Pages receiving paginated data declare their props as `PaginatedResponse<Restaurant>` or `PaginatedResponse<Order>`, automatically receiving correct types for all pagination properties including the navigation links array and page URLs.
 
 ===== Global PageProps Interface
 
