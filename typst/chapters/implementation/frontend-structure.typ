@@ -27,7 +27,8 @@ _Hooks Directory_ (#source_code_link("resources/js/Hooks")) encapsulates reusabl
 - Authentication utilities (`useAuth`)
 - Map page orchestration (`useMapPage`)
 - Configurable fuzzy search (`useSearch`)
-- Real-time update subscriptions (`useMenuItemUpdates`, `useRestaurantCart`)
+- Cart management per restaurant (`useRestaurantCart`)
+- Real-time update subscriptions in a dedicated `Updates/` subdirectory (`useMenuItemUpdates`, `useOrderUpdates`, `useChannelUpdates`)
 
 _Contexts Directory_ (#source_code_link("resources/js/Contexts")) defines React Context providers for global state:
 
@@ -41,22 +42,27 @@ _Utils Directory_ (#source_code_link("resources/js/Utils")) contains pure utilit
 ===== Convention in Practice
 
 #code_example[
-  The following excerpt from #source_code_link("resources/js/Pages/Customer/Restaurants/Show.tsx") illustrates how a typical page component composes elements from each layer — importing shared components, consuming a context hook, and receiving typed props from the server.
+  The following excerpt from #source_code_link("resources/js/Pages/Customer/Restaurants/Show.tsx") illustrates how a typical page component composes elements from each layer — importing shared components, consuming hooks, and receiving typed props from the server.
 
   ```typescript
   import AppLayout from '@/Layouts/AppLayout';
-  import MenuItemCard from '@/Components/Shared/MenuItemCard';
   import StarRating from '@/Components/Shared/StarRating';
-  import { useCart } from '@/Contexts/CartContext';
-  import { Restaurant, MenuItem } from '@/types/models';
+  import RestaurantMenu from '@/Components/Shared/RestaurantMenu';
+  import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
+  import { Restaurant } from '@/types/models';
+  import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
+  import { useAuth } from '@/Hooks/useAuth';
 
-  interface ShowPageProps extends PageProps {
+  interface RestaurantShowProps extends PageProps {
     restaurant: Restaurant;
-    menuItems: MenuItem[];
+    isFavorited: boolean;
   }
 
-  export default function Show({ restaurant, menuItems }: ShowPageProps) {
-    const { addItem } = useCart();
+  export default function RestaurantShow({
+    restaurant,
+    isFavorited,
+  }: RestaurantShowProps) {
+    const { requireAuth } = useAuth();
     // Page composes shared components with server-provided data
   }
   ```

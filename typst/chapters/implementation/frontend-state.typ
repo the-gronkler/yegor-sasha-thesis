@@ -21,6 +21,7 @@ Context providers follow a consistent implementation pattern: create a typed con
     updateQuantity: (menuItemId: number, quantity: number) => void;
     clearCart: () => void;
     isLoading: boolean;
+    getOrderId: (restaurantId: number) => number | undefined;
   }
 
   const CartContext = createContext<CartContextType | undefined>(undefined);

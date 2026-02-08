@@ -14,8 +14,8 @@ The #source_code_link("resources/js/Hooks/useSearch.ts") hook encapsulates the F
   ```typescript
   export function useSearch<T>(
     items: T[],
-    searchKeys: Array<keyof T>,
-    options?: Partial<IFuseOptions<T>>
+    searchKeys: (keyof T)[],
+    options?: IFuseOptions<T>
   ): {
     query: string;
     setQuery: (query: string) => void;
