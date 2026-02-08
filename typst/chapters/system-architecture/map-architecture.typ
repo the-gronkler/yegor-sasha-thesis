@@ -59,57 +59,13 @@ This abstraction allows controllers to remain focused on HTTP request handling w
 
 ==== Session-Based Location Persistence <map-arch-session-persistence>
 
-User location is persisted in the server-side session with an expiry timestamp. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after a configurable period and is not permanently stored).
-
-#block(breakable: false)[
-  The session pattern follows a read-through cache model:
-
-  ```
-  Controller                    Service                     Session
-      │                            │                           │
-      ├──── getLocation() ────────►│                           │
-      │                            ├──── read & validate ─────►│
-      │                            │◄─── coordinates/null ─────┤
-      │◄─── location/null ─────────┤                           │
-      │                            │                           │
-      ▼ (if null: use default)     │                           │
-  ```
-
-  This design keeps the controller simple (request → service → fallback) while encapsulating session validation logic in the service layer.
-]
+User location is persisted in the server-side session with an expiry timestamp. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after a configurable period and is not permanently stored). The session pattern follows a read-through cache model where the controller delegates location retrieval to the service layer, which handles session validation and fallback logic.
 
 === Frontend Architecture Patterns
 
 ==== Component Hierarchy and Separation of Concerns <map-arch-component-hierarchy>
 
-#block(breakable: false)[
-  The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
-  // TODO: Change the text diagram below to an actual diagram if needed.
-  ```
-  MapIndex (Page Component - Orchestration)
-  ├── useMapPage (Hook - State & Business Logic)
-  ├── MapLayout (Layout - Scroll Management)
-  ├── MapOverlay (Component - Controls)
-  │   ├── Search Input
-  │   ├── Radius Slider
-  │   ├── Location Controls
-  │   └── "Search Here" Button
-  ├── Map (Component - Visualization)
-  │   ├── GeoJSON Source (Restaurants)
-  │   ├── Cluster Layer
-  │   ├── Point Layer
-  │   ├── Selected Point Layer
-  │   └── User Marker Layer
-  ├── MapPopup (Component - Selection Detail)
-  └── BottomSheet (Component - List Sync)
-      └── RestaurantCard (Component - List Item)
-  ```
-
-  This hierarchy follows the single responsibility principle:
-  - The page component composes layout and wires props
-  - The hook owns state and performs side effects (Inertia navigation, geolocation)
-  - Each UI component focuses on one interaction surface (overlay controls, map canvas, list)
-]
+The frontend follows a clear hierarchy that separates orchestration, state management, and presentation. This hierarchy follows the single responsibility principle: the page component composes layout and wires props, the hook owns state and performs side effects (Inertia navigation, geolocation), and each UI component focuses on one interaction surface (overlay controls, map canvas, list).
 
 === State Management Architecture
 
@@ -131,33 +87,7 @@ This layered approach follows the principle of state locality @DoddsStateColocat
 
 ==== Data Flow and Synchronization <map-arch-data-flow>
 
-The map feature implements bidirectional data flow between server and client:
-
-*Server → Client (Initial Load & Updates):*
-
-1. User navigates to map page or changes filters
-2. Backend executes three-phase pipeline and returns restaurant array
-3. Inertia updates page props
-4. React re-renders with new dataset
-5. Hook converts restaurants to GeoJSON markers
-6. Map component updates layers
-
-*Client → Server (Filter Changes):*
-
-1. User adjusts radius, triggers geolocation, or clicks "Search Here"
-2. Hook constructs new query parameters
-3. Inertia partial reload (`only: ['restaurants', 'filters']`)
-4. Backend re-executes pipeline with new parameters
-5. Response updates only dataset props, preserving UI state
-
-*Client-Only Flow (Search & Selection):*
-
-1. User types in search box
-2. Hook filters restaurant array with Fuse.js
-3. Filtered results update map markers and list
-4. No server request (client-side only)
-
-This hybrid approach optimizes for responsiveness: dataset changes require server validation (radius enforcement, scoring), but UI interactions (search, selection) remain instant through client-side state.
+The map feature implements bidirectional data flow between server and client. Server-to-client flow handles initial loads and filter updates through Inertia partial reloads, where the backend executes the three-phase pipeline and returns updated datasets. Client-to-server flow occurs when users adjust filters, triggering server-side re-execution with new parameters. Client-only flow handles search and selection through Fuse.js filtering without server requests. This hybrid approach optimizes for responsiveness: dataset changes require server validation (radius enforcement, scoring), but UI interactions (search, selection) remain instant through client-side state.
 
 ==== Controlled Map Component Pattern
 
@@ -173,17 +103,7 @@ The alternative - uncontrolled component with internal ref access - would scatte
 
 ==== Geolocation Integration Pattern <map-arch-geolocation-pattern>
 
-Geolocation uses a callback registration pattern to bridge the gap between the Mapbox `GeolocateControl` (which has its own UI and lifecycle) and the custom overlay controls.
-
-Flow:
-1. Map component renders hidden `GeolocateControl`
-2. Geolocation hook inside Map registers a trigger function via callback
-3. Page-level hook stores the trigger function in a ref
-4. Overlay "My Location" button calls the trigger function
-5. Control acquires location and fires success/error events
-6. Events propagate to page hook, which updates state and navigates
-
-This pattern decouples the UI (custom button in overlay) from the implementation (Mapbox control) while maintaining clean component boundaries. The trigger function serves as a stable interface across component re-renders.
+Geolocation uses a callback registration pattern to bridge the gap between the Mapbox `GeolocateControl` (which has its own UI and lifecycle) and the custom overlay controls. This pattern decouples the UI (custom button in overlay) from the implementation (Mapbox control) while maintaining clean component boundaries. The trigger function serves as a stable interface across component re-renders.
 
 === Data Architecture and Flow Patterns
 
