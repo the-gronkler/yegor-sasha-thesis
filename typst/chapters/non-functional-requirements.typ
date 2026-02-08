@@ -5,7 +5,7 @@
 - Loading times for key functions (e.g., menu display and order tracking) must not exceed 3 seconds.
 
 == Security
-- User data, including payment details, must be encrypted using AES-256 standards.
+- User data, including payment details, must be encrypted using AES-256 standards @NISTFIPS197.
 - Implement two-factor authentication for restaurant and customer accounts.
 
 == Scalability
@@ -13,11 +13,11 @@
 - The system must accommodate increased user activity during peak hours without disruption.
 
 == Availability
-- Ensure 99.9% uptime with a reliable disaster recovery mechanism.
+- Ensure 99.9% uptime @AWSAvailability with a reliable disaster recovery mechanism.
 - In case of a system failure, data recovery must be completed within 2 hours.
 
 == Usability
-- The interface must meet WCAG 2.1 accessibility standards, ensuring ease of use for all users.
+- The interface must meet WCAG 2.1 accessibility standards @WCAG21, ensuring ease of use for all users.
 - New users should be able to navigate the app and place orders within 5 minutes of onboarding.
 
 == Maintainability

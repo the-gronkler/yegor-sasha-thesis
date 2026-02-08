@@ -7,7 +7,7 @@ The system persists domain state in a relational database. Any and all interacti
 === Persistence Strategy and Pattern Selection
 An Object-Relational Mapping (ORM) layer abstracts the interaction between the application domain and the relational database. Each domain entity is represented by a corresponding model class that encapsulates both the data structure and the persistence logic.
 
-This is an example of the Active Record design pattern, which was selected over the Repository pattern in order to adhere to the framework conventions. In Laravel, the Eloquent ORM natively implements the Active Record pattern, and combined with the framework's emphasis on convention over configuration, this approach streamlines development by reducing boilerplate code and leveraging built-in functionalities.
+This is an example of the Active Record design pattern @FowlerPEAA2002, which was selected over the Repository pattern in order to adhere to the framework conventions. In Laravel, the Eloquent ORM natively implements the Active Record pattern, and combined with the framework's emphasis on convention over configuration, this approach streamlines development by reducing boilerplate code and leveraging built-in functionalities.
 
 The ORM handles tasks such as query construction, relationship management, and lifecycle events, allowing developers to interact with the database using high-level abstractions rather than raw SQL.
 
@@ -48,7 +48,7 @@ The architecture employs a bifurcated strategy for modeling many-to-many associa
 
 For relationships that serve purely as structural connections without additional attributes, the system relies on Eloquent's ability to manage associations directly via an intermediate table, without requiring a corresponding domain entity. This lightweight pattern is suitable for tagging or categorization features, such as the association between menu items and allergens, where the relationship signifies simple presence.
 
-In contrast, when an association possesses its own data lifecycle or attributes, the architecture elevates the connection to a "Rich Association". The relationship is explicitly modelled as a distinct domain entity rather than a passive database link.
+In contrast, when an association possesses its own data lifecycle or attributes, the architecture elevates the connection to a "Rich Association" @FowlerPEAA2002. The relationship is explicitly modelled as a distinct domain entity rather than a passive database link.
 
 This approach is applied to complex associations such as order line items and user preferences, which require the encapsulation of stateful data like quantities or rankings. By formalizing these intersections as entities, the architecture ensures that relationship attributes are subject to the same validation, typing, and business logic constraints as core domain objects, preserving the integrity of the aggregate boundary.
 
