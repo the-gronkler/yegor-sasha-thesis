@@ -104,6 +104,7 @@ export interface Restaurant {
   longitude: number | null;
   description: string | null;
   rating: number | null;
+  reviews_count?: number;
   opening_hours: string | null;
   rank?: number;
   distance?: number | null; // Distance in kilometers when filtered by geolocation
@@ -161,6 +162,7 @@ export interface MapMarker {
   address?: string | null;
   openingHours?: string | null;
   rating?: number | null;
+  reviewsCount?: number | null;
   distanceKm?: number | null;
   imageUrl?: string | null;
 }

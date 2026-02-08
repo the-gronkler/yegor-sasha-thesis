@@ -52,6 +52,8 @@ Restaurants are associated with customers through a 'Review' joining table, whic
 
 *Primary Key Strategy*: The review entity employs a surrogate primary key (`id`) rather than using the natural composite key `(customer_user_id, restaurant_id)` as the primary identifier. While the composite key uniquely identifies each review, using a dedicated surrogate key simplifies foreign key relationships, particularly for the `review_images` table. With a single-column primary key, `review_images` requires only one foreign key column (`review_id`) rather than propagating the composite key through multiple columns. This approach reduces join complexity and improves query readability. The natural uniqueness constraint is still enforced at the database level to prevent duplicate reviews.
 
+The `rating` column on the `restaurants` table stores the aggregate average of all associated review ratings. This value is recalculated whenever a review is created, updated, or deleted, ensuring that the displayed rating always reflects the current state of customer feedback. The review count is derived at query time using the reviews relationship rather than being stored as a denormalized column.
+
 ==== Orders
 Orders are represented by the *Orders* table, linked to customers with a one-to-many relationship and having a many-to-many relationship to menu items. The joining table *Order Items* captures this many-to-many relationship, also storing the quantity of each menu item in the order.
 

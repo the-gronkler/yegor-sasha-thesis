@@ -8,6 +8,7 @@ import {
   CursorArrowRaysIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
+  FireIcon,
 } from '@heroicons/react/24/outline';
 
 /**
@@ -46,6 +47,8 @@ interface MapOverlayProps {
   setIsPickingLocation: (isPicking: boolean) => void;
   onManualLocation: (lat: number, lng: number) => void;
   onError: (error: string | null) => void;
+  showHeatmap: boolean;
+  onToggleHeatmap: (show: boolean) => void;
   showSearchInArea: boolean;
   onSearchInArea: () => void;
   mapCenter: {
@@ -67,6 +70,8 @@ export default function MapOverlay({
   setIsPickingLocation,
   onManualLocation,
   onError,
+  showHeatmap,
+  onToggleHeatmap,
   showSearchInArea,
   onSearchInArea,
   mapCenter,
@@ -239,6 +244,19 @@ export default function MapOverlay({
               >
                 <CursorArrowRaysIcon className="btn-icon" aria-hidden="true" />
                 Pick on Map
+              </button>
+            </div>
+
+            <div className="map-layer-controls">
+              <button
+                type="button"
+                className={`map-heatmap-toggle ${showHeatmap ? 'is-active' : ''}`}
+                onClick={() => onToggleHeatmap(!showHeatmap)}
+                aria-label={showHeatmap ? 'Hide heatmap' : 'Show heatmap'}
+                aria-pressed={showHeatmap}
+              >
+                <FireIcon className="btn-icon" aria-hidden="true" />
+                Heatmap
               </button>
             </div>
 

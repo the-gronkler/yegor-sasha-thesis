@@ -19,6 +19,7 @@ import {
   getClusterCountLayer,
   getSelectedPointLayer,
   getUnclusteredPointLayer,
+  getHeatmapLayer,
   MapTheme,
 } from './mapStyles';
 import { useMapGeolocation } from '@/Hooks/useMapGeolocation';
@@ -47,6 +48,8 @@ interface Props {
   isPickingLocation?: boolean;
   onPickLocation?: (lat: number, lng: number) => void;
   showGeolocateControlUi?: boolean;
+  showHeatmap?: boolean;
+  onReady?: () => void;
 }
 
 export default function MapComponent({
@@ -65,6 +68,8 @@ export default function MapComponent({
   isPickingLocation,
   onPickLocation,
   showGeolocateControlUi = true,
+  showHeatmap = false,
+  onReady,
 }: Props) {
   const mapRef = React.useRef<MapRef>(null);
 
@@ -107,6 +112,7 @@ export default function MapComponent({
           address: marker.address,
           openingHours: marker.openingHours,
           rating: marker.rating,
+          reviewsCount: marker.reviewsCount,
           distanceKm: marker.distanceKm,
           imageUrl: marker.imageUrl,
         },
@@ -167,6 +173,7 @@ export default function MapComponent({
             address: properties.address,
             openingHours: properties.openingHours,
             rating: properties.rating,
+            reviewsCount: properties.reviewsCount,
             distanceKm: properties.distanceKm,
             imageUrl: properties.imageUrl,
           };
@@ -201,6 +208,40 @@ export default function MapComponent({
       padding: { top: 240, bottom: 280, left: 40, right: 40 },
     });
   }, [selectedRestaurant?.id]);
+
+  // Breathing pulse animation for the heatmap layer
+  React.useEffect(() => {
+    if (!showHeatmap) return;
+
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    // Base intensity stops: [zoom, value, zoom, value, ...]
+    const baseStops = [
+      [0, 2],
+      [5, 2.5],
+      [9, 3.5],
+      [13, 4.5],
+      [15, 5],
+    ];
+
+    const intervalId = setInterval(() => {
+      const t = performance.now() / 1000;
+      // ~0.12 Hz breathing cycle (~8s period), ±20% amplitude
+      const pulse = 1 + 0.2 * Math.sin(t * 0.25 * Math.PI);
+
+      if (map.getLayer('heatmap')) {
+        map.setPaintProperty('heatmap', 'heatmap-intensity', [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          ...baseStops.flatMap(([z, v]) => [z, v * pulse]),
+        ]);
+      }
+    }, 100);
+
+    return () => clearInterval(intervalId);
+  }, [showHeatmap]);
 
   // Handle map mouse move for cursor changes
   const handleMapMouseMove = React.useCallback((event: MapMouseEvent) => {
@@ -266,6 +307,8 @@ export default function MapComponent({
             'star-intensity': 0.25,
             'horizon-blend': 0.15,
           });
+
+          onReady?.();
         }}
         ref={mapRef}
         onClick={handleMapClick}
@@ -323,6 +366,7 @@ export default function MapComponent({
           clusterMaxZoom={14}
           clusterRadius={50}
         >
+          <Layer {...getHeatmapLayer(showHeatmap)} />
           <Layer {...getClusterLayer(THEME)} />
           <Layer {...getClusterCountLayer()} />
           <Layer {...getSelectedPointLayer(THEME, selectedRestaurantId)} />
