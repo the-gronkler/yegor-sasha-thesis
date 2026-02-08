@@ -88,6 +88,12 @@ export default function RestaurantShow({
 
           <div className="rating-container">
             <StarRating rating={restaurant.rating || 0} />
+            {restaurant.reviews_count != null && (
+              <span className="reviews-count">
+                ({restaurant.reviews_count}{' '}
+                {restaurant.reviews_count === 1 ? 'review' : 'reviews'})
+              </span>
+            )}
           </div>
 
           <div className="info-row">
