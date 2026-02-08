@@ -83,8 +83,16 @@
 }
 
 .map-popup-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.9rem;
   opacity: 0.9;
+
+  .reviews-count {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
 }
 
 .map-popup-body {

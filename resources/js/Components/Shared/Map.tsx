@@ -49,6 +49,7 @@ interface Props {
   onPickLocation?: (lat: number, lng: number) => void;
   showGeolocateControlUi?: boolean;
   showHeatmap?: boolean;
+  onReady?: () => void;
 }
 
 export default function MapComponent({
@@ -68,6 +69,7 @@ export default function MapComponent({
   onPickLocation,
   showGeolocateControlUi = true,
   showHeatmap = false,
+  onReady,
 }: Props) {
   const mapRef = React.useRef<MapRef>(null);
 
@@ -110,6 +112,7 @@ export default function MapComponent({
           address: marker.address,
           openingHours: marker.openingHours,
           rating: marker.rating,
+          reviewsCount: marker.reviewsCount,
           distanceKm: marker.distanceKm,
           imageUrl: marker.imageUrl,
         },
@@ -170,6 +173,7 @@ export default function MapComponent({
             address: properties.address,
             openingHours: properties.openingHours,
             rating: properties.rating,
+            reviewsCount: properties.reviewsCount,
             distanceKm: properties.distanceKm,
             imageUrl: properties.imageUrl,
           };
@@ -310,6 +314,8 @@ export default function MapComponent({
             'star-intensity': 0.25,
             'horizon-blend': 0.15,
           });
+
+          onReady?.();
         }}
         ref={mapRef}
         onClick={handleMapClick}

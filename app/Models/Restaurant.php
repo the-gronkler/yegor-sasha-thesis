@@ -83,6 +83,18 @@ class Restaurant extends Model
     }
 
     /**
+     * Recalculate the restaurant's average rating from its reviews.
+     */
+    public function recalculateRating(): void
+    {
+        $avgRating = $this->reviews()->avg('rating');
+
+        $this->update([
+            'rating' => $avgRating !== null ? round($avgRating, 2) : null,
+        ]);
+    }
+
+    /**
      * Local Scope: Calculate distance to a given point.
      *
      * Adds a 'distance' column (in kilometers) to query results.

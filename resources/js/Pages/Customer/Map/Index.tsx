@@ -56,6 +56,7 @@ export default function MapIndex({
     reloadMap,
     showSearchInArea,
     searchInArea,
+    handleMapReady,
   } = useMapPage({ restaurants, filters, mapboxPublicKey });
 
   return (
@@ -130,6 +131,7 @@ export default function MapIndex({
             onPickLocation={handlePickLocation}
             showGeolocateControlUi={false}
             showHeatmap={showHeatmap}
+            onReady={handleMapReady}
           />
           <BottomSheet
             restaurants={filteredRestaurants}

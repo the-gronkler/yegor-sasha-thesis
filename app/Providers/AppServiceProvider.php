@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 // Return all cart orders (one per restaurant)
-                return Order::with(['menuItems.images', 'restaurant'])
+                return Order::with(['menuItems.image', 'menuItems.images', 'restaurant'])
                     ->where('customer_user_id', $customer->user_id)
                     ->where('order_status_id', OrderStatus::InCart)
                     ->get();

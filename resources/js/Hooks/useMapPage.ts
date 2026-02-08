@@ -75,12 +75,28 @@ export function useMapPage({
   // --- Refs ---
   const geolocateTriggerRef = useRef<null | (() => boolean)>(null);
   const initialCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+  const hasAutoGeolocatedRef = useRef(false);
 
   // --- Callbacks & Handlers ---
 
   const registerGeolocateTrigger = useCallback((fn: (() => boolean) | null) => {
     geolocateTriggerRef.current = fn;
   }, []);
+
+  const handleMapReady = useCallback(() => {
+    // Auto-prompt for location on first map load when no location is persisted
+    if (
+      !hasAutoGeolocatedRef.current &&
+      filters.lat === null &&
+      filters.lng === null
+    ) {
+      hasAutoGeolocatedRef.current = true;
+      const ok = geolocateTriggerRef.current?.();
+      if (ok) {
+        setIsGeolocating(true);
+      }
+    }
+  }, [filters.lat, filters.lng]);
 
   const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
     router.get(
@@ -241,6 +257,7 @@ export function useMapPage({
           address: r.address,
           openingHours: r.opening_hours,
           rating: r.rating,
+          reviewsCount: r.reviews_count ?? null,
           distanceKm: r.distance ?? null,
           imageUrl: primaryImage?.url ?? null,
         };
@@ -283,5 +300,6 @@ export function useMapPage({
     // Data / Actions
     mapMarkers,
     reloadMap,
+    handleMapReady,
   };
 }
