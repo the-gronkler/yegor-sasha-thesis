@@ -48,7 +48,7 @@ This separation enforces the architectural guarantee that radius constraints are
 
 ==== Service Layer Abstraction
 
-The geospatial logic is isolated in a dedicated service class that provides stateless methods for domain-specific operations. This follows the Domain Service pattern from Domain-Driven Design: logic that does not naturally belong to an entity or value object is extracted into a service.
+The geospatial logic is isolated in a dedicated service class that provides stateless methods for domain-specific operations. This follows the Domain Service pattern from Domain-Driven Design @EvansDDD2003: logic that does not naturally belong to an entity or value object is extracted into a service.
 
 The service exposes methods for:
 - Bounding box calculation (approximates lat/lng deltas from radius)
@@ -127,7 +127,7 @@ Manages client-side state: view state (camera position), selection state (active
 
 Cart state is shared globally via Context API. This state must be accessible from navigation, restaurant menus, and the cart page. The Context pattern avoids prop drilling while keeping state simple (no external state library boilerplate needed).
 
-This layered approach follows the principle of state locality: keep state as close as possible to where it is used, but share globally only when necessary.
+This layered approach follows the principle of state locality @DoddsStateColocation: keep state as close as possible to where it is used, but share globally only when necessary.
 
 ==== Data Flow and Synchronization <map-arch-data-flow>
 
@@ -286,7 +286,7 @@ All scoring and ordering happens in SQL, leveraging MariaDB's query optimizer. T
 
 Separate single-column indexes on `latitude` and `longitude` columns support the bounding box prefilter that reduces the candidate set before expensive distance calculations.
 
-MariaDB's query optimizer uses index merge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
+MariaDB's query optimizer uses index merge @MariaDBIndexMerge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
 
 Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently-the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 

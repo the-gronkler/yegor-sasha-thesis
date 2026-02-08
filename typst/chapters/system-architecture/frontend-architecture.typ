@@ -6,7 +6,7 @@ The frontend architecture organizes React components into a layered hierarchy th
 
 === Component Hierarchy
 
-The architecture employs a three-tier component hierarchy inspired by atomic design principles.
+The architecture employs a three-tier component hierarchy inspired by atomic design principles @FrostAtomicDesign2016.
 
 _Page Components_ represent the top level, corresponding directly to application routes. Pages receive data from Laravel controllers via Inertia.js and orchestrate composition of lower-level components. Complex logic delegates to custom hooks, keeping pages focused on assembly and data distribution.
 
@@ -38,10 +38,10 @@ Component styling separates structure from presentation. React components refere
 
 The SCSS codebase organizes into modules: design tokens for colors, spacing, and typography; component-specific partials matching React components; layout styles; and page-specific overrides. This mirrors the component hierarchy and enables independent styling without cross-component interference.
 
-The application employs mobile-first responsive design. Base styles target mobile viewports, with media queries progressively enhancing for larger screens. Layout components handle structural adaptation (bottom navigation for mobile, alternative arrangements for desktop), while atomic components remain viewport-agnostic. Customer interfaces prioritize mobile optimization; employee interfaces optimize for desktop workflows.
+The application employs mobile-first responsive design @WroblewskiMobileFirst2011. Base styles target mobile viewports, with media queries progressively enhancing for larger screens. Layout components handle structural adaptation (bottom navigation for mobile, alternative arrangements for desktop), while atomic components remain viewport-agnostic. Customer interfaces prioritize mobile optimization; employee interfaces optimize for desktop workflows.
 
 === Error Handling
 
-React Error Boundaries catch rendering errors in component subtrees, displaying fallback UI rather than crashing the entire interface. This isolates failures to specific sections while maintaining overall application stability.
+React Error Boundaries @ReactErrorBoundaries catch rendering errors in component subtrees, displaying fallback UI rather than crashing the entire interface. This isolates failures to specific sections while maintaining overall application stability.
 
 Server-side errors flow through Inertia's error handling. Validation errors appear in page props for form feedback. Network and server failures trigger error callbacks, enabling appropriate responses—reverting optimistic updates, displaying notifications, or redirecting to error pages.

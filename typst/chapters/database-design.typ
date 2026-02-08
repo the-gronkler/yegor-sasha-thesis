@@ -13,9 +13,9 @@ The design philosophy prioritizes normalization to eliminate data redundancy, co
   caption: [Entity-Relationship Diagram (ERD)],
 ) <fig:er-diagram>
 
-The Entity-Relationship Diagram in @fig:er-diagram depicts the database schema used in the application. The schema follows the Third Normal Form to reduce redundancy and enforce integrity via primary keys, foreign keys, and uniqueness constraints.
+The Entity-Relationship Diagram in @fig:er-diagram depicts the database schema used in the application. The schema follows the Third Normal Form @Codd3NF1971 to reduce redundancy and enforce integrity via primary keys, foreign keys, and uniqueness constraints.
 
-The Entity-Relationship Diagram uses crow's foot notation to represent cardinality and participation constraints. Entities are represented as boxes with their attributes listed, while relationships are depicted as lines connecting the entities, annotated with symbols indicating the nature of the relationship (one-to-one, one-to-many, many-to-many). Redgate Data Modeler was used to generate the diagram#footnote[https://datamodeler.redgate-platform.com/] (formerly known as Vertabelo).
+The Entity-Relationship Diagram uses crow's foot notation@EverestCrowsFoot1976 to represent cardinality and participation constraints. Entities are represented as boxes with their attributes listed, while relationships are depicted as lines connecting the entities, annotated with symbols indicating the nature of the relationship (one-to-one, one-to-many, many-to-many). Redgate Data Modeler was used to generate the diagram#footnote[https://datamodeler.redgate-platform.com/] (formerly known as Vertabelo).
 
 *Diagram Scope*: For clarity and focus on the business domain, the ERD intentionally omits framework-level infrastructure tables (sessions, cache, job queues, password resets) and standard audit timestamp columns (`created_at`, `updated_at`) present on all entities. These system-level concerns are handled by the application framework and do not impact the logical domain model. The complete physical schema, including all system columns and infrastructure tables, is defined through database migrations detailed in the implementation chapter.
 
@@ -41,9 +41,9 @@ The menu structure employs a hierarchical categorization strategy. A Restaurant 
 *Normalization*: Menu items are not directly linked to the restaurant; they inherit this association transitively through their Food Type. This design strictly adheres to the Third Normal Form, eliminating update anomalies where a category's restaurant association might contradict its items'.
 
 ==== Images
-To support rich media while maintaining schema simplicity, the system utilizes a unified `images` table linked to restaurants via an explicit nullable foreign key (`restaurant_id`). Unlike polymorphic associations (which rely on string-based `model_type` columns and cannot enforce database-level referential integrity), explicit foreign keys allow the database to strictly enforce valid relationships. The foreign key uses `ON DELETE SET NULL` behavior, preserving image records even when their associated restaurant is deleted, which allows for potential orphan cleanup or administrative review.
+To support rich media while maintaining schema simplicity, the system utilizes a unified `images` table linked to restaurants via an explicit nullable foreign key (`restaurant_id`). Unlike polymorphic associations (which rely on string-based `model_type` columns and cannot enforce database-level referential integrity), explicit foreign keys allow the database to strictly enforce valid relationships. The foreign key uses `ON DELETE SET NULL` behavior, preserving image records even when the associated restaurant is deleted, which allows for potential orphan cleanup or administrative review.
 
-A boolean flag (`is_primary_for_restaurant`) designates the main display image for restaurant lists and thumbnails. Menu items reference images through a foreign key (`image_id`) on the `menu_items` table, allowing each menu item to select one of the restaurant's existing images as its primary representation. This design keeps image ownership at the restaurant level while allowing menu items to reuse the same image pool without duplication.
+A boolean flag (`is_primary_for_restaurant`) designates the main display image for restaurant listings and thumbnails. Menu items reference the images table via their own `image_id` foreign key, allowing each menu item to optionally associate with a specific image as its visual representation. This design treats images as a restaurant-level resource pool: restaurants own images through the `images.restaurant_id` relationship, while menu items select from available images through the `menu_items.image_id` reference.
 
 The table stores only the resource path (e.g., `restaurants/1/cover.jpg`), delegating the actual binary storage to an external object storage service to keep the database lightweight and performant.
 
@@ -63,7 +63,37 @@ Order status is tracked using a dedicated *Order Statuses* dictionary table, ens
 Notably, the user's cart is not modeled as a separate table but as an order record with the "In Cart" status. This design choice simplifies the schema by avoiding duplication and reduces write operations when transitioning from cart to placed order, as it merely updates the status and sets the time_placed timestamp.
 
 === Spatial Data Representation
-The database schema handles geospatial data using standard double-precision floating-point columns for `latitude` and `longitude` within the `restaurants` table, rather than specialized geometric data types. This design prioritizes portability and eliminates dependencies on specific GIS database extensions. Usage of standard primitive types allows for the efficient execution of bounding-box queries directly through standard B-tree indices on the coordinate columns, ensuring that spatial lookups remain performant without introducing the complexity of spatial extension overhead.
+The database schema handles geospatial data using standard double-precision floating-point columns for `latitude` and `longitude` within the `restaurants` table, rather than specialized geometric data types. This design prioritizes portability and eliminates dependencies on specific GIS database extensions. Usage of standard primitive types allows for the efficient execution of bounding-box queries directly through standard B-tree indices @BayerMcCreightBTree1972 on the coordinate columns, ensuring that spatial lookups remain performant without introducing the complexity of spatial extension overhead.
+
+=== System Columns and Infrastructure Tables
+
+==== Audit Timestamps
+All domain entities include standard audit timestamp columns (`created_at` and `updated_at`) that automatically track record creation and modification times. These system-level columns are managed transparently by the framework's ORM layer and require no explicit application logic. While omitted from the logical ERD for visual clarity, these timestamps are physically present in all tables and serve multiple purposes: supporting temporal queries, providing audit trails for regulatory compliance, and enabling cache invalidation strategies. The timestamp columns are nullable to accommodate edge cases in data migration scenarios.
+
+==== Framework Infrastructure Tables
+The physical database schema includes several framework-managed tables that support application infrastructure but do not represent business domain entities. These tables are intentionally excluded from the ERD as they constitute implementation details rather than logical design decisions:
+
+- *Sessions*: Server-side session storage for stateful authentication
+- *Cache and Cache Locks*: Application-level caching layer with distributed locking support
+- *Jobs, Job Batches, and Failed Jobs*: Asynchronous task queue management for background processing (email notifications, order status updates, image processing)
+- *Password Reset Tokens*: Temporary token storage for secure password recovery flows
+
+These infrastructure tables are provisioned through framework migrations and operate independently of the business domain model. Their schema and behavior are dictated by framework conventions, ensuring compatibility with the broader ecosystem of libraries and tools that integrate with the framework's job queue, cache, and authentication systems.
+
+=== System Columns and Infrastructure Tables
+
+==== Audit Timestamps
+All domain entities include standard audit timestamp columns (`created_at` and `updated_at`) that automatically track record creation and modification times. These system-level columns are managed transparently by the framework's ORM layer and require no explicit application logic. While omitted from the logical ERD for visual clarity, these timestamps are physically present in all tables and serve multiple purposes: supporting temporal queries, providing audit trails for regulatory compliance, and enabling cache invalidation strategies. The timestamp columns are nullable to accommodate edge cases in data migration scenarios.
+
+==== Framework Infrastructure Tables
+The physical database schema includes several framework-managed tables that support application infrastructure but do not represent business domain entities. These tables are intentionally excluded from the ERD as they constitute implementation details rather than logical design decisions:
+
+- *Sessions*: Server-side session storage for stateful authentication
+- *Cache and Cache Locks*: Application-level caching layer with distributed locking support
+- *Jobs, Job Batches, and Failed Jobs*: Asynchronous task queue management for background processing (email notifications, order status updates, image processing)
+- *Password Reset Tokens*: Temporary token storage for secure password recovery flows
+
+These infrastructure tables are provisioned through framework migrations and operate independently of the business domain model. Their schema and behavior are dictated by framework conventions, ensuring compatibility with the broader ecosystem of libraries and tools that integrate with the framework's job queue, cache, and authentication systems.
 
 === System Columns and Infrastructure Tables
 

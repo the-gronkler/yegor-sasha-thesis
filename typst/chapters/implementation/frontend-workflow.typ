@@ -14,7 +14,7 @@ For example, changing the `Button` component's styling requires rebuilding all p
 
 The Vite development server provides hot module replacement (HMR) that updates changed modules in the running application without full page reload. This preserves application state during development, enabling rapid style iteration and component refinement.
 
-The HMR configuration in `vite.config.js` recognizes React Fast Refresh, which preserves component state across edits to component bodies while resetting state when props or hooks change.
+The HMR configuration in `vite.config.js` recognizes React Fast Refresh @ReactFastRefresh, which preserves component state across edits to component bodies while resetting state when props or hooks change.
 
 #code_example[
   Vite configuration enables React Fast Refresh for development builds.
@@ -63,7 +63,7 @@ The bundler analyzes the import graph and creates separate chunks for each Inert
 
 The production build applies several optimizations to minimize JavaScript payload:
 
-- _Tree shaking_: Unused exports from imported modules are eliminated during bundling
+- _Tree shaking_: Unused exports from imported modules are eliminated during bundling @ViteDocs
 - _Minification_: JavaScript code is compressed, removing whitespace and shortening identifiers
 - _Compression_: Vite generates pre-compressed gzip and Brotli variants for static assets
 - _Asset hashing_: File names include content hashes enabling aggressive caching with cache invalidation on updates

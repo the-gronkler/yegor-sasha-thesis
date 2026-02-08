@@ -1,4 +1,4 @@
-#import "../../config.typ": source_code_link, code_example
+#import "../../config.typ": code_example, source_code_link
 
 == Map-Based Restaurant Discovery Implementation <map-implementation>
 
@@ -43,26 +43,26 @@ The dataset for the map is produced by the `index` action in #source_code_link("
 The endpoint authorizes access through Laravel policies and validates all optional query parameters. The validation is explicitly permissive regarding optionality: all parameters may be absent (defaulting to Warsaw + default radius), and `radius` may be `0` (interpreted as “no range limit”).
 
 #code_example[
-The controller authorizes the request and validates geospatial inputs before building any database query.
+  The controller authorizes the request and validates geospatial inputs before building any database query.
 
-```php
-  <?php
-// app/Http/Controllers/Customer/MapController.php
-public function index(Request $request): Response
-{
-    $this->authorize('viewAny', Restaurant::class);
+  ```php
+    <?php
+  // app/Http/Controllers/Customer/MapController.php
+  public function index(Request $request): Response
+  {
+      $this->authorize('viewAny', Restaurant::class);
 
-    $validated = $request->validate([
-        'lat' => 'nullable|numeric|between:-90,90',
-        'lng' => 'nullable|numeric|between:-180,180',
-        'search_lat' => 'nullable|numeric|between:-90,90',
-        'search_lng' => 'nullable|numeric|between:-180,180',
-        'radius' => 'nullable|numeric|min:0|max:'.GeoService::MAX_RADIUS_KM,
-    ]);
+      $validated = $request->validate([
+          'lat' => 'nullable|numeric|between:-90,90',
+          'lng' => 'nullable|numeric|between:-180,180',
+          'search_lat' => 'nullable|numeric|between:-90,90',
+          'search_lng' => 'nullable|numeric|between:-180,180',
+          'radius' => 'nullable|numeric|min:0|max:'.GeoService::MAX_RADIUS_KM,
+      ]);
 
-    // ...
-}
-```
+      // ...
+  }
+  ```
 ]
 
 Two details are important for correctness:
@@ -85,37 +85,37 @@ The controller normalizes coordinates into a single center point, with the follo
 A critical decision is that only real user location is persisted. Search center coordinates are deliberately ephemeral.
 
 #code_example[
-The normalization method implements the priority cascade and persists only user location (`lat/lng`) to session.
+  The normalization method implements the priority cascade and persists only user location (`lat/lng`) to session.
 
-```php
-  <?php
-// app/Http/Controllers/Customer/MapController.php
-private function normalizeCenterCoordinates(Request $request, array $validated): array
-{
-    if (isset($validated['search_lat'], $validated['search_lng'])) {
-        return [
-            'lat' => (float) $validated['search_lat'],
-            'lng' => (float) $validated['search_lng'],
-        ];
-    }
+  ```php
+    <?php
+  // app/Http/Controllers/Customer/MapController.php
+  private function normalizeCenterCoordinates(Request $request, array $validated): array
+  {
+      if (isset($validated['search_lat'], $validated['search_lng'])) {
+          return [
+              'lat' => (float) $validated['search_lat'],
+              'lng' => (float) $validated['search_lng'],
+          ];
+      }
 
-    if (isset($validated['lat'], $validated['lng'])) {
-        $lat = (float) $validated['lat'];
-        $lng = (float) $validated['lng'];
+      if (isset($validated['lat'], $validated['lng'])) {
+          $lat = (float) $validated['lat'];
+          $lng = (float) $validated['lng'];
 
-        $this->geoService->storeGeoInSession($request, $lat, $lng);
+          $this->geoService->storeGeoInSession($request, $lat, $lng);
 
-        return ['lat' => $lat, 'lng' => $lng];
-    }
+          return ['lat' => $lat, 'lng' => $lng];
+      }
 
-    $sessionGeo = $this->geoService->getValidGeoFromSession($request);
-    if ($sessionGeo) {
-        return $sessionGeo;
-    }
+      $sessionGeo = $this->geoService->getValidGeoFromSession($request);
+      if ($sessionGeo) {
+          return $sessionGeo;
+      }
 
-    return ['lat' => 52.2297, 'lng' => 21.0122];
-}
-```
+      return ['lat' => 52.2297, 'lng' => 21.0122];
+  }
+  ```
 ]
 
 This design allows exploration without losing context: users can browse multiple areas with “Search here” while the app still remembers their actual location for future visits.
@@ -125,29 +125,29 @@ This design allows exploration without losing context: users can browse multiple
 The session persistence architecture described in @map-arch-session-persistence is implemented by #source_code_link("app/Services/GeoService.php"). The service stores coordinates under `geo.last` with a 24-hour expiry timestamp.
 
 #code_example[
-GeoService persists `geo.last` with a timestamp and rejects expired session values.
+  GeoService persists `geo.last` with a timestamp and rejects expired session values.
 
-```php
-  <?php
-// app/Services/GeoService.php
-public function getValidGeoFromSession(Request $request): ?array
-{
-    $geo = $request->session()->get('geo.last');
+  ```php
+    <?php
+  // app/Services/GeoService.php
+  public function getValidGeoFromSession(Request $request): ?array
+  {
+      $geo = $request->session()->get('geo.last');
 
-    if (! $geo || ! isset($geo['lat'], $geo['lng'])) {
-        return null;
-    }
+      if (! $geo || ! isset($geo['lat'], $geo['lng'])) {
+          return null;
+      }
 
-    if (isset($geo['stored_at']) && (time() - (int) $geo['stored_at']) > self::SESSION_EXPIRY_SECONDS) {
-        return null;
-    }
+      if (isset($geo['stored_at']) && (time() - (int) $geo['stored_at']) > self::SESSION_EXPIRY_SECONDS) {
+          return null;
+      }
 
-    return [
-        'lat' => (float) $geo['lat'],
-        'lng' => (float) $geo['lng'],
-    ];
-}
-```
+      return [
+          'lat' => (float) $geo['lat'],
+          'lng' => (float) $geo['lng'],
+      ];
+  }
+  ```
 ]
 
 The service also defines critical constants used throughout the geospatial logic:
@@ -165,60 +165,60 @@ These constants centralize magic numbers and provide a single source of truth fo
 Phase B implements the proximity-first selection described in @map-arch-three-phase. The output is intentionally lightweight (IDs only) to avoid loading models and relations before the candidate set is finalized.
 
 #code_example[
-Phase B returns only IDs, enforcing the radius as a hard SQL constraint via HAVING.
+  Phase B returns only IDs, enforcing the radius as a hard SQL constraint via HAVING.
 
-```php
-  <?php
-// app/Http/Controllers/Customer/MapController.php
-private function selectNearestRestaurantIds(float $centerLat, float $centerLng, float $radius): \Illuminate\Support\Collection
-{
-    $query = \DB::table('restaurants')
-        ->select('id')
-        ->whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->selectRaw(
-            '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
-            [$centerLng, $centerLat]
-        );
+  ```php
+    <?php
+  // app/Http/Controllers/Customer/MapController.php
+  private function selectNearestRestaurantIds(float $centerLat, float $centerLng, float $radius): \Illuminate\Support\Collection
+  {
+      $query = \DB::table('restaurants')
+          ->select('id')
+          ->whereNotNull('latitude')
+          ->whereNotNull('longitude')
+          ->selectRaw(
+              '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
+              [$centerLng, $centerLat]
+          );
 
-    if ($radius > 0) {
-        $bounds = $this->geoService->getBoundingBox($centerLat, $centerLng, $radius);
+      if ($radius > 0) {
+          $bounds = $this->geoService->getBoundingBox($centerLat, $centerLng, $radius);
 
-        $query->whereBetween('latitude', [$bounds['latMin'], $bounds['latMax']])
-            ->whereBetween('longitude', [$bounds['lngMin'], $bounds['lngMax']])
-            ->havingRaw('distance_km <= ?', [$radius]);
-    }
+          $query->whereBetween('latitude', [$bounds['latMin'], $bounds['latMax']])
+              ->whereBetween('longitude', [$bounds['lngMin'], $bounds['lngMax']])
+              ->havingRaw('distance_km <= ?', [$radius]);
+      }
 
-    return $query->orderBy('distance_km', 'asc')
-        ->limit(self::MAX_RESTAURANTS_LIMIT)
-        ->pluck('id');
-}
-```
+      return $query->orderBy('distance_km', 'asc')
+          ->limit(self::MAX_RESTAURANTS_LIMIT)
+          ->pluck('id');
+  }
+  ```
 ]
 
 The bounding box prefilter pattern described in @map-arch-bounding-box is implemented using indexed range checks (`whereBetween`).
 
 #code_example[
-GeoService computes an approximate bounding box and clamps latitude to avoid instability near the poles.
+  GeoService computes an approximate bounding box and clamps latitude to avoid instability near the poles.
 
-```php
-  <?php
-// app/Services/GeoService.php
-public function getBoundingBox(float $lat, float $lng, float $radiusKm): array
-{
-    $clampedLat = max(min($lat, self::MAX_LATITUDE), self::MIN_LATITUDE);
+  ```php
+    <?php
+  // app/Services/GeoService.php
+  public function getBoundingBox(float $lat, float $lng, float $radiusKm): array
+  {
+      $clampedLat = max(min($lat, self::MAX_LATITUDE), self::MIN_LATITUDE);
 
-    $latDelta = $radiusKm / self::KM_PER_DEGREE;
-    $lngDelta = $radiusKm / (self::KM_PER_DEGREE * cos(deg2rad($clampedLat)));
+      $latDelta = $radiusKm / self::KM_PER_DEGREE;
+      $lngDelta = $radiusKm / (self::KM_PER_DEGREE * cos(deg2rad($clampedLat)));
 
-    return [
-        'latMin' => $lat - $latDelta,
-        'latMax' => $lat + $latDelta,
-        'lngMin' => $lng - $lngDelta,
-        'lngMax' => $lng + $lngDelta,
-    ];
-}
-```
+      return [
+          'latMin' => $lat - $latDelta,
+          'latMax' => $lat + $latDelta,
+          'lngMin' => $lng - $lngDelta,
+          'lngMax' => $lng + $lngDelta,
+      ];
+  }
+  ```
 ]
 
 The `HAVING` clause enforces the hard radius guarantee (as specified in @map-arch-guarantees): only rows satisfying `distance_km <= radius` remain candidates, and only then is the limit applied. When `radius = 0`, the `HAVING` clause is omitted and the 250 nearest restaurants globally are returned.
@@ -232,68 +232,68 @@ The controller deliberately avoids computing any score while converting the sele
 Phase C implements the single-pass SQL computation strategy described in @map-arch-query-optimization. Full restaurant models are hydrated and a composite quality score is computed exactly once in a derived table using three weighted signals: rating (0–50 points), review count (0–30 points, logarithmic scale), and proximity (0–20 points, linear decay).
 
 #code_example[
-Phase C builds derived tables: review counts are aggregated once, distance is computed once, and composite score is calculated once.
+  Phase C builds derived tables: review counts are aggregated once, distance is computed once, and composite score is calculated once.
 
-```php
-  <?php
-// app/Http/Controllers/Customer/MapController.php
-$reviewCounts = \DB::table('reviews')
-    ->select('restaurant_id')
-    ->selectRaw('COUNT(*) as review_count')
-    ->whereIn('restaurant_id', $selectedIds)
-    ->groupBy('restaurant_id');
+  ```php
+    <?php
+  // app/Http/Controllers/Customer/MapController.php
+  $reviewCounts = \DB::table('reviews')
+      ->select('restaurant_id')
+      ->selectRaw('COUNT(*) as review_count')
+      ->whereIn('restaurant_id', $selectedIds)
+      ->groupBy('restaurant_id');
 
-$restaurantsWithDistance = \DB::table('restaurants')
-    ->select(['id', 'latitude', 'longitude', 'rating'])
-    ->selectRaw(
-        '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
-        [$centerLng, $centerLat]
-    )
-    ->whereIn('id', $selectedIds);
+  $restaurantsWithDistance = \DB::table('restaurants')
+      ->select(['id', 'latitude', 'longitude', 'rating'])
+      ->selectRaw(
+          '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
+          [$centerLng, $centerLat]
+      )
+      ->whereIn('id', $selectedIds);
 
-$scoredRestaurants = \DB::query()
-    ->fromSub($restaurantsWithDistance, 'rwd')
-    ->leftJoinSub($reviewCounts, 'rc', 'rwd.id', '=', 'rc.restaurant_id')
-    ->select(['rwd.id', 'rwd.distance_km'])
-    ->selectRaw('COALESCE(rc.review_count, 0) as review_count')
-    ->selectRaw('(COALESCE(rwd.rating, 0) / 5) * 50 AS rating_score')
-    ->selectRaw('LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) AS review_score')
-    ->selectRaw('GREATEST(0, 20 * (1 - (rwd.distance_km / 20))) AS distance_score')
-    ->selectRaw(
-        '((COALESCE(rwd.rating, 0) / 5) * 50 + '.
-        'LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) + '.
-        'GREATEST(0, 20 * (1 - (rwd.distance_km / 20)))) AS composite_score'
-    );
-```
+  $scoredRestaurants = \DB::query()
+      ->fromSub($restaurantsWithDistance, 'rwd')
+      ->leftJoinSub($reviewCounts, 'rc', 'rwd.id', '=', 'rc.restaurant_id')
+      ->select(['rwd.id', 'rwd.distance_km'])
+      ->selectRaw('COALESCE(rc.review_count, 0) as review_count')
+      ->selectRaw('(COALESCE(rwd.rating, 0) / 5) * 50 AS rating_score')
+      ->selectRaw('LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) AS review_score')
+      ->selectRaw('GREATEST(0, 20 * (1 - (rwd.distance_km / 20))) AS distance_score')
+      ->selectRaw(
+          '((COALESCE(rwd.rating, 0) / 5) * 50 + '.
+          'LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) + '.
+          'GREATEST(0, 20 * (1 - (rwd.distance_km / 20)))) AS composite_score'
+      );
+  ```
 ]
 
 The scored subquery is joined back to `restaurants` using `joinSub`, preserving Eloquent hydration while keeping ordering in SQL. This avoids the complexity and risks of manual `FIELD()` ordering and eliminates PHP post-processing that could unintentionally change ordering semantics.
 
 #code_example[
-The final query joins scores for Eloquent hydration, eager-loads only required relations, and orders by score then distance.
+  The final query joins scores for Eloquent hydration, eager-loads only required relations, and orders by score then distance.
 
-```php
-  <?php
-// app/Http/Controllers/Customer/MapController.php
-$query = Restaurant::query()
-    ->joinSub($scoredRestaurants, 'scored', 'restaurants.id', '=', 'scored.id')
-    ->with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
-    ->select([
-        'restaurants.id',
-        'restaurants.name',
-        'restaurants.address',
-        'restaurants.latitude',
-        'restaurants.longitude',
-        'restaurants.rating',
-        'restaurants.description',
-        'restaurants.opening_hours',
-        'scored.distance_km as distance',
-        'scored.review_count as reviews_count',
-        'scored.composite_score',
-    ])
-    ->orderByDesc('scored.composite_score')
-    ->orderBy('scored.distance_km', 'asc');
-```
+  ```php
+    <?php
+  // app/Http/Controllers/Customer/MapController.php
+  $query = Restaurant::query()
+      ->joinSub($scoredRestaurants, 'scored', 'restaurants.id', '=', 'scored.id')
+      ->with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
+      ->select([
+          'restaurants.id',
+          'restaurants.name',
+          'restaurants.address',
+          'restaurants.latitude',
+          'restaurants.longitude',
+          'restaurants.rating',
+          'restaurants.description',
+          'restaurants.opening_hours',
+          'scored.distance_km as distance',
+          'scored.review_count as reviews_count',
+          'scored.composite_score',
+      ])
+      ->orderByDesc('scored.composite_score')
+      ->orderBy('scored.distance_km', 'asc');
+  ```
 ]
 
 Favorite detection is included conditionally for authenticated users via a `LEFT JOIN`, producing an `is_favorited` flag without additional queries. The controller maps each model into a compact JSON-friendly structure required by the map UI (distance, reviews count, score, and a reduced images array). Distance formatting is centralized in `GeoService::formatDistance`, which keeps presentation rounding out of the controller and ensures consistent formatting anywhere distance is displayed.
@@ -311,24 +311,24 @@ The three-phase architecture relies on specific database indexes for optimal per
 When Phase B returns an empty collection (no restaurants within radius or no restaurants at all), the controller short-circuits Phase C entirely and returns an empty dataset immediately. This optimization avoids constructing complex derived table queries when the result is known to be empty.
 
 #code_example[
-The controller terminates early when no candidates are found, avoiding unnecessary query construction.
+  The controller terminates early when no candidates are found, avoiding unnecessary query construction.
 
-```php
-  <?php
-// app/Http/Controllers/Customer/MapController.php
-$selectedIds = $this->selectNearestRestaurantIds($centerLat, $centerLng, $radius);
+  ```php
+    <?php
+  // app/Http/Controllers/Customer/MapController.php
+  $selectedIds = $this->selectNearestRestaurantIds($centerLat, $centerLng, $radius);
 
-if ($selectedIds->isEmpty()) {
-    return Inertia::render('Customer/Map/Index', [
-        'restaurants' => [],
-        'filters' => [
-            'lat' => $validated['lat'] ?? null,
-            'lng' => $validated['lng'] ?? null,
-            'radius' => $radius,
-        ],
-    ]);
-}
-```
+  if ($selectedIds->isEmpty()) {
+      return Inertia::render('Customer/Map/Index', [
+          'restaurants' => [],
+          'filters' => [
+              'lat' => $validated['lat'] ?? null,
+              'lng' => $validated['lng'] ?? null,
+              'radius' => $radius,
+          ],
+      ]);
+  }
+  ```
 ]
 
 This pattern ensures that edge cases (user in a rural area with large radius, or very restrictive filters) remain performant.
@@ -338,20 +338,20 @@ This pattern ensures that edge cases (user in a rural area with large radius, or
 The `GeoService` provides a centralized `formatDistance` method that normalizes distance values to a consistent precision. This abstraction ensures consistent distance handling across all features (map, restaurant cards, search results) without duplicating rounding logic.
 
 #code_example[
-Distance formatting is centralized in GeoService to ensure consistency across the application.
+  Distance formatting is centralized in GeoService to ensure consistency across the application.
 
-```php
-  <?php
-// app/Services/GeoService.php
-public function formatDistance(float|string|null $distance): ?float
-{
-    if ($distance === null) {
-        return null;
-    }
+  ```php
+    <?php
+  // app/Services/GeoService.php
+  public function formatDistance(float|string|null $distance): ?float
+  {
+      if ($distance === null) {
+          return null;
+      }
 
-    return round((float) $distance, 2);
-}
-```
+      return round((float) $distance, 2);
+  }
+  ```
 ]
 
 The controller also implements a payload optimization strategy to minimize the data sent to the frontend. Since the map UI displays only restaurant cards with thumbnails, ratings, and distances, the full menu hierarchy is unnecessary at this stage. The controller therefore eager-loads only the `images` relation, selecting specific columns (`id`, `restaurant_id`, `image`, `is_primary_for_restaurant`), while deliberately excluding the `foodTypes.menuItems` hierarchy that would otherwise include every food type, menu item, and associated metadata. This reduces response size significantly compared to loading the complete restaurant model with nested relations. Detailed menu data is instead loaded on-demand when users navigate to an individual restaurant page.
@@ -369,44 +369,44 @@ The frontend implements the component hierarchy and separation of concerns descr
 The page component wires the hook outputs into the UI, without embedding complex logic in JSX. This keeps the render tree readable and makes behavior changes local to the hook.
 
 #code_example[
-`MapIndex` composes the page layout and passes state/handlers to the overlay, map, and bottom sheet.
+  `MapIndex` composes the page layout and passes state/handlers to the overlay, map, and bottom sheet.
 
-```tsx
-// resources/js/Pages/Customer/Map/Index.tsx
-<MapOverlay
-  query={query}
-  onQueryChange={setQuery}
-  hasLocation={filters.lat !== null && filters.lng !== null}
-  currentRadius={filters.radius ?? 50}
-  onRadiusChange={(r) => {
-    if (filters.lat !== null && filters.lng !== null) {
-      reloadMap(filters.lat, filters.lng, r);
-    }
-  }}
-  isGeolocating={isGeolocating}
-  onTriggerGeolocate={triggerGeolocate}
-  isPickingLocation={isPickingLocation}
-  setIsPickingLocation={setIsPickingLocation}
-  onManualLocation={handleMapGeolocate}
-  onError={setLocationError}
-  showSearchInArea={showSearchInArea}
-  onSearchInArea={searchInArea}
-  mapCenter={viewState}
-/>
+  ```tsx
+  // resources/js/Pages/Customer/Map/Index.tsx
+  <MapOverlay
+    query={query}
+    onQueryChange={setQuery}
+    hasLocation={filters.lat !== null && filters.lng !== null}
+    currentRadius={filters.radius ?? 50}
+    onRadiusChange={(r) => {
+      if (filters.lat !== null && filters.lng !== null) {
+        reloadMap(filters.lat, filters.lng, r);
+      }
+    }}
+    isGeolocating={isGeolocating}
+    onTriggerGeolocate={triggerGeolocate}
+    isPickingLocation={isPickingLocation}
+    setIsPickingLocation={setIsPickingLocation}
+    onManualLocation={handleMapGeolocate}
+    onError={setLocationError}
+    showSearchInArea={showSearchInArea}
+    onSearchInArea={searchInArea}
+    mapCenter={viewState}
+  />
 
-<Map
-  viewState={viewState}
-  onMove={setViewState}
-  markers={mapMarkers}
-  mapboxAccessToken={mapboxPublicKey || ''}
-/>
+  <Map
+    viewState={viewState}
+    onMove={setViewState}
+    markers={mapMarkers}
+    mapboxAccessToken={mapboxPublicKey || ''}
+  />
 
-<BottomSheet
-  restaurants={filteredRestaurants}
-  selectedRestaurantId={selectedRestaurantId}
-  onSelectRestaurant={selectRestaurant}
-/>
-```
+  <BottomSheet
+    restaurants={filteredRestaurants}
+    selectedRestaurantId={selectedRestaurantId}
+    onSelectRestaurant={selectRestaurant}
+  />
+  ```
 ]
 
 ==== MapLayout: preventing body scroll conflicts
@@ -414,23 +414,23 @@ The page component wires the hook outputs into the UI, without embedding complex
 A full-screen map creates a conflict with browser scroll behavior. When users interact with the map (panning, zooming), touch and scroll events can accidentally trigger page scrolling, creating a jarring experience. The `MapLayout` component solves this by toggling CSS classes on the document root elements.
 
 #code_example[
-MapLayout disables body scrolling on mount and re-enables it on unmount using a cleanup effect.
+  MapLayout disables body scrolling on mount and re-enables it on unmount using a cleanup effect.
 
-```tsx
-// resources/js/Layouts/MapLayout.tsx
-useEffect(() => {
-  const html = document.documentElement;
-  const body = document.body;
+  ```tsx
+  // resources/js/Layouts/MapLayout.tsx
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
 
-  html.classList.add('is-map-active');
-  body.classList.add('is-map-active');
+    html.classList.add('is-map-active');
+    body.classList.add('is-map-active');
 
-  return () => {
-    html.classList.remove('is-map-active');
-    body.classList.remove('is-map-active');
-  };
-}, []);
-```
+    return () => {
+      html.classList.remove('is-map-active');
+      body.classList.remove('is-map-active');
+    };
+  }, []);
+  ```
 ]
 
 The corresponding CSS rules set `overflow: hidden` on these elements when the class is present, preventing background scrolling without affecting the map's internal pan/zoom interactions or the bottom sheet's scrollable content. This approach is more reliable than inline style manipulation and works consistently across mobile and desktop browsers.
@@ -447,23 +447,23 @@ The `useMapPage` hook manages:
 Following the hybrid client-server architecture described in @map-arch-data-flow, the hook requests only the props that must change, while preserving UI state and scroll position.
 
 #code_example[
-Reload operations fetch only `restaurants` and `filters`, preserving UI state and scroll to keep interactions responsive.
+  Reload operations fetch only `restaurants` and `filters`, preserving UI state and scroll to keep interactions responsive.
 
-```ts
-// resources/js/Hooks/useMapPage.ts
-const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
-  router.get(
-    route('map.index'),
-    { lat, lng, radius },
-    {
-      replace: true,
-      preserveState: true,
-      preserveScroll: true,
-      only: ['restaurants', 'filters'],
-    },
-  );
-}, []);
-```
+  ```ts
+  // resources/js/Hooks/useMapPage.ts
+  const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
+    router.get(
+      route('map.index'),
+      { lat, lng, radius },
+      {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        only: ['restaurants', 'filters'],
+      },
+    );
+  }, []);
+  ```
 ]
 
 ==== "Search here": exploration without losing user context
@@ -471,32 +471,32 @@ const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
 The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available.
 
 #code_example[
-The “Search here” navigation updates only the search center and preserves the user location context.
+  The “Search here” navigation updates only the search center and preserves the user location context.
 
-```ts
-// resources/js/Hooks/useMapPage.ts
-const searchInArea = useCallback(() => {
-  const { latitude, longitude } = viewState;
-  setShowSearchInArea(false);
+  ```ts
+  // resources/js/Hooks/useMapPage.ts
+  const searchInArea = useCallback(() => {
+    const { latitude, longitude } = viewState;
+    setShowSearchInArea(false);
 
-  router.get(
-    route('map.index'),
-    {
-      search_lat: latitude,
-      search_lng: longitude,
-      ...(filters.lat !== null && filters.lng !== null
-        ? { lat: filters.lat, lng: filters.lng }
-        : {}),
-    },
-    {
-      replace: true,
-      preserveState: true,
-      preserveScroll: true,
-      only: ['restaurants', 'filters'],
-    },
-  );
-}, [viewState, filters]);
-```
+    router.get(
+      route('map.index'),
+      {
+        search_lat: latitude,
+        search_lng: longitude,
+        ...(filters.lat !== null && filters.lng !== null
+          ? { lat: filters.lat, lng: filters.lng }
+          : {}),
+      },
+      {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        only: ['restaurants', 'filters'],
+      },
+    );
+  }, [viewState, filters]);
+  ```
 ]
 
 ==== Geolocation integration: trigger mechanism and error handling
@@ -504,50 +504,50 @@ const searchInArea = useCallback(() => {
 The geolocation integration pattern described in @map-arch-geolocation-pattern is implemented using Mapbox's `GeolocateControl`. The control's UI is hidden (`showGeolocateControlUi={false}`) because the overlay provides its own "My Location" button, with a callback registration pattern bridging the two.
 
 #code_example[
-The page hook triggers geolocation through the registered callback and provides defensive error handling.
+  The page hook triggers geolocation through the registered callback and provides defensive error handling.
 
-```ts
-// resources/js/Hooks/useMapPage.ts
-const triggerGeolocate = useCallback(() => {
-  const ok = geolocateTriggerRef.current?.();
-  if (!ok) {
-    setLocationError(
-      'Geolocation control not ready yet. Refresh and try again.',
-    );
-    return;
-  }
-  setIsGeolocating(true);
-}, []);
-```
+  ```ts
+  // resources/js/Hooks/useMapPage.ts
+  const triggerGeolocate = useCallback(() => {
+    const ok = geolocateTriggerRef.current?.();
+    if (!ok) {
+      setLocationError(
+        'Geolocation control not ready yet. Refresh and try again.',
+      );
+      return;
+    }
+    setIsGeolocating(true);
+  }, []);
+  ```
 ]
 
 The geolocation hook inside the Map component handles both success and error cases. On success, it calls `onGeolocate` with the coordinates. On error, it extracts error codes and maps them to user-friendly messages.
 
 #code_example[
-Error extraction maps browser geolocation error codes to actionable user messages.
+  Error extraction maps browser geolocation error codes to actionable user messages.
 
-```ts
-// resources/js/Hooks/useMapGeolocation.ts (inside Map component)
-const handleGeolocateError = useCallback((evt: unknown) => {
-  const { code, message } = extractGeolocateError(evt);
+  ```ts
+  // resources/js/Hooks/useMapGeolocation.ts (inside Map component)
+  const handleGeolocateError = useCallback((evt: unknown) => {
+    const { code, message } = extractGeolocateError(evt);
 
-  let errorMessage = message || 'Unable to get your location. Please check browser/OS location permissions.';
+    let errorMessage = message || 'Unable to get your location. Please check browser/OS location permissions.';
 
-  switch (code) {
-    case 1: // PERMISSION_DENIED
-      errorMessage = 'Location access denied. Allow location permissions to see nearby restaurants.';
-      break;
-    case 2: // POSITION_UNAVAILABLE
-      errorMessage = 'Location information unavailable. Check OS location services or try again.';
-      break;
-    case 3: // TIMEOUT
-      errorMessage = 'Location request timed out. Try again or disable high accuracy.';
-      break;
-  }
+    switch (code) {
+      case 1: // PERMISSION_DENIED
+        errorMessage = 'Location access denied. Allow location permissions to see nearby restaurants.';
+        break;
+      case 2: // POSITION_UNAVAILABLE
+        errorMessage = 'Location information unavailable. Check OS location services or try again.';
+        break;
+      case 3: // TIMEOUT
+        errorMessage = 'Location request timed out. Try again or disable high accuracy.';
+        break;
+    }
 
-  onGeolocateError?.(errorMessage);
-}, [onGeolocateError]);
-```
+    onGeolocateError?.(errorMessage);
+  }, [onGeolocateError]);
+  ```
 ]
 
 This defensive error handling ensures users receive clear, actionable guidance when geolocation fails, rather than generic browser error messages.
@@ -575,60 +575,60 @@ The click handler is intentionally multi-modal:
   - empty clicks clear selection.
 
 #code_example[
-The click handler switches behavior based on location-picking mode, while preserving normal clustering/selection semantics.
+  The click handler switches behavior based on location-picking mode, while preserving normal clustering/selection semantics.
 
-```tsx
-// resources/js/Components/Shared/Map.tsx
-const handleMapClick = React.useCallback(
-  (event: MapMouseEvent) => {
-    if (isPickingLocation) {
-      const { lng, lat } = event.lngLat;
-      onPickLocation?.(lat, lng);
-      return;
-    }
-
-    const map = mapRef.current?.getMap();
-    if (!map) return;
-
-    const features = map.queryRenderedFeatures(event.point, {
-      layers: ['clusters', 'unclustered-point'],
-    });
-
-    if (features.length > 0) {
-      const feature = features[0];
-
-      if (feature.layer?.id === 'clusters') {
-        // Zoom into cluster (expansion zoom)
-      } else if (feature.layer?.id === 'unclustered-point') {
-        // Select restaurant point -> open popup
-        const properties = feature.properties;
-        if (!properties || feature.geometry.type !== 'Point') return;
-        onSelectRestaurant?.(properties.id);
+  ```tsx
+  // resources/js/Components/Shared/Map.tsx
+  const handleMapClick = React.useCallback(
+    (event: MapMouseEvent) => {
+      if (isPickingLocation) {
+        const { lng, lat } = event.lngLat;
+        onPickLocation?.(lat, lng);
+        return;
       }
-    } else {
-      onSelectRestaurant?.(null);
-    }
-  },
-  [isPickingLocation, onPickLocation, onSelectRestaurant],
-);
-```
+
+      const map = mapRef.current?.getMap();
+      if (!map) return;
+
+      const features = map.queryRenderedFeatures(event.point, {
+        layers: ['clusters', 'unclustered-point'],
+      });
+
+      if (features.length > 0) {
+        const feature = features[0];
+
+        if (feature.layer?.id === 'clusters') {
+          // Zoom into cluster (expansion zoom)
+        } else if (feature.layer?.id === 'unclustered-point') {
+          // Select restaurant point -> open popup
+          const properties = feature.properties;
+          if (!properties || feature.geometry.type !== 'Point') return;
+          onSelectRestaurant?.(properties.id);
+        }
+      } else {
+        onSelectRestaurant?.(null);
+      }
+    },
+    [isPickingLocation, onPickLocation, onSelectRestaurant],
+  );
+  ```
 ]
 
 When a restaurant is selected, the map animates the camera using `flyTo` and applies padding so the selected point remains visible above overlay UI and the bottom sheet. This is a small but important UX decision: it prevents the user from "losing" the selected restaurant under floating UI elements.
 
 #code_example[
-Camera animation applies UI-aware padding to keep the selected restaurant visible.
+  Camera animation applies UI-aware padding to keep the selected restaurant visible.
 
-```tsx
-// resources/js/Components/Shared/Map.tsx
-map.flyTo({
-  center: [selectedRestaurant.lng, selectedRestaurant.lat],
-  zoom: Math.max(viewState.zoom, 10),
-  duration: 900,
-  essential: true,
-  padding: { top: 240, bottom: 280, left: 40, right: 40 },
-});
-```
+  ```tsx
+  // resources/js/Components/Shared/Map.tsx
+  map.flyTo({
+    center: [selectedRestaurant.lng, selectedRestaurant.lat],
+    zoom: Math.max(viewState.zoom, 10),
+    duration: 900,
+    essential: true,
+    padding: { top: 240, bottom: 280, left: 40, right: 40 },
+  });
+  ```
 ]
 
 The padding values are carefully tuned to account for the overlay height at the top and the bottom sheet in its expanded state. The `essential: true` flag ensures the animation respects user preferences for reduced motion, improving accessibility.
@@ -636,25 +636,25 @@ The padding values are carefully tuned to account for the overlay height at the 
 The map also includes runtime API key validation to fail fast with a clear error message if the Mapbox key is missing or if a secret key (starting with `sk.`) is accidentally used in the browser.
 
 #code_example[
-Mapbox token validation prevents configuration errors and credential leaks.
+  Mapbox token validation prevents configuration errors and credential leaks.
 
-```tsx
-// resources/js/Components/Shared/Map.tsx
-if (!mapboxAccessToken) {
-  return <div className="map-error-message">Mapbox API key is not configured.</div>;
-}
+  ```tsx
+  // resources/js/Components/Shared/Map.tsx
+  if (!mapboxAccessToken) {
+    return <div className="map-error-message">Mapbox API key is not configured.</div>;
+  }
 
-if (!mapboxAccessToken.startsWith('pk.')) {
-  return <div className="map-error-message">Invalid Mapbox API key type.</div>;
-}
-```
+  if (!mapboxAccessToken.startsWith('pk.')) {
+    return <div className="map-error-message">Invalid Mapbox API key type.</div>;
+  }
+  ```
 ]
 
 This validation runs before initializing Mapbox, providing immediate feedback during development and preventing accidental exposure of secret tokens in production bundles.
 
 ==== Bottom sheet: pointer-driven drag, snapping, and selection sync
 
-The restaurant list is implemented as a draggable bottom sheet using Pointer Events API with pointer capture. This approach yields consistent behavior across mouse and touch devices, avoiding the complexities of managing separate touch and mouse event handlers.
+The restaurant list is implemented as a draggable bottom sheet using Pointer Events API @W3CPointerEvents with pointer capture. This approach yields consistent behavior across mouse and touch devices, avoiding the complexities of managing separate touch and mouse event handlers.
 
 The drag implementation uses three key techniques:
 
@@ -665,19 +665,19 @@ The drag implementation uses three key techniques:
 3. *Snap-on-release*: When the pointer is released, the sheet snaps to either collapsed or expanded state based on its current position. The snap threshold uses the midpoint between states to provide intuitive behavior.
 
 #code_example[
-The bottom sheet prevents click-toggle immediately after drag to avoid accidental actions.
+  The bottom sheet prevents click-toggle immediately after drag to avoid accidental actions.
 
-```tsx
-// resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
-const toggleSheet = () => {
-  if (dragMovedRef.current) {
-    dragMovedRef.current = false;
-    return;
-  }
+  ```tsx
+  // resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
+  const toggleSheet = () => {
+    if (dragMovedRef.current) {
+      dragMovedRef.current = false;
+      return;
+    }
 
-  setSheetHeight((h) => (h <= COLLAPSED_PX + 2 ? expandedPx : COLLAPSED_PX));
-};
-```
+    setSheetHeight((h) => (h <= COLLAPSED_PX + 2 ? expandedPx : COLLAPSED_PX));
+  };
+  ```
 ]
 
 Selection synchronization requires careful timing. When a restaurant becomes selected (either from map click or list click), the bottom sheet must scroll the corresponding card into view. However, if the sheet is transitioning between collapsed and expanded states, measuring card positions during the transition produces incorrect offsets.
@@ -685,28 +685,28 @@ Selection synchronization requires careful timing. When a restaurant becomes sel
 The solution waits for CSS transitions to complete before measuring and scrolling. It observes `transitionend` events with a timeout fallback (300ms) to handle cases where the transition is interrupted or already complete.
 
 #code_example[
-Auto-scroll waits for transitions to complete before measuring positions to avoid layout thrashing.
+  Auto-scroll waits for transitions to complete before measuring positions to avoid layout thrashing.
 
-```tsx
-// resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
-const waitForTransition = new Promise<void>((resolve) => {
-  let resolved = false;
+  ```tsx
+  // resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
+  const waitForTransition = new Promise<void>((resolve) => {
+    let resolved = false;
 
-  const onTransitionEnd = () => {
-    if (resolved) return;
-    resolved = true;
-    resolve();
-  };
+    const onTransitionEnd = () => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    };
 
-  sheetRef.current?.addEventListener('transitionend', onTransitionEnd, { once: true });
+    sheetRef.current?.addEventListener('transitionend', onTransitionEnd, { once: true });
 
-  setTimeout(() => {
-    if (resolved) return;
-    resolved = true;
-    resolve();
-  }, 500);
-});
-```
+    setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    }, 500);
+  });
+  ```
 ]
 
 After the transition completes, the implementation measures the card position, calculates the scroll offset needed to center it in the visible area, clamps the result to valid scroll boundaries, and performs a smooth scroll. This ensures the selected restaurant is always visible and centered, providing clear visual feedback regardless of whether selection originated from the map or the list.

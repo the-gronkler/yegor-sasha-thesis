@@ -6,7 +6,7 @@ The deployment strategy for the system relies on containerization to ensure cons
 
 === Infrastructure
 
-The production environment is hosted on an Azure Virtual Machine. The decision to utilize a self-managed VM rather than a Platform-as-a-Service (PaaS) solution was driven by cost efficacy and the need for granular control over the environment. While PaaS offerings provide automated scaling, a VM offers a predictable cost structure and allows for a custom Docker-based configuration that exactly mirrors the local development setup. Security is enforced through network security groups (NSGs) which restrict access to essential ports (HTTP/HTTPS for public access and SSH for administration).
+The production environment is hosted on an Azure Virtual Machine @AzureVMDocs. The decision to utilize a self-managed VM rather than a Platform-as-a-Service (PaaS) solution was driven by cost efficacy and the need for granular control over the environment. While PaaS offerings provide automated scaling, a VM offers a predictable cost structure and allows for a custom Docker-based configuration that exactly mirrors the local development setup. Security is enforced through network security groups (NSGs) which restrict access to essential ports (HTTP/HTTPS for public access and SSH for administration).
 
 === Container Orchestration
 
@@ -24,7 +24,7 @@ In production systems, databases are typically hosted on dedicated managed servi
 By encapsulating the entire technology stack in container definitions, the host VM functions as a generic execution environment, greatly reducing configuration drift between development and production. The following sections detail the individual services and their roles.
 
 ==== Application Service (`app`)
-The `app` service functions as the central logic unit, purposely deviating from the standard "single process per container" paradigm to prioritize consistency and deployment simplicity. By utilizing *Supervisor* as an internal process manager, this service packages the entire application runtime -- PHP-FPM, the Nginx web server, and asynchronous workers -- into a cohesive artifact.
+The `app` service functions as the central logic unit, purposely deviating from the standard "single process per container" paradigm to prioritize consistency and deployment simplicity. By utilizing *Supervisor* @SupervisorDocs as an internal process manager, this service packages the entire application runtime -- PHP-FPM, the Nginx web server, and asynchronous workers -- into a cohesive artifact.
 
 Supervisor acts as the container's entry point (PID 1), responsible for spawning and monitoring the disparate components required for the application to function. Unlike a standard shell script, Supervisor provides active process control: it ensures that the Nginx web server, the PHP-FPM runtime, the Laravel queue worker, and the Reverb WebSocket server run simultaneously. Crucially, it provides a self-healing mechanism by automatically restarting any of these critical background processes if they fail or crash, ensuring high availability within the isolated environment.
 
@@ -40,7 +40,7 @@ The service employs a multi-stage #source_code_link("Dockerfile") to ensure effi
 The `caddy` service acts as the dedicated ingress gateway, decoupling public access management from the application logic.
 
 *Rationale for Separation:*
-- *Automated Security*: Caddy handles the acquisition and renewal of SSL/TLS certificates (via Let's Encrypt) completely independently of the application. This ensures strict encryption standards without requiring the `app` service to manage sensitive certificate files or domain validation challenges.
+- *Automated Security*: Caddy handles the acquisition and renewal of SSL/TLS certificates (via Let's Encrypt) @CaddyDocs completely independently of the application. This ensures strict encryption standards without requiring the `app` service to manage sensitive certificate files or domain validation challenges.
 - *Infrastructure Abstraction*: By serving as the single entry point, Caddy abstracts the complexity of the internal network. The application container can listen on a simple, unencrypted port, unaware of the external domain configuration, while Caddy handles the translation from secure public requests to internal traffic.
 
 ==== Database Service (`db`)

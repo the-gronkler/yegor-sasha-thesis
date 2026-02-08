@@ -6,7 +6,7 @@ The map-based restaurant discovery feature requires accurate geospatial calculat
 
 === Geospatial Computation <map-tech-geospatial>
 
-*MariaDB Spatial Functions* are used for all distance calculations on the backend. The `ST_Distance_Sphere` function computes geodesic distance on a spherical Earth model, providing acceptable accuracy for restaurant discovery (error < 0.5% for distances under 100 km).
+*MariaDB Spatial Functions* are used for all distance calculations on the backend. The `ST_Distance_Sphere` function computes geodesic distance on a spherical Earth model, providing acceptable accuracy for restaurant discovery (error < 0.5% for distances under 100 km) @MariaDBSpatialDocs.
 
 This approach was selected over two alternatives:
 
@@ -20,18 +20,18 @@ MariaDB's native function executes entirely in the database engine, enabling eff
 
 *Mapbox GL JS* provides interactive map rendering using WebGL-accelerated vector tiles. This technology was selected for several reasons:
 
-- *Rendering Performance*: Vector-based rendering delivers smooth 60fps interactions even with hundreds of markers, outperforming raster-tile approaches that require downloading pre-rendered images at each zoom level.
+- *Rendering Performance*: Vector-based rendering delivers smooth 60fps interactions even with hundreds of markers @MapboxGLJSDocs, outperforming raster-tile approaches that require downloading pre-rendered images at each zoom level.
 - *Native Clustering*: Built-in point clustering groups nearby markers at low zoom levels, improving both visual clarity and rendering performance without additional libraries.
 - *Style Customization*: Mapbox Studio enables granular control over map appearance, allowing the map to match the application's design system.
-- *Cost Structure*: The free tier (50,000 map loads per month) is sufficient for development and moderate production traffic.
+- *Cost Structure*: The free tier (50,000 map loads per month) @MapboxPricing is sufficient for development and moderate production traffic.
 
 _Google Maps_ was considered due to its ubiquity and user familiarity. However, Mapbox offered more generous free-tier limits, finer style control, and a more modern JavaScript API designed for React integration.
 
-_Leaflet with OpenStreetMap_ was considered as an open-source alternative requiring no API key. However, Leaflet uses raster tiles by default (resulting in slower rendering), and vector tile support requires additional plugins. Clustering also requires plugin integration rather than being built-in.
+_Leaflet with OpenStreetMap_ was considered as an open-source alternative requiring no API key. However, Leaflet uses raster tiles by default @LeafletDocs (resulting in slower rendering), and vector tile support requires additional plugins. Clustering also requires plugin integration rather than being built-in.
 
 === React Integration <map-tech-react-integration>
 
-*react-map-gl* wraps Mapbox GL JS with React-friendly bindings, providing a declarative component model (`<Map>`, `<Source>`, `<Layer>`, `<Popup>`) that integrates naturally with React's lifecycle. The library handles automatic cleanup of event listeners and map instances, preventing memory leaks that commonly occur when managing Mapbox imperatively.
+*react-map-gl* wraps Mapbox GL JS @ReactMapGL with React-friendly bindings, providing a declarative component model (`<Map>`, `<Source>`, `<Layer>`, `<Popup>`) that integrates naturally with React's lifecycle. The library handles automatic cleanup of event listeners and map instances, preventing memory leaks that commonly occur when managing Mapbox imperatively.
 
 The library supports the controlled component pattern used in the map architecture (see @map-architecture), enabling programmatic camera control and view state synchronization.
 
