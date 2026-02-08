@@ -20,13 +20,7 @@ When selecting a backend framework, three primary candidates were evaluated: Lar
 
 === PHP Language Maturity and Framework Ecosystem
 
-A common perception in software development discussions positions PHP as lacking the sophistication of more modern languages. This perception largely stems from earlier PHP versions (pre-7.0), which indeed lacked many features now considered standard in contemporary programming languages @PHP8Release. However, PHP 8.x represents a substantial evolution from its earlier iterations.
-
-Modern PHP 8.x includes strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties @PHP8Release. These features provide capabilities comparable to those found in Java, `C#`, and other statically-typed languages commonly employed for enterprise web applications. The language's evolution directly addresses the historical limitations that informed earlier criticisms, positioning PHP 8.x as a viable foundation for type-safe, maintainable application development.
-
-When evaluating backend technologies for this project, the language's current feature set and ecosystem maturity proved more relevant than its historical reputation. PHP 8.3 provides the type safety, performance characteristics, and developer tooling necessary for building reliable, maintainable enterprise applications. This modern feature set, combined with Laravel's framework abstractions, reduces the gap between PHP-based development and alternatives built on languages traditionally favored for enterprise systems.
-
-Laravel's documentation and community resources further strengthen the framework's suitability for production applications. The official Laravel documentation provides comprehensive coverage of framework features, architectural patterns, and integration points, with practical examples and detailed API references. This documentation quality reduces dependency on external resources during development and enables developers to implement complex features with minimal research overhead. The ecosystem maturity contributed significantly to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
+PHP 8.x represents substantial evolution from earlier versions, including strict typing, attributes, named arguments, match expressions, enumerations, and readonly properties @PHP8Release, providing capabilities comparable to Java and C#. Modern PHP 8.3 provides the type safety, performance, and tooling necessary for reliable enterprise applications. Laravel's comprehensive documentation and active community reduce development friction and accelerate feature implementation.
 
 === Queue System Selection
 
