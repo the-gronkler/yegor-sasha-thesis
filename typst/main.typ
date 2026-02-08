@@ -65,4 +65,4 @@
 
 
 
-#bibliography("resources/references.bib", style: "ieee")
+#bibliography("resources/references.bib", style: "chicago-notes")
