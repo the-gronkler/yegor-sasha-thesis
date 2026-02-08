@@ -24,26 +24,12 @@ In production systems, databases are typically hosted on dedicated managed servi
 By encapsulating the entire technology stack in container definitions, the host VM functions as a generic execution environment, greatly reducing configuration drift between development and production. The following sections detail the individual services and their roles.
 
 ==== Application Service (`app`)
-The `app` service functions as the central logic unit, purposely deviating from the standard "single process per container" paradigm to prioritize consistency and deployment simplicity. By utilizing *Supervisor* @SupervisorDocs as an internal process manager, this service packages the entire application runtime -- PHP-FPM, the Nginx web server, and asynchronous workers -- into a cohesive artifact.
-
-Supervisor acts as the container's entry point (PID 1), responsible for spawning and monitoring the disparate components required for the application to function. Unlike a standard shell script, Supervisor provides active process control: it ensures that the Nginx web server, the PHP-FPM runtime, the Laravel queue worker, and the Reverb WebSocket server run simultaneously. Crucially, it provides a self-healing mechanism by automatically restarting any of these critical background processes if they fail or crash, ensuring high availability within the isolated environment.
-
-*Rationale for Internal Architecture:*
-- *Versioning Consistency*: Bundling the request handlers (Nginx/PHP) with the background processors (Queue Workers/Reverb) guarantees that all components operate on the exact same version of the source code. This eliminates the risk of "skew" where a separate worker container might process a job using outdated class definitions.
-- *Operational Simplicity*: Using Supervisor to manage the lifecycle of the Queue and WebSocket servers alongside the web server allows the entire application to be scaled or restarted as a single atomic unit.
-- *Local Asset Delivery*: Including Nginx inside the container provides the necessary capability to serve compiled frontend assets and handle FastCGI communication over a low-latency local socket, removing the need for complex shared volumes or external web server configuration.
-
-*Build Optimization:*
-The service employs a multi-stage #source_code_link("Dockerfile") to ensure efficiency. By compiling frontend assets in a temporary Node.js stage and copying only the artifacts to the final PHP stage, the production image remains lean, focusing solely on runtime requirements.
+The `app` service uses *Supervisor* @SupervisorDocs to manage PHP-FPM, Nginx, queue workers, and the Reverb WebSocket server within a single container. This ensures versioning consistency (all components use the same code version), operational simplicity (atomic scaling/restart), and local asset delivery via Nginx. The #source_code_link("Dockerfile") uses multi-stage builds to compile frontend assets separately, keeping the production image lean.
 
 ==== Reverse Proxy (`caddy`)
-The `caddy` service acts as the dedicated ingress gateway, decoupling public access management from the application logic.
-
-*Rationale for Separation:*
-- *Automated Security*: Caddy handles the acquisition and renewal of SSL/TLS certificates (via Let's Encrypt) @CaddyDocs completely independently of the application. This ensures strict encryption standards without requiring the `app` service to manage sensitive certificate files or domain validation challenges.
-- *Infrastructure Abstraction*: By serving as the single entry point, Caddy abstracts the complexity of the internal network. The application container can listen on a simple, unencrypted port, unaware of the external domain configuration, while Caddy handles the translation from secure public requests to internal traffic.
+The `caddy` service acts as the ingress gateway, handling SSL/TLS certificate management via Let's Encrypt @CaddyDocs independently of the application. This separates public access from application logic and allows the app container to use simple unencrypted internal ports.
 
 ==== Database Service (`db`)
-A MariaDB 10.11 instance provides the relational data storage for the application. As discussed above, co-locating the database within the Compose stack is a deliberate trade-off for this academic project. Data integrity is preserved through a Docker volume mounted to the container's data directory, ensuring that database files persist independently of the container's lifecycle. This means the database can be stopped, upgraded, or rebuilt without losing data - the volume remains on the host filesystem and is reattached when the container restarts.
+A MariaDB 10.11 instance provides relational storage, co-located within Docker Compose for this academic project. Data persists via a Docker volume mounted to the container's data directory, surviving container stops, upgrades, or rebuilds.
 
 

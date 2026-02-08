@@ -14,25 +14,7 @@ During the development phase, AI tools were utilized to augment manual code revi
 To facilitate this, a custom context configuration was established in #source_code_link("/AGENTS.md"), enabling the AI to act as a specialized reviewer aware of the project's specific constraints.
 
 ==== Agent Instructions (AGENTS.md)
-The #source_code_link("/AGENTS.md") file serves as a centralized repository of project-specific rules, ensuring consistent adherence to the technology stack, frontend architecture, styling conventions, testing requirements, and security protocols. This approach ensures that AI-generated suggestions follow the same rigorous standards as human code reviews.
-
-This follows GitHub Copilot's system, where `AGENTS.md` files provide agent instructions. The closest file in the directory structure takes priority @GitHubCopilotRepoInstructions.
-
-The AGENTS.md open format describes `AGENTS.md` as a dedicated and predictable place to provide project context and instructions for coding agents, typically including practical environment tips, testing guidance, and pull request expectations @AgentsMDFormat.
-
-Guidance on writing effective instruction files emphasizes clear, natural-language rules in Markdown, avoiding conflicting instructions, and documenting build and validation steps (including working command sequences and prerequisites) to reduce trial-and-error when an agent executes changes @GitHubCopilotRepoInstructions.
-
-The following techniques were utilized in this file:
-
-- Defining the agent as an expert in the specific technology stack and architecture.
-- Instructing it to make no assumptions and rely only on known facts.
-- Referencing external documentation for detailed rules.
-- Using structured lists for clarity.
-- Specifying prohibited actions explicitly (e.g., "NO TAILWIND").
-- Providing concrete examples.
-- Enforcing strict adherence with warnings.
-
-This method aims to ensure the agent follows instructions, leading to higher-quality contributions and improved consistency across the codebase. These techniques align with Copilot's Markdown-based customization for directing AI in development @VSCodeCopilotCustomizeChat.
+The #source_code_link("/AGENTS.md") file serves as a centralized repository of project-specific rules, ensuring consistent adherence to the technology stack, frontend architecture, styling conventions, testing requirements, and security protocols. This follows GitHub Copilot's system, where `AGENTS.md` files provide agent instructions @GitHubCopilotRepoInstructions @AgentsMDFormat. The file uses clear Markdown rules, references external documentation, and explicitly specifies prohibited actions (e.g., "NO TAILWIND") @VSCodeCopilotCustomizeChat.
 
 
 === Ethical Considerations

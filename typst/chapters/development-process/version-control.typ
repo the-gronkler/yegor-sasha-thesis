@@ -40,34 +40,10 @@ type/scope/sub-scope/description
 ```
 
 Where:
-- *type* indicates the nature of the change:
-  - `feat`: A new feature
-  - `fix`: A bug fix
-  - `chore`: Maintenance tasks (e.g., dependency updates)
-  - `refactor`: Code restructuring without functional changes
-  - `docs`: Documentation updates
-  - `style`: Code style changes (formatting, etc.)
-  - `test`: Adding or modifying tests
-  - `perf`: Performance improvements
-  - `ci`: Continuous integration changes
-  - `build`: Build system modifications
-  - `revert`: Reverting previous commits
-- *scope* specifies the affected component:
-  - `FE`: Frontend (React/TypeScript)
-  - `BE`: Backend (Laravel/PHP)
-  - `API`: API-related changes
-  - `Auth`: Authentication and authorization
-  - `devtools`: Development tooling
-  - `thesis`: Typst documentation content
-  - Specific feature names or subscopes (e.g., `FE/menu-card`, `BE/order-processing`)
+- *type* indicates the nature of the change (e.g., `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `perf`, `ci`)
+- *scope* specifies the affected component (e.g., `FE` for frontend, `BE` for backend, `API`, `Auth`, or specific feature names)
 - *description* provides a concise, imperative summary of the change
 
-While the standard Conventional Commit format is preferred, the slash-delimited alternative (`type/scope/description`) is also accepted. This alternative format is accepted mainly because it aligns with *tooling defaults* - the branch name is often suggested by platforms like GitHub and VS Code as the default Pull Request title, ensuring that the suggestion is automatically a valid commit message. Additionally, this format improves *typing efficiency* by eliminating the need for shift-keyed characters and offers *hierarchical clarity* by representing feature contexts as paths (e.g., `feat/FE/auth/login`) that map logically to the modular directory structure.
+While the standard Conventional Commit format is preferred, the slash-delimited alternative (`type/scope/description`) is also accepted because it aligns with tooling defaults (GitHub and VS Code suggest branch names as PR titles), improves typing efficiency by eliminating shift-keyed characters, and provides hierarchical clarity by representing feature contexts as paths.
 
-Examples include:
-- `feat(FE): implement restaurant menu card component`
-- `fix/BE/orders/resolve-race-condition`
-- `docs(thesis): add database design chapter`
-- `refactor/API/responses/standardize-error-format`
-
-This standardized format enables automated changelog generation, semantic versioning determination, and facilitates understanding of the project's evolution through its commit history.
+Examples: `feat(FE): implement restaurant menu card`, `fix/BE/orders/resolve-race-condition`, `docs(thesis): add database design chapter`.
