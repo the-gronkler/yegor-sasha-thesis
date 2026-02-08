@@ -9,8 +9,8 @@ The broadcasting system utilizes Laravel Reverb, a WebSocket server built for La
 === Backend Event Broadcasting
 On the backend, broadcasting is implemented using Laravel's event system with dedicated event classes that implement `ShouldBroadcast`. This approach ensures automatic event dispatching when model data changes, maintaining real-time synchronization across clients. Events are dispatched from model `booted` methods on create/update, supplemented by `touch()` calls in controllers for relationship updates.
 
-This architectural pattern centralizes broadcasting logic in model event handlers, adhering to the separation of concerns principle by isolating real-time notification responsibilities from business logic in controllers and services.
-It follows the open-closed principle, allowing new broadcasting behaviors to be added via event classes without modifying existing code.
+This architectural pattern centralizes broadcasting logic in model event handlers, adhering to the separation of concerns principle @DijkstraSoC1974 by isolating real-time notification responsibilities from business logic in controllers and services.
+It follows the open-closed principle @MartinCleanArch2017, allowing new broadcasting behaviors to be added via event classes without modifying existing code.
 
 This approach reduces errors by automating event dispatching on data changes, ensures the system remains reactive to all relevant updates, and promotes maintainability through declarative event definitions.
 

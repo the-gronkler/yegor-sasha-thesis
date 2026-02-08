@@ -22,7 +22,7 @@ Cross-cutting concerns (authentication, authorization, validation) are handled t
 
 ==== Laravel Sanctum Integration
 
-Authentication is provided by Laravel Sanctum, which offers both session-based authentication for web requests and token-based authentication for API consumers. Given the web-first nature of this application, session-based authentication is used exclusively.
+Authentication is provided by Laravel Sanctum @LaravelSanctumDocs, which offers both session-based authentication for web requests and token-based authentication for API consumers. Given the web-first nature of this application, session-based authentication is used exclusively.
 
 The authentication flow relies on Laravel's default `web` guard with session storage. Upon successful login, a session is established and maintained through encrypted cookies. Subsequent requests are authenticated by validating the session against the database-backed session store.
 
@@ -87,7 +87,7 @@ Beyond resource policies, custom gates define cross-cutting authorization rules.
 
 ==== Thin Controller Pattern
 
-Controllers in this application follow the thin controller pattern, focusing exclusively on HTTP-layer concerns:
+Controllers in this application follow the thin controller pattern @FowlerPEAA2002, focusing exclusively on HTTP-layer concerns:
 
 + Parsing and validating request input
 + Invoking authorization checks via policies
