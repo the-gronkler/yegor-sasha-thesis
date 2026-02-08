@@ -8,6 +8,7 @@ use App\Models\Restaurant;
 use App\Models\User;
 use Database\Seeders\CustomerSeeder;
 use Database\Seeders\EmployeeSeeder;
+use Database\Seeders\OrderSeeder;
 use Database\Seeders\RestaurantSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\static_data\AllergenSeeder;
@@ -30,11 +31,16 @@ class DatabaseSeederService
         (new RestaurantSeeder)->run($count, $lat, $lon, $radius, $progressCallback);
     }
 
-    public function seedCustomers(int $count, ?int $ordersPerCustomer = null, ?callable $progressCallback = null): void
+    public function seedCustomers(int $count, ?callable $progressCallback = null): void
     {
-        $ordersPerCustomer ??= config('seeding.orders_per_customer');
+        (new CustomerSeeder)->run($count, $progressCallback);
+    }
 
-        (new CustomerSeeder)->run($count, $ordersPerCustomer, $progressCallback);
+    public function seedOrders(?int $ordersPerRestaurant = null, ?callable $progressCallback = null): void
+    {
+        $ordersPerRestaurant ??= config('seeding.orders_per_restaurant');
+
+        (new OrderSeeder)->run($ordersPerRestaurant, $progressCallback);
     }
 
     public function seedReviews(?callable $progressCallback = null): void
