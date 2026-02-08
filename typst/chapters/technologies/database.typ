@@ -21,24 +21,11 @@ The support for JSON column types allows for semi-structured data storage within
 
 ==== Multi-Master Replication
 
-MariaDB supports multi-master replication @MariaDBGaleraCluster, enabling data synchronization across multiple database servers. Unlike traditional master-slave replication, which restricts writes to a single master server, multi-master allows writes on multiple nodes for greater flexibility in distributed environments.
-
-This feature facilitates future scaling by allowing geographic distribution of databases, which aligns with the application's geospatial nature where users _primarily_ access local restaurant data. Such distribution reduces latency for regional queries and maintains data consistency across the system.
-
-==== Licensing and Ecosystem
-
-As a fully open-source solution with a strong commitment to the GPL license @MariaDBAbout, MariaDB aligns with the project's preference for open technologies. Its binary compatibility with MySQL @MariaDBMySQLCompat ensures seamless integration with the Laravel framework, which treats it as a first-class citizen @LaravelDocs.
+MariaDB supports multi-master replication @MariaDBGaleraCluster, enabling data synchronization across multiple database servers. Unlike traditional master-slave replication, which restricts writes to a single master server, multi-master allows writes on multiple nodes. This feature facilitates future scaling by allowing geographic distribution of databases, reducing latency for regional queries while maintaining data consistency.
 
 ==== Limitations
 
-While MariaDB excels in the areas outlined above, it has some limitations. As a fork of MySQL, it may lag behind in adopting the latest features from the broader MySQL ecosystem.
-
-MariaDB-specific deployment and hosting options are more limited than MySQL. However, its binary compatibility with MySQL means it can typically be hosted on MySQL-compatible environments and use MySQL drivers.
-
-
-Its community and ecosystem are smaller than MySQL's, potentially affecting long-term support and third-party integrations.
-
-For highly specialized geospatial analyses beyond basic filtering and distance calculations, extensions like PostGIS in PostgreSQL offer more advanced capabilities @PostGISDocs.
+While MariaDB excels in the areas outlined above, it has some limitations. MariaDB-specific deployment options are more limited than MySQL, though binary compatibility with MySQL means it can typically be hosted on MySQL-compatible environments. Its community and ecosystem are smaller than MySQL's, potentially affecting long-term support and third-party integrations. For highly specialized geospatial analyses, extensions like PostGIS in PostgreSQL offer more advanced capabilities @PostGISDocs.
 
 === Comparison with Alternatives
 

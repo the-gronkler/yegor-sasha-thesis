@@ -2,7 +2,7 @@
 
 == Object Storage: Cloudflare R2 <sec:blob-storage>
 
-To handle the storage and delivery of dynamic media assets, specifically restaurant cover images and menu item photos, the system employs Cloudflare R2. This object storage service allows the application to offload static assets from the application server, ensuring that the database remains lightweight by storing only file paths (see @sec:media-storage) and the application servers remain stateless.
+To handle storage and delivery of dynamic media assets (restaurant cover images and menu item photos), the system employs Cloudflare R2. This object storage service offloads static assets from the application server, ensuring the database remains lightweight by storing only file paths (see @sec:media-storage) and application servers remain stateless.
 
 === Justification for Cloudflare R2
 

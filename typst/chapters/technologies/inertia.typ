@@ -8,7 +8,7 @@ Modern web applications typically choose between two architectural approaches: t
 
 When designing the connection between the Laravel backend and React frontend, three primary approaches were evaluated:
 
-*Traditional REST API with SPA* — The conventional approach separates the backend into a stateless API that returns JSON, while the frontend maintains its own routing, state management, and data fetching logic. This architecture requires maintaining two separate applications: the API with its own authentication, validation responses, and error handling, plus a frontend application that duplicates route definitions and implements client-side data fetching. For small teams, this duplication increases development overhead and creates synchronization challenges when requirements change.
+*Traditional REST API with SPA* — The conventional approach separates the backend into a stateless API that returns JSON, while the frontend maintains its own routing, state management, and data fetching logic. This architecture requires maintaining two separate applications with duplicated route definitions, authentication logic, and error handling.
 
 *GraphQL* — GraphQL addresses some API flexibility concerns by allowing clients to request exactly the data they need. However, it introduces additional complexity through schema definitions, resolver implementations, and client-side query management. For an application with well-defined page structures and predictable data requirements, GraphQL's flexibility provides limited benefit while adding infrastructure overhead.
 
