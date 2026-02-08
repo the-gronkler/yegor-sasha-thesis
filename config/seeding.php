@@ -9,5 +9,5 @@ return [
     'customers' => 15,
     'employees_min' => 2, // Minimum number of regular employees per restaurant (one admin is always created in addition)
     'employees_max' => 14, // Maximum employees per restaurant (excluding admin)
-    'orders_per_customer' => 4, // Number of orders each customer has
+    'orders_per_restaurant' => 4, // Number of orders per restaurant
 ];
