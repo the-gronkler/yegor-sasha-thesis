@@ -30,6 +30,9 @@ export default function CartRestaurantSection({
   onCheckout,
   onNotesChange,
 }: CartRestaurantSectionProps) {
+  // Calculate total quantity of items for this restaurant
+  const totalItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <div className="restaurant-section">
       {/* Restaurant Header */}
@@ -43,7 +46,7 @@ export default function CartRestaurantSection({
           <div className="restaurant-info">
             <h2 className="restaurant-name">{restaurant.name}</h2>
             <span className="item-count-small">
-              {items.length} item{items.length !== 1 ? 's' : ''}
+              {totalItemCount} item{totalItemCount !== 1 ? 's' : ''}
             </span>
           </div>
           <ChevronRightIcon className="chevron-icon" />
