@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Customer;
+use App\Models\Image;
 use App\Models\Restaurant;
 use App\Models\Review;
 use App\Models\ReviewImage;
@@ -19,7 +20,7 @@ class ReviewSeeder extends Seeder
             return;
         }
 
-        $sampleImageUrl = url('images/seed/sample-review.png');
+        $allImageUrls = Image::pluck('image')->toArray();
         $processed = 0;
 
         foreach ($restaurants as $restaurant) {
@@ -37,10 +38,10 @@ class ReviewSeeder extends Seeder
                     'restaurant_id' => $restaurant->id,
                 ]);
 
-                if ($reviewIndex % 3 === 0) {
+                if ($reviewIndex % 3 === 0 && ! empty($allImageUrls)) {
                     ReviewImage::create([
                         'review_id' => $review->id,
-                        'image' => $sampleImageUrl,
+                        'image' => $allImageUrls[array_rand($allImageUrls)],
                     ]);
                 }
 

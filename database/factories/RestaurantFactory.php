@@ -147,7 +147,6 @@ class RestaurantFactory extends Factory
                 MenuItem::factory()
                     ->count($menuCount)
                     ->state([
-                        'restaurant_id' => $restaurant->id,
                         'food_type_id' => $ft->id,
                     ])
                     ->create()

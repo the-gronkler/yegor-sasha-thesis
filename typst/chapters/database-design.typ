@@ -1,6 +1,6 @@
 #import "../config.typ": code_example, source_code_link
 
-= Database Design
+= Database Design <database-design>
 
 The database design constitutes the structural backbone of the platform, determining how domain entities are modeled, stored, and interconnected to fulfill the system's functional requirements. This chapter presents the logical and physical organization of the data persistence layer, which is built upon a relational model to ensure strong consistency and referential integrity.
 

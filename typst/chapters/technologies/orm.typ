@@ -1,6 +1,6 @@
 #import "../../config.typ": code_example, source_code_link
 
-== Object-Relational Mapping (ORM)
+== Object-Relational Mapping (ORM) <sec:orm>
 
 To abstract the complexity of raw database interactions and accelerate development, the system utilizes *Eloquent*, Laravel's native Object-Relational Mapper. Eloquent implements the Active Record pattern, where each database table is represented by a corresponding "Model" class (e.g., `Restaurant`, `Order`). Alternative ORM solutions were not considered as primary candidates, as Eloquent is intrinsically integrated with Laravel, making it the default and optimal choice for the framework. However, a contextual comparison with other ORM patterns is provided later in this section to further justify this architectural choice.
 

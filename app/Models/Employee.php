@@ -24,6 +24,7 @@ class Employee extends Model
     {
         return [
             'is_admin' => 'boolean',
+            'restaurant_id' => 'integer',
         ];
     }
 

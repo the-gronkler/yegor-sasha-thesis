@@ -335,6 +335,9 @@ Follow the standard engineering thesis structure:
     - Use `-` for bullet points and `+` for numbered lists.
     - **CRITICAL**: Use `*text*` for **bold** and `_text_` for _italic_ (Typst syntax, NOT Markdown `**bold**` or `*italic*`).
     - Use ` ```lang ... ``` ` for code blocks.
+    - **CRITICAL (PHP Code Blocks)**: All PHP code blocks **MUST** open with `<?php` on the first line to enable syntax highlighting. This is required even in simplified examples.
+      - **Correct**: ` ```php\n<?php\necho 'Hello';\n``` `
+      - **Incorrect**: ` ```php\necho 'Hello';\n``` ` (missing `<?php`)
 3.  **Math**:
     - Inline math: `$x^2$`.
     - Block math: `$ x^2 $` (with spaces).
