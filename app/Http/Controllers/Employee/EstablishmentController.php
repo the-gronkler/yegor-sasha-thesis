@@ -24,13 +24,42 @@ class EstablishmentController extends Controller
     private const RESTAURANT_IMAGES_DISK = 'r2';
 
     /**
-     * Display the establishment management page (admins only).
+     * Display the establishment management page.
+     * Admins see full management, workers see their profile.
      */
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $restaurant = $user->employee->restaurant;
+        $employee = $user->employee;
+        $restaurant = $employee->restaurant;
 
+        // Non-admin workers see their profile page
+        if (! $employee->is_admin) {
+            // Get admin employees for contact information
+            $admins = $restaurant->employees()
+                ->where('is_admin', true)
+                ->with('user')
+                ->get()
+                ->map(fn ($admin) => [
+                    'name' => $admin->user->name,
+                    'surname' => $admin->user->surname,
+                    'email' => $admin->user->email,
+                ]);
+
+            return Inertia::render('Employee/Establishment/WorkerProfile', [
+                'user' => [
+                    'name' => $user->name,
+                    'surname' => $user->surname,
+                    'email' => $user->email,
+                ],
+                'restaurant' => [
+                    'name' => $restaurant->name,
+                ],
+                'admins' => $admins,
+            ]);
+        }
+
+        // Admins see full establishment management
         // Load counts for statistics (more efficient than loading full relationships)
         $restaurant->loadCount([
             'employees',
