@@ -295,13 +295,13 @@ The `useMapPage` hook manages:
 - View state (camera position) and derived “Search here” visibility.
 - Selection state (selected restaurant ID).
 - Geolocation flow, including a defensive error message when the Mapbox control is not ready.
-- Inertia navigation for dataset refresh, using partial reloads to only re-fetch `restaurants` and `filters`.
+- Inertia navigation for dataset refresh, using partial reloads (see @inertia-technology) to only re-fetch `restaurants` and `filters`.
 
-Following the hybrid client-server architecture described in @map-arch-data-flow, the hook requests only the props that must change, while preserving UI state and scroll position. Reload operations (see #source_code_link("resources/js/Hooks/useMapPage.ts")) use Inertia's partial reloads with `only: ['restaurants', 'filters']`, preserving state and scroll to keep interactions responsive.
+Following the hybrid client-server architecture described in @map-arch-data-flow, reload operations use Inertia's partial reloads with `only: ['restaurants', 'filters']` (see @inertia-technology), preserving state and scroll position to maintain responsive interactions.
 
 ==== "Search here": exploration without losing user context
 
-The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available. The navigation logic (see #source_code_link("resources/js/Hooks/useMapPage.ts")) conditionally includes the user location context when available, updates only the search center, and uses partial reloads to maintain UI state.
+The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available. The navigation logic uses Inertia's partial reloads (see @inertia-technology) to maintain UI state while updating the search center.
 
 ==== Geolocation integration: trigger mechanism and error handling
 

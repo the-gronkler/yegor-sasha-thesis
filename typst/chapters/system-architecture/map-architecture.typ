@@ -138,11 +138,7 @@ These guarantees reflect architectural choices prioritizing predictability and u
 
 ==== Inertia.js Bridge Pattern <map-arch-inertia-bridge>
 
-The map feature relies on the Inertia.js integration described in @inertia-technology, which provides SPA-like navigation with server-authoritative routing and data.
-
-Of particular importance for the map architecture is Inertia's partial reload capability: when the user changes filters, only the restaurant dataset is re-fetched from the server, while the rest of the page state (camera position, selection, overlay) is preserved.
-
-This allows the map to maintain user context (e.g., zoom level, selected restaurant) while updating the underlying data. The architecture leverages this capability to create a responsive, stateful UI without sacrificing server-side control over routing and data.
+The map feature leverages Inertia's partial reload capability (see @inertia-technology) to re-fetch only the restaurant dataset when filters change, preserving page state (camera position, selection, overlay) and maintaining user context without full re-renders. This enables a responsive, stateful UI while preserving server-side authority over routing and data.
 
 ==== Mapbox Integration Architecture
 
