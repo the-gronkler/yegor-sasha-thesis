@@ -42,10 +42,17 @@ For highly specialized geospatial analyses beyond basic filtering and distance c
 
 === Comparison with Alternatives
 
-*PostgreSQL*: While PostgreSQL offers robust geospatial extensions via PostGIS, the complexity of configuring and maintaining PostGIS was deemed unnecessary for the project's specific scope (radius filtering and distance calculation). MariaDB's out-of-the-box spatial functions provided the required functionality with lower operational overhead.
+@tbl:database-comparison compares MariaDB with alternative database systems considered for this project.
 
-*MySQL*: Although the foundation for MariaDB, MySQL is governed by Oracle. MariaDB was chosen primarily because it is a fully open-source project, whereas MySQL is not considered purely open-source due to its corporate ownership and dual-licensing model @MySQLLicensing.
-
-*Microsoft SQL Server*: A robust enterprise solution, but its proprietary licensing model and cost barriers made it unsuitable for this project. Additionally, while compatible with PHP, the driver support and community resources for Laravel are less extensive than those for the MySQL/MariaDB ecosystem.
-
-*NoSQL (MongoDB)*: A document store was considered for the menu catalog but rejected due to the inherently relational nature of orders, customers, and payments. Maintaining ACID compliance @HaerderReuter1983 (data integrity) for financial transactions was prioritized over schema flexibility.
+#figure(
+  table(
+    columns: (auto, 1fr, 1fr),
+    align: (left, left, left),
+    [*System*], [*Advantages*], [*Limitations for This Project*],
+    [*PostgreSQL*], [Robust PostGIS extension for advanced geospatial analyses @PostGISDocs], [PostGIS setup complexity unnecessary for simple radius filtering and distance calculation],
+    [*MySQL*], [Foundation for MariaDB, wide ecosystem], [Oracle ownership raises open-source concerns due to dual-licensing model @MySQLLicensing],
+    [*SQL Server*], [Enterprise-grade robustness], [Proprietary licensing, cost barriers, weaker Laravel ecosystem support],
+    [*MongoDB*], [Schema flexibility for semi-structured data], [Poor fit for relational orders/payments; ACID compliance @HaerderReuter1983 prioritized],
+  ),
+  caption: [Database Management System Comparison]
+) <tbl:database-comparison>

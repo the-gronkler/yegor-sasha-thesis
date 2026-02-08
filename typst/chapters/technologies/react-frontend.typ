@@ -6,21 +6,22 @@ The frontend of the system is built on *React 19*, a JavaScript library for buil
 
 === Framework Selection Rationale
 
-When selecting a frontend framework, three primary candidates were evaluated: React, Vue.js, and Angular. Each framework has proven capable of building complex single-page applications, but React was chosen for the following reasons:
+When selecting a frontend framework, three primary candidates were evaluated: React, Vue.js, and Angular. React was chosen based on the comparative analysis in @tbl:react-comparison.
 
-*Ecosystem Maturity and Community Support* — React's ecosystem significantly surpasses both Vue.js and Angular in size and diversity @StackOverflowSurvey2024. While Vue.js offers excellent official packages (Vue Router, Pinia), its third-party ecosystem remains smaller, limiting options for specialized requirements such as advanced data visualization, complex form handling, or specific UI component libraries. Angular's ecosystem, though mature, remains tightly coupled to the framework's opinionated architecture, requiring developers to adopt Angular-specific solutions rather than leveraging the broader JavaScript ecosystem. React's flexibility allows integration with any compatible library, providing greater adaptability as project requirements evolve.
-
-*Inertia.js Integration Quality* — Inertia.js was originally developed alongside Laravel with React as the primary frontend target. While Inertia adapters exist for Vue.js and Angular, the React implementation receives the most attention, documentation, and community support. The Vue.js adapter, though functional, has fewer real-world examples and community-contributed patterns available. Angular's Inertia support remains experimental and lacks the production-ready stability required for a reliable application. Choosing React ensures access to the most mature Inertia integration, reducing integration risks and development overhead.
-
-*Component Model and Reusability* — React's component model emphasizes composition over configuration, aligning well with the application's UI requirements. The restaurant discovery interface, order management screens, and employee dashboards share common elements (cards, buttons, forms, modals) that benefit from React's composable approach. Vue.js achieves similar composability, but its single-file component structure combines template, logic, and styling in one file, which can complicate component reuse when styling needs differ across contexts. Angular's component model, while powerful, requires understanding directives, pipes, and dependency injection before achieving similar levels of reusability, increasing the learning curve for new developers joining the project.
-
-*Hooks API vs. Alternatives* — React's hooks API provides a functional programming approach to state management and side effects without the complexity of class-based components @ReactHooksDocs. Custom hooks enable extraction of reusable logic for authentication, cart management, geolocation, and real-time updates, reducing code duplication across components. Vue 3's Composition API offers similar capabilities and was directly inspired by React hooks @VueCompositionAPIRFC, but Vue's ecosystem had less mature patterns for hook-based development at the time of technology selection. Angular's reliance on services and dependency injection requires more boilerplate code to achieve similar separation of concerns, particularly when sharing stateful logic between components.
-
-*Developer Experience and Tooling* — React's developer tools and debugging capabilities surpass those of competing frameworks. The React DevTools browser extension provides detailed component hierarchy inspection, prop and state analysis, and performance profiling. While Vue Devtools offer comparable functionality for Vue applications, the React tools benefit from wider adoption and more frequent updates. Angular's debugging tools, though comprehensive, require understanding Angular's zone-based change detection and dependency injection system, adding cognitive overhead during development and troubleshooting.
-
-*TypeScript Integration* — While all three frameworks support TypeScript, their approaches differ significantly. Angular mandates TypeScript usage @AngularDocs, which ensures type safety but removes flexibility for teams preferring gradual adoption. Vue.js supports TypeScript but historically had weaker type inference, particularly with the Options API (Vue 3's Composition API improved this considerably). React treats TypeScript as optional, allowing gradual adoption while providing excellent type inference through community-maintained type definitions. This flexibility proved valuable during initial development, enabling rapid prototyping in JavaScript before adding type safety to critical components.
-
-*Industry Adoption and Hiring Considerations* — React remains the most widely adopted frontend framework in the industry. According to Stack Overflow's developer surveys and npm download statistics, React consistently shows higher usage than Vue.js and Angular @StackOverflowSurvey2024. This widespread adoption ensures future maintainability, as developers joining the project are statistically more likely to possess React experience than expertise in Vue or Angular. Additionally, the abundance of React developers in the job market reduces hiring friction compared to frameworks with smaller talent pools.
+#figure(
+  table(
+    columns: (auto, 1fr, 1fr, 1fr),
+    align: (left, left, left, left),
+    [*Criterion*], [*React*], [*Vue.js*], [*Angular*],
+    [Ecosystem], [Largest and most diverse @StackOverflowSurvey2024], [Excellent official packages, smaller third-party ecosystem], [Mature but tightly coupled to framework],
+    [Inertia Integration], [Primary target, best documentation and support], [Functional adapter with fewer examples], [Experimental support, not production-ready],
+    [Component Model], [Composition-based, highly reusable], [Single-file components, complicates styling reuse], [Powerful but requires understanding directives, pipes, DI],
+    [State API], [Hooks API for functional patterns @ReactHooksDocs], [Composition API inspired by React hooks @VueCompositionAPIRFC], [Services with dependency injection, more boilerplate],
+    [TypeScript], [Optional, gradual adoption with strong inference], [Improved in Vue 3, historically weaker], [Mandatory usage @AngularDocs],
+    [Industry Adoption], [Most widely adopted @StackOverflowSurvey2024], [Growing adoption], [Declining popularity],
+  ),
+  caption: [Frontend Framework Comparison]
+) <tbl:react-comparison>
 
 === TypeScript: Type Safety for JavaScript
 

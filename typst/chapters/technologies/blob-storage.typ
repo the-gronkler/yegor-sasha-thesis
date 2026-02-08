@@ -22,8 +22,16 @@ As part of the Cloudflare ecosystem, R2 is naturally integrated with the Cloudfl
 
 === Comparison with Alternatives
 
-*Amazon S3*: The industry standard for object storage. While it offers unmatched separate feature sets (such as lifecycle policies and Glacier archival), its pricing structure - specifically the charge for outbound data transfer - was deemed prohibitive for this project. The complexity of AWS IAM (Identity and Access Management) also introduces a steeper learning curve compared to R2's simplified token management.
+@tbl:storage-comparison compares Cloudflare R2 with alternative object storage solutions considered for this project.
 
-*Local Filesystem Storage*: Storing images directly on the application server's disk was rejected for production. This approach builds state into the server, preventing horizontal scaling (e.g., adding a second server would result in split-brain asset availability) and complicating containerized deployments where the filesystem is ephemeral @TwelveFactorApp.
-
-*DigitalOcean Spaces*: A viable alternative with a fixed pricing model. However, Cloudflare R2's free tier is significantly more generous for smaller workloads, and its "zero egress" policy offers better long-term scalability protection against traffic spikes compared to DigitalOcean's bundled bandwidth limits.
+#figure(
+  table(
+    columns: (auto, 1fr, 1fr),
+    align: (left, left, left),
+    [*Solution*], [*Advantages*], [*Limitations for This Project*],
+    [*Amazon S3*], [Industry standard, lifecycle policies, Glacier archival], [Egress fees prohibitive for academic project; AWS IAM complexity],
+    [*Local Filesystem*], [Simple implementation], [Prevents horizontal scaling; complicates containerized deployments @TwelveFactorApp],
+    [*DigitalOcean Spaces*], [Fixed pricing model], [Less generous free tier; bundled bandwidth limits less flexible than R2 zero egress],
+  ),
+  caption: [Object Storage Solution Comparison]
+) <tbl:storage-comparison>
