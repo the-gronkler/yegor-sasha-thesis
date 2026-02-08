@@ -6,7 +6,29 @@ Accessibility is enforced at the UI component layer to ensure consistent pattern
 
 ===== Semantic HTML Structure
 
-Components use native semantic HTML elements (`<button>`, `<nav>`, `<main>`, `<section>`) that communicate roles to assistive technologies @WCAG21 @WAIARIA without requiring additional ARIA annotations. This preference for native semantics over generic `<div>` containers with manual role attributes improves screen reader compatibility and reduces maintenance burden. Navigation structures use `<nav>` landmarks, and content regions use `<main>`, `<aside>`, and `<section>` with appropriate headings, enabling users to navigate by landmarks and skip irrelevant content.
+Components use semantic HTML elements that communicate roles to assistive technologies @WCAG21 @WAIARIA without requiring additional annotations. This preference for native semantics over generic containers improves compatibility with screen readers and reduces maintenance burden.
+
+#code_example[
+  Button components use `<button>` elements rather than styled `<div>` with click handlers.
+
+  ```typescript
+  // Correct: semantic button with implicit ARIA role
+  <button
+    type="button"
+    onClick={handleAddToCart}
+    className="btn-primary"
+  >
+    Add to Cart
+  </button>
+
+  // Incorrect: generic div requiring manual ARIA
+  // <div onClick={handleAddToCart} role="button" tabIndex={0}>
+  //   Add to Cart
+  // </div>
+  ```
+]
+
+Navigation structures use `<nav>` landmarks, content sections use `<main>`, `<aside>`, and `<section>` elements with appropriate headings. This structure enables screen reader users to navigate by landmarks and skip irrelevant content.
 
 ===== Descriptive ARIA Labels for Context
 

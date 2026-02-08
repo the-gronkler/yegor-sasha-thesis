@@ -46,7 +46,14 @@ This separation enforces the architectural guarantee that radius constraints are
 
 ==== Service Layer Abstraction
 
-The geospatial logic is isolated in a dedicated stateless service class following the Domain Service pattern @EvansDDD2003, providing bounding box calculation, distance formatting, and session persistence.
+The geospatial logic is isolated in a dedicated service class that provides stateless methods for domain-specific operations. This follows the Domain Service pattern from Domain-Driven Design @EvansDDD2003: logic that does not naturally belong to an entity or value object is extracted into a service.
+
+The service exposes methods for:
+- Bounding box calculation (approximates lat/lng deltas from radius)
+- Distance formatting (converts kilometers to human-readable strings)
+- Session persistence (stores/retrieves coordinates with expiry validation)
+
+This abstraction allows controllers to remain focused on HTTP request handling while delegating geospatial domain logic to a specialized component. The service is stateless and side-effect-free (except for session writes), making it straightforward to test and reason about.
 
 ==== Session-Based Location Persistence <map-arch-session-persistence>
 
@@ -60,7 +67,21 @@ The frontend follows a clear hierarchy that separates orchestration, state manag
 
 === State Management Architecture
 
-State in the map feature is distributed across three layers following the principle of state locality @DoddsStateColocation. Server state (Inertia props) holds the authoritative restaurant dataset and filter metadata, updated via partial reloads. Page state (the map hook) manages ephemeral client-side concerns such as camera position, selection, geolocation, and fuzzy search. Global state (React Context) provides cart data across navigation, restaurant, and cart pages without prop drilling.
+State in the map feature is distributed across three layers, each with a specific responsibility:
+
+*Server State (Inertia Props):*
+
+Authoritative data from backend: restaurant array, filter metadata (lat, lng, radius). Updated via Inertia partial reloads when filters change. The server is the single source of truth for the dataset.
+
+*Page State (Map Hook):*
+
+Manages client-side state: view state (camera position), selection state (active restaurant ID), geolocation state (loading/error), and search query (fuzzy filter). This state is ephemeral - it does not persist across page reloads and is not sent to the server.
+
+*Global State (React Context):*
+
+Cart state is shared globally via Context API. This state must be accessible from navigation, restaurant menus, and the cart page. The Context pattern avoids prop drilling while keeping state simple (no external state library boilerplate needed).
+
+This layered approach follows the principle of state locality @DoddsStateColocation: keep state as close as possible to where it is used, but share globally only when necessary.
 
 ==== Data Flow and Synchronization <map-arch-data-flow>
 

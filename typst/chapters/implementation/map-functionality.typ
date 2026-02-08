@@ -178,7 +178,30 @@ Phase B implements the proximity-first selection described in @map-arch-three-ph
   ```
 ]
 
-The bounding box prefilter pattern is implemented using indexed range checks (`whereBetween`). The `GeoService::getBoundingBox` method computes an approximate bounding box by clamping latitude near the poles and calculating degree deltas from the radius (#source_code_link("app/Services/GeoService.php")).
+The bounding box prefilter pattern described in @map-arch-bounding-box is implemented using indexed range checks (`whereBetween`).
+
+#code_example[
+  GeoService computes an approximate bounding box and clamps latitude to avoid instability near the poles.
+
+  ```php
+    <?php
+  // app/Services/GeoService.php
+  public function getBoundingBox(float $lat, float $lng, float $radiusKm): array
+  {
+      $clampedLat = max(min($lat, self::MAX_LATITUDE), self::MIN_LATITUDE);
+
+      $latDelta = $radiusKm / self::KM_PER_DEGREE;
+      $lngDelta = $radiusKm / (self::KM_PER_DEGREE * cos(deg2rad($clampedLat)));
+
+      return [
+          'latMin' => $lat - $latDelta,
+          'latMax' => $lat + $latDelta,
+          'lngMin' => $lng - $lngDelta,
+          'lngMax' => $lng + $lngDelta,
+      ];
+  }
+  ```
+]
 
 The `HAVING` clause enforces the hard radius guarantee (as specified in @map-arch-guarantees): only rows satisfying `distance_km <= radius` remain candidates, and only then is the limit applied. When `radius = 0`, the `HAVING` clause is omitted and the 250 nearest restaurants globally are returned.
 
@@ -282,7 +305,24 @@ This pattern ensures that edge cases (user in a rural area with large radius, or
 
 ==== Distance formatting and payload optimization
 
-The `GeoService` provides a centralized `formatDistance` method that normalizes distance values to a consistent precision (#source_code_link("app/Services/GeoService.php")). This abstraction ensures consistent distance handling across all features (map, restaurant cards, search results) without duplicating rounding logic.
+The `GeoService` provides a centralized `formatDistance` method that normalizes distance values to a consistent precision. This abstraction ensures consistent distance handling across all features (map, restaurant cards, search results) without duplicating rounding logic.
+
+#code_example[
+  Distance formatting is centralized in GeoService to ensure consistency across the application.
+
+  ```php
+    <?php
+  // app/Services/GeoService.php
+  public function formatDistance(float|string|null $distance): ?float
+  {
+      if ($distance === null) {
+          return null;
+      }
+
+      return round((float) $distance, 2);
+  }
+  ```
+]
 
 The controller also implements a payload optimization strategy to minimize the data sent to the frontend. Since the map UI displays only restaurant cards with thumbnails, ratings, and distances, the full menu hierarchy is unnecessary at this stage. The controller therefore eager-loads only the `images` relation, selecting specific columns (`id`, `restaurant_id`, `image`, `is_primary_for_restaurant`), while deliberately excluding the `foodTypes.menuItems` hierarchy that would otherwise include every food type, menu item, and associated metadata. This reduces response size significantly compared to loading the complete restaurant model with nested relations. Detailed menu data is instead loaded on-demand when users navigate to an individual restaurant page.
 
@@ -299,19 +339,29 @@ The frontend implements the component hierarchy and separation of concerns descr
 The page component wires the hook outputs into the UI, without embedding complex logic in JSX. This keeps the render tree readable and makes behavior changes local to the hook.
 
 #code_example[
-  `MapIndex` composes the page layout and passes state and handlers to the overlay, map, and bottom sheet.
+  `MapIndex` composes the page layout and passes state/handlers to the overlay, map, and bottom sheet.
 
   ```tsx
   // resources/js/Pages/Customer/Map/Index.tsx
   <MapOverlay
     query={query}
     onQueryChange={setQuery}
+    hasLocation={filters.lat !== null && filters.lng !== null}
     currentRadius={filters.radius ?? 50}
-    onRadiusChange={(r) => reloadMap(filters.lat, filters.lng, r)}
+    onRadiusChange={(r) => {
+      if (filters.lat !== null && filters.lng !== null) {
+        reloadMap(filters.lat, filters.lng, r);
+      }
+    }}
     isGeolocating={isGeolocating}
     onTriggerGeolocate={triggerGeolocate}
+    isPickingLocation={isPickingLocation}
+    setIsPickingLocation={setIsPickingLocation}
+    onManualLocation={handleMapGeolocate}
+    onError={setLocationError}
     showSearchInArea={showSearchInArea}
     onSearchInArea={searchInArea}
+    mapCenter={viewState}
   />
 
   <Map
@@ -329,7 +379,31 @@ The page component wires the hook outputs into the UI, without embedding complex
   ```
 ]
 
-The `MapLayout` component prevents body scroll conflicts by toggling CSS classes that set `overflow: hidden` on mount.
+==== MapLayout: preventing body scroll conflicts
+
+A full-screen map creates a conflict with browser scroll behavior. When users interact with the map (panning, zooming), touch and scroll events can accidentally trigger page scrolling, creating a jarring experience. The `MapLayout` component solves this by toggling CSS classes on the document root elements.
+
+#code_example[
+  MapLayout disables body scrolling on mount and re-enables it on unmount using a cleanup effect.
+
+  ```tsx
+  // resources/js/Layouts/MapLayout.tsx
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+
+    html.classList.add('is-map-active');
+    body.classList.add('is-map-active');
+
+    return () => {
+      html.classList.remove('is-map-active');
+      body.classList.remove('is-map-active');
+    };
+  }, []);
+  ```
+]
+
+The corresponding CSS rules set `overflow: hidden` on these elements when the class is present, preventing background scrolling without affecting the map's internal pan/zoom interactions or the bottom sheet's scrollable content. This approach is more reliable than inline style manipulation and works consistently across mobile and desktop browsers.
 
 ==== `useMapPage`: single source of truth for page state
 
@@ -364,7 +438,36 @@ Following the hybrid client-server architecture described in @map-arch-data-flow
 
 ==== "Search here": exploration without losing user context
 
-The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: the function sends the current view center as `search_lat`/`search_lng` while preserving existing `lat/lng` if available, using partial Inertia reloads (#source_code_link("resources/js/Hooks/useMapPage.ts")).
+The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available.
+
+#code_example[
+  The “Search here” navigation updates only the search center and preserves the user location context.
+
+  ```ts
+  // resources/js/Hooks/useMapPage.ts
+  const searchInArea = useCallback(() => {
+    const { latitude, longitude } = viewState;
+    setShowSearchInArea(false);
+
+    router.get(
+      route('map.index'),
+      {
+        search_lat: latitude,
+        search_lng: longitude,
+        ...(filters.lat !== null && filters.lng !== null
+          ? { lat: filters.lat, lng: filters.lng }
+          : {}),
+      },
+      {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        only: ['restaurants', 'filters'],
+      },
+    );
+  }, [viewState, filters]);
+  ```
+]
 
 ==== Geolocation integration: trigger mechanism and error handling
 
@@ -388,7 +491,36 @@ The geolocation integration uses Mapbox's `GeolocateControl`. The control's UI i
   ```
 ]
 
-The geolocation hook inside the Map component handles both success and error cases. On success, it calls `onGeolocate` with the coordinates. Error handling maps browser geolocation error codes to user-friendly messages, providing actionable guidance for permission denial, service unavailability, and timeout scenarios (#source_code_link("resources/js/Hooks/useMapGeolocation.ts")).
+The geolocation hook inside the Map component handles both success and error cases. On success, it calls `onGeolocate` with the coordinates. On error, it extracts error codes and maps them to user-friendly messages.
+
+#code_example[
+  Error extraction maps browser geolocation error codes to actionable user messages.
+
+  ```ts
+  // resources/js/Hooks/useMapGeolocation.ts (inside Map component)
+  const handleGeolocateError = useCallback((evt: unknown) => {
+    const { code, message } = extractGeolocateError(evt);
+
+    let errorMessage = message || 'Unable to get your location. Please check browser/OS location permissions.';
+
+    switch (code) {
+      case 1: // PERMISSION_DENIED
+        errorMessage = 'Location access denied. Allow location permissions to see nearby restaurants.';
+        break;
+      case 2: // POSITION_UNAVAILABLE
+        errorMessage = 'Location information unavailable. Check OS location services or try again.';
+        break;
+      case 3: // TIMEOUT
+        errorMessage = 'Location request timed out. Try again or disable high accuracy.';
+        break;
+    }
+
+    onGeolocateError?.(errorMessage);
+  }, [onGeolocateError]);
+  ```
+]
+
+This defensive error handling ensures users receive clear, actionable guidance when geolocation fails, rather than generic browser error messages.
 
 ==== Overlay controls: location, radius, and manual entry
 
@@ -454,7 +586,41 @@ The click handler is intentionally multi-modal:
 
 When a restaurant is selected, the map animates the camera using `flyTo` with UI-aware padding to keep the selected point visible above overlay elements and the bottom sheet. The padding values account for the overlay height at the top and the bottom sheet in its expanded state.
 
-The map also includes runtime API key validation to prevent configuration errors and credential leaks (#source_code_link("resources/js/Components/Shared/Map.tsx")).
+#code_example[
+  Camera animation applies UI-aware padding to keep the selected restaurant visible.
+
+  ```tsx
+  // resources/js/Components/Shared/Map.tsx
+  map.flyTo({
+    center: [selectedRestaurant.lng, selectedRestaurant.lat],
+    zoom: Math.max(viewState.zoom, 10),
+    duration: 900,
+    essential: true,
+    padding: { top: 240, bottom: 280, left: 40, right: 40 },
+  });
+  ```
+]
+
+The padding values are carefully tuned to account for the overlay height at the top and the bottom sheet in its expanded state. The `essential: true` flag ensures the animation respects user preferences for reduced motion, improving accessibility.
+
+The map also includes runtime API key validation to fail fast with a clear error message if the Mapbox key is missing or if a secret key (starting with `sk.`) is accidentally used in the browser.
+
+#code_example[
+  Mapbox token validation prevents configuration errors and credential leaks.
+
+  ```tsx
+  // resources/js/Components/Shared/Map.tsx
+  if (!mapboxAccessToken) {
+    return <div className="map-error-message">Mapbox API key is not configured.</div>;
+  }
+
+  if (!mapboxAccessToken.startsWith('pk.')) {
+    return <div className="map-error-message">Invalid Mapbox API key type.</div>;
+  }
+  ```
+]
+
+This validation runs before initializing Mapbox, providing immediate feedback during development and preventing accidental exposure of secret tokens in production bundles.
 
 ==== Bottom sheet: pointer-driven drag, snapping, and selection sync
 
@@ -468,7 +634,70 @@ The drag implementation uses three key techniques:
 
 3. *Snap-on-release*: When the pointer is released, the sheet snaps to either collapsed or expanded state based on its current position. The snap threshold uses the midpoint between states to provide intuitive behavior.
 
-The drag-to-toggle and click-guard logic is implemented in #source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx").
+#code_example[
+  The bottom sheet prevents click-toggle immediately after drag to avoid accidental actions.
 
-Selection synchronization requires careful timing: when a restaurant becomes selected, the bottom sheet must scroll the corresponding card into view. If the sheet is transitioning between states, measuring card positions during the transition produces incorrect offsets. The solution waits for CSS `transitionend` events (with a timeout fallback) before measuring positions and performing a smooth scroll to center the selected card (#source_code_link("resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx")).
+  ```tsx
+  // resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
+  const toggleSheet = () => {
+    if (dragMovedRef.current) {
+      dragMovedRef.current = false;
+      return;
+    }
 
+    setSheetHeight((h) => (h <= COLLAPSED_PX + 2 ? expandedPx : COLLAPSED_PX));
+  };
+  ```
+]
+
+Selection synchronization requires careful timing. When a restaurant becomes selected (either from map click or list click), the bottom sheet must scroll the corresponding card into view. However, if the sheet is transitioning between collapsed and expanded states, measuring card positions during the transition produces incorrect offsets.
+
+The solution waits for CSS transitions to complete before measuring and scrolling. It observes `transitionend` events with a timeout fallback (300ms) to handle cases where the transition is interrupted or already complete.
+
+#code_example[
+  Auto-scroll waits for transitions to complete before measuring positions to avoid layout thrashing.
+
+  ```tsx
+  // resources/js/Pages/Customer/Map/Partials/BottomSheet.tsx
+  const waitForTransition = new Promise<void>((resolve) => {
+    let resolved = false;
+
+    const onTransitionEnd = () => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    };
+
+    sheetRef.current?.addEventListener('transitionend', onTransitionEnd, { once: true });
+
+    setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    }, 500);
+  });
+  ```
+]
+
+After the transition completes, the implementation measures the card position, calculates the scroll offset needed to center it in the visible area, clamps the result to valid scroll boundaries, and performs a smooth scroll. This ensures the selected restaurant is always visible and centered, providing clear visual feedback regardless of whether selection originated from the map or the list.
+
+=== Summary
+
+The map-based restaurant discovery feature demonstrates a complete implementation combining the architectural patterns from @map-architecture with the technology choices from @map-technologies.
+
+*Backend implementation highlights:*
+- The three-phase processing pipeline (@map-arch-three-phase) is realized through distinct controller methods that enforce phase boundaries
+- SQL-level radius enforcement via HAVING clauses guarantees the architectural invariants (@map-arch-guarantees)
+- Single-pass score computation (@map-arch-query-optimization) is implemented using Laravel's `fromSub` and `joinSub` query builder methods
+
+*Frontend implementation highlights:*
+- The component hierarchy (@map-arch-component-hierarchy) is implemented with clear separation between the page orchestrator, logic hook, and UI partials
+- The geolocation callback registration pattern (@map-arch-geolocation-pattern) bridges the hidden Mapbox control with custom overlay buttons
+- Bottom sheet drag behavior uses Pointer Events API with capture for cross-device consistency
+- Transition-aware auto-scroll prevents layout measurement errors during CSS animations
+
+*User experience refinements:*
+- Multiple location acquisition methods (geolocation, manual entry, map click) provide fallback options
+- Commit-on-release radius slider prevents backend flooding during drag interactions
+- Camera animation with UI-aware padding keeps selected restaurants visible above overlays
+- Error messages map browser geolocation codes to actionable user guidance

@@ -25,7 +25,9 @@ This mandatory process is enforced by GitHub branch protection policies, ensurin
 
 === Commit Conventions
 
-Commits follow the Conventional Commits 1.0.0 specification @ConventionalCommits, providing a uniform format that facilitates automated changelog generation and semantic versioning. The primary format is:
+Commits follow the Conventional Commits 1.0.0 specification @ConventionalCommits to ensure consistent and meaningful commit messages. This standard provides a uniform format for commit messages across the project, facilitating automated tooling for version management, changelog generation, and semantic versioning.
+
+The format is:
 
 ```go
 type(scope): description

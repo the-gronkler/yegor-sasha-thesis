@@ -24,7 +24,9 @@ Cross-cutting concerns (authentication, authorization, validation) are handled t
 
 ==== Laravel Sanctum Integration
 
-Authentication is provided by Laravel Sanctum @LaravelSanctumDocs using session-based authentication exclusively, given the web-first nature of the application. Upon successful login, a session is established and maintained through encrypted cookies, with subsequent requests validated against the database-backed session store.
+Authentication is provided by Laravel Sanctum @LaravelSanctumDocs, which offers both session-based authentication for web requests and token-based authentication for API consumers. Given the web-first nature of this application, session-based authentication is used exclusively.
+
+The authentication flow relies on Laravel's default `web` guard with session storage. Upon successful login, a session is established and maintained through encrypted cookies. Subsequent requests are authenticated by validating the session against the database-backed session store.
 
 ==== Dual User Type Architecture
 
@@ -56,7 +58,22 @@ Beyond resource policies, custom gates define cross-cutting rules. The `manage-r
 
 Controllers follow the thin controller pattern @FowlerPEAA2002, focusing exclusively on HTTP-layer concerns: parsing input, invoking authorization, delegating to services, and returning responses. Business logic and side effects are delegated to service classes or model events. When logic is sufficiently simple (straightforward CRUD), it remains in the controller; services are introduced when complexity warrants extraction.
 
-Controllers are organized by user domain (`App\Http\Controllers\Customer`, `App\Http\Controllers\Employee`) rather than resource type, aligning with route grouping and middleware application.
+Controllers in this application follow the thin controller pattern @FowlerPEAA2002, focusing exclusively on HTTP-layer concerns:
+
++ Parsing and validating request input
++ Invoking authorization checks via policies
++ Delegating business logic to services
++ Constructing and returning responses
+
+Business logic, data transformation, and side effects (such as file uploads or event dispatching) are delegated to service classes or handled through model events. This separation ensures controllers remain testable and maintainable as the application grows.
+
+For example, a review controller receives a review service through constructor injection and delegates all create, update, and delete operations to the service, handling only authorization, validation, and response formatting.
+
+When business logic is sufficiently simple --- such as straightforward CRUD operations or single-model updates --- it may remain in the controller rather than being extracted into a dedicated service. Service classes are introduced when the logic grows complex enough that it would obscure the controller's orchestration responsibility, involves multiple models or external systems, or benefits from reuse across different entry points.
+
+==== Domain-Organized Controllers
+
+Controllers are organized by user domain rather than resource type. Customer-facing controllers reside in `App\Http\Controllers\Customer`, while employee-facing controllers reside in `App\Http\Controllers\Employee`. This organization reflects the architectural separation between user journeys and aligns with route grouping and middleware application.
 
 === Service Layer Architecture
 
