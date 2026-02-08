@@ -6,127 +6,19 @@ The search implementation provides instant filtering feedback for restaurant and
 
 ===== Reusable useSearch Hook
 
-The #source_code_link("resources/js/Hooks/useSearch.ts") hook encapsulates the Fuse.js integration and search state management. The hook accepts a data array, searchable property keys, and optional configuration, returning filtered results and query state management functions.
-
-#code_example[
-  The `useSearch` hook signature provides flexible configuration with sensible defaults.
-
-  ```typescript
-  export function useSearch<T>(
-    items: T[],
-    searchKeys: (keyof T)[],
-    options?: IFuseOptions<T>
-  ): {
-    query: string;
-    setQuery: (query: string) => void;
-    filteredItems: T[];
-  }
-  ```
-]
-
-The generic type parameter `T` enables the hook to work with any data structure while maintaining type safety. TypeScript verifies that `searchKeys` reference actual properties of `T`, preventing runtime errors from invalid property access.
+The #source_code_link("resources/js/Hooks/useSearch.ts") hook encapsulates the Fuse.js integration and search state management. The hook accepts a generic data array, searchable property keys, and optional configuration, returning filtered results and query state management functions. The generic type parameter `T` enables the hook to work with any data structure while maintaining type safety. TypeScript verifies that `searchKeys` reference actual properties of `T`, preventing runtime errors from invalid property access.
 
 ===== Fuse.js Configuration and Caching
 
-The hook configures Fuse.js with defaults optimized for typical restaurant discovery use cases. The configuration balances match tolerance with result relevance.
-
-#code_example[
-  Default Fuse.js configuration prioritizes relevant matches with location-agnostic search.
-
-  ```typescript
-  const defaultOptions: IFuseOptions<T> = {
-    keys: searchKeys as string[],
-    threshold: 0.3,
-    ignoreLocation: true,
-    includeScore: true,
-    shouldSort: true,
-  };
-
-  const fuseOptions = { ...defaultOptions, ...options };
-  ```
-]
-
-Configuration parameters control matching behavior:
-- `threshold: 0.3`: Requires 70% match quality, filtering very distant matches while allowing minor typos
-- `ignoreLocation: true`: Matches anywhere in text, not requiring match at string start
-- `includeScore: true`: Enables relevance-based result ordering
-- `shouldSort: true`: Orders results by match quality
-
-The Fuse.js instance creation is wrapped in `useMemo` to prevent redundant instantiation on unrelated component re-renders.
-
-#code_example[
-  Memoization prevents unnecessary Fuse.js instance creation when dependencies are stable.
-
-  ```typescript
-  const fuse = useMemo(
-    () => new Fuse(items, { ...defaultOptions, ...options }),
-    [items, searchKeys, options]
-  );
-  ```
-]
-
-The dependency array ensures the Fuse instance updates when items, search keys, or options change, triggering reindexing only when necessary.
+The hook configures Fuse.js with defaults optimized for typical restaurant discovery use cases: threshold of 0.3 (requires 70% match quality), `ignoreLocation: true` (matches anywhere in text), `includeScore: true` (enables relevance ordering), and `shouldSort: true`. The Fuse.js instance creation is wrapped in `useMemo` to prevent redundant instantiation on unrelated component re-renders, with a dependency array ensuring reindexing only when items, search keys, or options change.
 
 ===== Filtering Logic and Empty Query Optimization
 
-The filtering logic distinguishes between empty and populated queries. Empty queries return the unfiltered dataset immediately, avoiding unnecessary Fuse.js processing.
-
-#code_example[
-  Filtered results compute only when query is non-empty.
-
-  ```typescript
-  const filteredItems = useMemo(() => {
-    if (!query) {
-      return items;
-    }
-    return fuse.search(query).map(result => result.item);
-  }, [fuse, query]);
-  ```
-]
-
-This optimization matters for large datasets where Fuse.js processing has measurable cost. When users clear the search box, the full dataset displays instantly without recomputation.
+The filtering logic distinguishes between empty and populated queries. Empty queries return the unfiltered dataset immediately, avoiding unnecessary Fuse.js processing. This optimization matters for large datasets where Fuse.js processing has measurable cost. When users clear the search box, the full dataset displays instantly without recomputation.
 
 ===== Context-Specific Configurations
 
-While the hook provides general-purpose fuzzy search, specific features require tailored configurations with weighted keys for relevance tuning.
-
-#code_example[
-  Restaurant search weights name and description higher than nested menu items.
-
-  ```typescript
-  const { query, setQuery, filteredItems } = useSearch(
-    restaurants,
-    ['name', 'description', 'food_types.menu_items.name'],
-    {
-      keys: [
-        { name: 'name', weight: 0.5 },
-        { name: 'description', weight: 0.3 },
-        { name: 'food_types.menu_items.name', weight: 0.2 },
-      ],
-    }
-  );
-  ```
-]
-
-The weight distribution reflects search intent: users searching restaurants prioritize restaurant names, secondarily consider descriptions, and only tangentially care about specific menu items. This prevents a restaurant with matching menu items but unrelated name from outranking a restaurant with matching name.
-
-#code_example[
-  Menu filtering prioritizes item names over descriptions and categories.
-
-  ```typescript
-  const { filteredItems } = useSearch(
-    menuItems,
-    ['name', 'description', 'food_type.name'],
-    {
-      keys: [
-        { name: 'name', weight: 0.6 },
-        { name: 'description', weight: 0.25 },
-        { name: 'food_type.name', weight: 0.15 },
-      ],
-    }
-  );
-  ```
-]
+While the hook provides general-purpose fuzzy search, specific features require tailored configurations with weighted keys for relevance tuning. Restaurant search weights name (0.5) and description (0.3) higher than nested menu items (0.2), reflecting search intent where users prioritize restaurant names and secondarily consider descriptions. Menu filtering prioritizes item names (0.6) over descriptions (0.25) and categories (0.15).
 
 ===== Constraints and Trade-offs
 

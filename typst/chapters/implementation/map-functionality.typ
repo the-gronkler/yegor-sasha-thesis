@@ -229,74 +229,13 @@ The controller deliberately avoids computing any score while converting the sele
 
 ==== Phase C: scoring once and ordering by quality in SQL
 
-Phase C implements the single-pass SQL computation strategy described in @map-arch-query-optimization. Full restaurant models are hydrated and a composite quality score is computed exactly once in a derived table using three weighted signals: rating (0–50 points), review count (0–30 points, logarithmic scale), and proximity (0–20 points, linear decay).
+Phase C implements the single-pass SQL computation strategy described in @map-arch-query-optimization. Full restaurant models are hydrated and a composite quality score is computed exactly once using three weighted signals: rating (0–50 points), review count (0–30 points, logarithmic scale), and proximity (0–20 points, linear decay).
 
-#code_example[
-  Phase C builds derived tables: review counts are aggregated once, distance is computed once, and composite score is calculated once.
+The implementation constructs three derived tables in sequence (see #source_code_link("app/Http/Controllers/Customer/MapController.php")): first, review counts are aggregated per restaurant using `GROUP BY`; second, distances are calculated using MariaDB's `ST_Distance_Sphere` function; third, these results are joined to compute the composite score from the three weighted components. The scoring formula applies: `(rating/5) * 50 + LOG10(reviews + 1) * 10 (capped at 30) + max(0, 20 * (1 - distance/20))`.
 
-  ```php
-    <?php
-  // app/Http/Controllers/Customer/MapController.php
-  $reviewCounts = \DB::table('reviews')
-      ->select('restaurant_id')
-      ->selectRaw('COUNT(*) as review_count')
-      ->whereIn('restaurant_id', $selectedIds)
-      ->groupBy('restaurant_id');
+The scored subquery is joined back to the `restaurants` table using `joinSub`, preserving Eloquent model hydration while keeping ordering in SQL. This avoids the complexity and risks of manual `FIELD()` ordering and eliminates PHP post-processing that could unintentionally change ordering semantics. The final query eager-loads required relations, selects only necessary columns, and orders by composite score descending, then by distance ascending.
 
-  $restaurantsWithDistance = \DB::table('restaurants')
-      ->select(['id', 'latitude', 'longitude', 'rating'])
-      ->selectRaw(
-          '(ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) / 1000) AS distance_km',
-          [$centerLng, $centerLat]
-      )
-      ->whereIn('id', $selectedIds);
-
-  $scoredRestaurants = \DB::query()
-      ->fromSub($restaurantsWithDistance, 'rwd')
-      ->leftJoinSub($reviewCounts, 'rc', 'rwd.id', '=', 'rc.restaurant_id')
-      ->select(['rwd.id', 'rwd.distance_km'])
-      ->selectRaw('COALESCE(rc.review_count, 0) as review_count')
-      ->selectRaw('(COALESCE(rwd.rating, 0) / 5) * 50 AS rating_score')
-      ->selectRaw('LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) AS review_score')
-      ->selectRaw('GREATEST(0, 20 * (1 - (rwd.distance_km / 20))) AS distance_score')
-      ->selectRaw(
-          '((COALESCE(rwd.rating, 0) / 5) * 50 + '.
-          'LEAST(30, LOG10(COALESCE(rc.review_count, 0) + 1) * 10) + '.
-          'GREATEST(0, 20 * (1 - (rwd.distance_km / 20)))) AS composite_score'
-      );
-  ```
-]
-
-The scored subquery is joined back to `restaurants` using `joinSub`, preserving Eloquent hydration while keeping ordering in SQL. This avoids the complexity and risks of manual `FIELD()` ordering and eliminates PHP post-processing that could unintentionally change ordering semantics.
-
-#code_example[
-  The final query joins scores for Eloquent hydration, eager-loads only required relations, and orders by score then distance.
-
-  ```php
-    <?php
-  // app/Http/Controllers/Customer/MapController.php
-  $query = Restaurant::query()
-      ->joinSub($scoredRestaurants, 'scored', 'restaurants.id', '=', 'scored.id')
-      ->with(['images:id,restaurant_id,image,is_primary_for_restaurant'])
-      ->select([
-          'restaurants.id',
-          'restaurants.name',
-          'restaurants.address',
-          'restaurants.latitude',
-          'restaurants.longitude',
-          'restaurants.rating',
-          'restaurants.description',
-          'restaurants.opening_hours',
-          'scored.distance_km as distance',
-          'scored.review_count as reviews_count',
-          'scored.composite_score',
-      ])
-      ->orderByDesc('scored.composite_score')
-      ->orderBy('scored.distance_km', 'asc');
-  ```
-]
-
-Favorite detection is included conditionally for authenticated users via a `LEFT JOIN`, producing an `is_favorited` flag without additional queries. The controller maps each model into a compact JSON-friendly structure required by the map UI (distance, reviews count, score, and a reduced images array). Distance formatting is centralized in `GeoService::formatDistance`, which keeps presentation rounding out of the controller and ensures consistent formatting anywhere distance is displayed.
+Favorite detection is included conditionally for authenticated users via a `LEFT JOIN`, producing an `is_favorited` flag without additional queries. The controller maps each model into a compact JSON-friendly structure required by the map UI. Distance formatting is centralized in `GeoService::formatDistance`.
 
 ==== Database indexing strategy for geospatial queries
 
@@ -308,30 +247,7 @@ The three-phase architecture relies on specific database indexes for optimal per
 
 ==== Empty result handling and early termination
 
-When Phase B returns an empty collection (no restaurants within radius or no restaurants at all), the controller short-circuits Phase C entirely and returns an empty dataset immediately. This optimization avoids constructing complex derived table queries when the result is known to be empty.
-
-#code_example[
-  The controller terminates early when no candidates are found, avoiding unnecessary query construction.
-
-  ```php
-    <?php
-  // app/Http/Controllers/Customer/MapController.php
-  $selectedIds = $this->selectNearestRestaurantIds($centerLat, $centerLng, $radius);
-
-  if ($selectedIds->isEmpty()) {
-      return Inertia::render('Customer/Map/Index', [
-          'restaurants' => [],
-          'filters' => [
-              'lat' => $validated['lat'] ?? null,
-              'lng' => $validated['lng'] ?? null,
-              'radius' => $radius,
-          ],
-      ]);
-  }
-  ```
-]
-
-This pattern ensures that edge cases (user in a rural area with large radius, or very restrictive filters) remain performant.
+When Phase B returns an empty collection (no restaurants within radius or no restaurants at all), the controller short-circuits Phase C entirely and returns an empty dataset immediately (see #source_code_link("app/Http/Controllers/Customer/MapController.php")). This optimization avoids constructing complex derived table queries when the result is known to be empty. This pattern ensures that edge cases (user in a rural area with large radius, or very restrictive filters) remain performant.
 
 ==== Distance formatting and payload optimization
 
@@ -366,74 +282,11 @@ The frontend implements the component hierarchy and separation of concerns descr
 
 ==== Entry composition: MapLayout + Overlay + Map + BottomSheet
 
-The page component wires the hook outputs into the UI, without embedding complex logic in JSX. This keeps the render tree readable and makes behavior changes local to the hook.
-
-#code_example[
-  `MapIndex` composes the page layout and passes state/handlers to the overlay, map, and bottom sheet.
-
-  ```tsx
-  // resources/js/Pages/Customer/Map/Index.tsx
-  <MapOverlay
-    query={query}
-    onQueryChange={setQuery}
-    hasLocation={filters.lat !== null && filters.lng !== null}
-    currentRadius={filters.radius ?? 50}
-    onRadiusChange={(r) => {
-      if (filters.lat !== null && filters.lng !== null) {
-        reloadMap(filters.lat, filters.lng, r);
-      }
-    }}
-    isGeolocating={isGeolocating}
-    onTriggerGeolocate={triggerGeolocate}
-    isPickingLocation={isPickingLocation}
-    setIsPickingLocation={setIsPickingLocation}
-    onManualLocation={handleMapGeolocate}
-    onError={setLocationError}
-    showSearchInArea={showSearchInArea}
-    onSearchInArea={searchInArea}
-    mapCenter={viewState}
-  />
-
-  <Map
-    viewState={viewState}
-    onMove={setViewState}
-    markers={mapMarkers}
-    mapboxAccessToken={mapboxPublicKey || ''}
-  />
-
-  <BottomSheet
-    restaurants={filteredRestaurants}
-    selectedRestaurantId={selectedRestaurantId}
-    onSelectRestaurant={selectRestaurant}
-  />
-  ```
-]
+The page component wires the hook outputs into the UI, without embedding complex logic in JSX (see #source_code_link("resources/js/Pages/Customer/Map/Index.tsx")). The component passes search query and handlers to `MapOverlay`, view state and markers to `Map`, and filtered restaurants with selection handlers to `BottomSheet`. This keeps the render tree readable and makes behavior changes local to the hook.
 
 ==== MapLayout: preventing body scroll conflicts
 
-A full-screen map creates a conflict with browser scroll behavior. When users interact with the map (panning, zooming), touch and scroll events can accidentally trigger page scrolling, creating a jarring experience. The `MapLayout` component solves this by toggling CSS classes on the document root elements.
-
-#code_example[
-  MapLayout disables body scrolling on mount and re-enables it on unmount using a cleanup effect.
-
-  ```tsx
-  // resources/js/Layouts/MapLayout.tsx
-  useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-
-    html.classList.add('is-map-active');
-    body.classList.add('is-map-active');
-
-    return () => {
-      html.classList.remove('is-map-active');
-      body.classList.remove('is-map-active');
-    };
-  }, []);
-  ```
-]
-
-The corresponding CSS rules set `overflow: hidden` on these elements when the class is present, preventing background scrolling without affecting the map's internal pan/zoom interactions or the bottom sheet's scrollable content. This approach is more reliable than inline style manipulation and works consistently across mobile and desktop browsers.
+A full-screen map creates a conflict with browser scroll behavior. When users interact with the map (panning, zooming), touch and scroll events can accidentally trigger page scrolling, creating a jarring experience. The `MapLayout` component solves this by toggling CSS classes on the document root elements (see #source_code_link("resources/js/Layouts/MapLayout.tsx")). The corresponding CSS rules set `overflow: hidden` on these elements when the class is present, preventing background scrolling without affecting the map's internal pan/zoom interactions or the bottom sheet's scrollable content. This approach is more reliable than inline style manipulation and works consistently across mobile and desktop browsers.
 
 ==== `useMapPage`: single source of truth for page state
 
@@ -444,113 +297,15 @@ The `useMapPage` hook manages:
 - Geolocation flow, including a defensive error message when the Mapbox control is not ready.
 - Inertia navigation for dataset refresh, using partial reloads to only re-fetch `restaurants` and `filters`.
 
-Following the hybrid client-server architecture described in @map-arch-data-flow, the hook requests only the props that must change, while preserving UI state and scroll position.
-
-#code_example[
-  Reload operations fetch only `restaurants` and `filters`, preserving UI state and scroll to keep interactions responsive.
-
-  ```ts
-  // resources/js/Hooks/useMapPage.ts
-  const reloadMap = useCallback((lat: number, lng: number, radius: number) => {
-    router.get(
-      route('map.index'),
-      { lat, lng, radius },
-      {
-        replace: true,
-        preserveState: true,
-        preserveScroll: true,
-        only: ['restaurants', 'filters'],
-      },
-    );
-  }, []);
-  ```
-]
+Following the hybrid client-server architecture described in @map-arch-data-flow, the hook requests only the props that must change, while preserving UI state and scroll position. Reload operations (see #source_code_link("resources/js/Hooks/useMapPage.ts")) use Inertia's partial reloads with `only: ['restaurants', 'filters']`, preserving state and scroll to keep interactions responsive.
 
 ==== "Search here": exploration without losing user context
 
-The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available.
-
-#code_example[
-  The “Search here” navigation updates only the search center and preserves the user location context.
-
-  ```ts
-  // resources/js/Hooks/useMapPage.ts
-  const searchInArea = useCallback(() => {
-    const { latitude, longitude } = viewState;
-    setShowSearchInArea(false);
-
-    router.get(
-      route('map.index'),
-      {
-        search_lat: latitude,
-        search_lng: longitude,
-        ...(filters.lat !== null && filters.lng !== null
-          ? { lat: filters.lat, lng: filters.lng }
-          : {}),
-      },
-      {
-        replace: true,
-        preserveState: true,
-        preserveScroll: true,
-        only: ['restaurants', 'filters'],
-      },
-    );
-  }, [viewState, filters]);
-  ```
-]
+The "Search here" button appears when the camera moves more than ~0.01 degrees (~1 km) from the initial center. This implements the session isolation guarantee from @map-arch-guarantees: `search_lat/search_lng` is sent using the current view center, while preserving existing `lat/lng` if available. The navigation logic (see #source_code_link("resources/js/Hooks/useMapPage.ts")) conditionally includes the user location context when available, updates only the search center, and uses partial reloads to maintain UI state.
 
 ==== Geolocation integration: trigger mechanism and error handling
 
-The geolocation integration pattern described in @map-arch-geolocation-pattern is implemented using Mapbox's `GeolocateControl`. The control's UI is hidden (`showGeolocateControlUi={false}`) because the overlay provides its own "My Location" button, with a callback registration pattern bridging the two.
-
-#code_example[
-  The page hook triggers geolocation through the registered callback and provides defensive error handling.
-
-  ```ts
-  // resources/js/Hooks/useMapPage.ts
-  const triggerGeolocate = useCallback(() => {
-    const ok = geolocateTriggerRef.current?.();
-    if (!ok) {
-      setLocationError(
-        'Geolocation control not ready yet. Refresh and try again.',
-      );
-      return;
-    }
-    setIsGeolocating(true);
-  }, []);
-  ```
-]
-
-The geolocation hook inside the Map component handles both success and error cases. On success, it calls `onGeolocate` with the coordinates. On error, it extracts error codes and maps them to user-friendly messages.
-
-#code_example[
-  Error extraction maps browser geolocation error codes to actionable user messages.
-
-  ```ts
-  // resources/js/Hooks/useMapGeolocation.ts (inside Map component)
-  const handleGeolocateError = useCallback((evt: unknown) => {
-    const { code, message } = extractGeolocateError(evt);
-
-    let errorMessage = message || 'Unable to get your location. Please check browser/OS location permissions.';
-
-    switch (code) {
-      case 1: // PERMISSION_DENIED
-        errorMessage = 'Location access denied. Allow location permissions to see nearby restaurants.';
-        break;
-      case 2: // POSITION_UNAVAILABLE
-        errorMessage = 'Location information unavailable. Check OS location services or try again.';
-        break;
-      case 3: // TIMEOUT
-        errorMessage = 'Location request timed out. Try again or disable high accuracy.';
-        break;
-    }
-
-    onGeolocateError?.(errorMessage);
-  }, [onGeolocateError]);
-  ```
-]
-
-This defensive error handling ensures users receive clear, actionable guidance when geolocation fails, rather than generic browser error messages.
+The geolocation integration pattern described in @map-arch-geolocation-pattern is implemented using Mapbox's `GeolocateControl`. The control's UI is hidden (`showGeolocateControlUi={false}`) because the overlay provides its own "My Location" button, with a callback registration pattern bridging the two. The page hook triggers geolocation through the registered callback (see #source_code_link("resources/js/Hooks/useMapPage.ts")) and provides defensive error handling when the control is not ready. The geolocation hook inside the Map component handles both success and error cases, extracting browser error codes and mapping them to user-friendly messages (see #source_code_link("resources/js/Hooks/useMapGeolocation.ts")). This defensive error handling ensures users receive clear, actionable guidance when geolocation fails, rather than generic browser error messages.
 
 ==== Overlay controls: location, radius, and manual entry
 
