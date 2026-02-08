@@ -6,57 +6,15 @@ Accessibility is enforced at the UI component layer to ensure consistent pattern
 
 ===== Semantic HTML Structure
 
-Components use semantic HTML elements that communicate roles to assistive technologies @WCAG21 @WAIARIA without requiring additional annotations. This preference for native semantics over generic containers improves compatibility with screen readers and reduces maintenance burden.
-
-#code_example[
-  Button components use `<button>` elements rather than styled `<div>` with click handlers.
-
-  ```typescript
-  // Correct: semantic button with implicit ARIA role
-  <button
-    type="button"
-    onClick={handleAddToCart}
-    className="btn-primary"
-  >
-    Add to Cart
-  </button>
-
-  // Incorrect: generic div requiring manual ARIA
-  // <div onClick={handleAddToCart} role="button" tabIndex={0}>
-  //   Add to Cart
-  // </div>
-  ```
-]
-
-Navigation structures use `<nav>` landmarks, content sections use `<main>`, `<aside>`, and `<section>` elements with appropriate headings. This structure enables screen reader users to navigate by landmarks and skip irrelevant content.
+Components use semantic HTML elements that communicate roles to assistive technologies @WCAG21 @WAIARIA without requiring additional annotations. Button components use `<button>` rather than styled `<div>` with click handlers. Navigation structures use `<nav>` landmarks, content sections use `<main>`, `<aside>`, and `<section>` with appropriate headings, enabling screen reader users to navigate by landmarks.
 
 ===== Descriptive ARIA Labels for Context
 
-Interactive elements receive descriptive `aria-label` attributes when visible text alone does not convey full context. This is particularly important for icon-only buttons and actions that depend on surrounding data.
-
-#code_example[
-  Cart item removal buttons include item name in ARIA label for clarity.
-
-  ```typescript
-  <button
-    type="button"
-    onClick={() => removeFromCart(item.id)}
-    aria-label={`Remove ${item.name} from cart`}
-    className="btn-icon-danger"
-  >
-    <TrashIcon />
-  </button>
-  ```
-]
-
-Without the descriptive label, screen readers would announce only "button" or the button's class name, providing no indication of what the button removes. The pattern includes dynamic data (item name) to disambiguate when multiple similar buttons exist on the page.
+Interactive elements receive descriptive `aria-label` attributes when visible text alone does not convey full context. For example, cart item removal buttons include item names: `aria-label={`Remove ${item.name} from cart`}`, disambiguating when multiple similar buttons exist on the page.
 
 ===== Form Label Association
 
-All form inputs associate with visible labels using explicit `htmlFor` attributes matching input `id` values. This enables clicking labels to focus inputs and ensures screen readers announce labels when inputs receive focus.
-
-#code_example[
-  Form fields use id/htmlFor association rather than implicit label wrapping.
+All form inputs associate with visible labels using explicit `htmlFor` attributes matching input `id` values, enabling clicking labels to focus inputs and ensuring screen readers announce labels when inputs receive focus.
 
   ```typescript
   <div className="form-field">

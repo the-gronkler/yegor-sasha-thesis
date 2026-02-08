@@ -6,33 +6,11 @@ The component architecture enables efficient development workflows through clear
 
 ===== Component Isolation and Change Impact
 
-The layered component hierarchy limits the scope of changes. Modifications to UI atoms affect only their direct consumers, while page-level changes remain route-isolated without cascading to unrelated features.
-
-For example, changing the `Button` component's styling requires rebuilding all pages that import it, but the TypeScript type system and bundler ensure only affected modules recompile. Modifying a specific customer page affects only that route's code chunk.
+The layered component hierarchy limits the scope of changes. Modifications to UI atoms affect only their direct consumers. The TypeScript type system and bundler ensure only affected modules recompile.
 
 ===== Vite Hot Module Replacement
 
-The Vite development server provides hot module replacement (HMR) that updates changed modules in the running application without full page reload. This preserves application state during development, enabling rapid style iteration and component refinement.
-
-The HMR configuration in `vite.config.js` recognizes React Fast Refresh @ReactFastRefresh, which preserves component state across edits to component bodies while resetting state when props or hooks change.
-
-#code_example[
-  Vite configuration enables React Fast Refresh for development builds.
-
-  ```typescript
-  export default defineConfig({
-    plugins: [
-      react(),
-      laravel({
-        input: ['resources/js/app.tsx', 'resources/css/main.scss'],
-        refresh: true,
-      }),
-    ],
-  });
-  ```
-]
-
-The `refresh: true` option enables Blade template detection, triggering full page reloads when server-side templates change rather than attempting to hot-replace server-rendered content.
+The Vite development server provides hot module replacement (HMR) that updates changed modules without full page reload, preserving application state. The HMR configuration recognizes React Fast Refresh @ReactFastRefresh, which preserves component state across edits to component bodies while resetting state when props or hooks change. The `refresh: true` option in `vite.config.js` enables Blade template detection.
 
 ===== SCSS Compilation Pipeline
 
