@@ -9,11 +9,7 @@ MariaDB, a community-developed fork of MySQL, was selected over competitors such
 
 ==== Native Geospatial Support
 
-A key requirement, since the application performs extensive geospatial calculations that must execute within the database engine for performance.
-
-The application relies heavily on location-based services, including filtering establishments within a user-defined radius and calculating accurate distances on the Earth's surface.
-
-MariaDB meets this requirement with efficient, native spatial functions such as `ST_Distance_Sphere`, enabling these calculations directly within the database engine and eliminating the need for expensive application-side processing or external geospatial libraries.
+The application relies heavily on location-based services, including filtering establishments within a user-defined radius and calculating accurate distances on the Earth's surface. MariaDB provides native spatial functions (such as `ST_Distance_Sphere`) that execute these calculations directly within the database engine, eliminating the need for application-side processing. The detailed comparison of geospatial computation approaches — including alternatives such as PostGIS and application-level Haversine — is presented in @map-tech-geospatial.
 
 ==== Performance Characteristics
 

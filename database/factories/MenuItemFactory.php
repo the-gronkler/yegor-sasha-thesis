@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\FoodType;
 use App\Models\MenuItem;
-use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MenuItemFactory extends Factory
@@ -66,7 +65,6 @@ class MenuItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
             'name' => self::$menuItemNames[array_rand(self::$menuItemNames)],
             'price' => $this->faker->randomFloat(2, 1, 100),
             'description' => self::$menuItemDescriptions[array_rand(self::$menuItemDescriptions)],
