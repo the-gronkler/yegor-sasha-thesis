@@ -71,10 +71,10 @@ All form inputs associate with visible labels using explicit `htmlFor` attribute
   ```
 ]
 
-Validation error messages are connected to inputs using `aria-describedby`, ensuring screen readers announce errors when inputs receive focus.
+
 
 #code_example[
-  Error message association example.
+  Validation error messages are connected to inputs using `aria-describedby`, ensuring screen readers announce errors when inputs receive focus.
 
   ```typescript
   <input
