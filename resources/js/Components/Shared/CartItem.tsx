@@ -16,10 +16,8 @@ export default function CartItem({
   onUpdateQuantity,
   onRemove,
 }: CartItemProps) {
-  const primaryImage =
-    item.images?.find((img) => img.is_primary_for_menu_item) ||
-    item.images?.[0];
-  const imageUrl = primaryImage?.url;
+  // Use the selected image (image_id relationship), fallback to first image, or null
+  const imageUrl = item.image?.url || item.images?.[0]?.url || null;
 
   return (
     <div className="cart-item">
