@@ -31,8 +31,7 @@ export default function MenuItemCard({
     setIsAvailable(item.is_available);
   }, [item.is_available]);
 
-  // Use the selected image (image_id relationship), fallback to first image, or null
-  const imageUrl = item.image?.url || item.images?.[0]?.url || null;
+  const imageUrl = item.image?.url || null;
 
   const handleAddToCart = () => {
     requireAuth(() => {

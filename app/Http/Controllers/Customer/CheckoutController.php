@@ -19,7 +19,7 @@ class CheckoutController extends Controller
                 ->with('info', 'This order has already been checked out.');
         }
 
-        $order->load(['restaurant', 'menuItems.images']);
+        $order->load(['restaurant', 'menuItems.image']);
 
         // Calculate totals
         $subtotal = $order->menuItems->sum(function ($item) {

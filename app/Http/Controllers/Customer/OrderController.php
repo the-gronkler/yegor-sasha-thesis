@@ -47,7 +47,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['restaurant', 'menuItems.images', 'status']);
+        $order->load(['restaurant', 'menuItems.image', 'status']);
 
         return Inertia::render('Customer/Orders/Show', [
             'order' => $order,
