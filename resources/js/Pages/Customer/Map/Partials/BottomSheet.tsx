@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import RestaurantCard from '@/Components/Shared/RestaurantCard';
 import { Restaurant } from '@/types/models';
 
@@ -224,23 +223,15 @@ export default function BottomSheet({
         className="sheet-content"
         ref={sheetContentRef}
       >
-        {restaurants.length === 0 ? (
-          <div className="sheet-empty-state">
-            <MagnifyingGlassIcon className="empty-icon" />
-            <h2>No restaurants found</h2>
-            <p>Try adjusting your search or expanding the radius.</p>
-          </div>
-        ) : (
-          restaurants.map((restaurant) => (
-            <RestaurantCard
-              key={restaurant.id}
-              restaurant={restaurant}
-              selected={restaurant.id === selectedRestaurantId}
-              onSelect={() => onSelectRestaurant(restaurant.id)}
-              containerRef={(el) => (cardRefs.current[restaurant.id] = el)}
-            />
-          ))
-        )}
+        {restaurants.map((restaurant) => (
+          <RestaurantCard
+            key={restaurant.id}
+            restaurant={restaurant}
+            selected={restaurant.id === selectedRestaurantId}
+            onSelect={() => onSelectRestaurant(restaurant.id)}
+            containerRef={(el) => (cardRefs.current[restaurant.id] = el)}
+          />
+        ))}
       </div>
     </div>
   );

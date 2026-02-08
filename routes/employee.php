@@ -22,11 +22,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsEmployee::class])
         // Menu
         Route::get('menu', [MenuController::class, 'index'])->name('menu.index');
 
-        // Establishment (All employees can access, but content differs)
-        Route::get('establishment', [EstablishmentController::class, 'index'])->name('establishment.index');
-
-        // Establishment sub-pages (Admins only)
+        // Establishment (Admins only)
         Route::middleware(['can:manage-restaurant'])->group(function () {
+            Route::get('establishment', [EstablishmentController::class, 'index'])->name('establishment.index');
+
             // Workers Management
             Route::get('establishment/workers', [EstablishmentController::class, 'workers'])->name('establishment.workers');
             Route::post('establishment/workers', [EstablishmentController::class, 'storeWorker'])->name('establishment.workers.store');

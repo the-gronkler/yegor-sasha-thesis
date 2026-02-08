@@ -30,12 +30,14 @@ export default function BottomNav() {
           icon={QueueListIcon}
           label="Menu"
         />
-        <IconNavItem
-          href={route('employee.establishment.index')}
-          active={route().current('employee.establishment.*')}
-          icon={isRestaurantAdmin ? BuildingStorefrontIcon : UserIcon}
-          label={isRestaurantAdmin ? 'Establishment' : 'Worker Profile'}
-        />
+        {isRestaurantAdmin && (
+          <IconNavItem
+            href={route('employee.establishment.index')}
+            active={route().current('employee.establishment.*')}
+            icon={BuildingStorefrontIcon}
+            label="Establishment"
+          />
+        )}
       </nav>
     );
   }
