@@ -4,7 +4,7 @@
 
 The component hierarchy described in @frontend-architecture is realized as a structured directory layout under #source_code_link("resources/js"). This section maps each architectural layer to its physical location in the codebase and demonstrates the conventions that govern file placement.
 
-_Pages Directory_ (#source_code_link("resources/js/Pages")) organizes views by user role, mirroring the backend route structure. The directory contains three primary subdivisions:
+*Pages Directory* (#source_code_link("resources/js/Pages")) organizes views by user role, mirroring the backend route structure. The directory contains three primary subdivisions:
 
 - `Customer/`: Customer-facing pages including restaurant discovery, menu browsing, cart management, and order tracking
 - `Employee/`: Restaurant employee interfaces for order management, menu editing, and establishment settings
@@ -12,31 +12,31 @@ _Pages Directory_ (#source_code_link("resources/js/Pages")) organizes views by u
 
 Each page component corresponds to an Inertia route defined in Laravel's web routes file. For example, #source_code_link("resources/js/Pages/Customer/Restaurants/Show.tsx") corresponds to the route `route('restaurants.show')`.
 
-_Layouts Directory_ (#source_code_link("resources/js/Layouts")) provides structural wrappers that persist across navigation. The application defines specialized layouts for different contexts:
+*Layouts Directory* (#source_code_link("resources/js/Layouts")) provides structural wrappers that persist across navigation. The application defines specialized layouts for different contexts:
 
 - `AppLayout`: Default layout with navigation header and footer for standard pages
 - `MapLayout`: Full-screen layout for map-based restaurant discovery, disabling body scrolling to prevent conflicts with map pan interactions
 
-_Components Directory_ splits into two subdirectories based on specificity:
+*Components Directory* splits into two subdirectories based on specificity:
 
 - #source_code_link("resources/js/Components/UI"): Generic atomic elements without domain knowledge (`Button`, `Modal`, `Toggle`, `Toast`, `SearchInput`, `Lightbox`). These components accept standard HTML attributes and provide consistent styling without business logic.
 - #source_code_link("resources/js/Components/Shared"): Domain-aware molecules combining UI atoms with business presentation logic (`RestaurantCard`, `MenuItemCard`, `CartItem`, `OrderCard`, `StarRating`, `BottomNav`, `Map`). These components accept typed domain models and format data for display.
 
-_Hooks Directory_ (#source_code_link("resources/js/Hooks")) encapsulates reusable stateful logic:
+*Hooks Directory* (#source_code_link("resources/js/Hooks")) encapsulates reusable stateful logic:
 
 - Authentication utilities (`useAuth`)
 - Map page orchestration (`useMapPage`)
 - Configurable fuzzy search (`useSearch`)
 - Real-time update subscriptions (`useMenuItemUpdates`, `useRestaurantCart`)
 
-_Contexts Directory_ (#source_code_link("resources/js/Contexts")) defines React Context providers for global state:
+*Contexts Directory* (#source_code_link("resources/js/Contexts")) defines React Context providers for global state:
 
 - `CartContext`: Shopping cart state and mutation functions
 - `LoginModalContext`: Authentication modal visibility and callbacks
 
-_Types Directory_ (#source_code_link("resources/js/types")) centralizes TypeScript definitions, with `models.ts` containing database model interfaces and `index.d.ts` providing global type definitions including the `PageProps` interface.
+*Types Directory* (#source_code_link("resources/js/types")) centralizes TypeScript definitions, with `models.ts` containing database model interfaces and `index.d.ts` providing global type definitions including the `PageProps` interface.
 
-_Utils Directory_ (#source_code_link("resources/js/Utils")) contains pure utility functions for data transformation and formatting.
+*Utils Directory* (#source_code_link("resources/js/Utils")) contains pure utility functions for data transformation and formatting.
 
 ===== Convention in Practice
 

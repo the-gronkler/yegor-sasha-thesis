@@ -132,9 +132,9 @@ The weight distribution reflects search intent: users searching restaurants prio
 
 Client-side search operates only on data already loaded to the client. This constraint has performance and completeness implications:
 
-_Performance_: For datasets under several hundred items, client-side filtering provides instant feedback with minimal CPU cost. The approach avoids network latency entirely.
+*Performance*: For datasets under several hundred items, client-side filtering provides instant feedback with minimal CPU cost. The approach avoids network latency entirely.
 
-_Completeness_: Search results are limited to items already returned from the backend. If a restaurant list loads 50 nearby restaurants, searching can only filter within those 50. Users cannot discover restaurants beyond the initial dataset without requesting more data from the server.
+*Completeness*: Search results are limited to items already returned from the backend. If a restaurant list loads 50 nearby restaurants, searching can only filter within those 50. Users cannot discover restaurants beyond the initial dataset without requesting more data from the server.
 
 The architecture accepts this trade-off because:
 1. Restaurant discovery already filters by proximity, so the subset is relevant.
