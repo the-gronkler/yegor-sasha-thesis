@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import AppLayout from '@/Layouts/AppLayout';
 import { Order } from '@/types/models';
 import { PageProps } from '@/types';
@@ -24,10 +23,6 @@ export default function OrderShow({ order }: OrderShowProps) {
 
       <div className="order-show-page">
         <div className="page-header">
-          <Link href={route('orders.index')} className="back-button-link">
-            <ArrowLeftIcon className="icon" />
-            <span>Orders</span>
-          </Link>
           <h1 className="page-title">Order #{order.id}</h1>
           <p className="order-date">{formatDateTime(order.created_at)}</p>
         </div>
@@ -82,6 +77,12 @@ export default function OrderShow({ order }: OrderShowProps) {
             <span>Total</span>
             <span>{formatCurrency(total)}</span>
           </div>
+        </div>
+
+        <div className="back-button-container">
+          <Link href={route('orders.index')} className="btn-secondary">
+            Back to Orders
+          </Link>
         </div>
       </div>
     </AppLayout>
