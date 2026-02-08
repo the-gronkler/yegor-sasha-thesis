@@ -100,16 +100,6 @@ These infrastructure tables are provisioned through framework migrations and ope
 ==== Audit Timestamps
 All domain entities include standard audit timestamp columns (`created_at` and `updated_at`) that automatically track record creation and modification times. These system-level columns are managed transparently by the framework's ORM layer and require no explicit application logic. While omitted from the logical ERD for visual clarity, these timestamps are physically present in all tables and serve multiple purposes: supporting temporal queries, providing audit trails for regulatory compliance, and enabling cache invalidation strategies. The timestamp columns are nullable to accommodate edge cases in data migration scenarios.
 
-==== Framework Infrastructure Tables
-The physical database schema includes several framework-managed tables that support application infrastructure but do not represent business domain entities. These tables are intentionally excluded from the ERD as they constitute implementation details rather than logical design decisions:
-
-- *Sessions*: Server-side session storage for stateful authentication
-- *Cache and Cache Locks*: Application-level caching layer with distributed locking support
-- *Jobs, Job Batches, and Failed Jobs*: Asynchronous task queue management for background processing (email notifications, order status updates, image processing)
-- *Password Reset Tokens*: Temporary token storage for secure password recovery flows
-
-These infrastructure tables are provisioned through framework migrations and operate independently of the business domain model. Their schema and behavior are dictated by framework conventions, ensuring compatibility with the broader ecosystem of libraries and tools that integrate with the framework's job queue, cache, and authentication systems.
-
 === Indexing and Constraint Strategy
 Indexing and constraints are applied to match the dominant access patterns while preserving integrity.
 *Primary keys*: Surrogate primary keys provide stable identifiers and predictable join behavior.
