@@ -55,7 +55,7 @@ The system provides a solid foundation upon which several enhancements could be 
 
 === Payment Gateway Integration
 
-Integrating a production payment provider such as Stripe represents the most critical next step for operational deployment. Laravel Cashier provides a first-party abstraction for Stripe subscriptions and one-time payments, offering webhook handling, receipt generation, and SCA (Strong Customer Authentication) compliance. The existing order lifecycle (with its status-based state machine transitioning from "In Cart" through "Placed" to "Fulfilled") was designed to accommodate this integration: payment confirmation would trigger the status transition from cart to placed order, replacing the current mock implementation.
+Integrating a production payment provider such as Stripe represents the most critical next step for operational deployment. Laravel Cashier @LaravelCashierDocs provides a first-party abstraction for Stripe subscriptions and one-time payments, offering webhook handling, receipt generation, and SCA (Strong Customer Authentication) compliance. The existing order lifecycle (with its status-based state machine transitioning from "In Cart" through "Placed" to "Fulfilled") was designed to accommodate this integration: payment confirmation would trigger the status transition from cart to placed order, replacing the current mock implementation.
 
 === Gamified Engagement System
 

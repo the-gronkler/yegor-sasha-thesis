@@ -6,7 +6,7 @@ Accessibility is enforced at the UI component layer to ensure consistent pattern
 
 ===== Semantic HTML Structure
 
-Components use semantic HTML elements that communicate roles to assistive technologies without requiring additional annotations. This preference for native semantics over generic containers improves compatibility with screen readers and reduces maintenance burden.
+Components use semantic HTML elements that communicate roles to assistive technologies @WCAG21 @WAIARIA without requiring additional annotations. This preference for native semantics over generic containers improves compatibility with screen readers and reduces maintenance burden.
 
 #code_example[
   Button components use `<button>` elements rather than styled `<div>` with click handlers.
