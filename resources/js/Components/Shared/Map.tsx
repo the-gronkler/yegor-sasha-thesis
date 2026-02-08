@@ -221,29 +221,22 @@ export default function MapComponent({
       [15, 5],
     ];
 
-    let animationId: number;
-
-    const animate = (): void => {
+    const intervalId = setInterval(() => {
       const t = performance.now() / 1000;
       // ~0.12 Hz breathing cycle (~8s period), ±20% amplitude
       const pulse = 1 + 0.2 * Math.sin(t * 0.25 * Math.PI);
 
-      try {
+      if (map.getLayer('heatmap')) {
         map.setPaintProperty('heatmap', 'heatmap-intensity', [
           'interpolate',
           ['linear'],
           ['zoom'],
           ...baseStops.flatMap(([z, v]) => [z, v * pulse]),
         ]);
-      } catch {
-        // Layer may not exist yet on first render
       }
+    }, 100);
 
-      animationId = requestAnimationFrame(animate);
-    };
-
-    animationId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationId);
+    return () => clearInterval(intervalId);
   }, [showHeatmap]);
 
   // Handle map mouse move for cursor changes

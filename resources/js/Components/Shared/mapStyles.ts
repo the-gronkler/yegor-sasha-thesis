@@ -1,4 +1,5 @@
 import type { LayerProps } from 'react-map-gl/mapbox';
+import type { HeatmapLayerSpecification } from 'mapbox-gl';
 
 export interface MapTheme {
   [key: string]: string;
@@ -70,7 +71,7 @@ export const getUnclusteredPointLayer = (theme: MapTheme): LayerProps => ({
 });
 
 export const getHeatmapLayer = (visible: boolean): LayerProps => {
-  const paint: Record<string, unknown> = {
+  const paint: HeatmapLayerSpecification['paint'] = {
     // Weight: amplify dense clusters so tightly packed areas glow hotter
     'heatmap-weight': [
       'interpolate',
@@ -165,5 +166,5 @@ export const getHeatmapLayer = (visible: boolean): LayerProps => {
     source: 'restaurants',
     maxzoom: 17,
     paint,
-  } as LayerProps;
+  };
 };
