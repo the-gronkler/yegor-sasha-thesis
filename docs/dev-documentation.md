@@ -90,12 +90,13 @@ php artisan mfs [options]
 
 - `--force`: Force the operation to run when in production
 - `--restaurants=<number>`: Number of restaurants to seed (default: 10)
-- `--customers=<number>`: Number of customers to seed (default: 5)
+- `--customers=<number>`: Number of customers to seed (default: 15)
 - `--employees-min=<number>`: Minimum employees per restaurant (default: 2)
 - `--employees-max=<number>`: Maximum employees per restaurant (default: 14)
-- `--reviews-per-customer=<number>`: Number of reviews each customer creates (default: 2)
-- `--orders-per-customer=<number>`: Number of orders each customer has (default: 4)
+- `--orders-per-restaurant=<number>`: Number of orders per restaurant (default: 4)
 - `--radius=<number>`: Radius in km for restaurant distribution (default: 10)
+
+**Seeding order:** static data (allergens, order statuses) → restaurants (with menu items, food types, images) → admin user → customers → employees → orders (per restaurant) → reviews (1-14 per restaurant) → default employee.
 
 **Examples:**
 
@@ -107,7 +108,7 @@ php artisan mfs
 php artisan mfs --restaurants=5 --customers=3 --employees-min=1 --employees-max=2 --radius=5
 
 # Force in production with heavy data
-php artisan mfs --force --restaurants=50 --customers=100 --reviews-per-customer=5
+php artisan mfs --force --restaurants=50 --customers=100 --orders-per-restaurant=6
 ```
 
 #### `seed:restaurants` - Seed Restaurants Only

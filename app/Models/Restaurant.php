@@ -90,7 +90,7 @@ class Restaurant extends Model
         $avgRating = $this->reviews()->avg('rating');
 
         $this->update([
-            'rating' => $avgRating !== null ? round($avgRating, 2) : null,
+            'rating' => $avgRating !== null ? round($avgRating, 2) : 3,
         ]);
     }
 
