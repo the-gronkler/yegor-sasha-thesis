@@ -27,6 +27,14 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
+        if ($this->app->runningInConsole()) {
+            $this->loadMigrationsFrom(
+                collect(glob(database_path('migrations/*'), GLOB_ONLYDIR))
+                    ->flatten()
+                    ->toArray()
+            );
+        }
+
         // Share validation errors and flash messages with all Inertia responses
         Inertia::share([
             'cart' => function () {
