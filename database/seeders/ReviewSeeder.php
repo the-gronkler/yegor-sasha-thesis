@@ -13,7 +13,6 @@ class ReviewSeeder extends Seeder
 {
     public function run(?callable $progressCallback = null): void
     {
-        $restaurants = Restaurant::all();
         $customerIds = Customer::pluck('user_id')->toArray();
 
         if (empty($customerIds)) {
@@ -21,10 +20,12 @@ class ReviewSeeder extends Seeder
         }
 
         $allImageUrls = Image::pluck('image')->toArray();
-        $processed = 0;
 
-        foreach ($restaurants as $restaurant) {
-            $reviewCount = rand(2, min(14, count($customerIds)));
+        $total = Restaurant::count();
+        $current = 0;
+
+        Restaurant::lazy()->each(function ($restaurant) use ($customerIds, $allImageUrls, &$current, $total, $progressCallback) {
+            $reviewCount = rand(1, min(14, count($customerIds)));
 
             $selectedCustomerIds = collect($customerIds)
                 ->shuffle()
@@ -49,11 +50,11 @@ class ReviewSeeder extends Seeder
             }
 
             $restaurant->recalculateRating();
-            $processed++;
+            $current++;
 
             if ($progressCallback) {
-                $progressCallback($processed, $restaurants->count());
+                $progressCallback($current, $total);
             }
-        }
+        });
     }
 }
