@@ -12,7 +12,7 @@ The objectives established at the outset of this project were addressed as follo
 
 ==== Customer Experience Enhancement
 
-An intuitive, mobile-first interface was developed, enabling customers to browse menus, place orders, and track their food in real time. The map-based restaurant discovery feature allows users to locate establishments based on proximity, quality, and popularity. Customer review functionality was implemented, permitting users to rate and comment on restaurants, with aggregate ratings influencing search results. Instant client-side search provides responsive filtering across restaurant and menu data.
+An intuitive, mobile-first interface was developed, enabling customers to browse menus, place orders, and track their food in real time. The map-based restaurant discovery feature allows users to locate establishments based on proximity, quality, and popularity, complemented by a toggleable heatmap layer that visualizes restaurant density and quality across the map. Customer review functionality was implemented, permitting users to rate and comment on restaurants, with aggregate ratings influencing search results. Instant client-side search provides responsive filtering across restaurant and menu data.
 
 ==== Restaurant Operations Optimization
 
@@ -57,10 +57,6 @@ The system provides a solid foundation upon which several enhancements could be 
 
 Integrating a production payment provider such as Stripe represents the most critical next step for operational deployment. Laravel Cashier provides a first-party abstraction for Stripe subscriptions and one-time payments, offering webhook handling, receipt generation, and SCA (Strong Customer Authentication) compliance. The existing order lifecycle (with its status-based state machine transitioning from "In Cart" through "Placed" to "Fulfilled") was designed to accommodate this integration: payment confirmation would trigger the status transition from cart to placed order, replacing the current mock implementation.
 
-=== Heatmap and Advanced Discovery
-
-The restaurant heatmap feature described in the functional requirements, where restaurants radiate "heat" based on a composite of popularity, rating, and proximity, forming identifiable hotspots, was specified but not implemented. Realizing this feature would involve extending the existing composite scoring algorithm in the map pipeline to generate a continuous density surface rather than discrete point scores. Mapbox GL JS natively supports heatmap layers, making the frontend rendering straightforward once the backend provides appropriately weighted data points.
-
 === Gamified Engagement System
 
 Implementing the specified points, badges, and discount coupon system would require new database entities for tracking user achievements and point balances, a rule engine for awarding points based on order activity, and integration with the checkout flow to allow point redemption. This feature has the potential to significantly increase repeat customer engagement and could be modeled after established loyalty program patterns in the food service industry.
@@ -96,3 +92,7 @@ While the current Docker Compose deployment is suitable for moderate traffic, pr
 === Internationalization
 
 Adding multi-language support would broaden the platform's accessibility across different markets. The backend could leverage Laravel's built-in localization features, while the frontend would require a translation management solution (such as react-i18next) and locale-aware formatting for currencies, dates, and number representations.
+
+== Closing Remarks
+
+This project set out to demonstrate that small and medium-sized restaurants can gain access to modern digital ordering capabilities without dependence on costly third-party platforms. The resulting system fulfills this goal: it provides a working, deployable product built entirely on open-source and self-hosted technologies, covering the full lifecycle from restaurant discovery through order placement to real-time fulfillment tracking. While several features remain for future development, the architectural foundation, the modular codebase, and the containerized deployment pipeline ensure that the system can evolve incrementally to meet the growing needs of its operators and their customers.
