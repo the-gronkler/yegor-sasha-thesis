@@ -17,9 +17,6 @@ One of the key considerations for this project's technology choices is the avoid
 ==== AWS S3 API Compatibility
 R2 provides full interface compatibility with the Amazon S3 API @CloudflareR2Docs. This feature allows the application to utilize Laravel's native S3 file storage driver without requiring any custom integration code. Because the application depends on Laravel's Storage facade abstraction rather than R2-specific APIs, the codebase remains provider-agnostic - switching to alternative S3-compatible providers would require only configuration changes without modifying business logic.
 
-==== Edge Integration
-As part of the Cloudflare ecosystem, R2 is naturally integrated with the Cloudflare Content Delivery Network (CDN) @CloudflareR2Docs. While not strictly a storage feature, this proximity ensures that assets are cached and delivered from edge locations closer to the user, reducing latency and improving the perceived performance of the application.
-
 === Comparison with Alternatives
 
 *Amazon S3*: The industry standard for object storage. While it offers unmatched separate feature sets (such as lifecycle policies and Glacier archival), its pricing structure - specifically the charge for outbound data transfer - was deemed prohibitive for this project. The complexity of AWS IAM (Identity and Access Management) also introduces a steeper learning curve compared to R2's simplified token management.

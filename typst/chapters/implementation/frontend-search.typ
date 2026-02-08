@@ -28,44 +28,7 @@ The generic type parameter `T` enables the hook to work with any data structure 
 
 ===== Fuse.js Configuration and Caching
 
-The hook configures Fuse.js with defaults optimized for typical restaurant discovery use cases. The configuration balances match tolerance with result relevance.
-
-#code_example[
-  Default Fuse.js configuration prioritizes relevant matches with location-agnostic search.
-
-  ```typescript
-  const defaultOptions: IFuseOptions<T> = {
-    keys: searchKeys as string[],
-    threshold: 0.3,
-    ignoreLocation: true,
-    includeScore: true,
-    shouldSort: true,
-  };
-
-  const fuseOptions = { ...defaultOptions, ...options };
-  ```
-]
-
-Configuration parameters control matching behavior:
-- `threshold: 0.3`: Requires 70% match quality, filtering very distant matches while allowing minor typos
-- `ignoreLocation: true`: Matches anywhere in text, not requiring match at string start
-- `includeScore: true`: Enables relevance-based result ordering
-- `shouldSort: true`: Orders results by match quality
-
-The Fuse.js instance creation is wrapped in `useMemo` to prevent redundant instantiation on unrelated component re-renders.
-
-#code_example[
-  Memoization prevents unnecessary Fuse.js instance creation when dependencies are stable.
-
-  ```typescript
-  const fuse = useMemo(
-    () => new Fuse(items, { ...defaultOptions, ...options }),
-    [items, searchKeys, options]
-  );
-  ```
-]
-
-The dependency array ensures the Fuse instance updates when items, search keys, or options change, triggering reindexing only when necessary.
+The hook configures Fuse.js with defaults optimized for restaurant discovery: a threshold of 0.3 (requiring 70% match quality to tolerate minor typos while filtering irrelevant results), location-agnostic matching, and relevance-based sorting. Callers may override any default through the optional `options` parameter. The Fuse.js instance is wrapped in `useMemo` to prevent redundant instantiation on unrelated re-renders, reindexing only when items, keys, or options change. The full configuration is defined in #source_code_link("resources/js/Hooks/useSearch.ts").
 
 ===== Filtering Logic and Empty Query Optimization
 
@@ -88,10 +51,10 @@ This optimization matters for large datasets where Fuse.js processing has measur
 
 ===== Context-Specific Configurations
 
-While the hook provides general-purpose fuzzy search, specific features require tailored configurations with weighted keys for relevance tuning.
+While the hook provides general-purpose fuzzy search, specific features supply tailored weighted key configurations for relevance tuning.
 
 #code_example[
-  Restaurant search weights name and description higher than nested menu items.
+  Restaurant search weights name highest, description second, and nested menu item names lowest, reflecting typical search intent.
 
   ```typescript
   const { query, setQuery, filteredItems } = useSearch(
@@ -108,25 +71,7 @@ While the hook provides general-purpose fuzzy search, specific features require 
   ```
 ]
 
-The weight distribution reflects search intent: users searching restaurants prioritize restaurant names, secondarily consider descriptions, and only tangentially care about specific menu items. This prevents a restaurant with matching menu items but unrelated name from outranking a restaurant with matching name.
-
-#code_example[
-  Menu filtering prioritizes item names over descriptions and categories.
-
-  ```typescript
-  const { filteredItems } = useSearch(
-    menuItems,
-    ['name', 'description', 'food_type.name'],
-    {
-      keys: [
-        { name: 'name', weight: 0.6 },
-        { name: 'description', weight: 0.25 },
-        { name: 'food_type.name', weight: 0.15 },
-      ],
-    }
-  );
-  ```
-]
+This weight distribution ensures a restaurant with a matching name outranks one that merely contains a matching menu item. Other search contexts, such as menu item filtering, apply analogous weight distributions tuned to their respective data structures.
 
 ===== Constraints and Trade-offs
 

@@ -6,29 +6,7 @@ Accessibility is enforced at the UI component layer to ensure consistent pattern
 
 ===== Semantic HTML Structure
 
-Components use semantic HTML elements that communicate roles to assistive technologies @WCAG21 @WAIARIA without requiring additional annotations. This preference for native semantics over generic containers improves compatibility with screen readers and reduces maintenance burden.
-
-#code_example[
-  Button components use `<button>` elements rather than styled `<div>` with click handlers.
-
-  ```typescript
-  // Correct: semantic button with implicit ARIA role
-  <button
-    type="button"
-    onClick={handleAddToCart}
-    className="btn-primary"
-  >
-    Add to Cart
-  </button>
-
-  // Incorrect: generic div requiring manual ARIA
-  // <div onClick={handleAddToCart} role="button" tabIndex={0}>
-  //   Add to Cart
-  // </div>
-  ```
-]
-
-Navigation structures use `<nav>` landmarks, content sections use `<main>`, `<aside>`, and `<section>` elements with appropriate headings. This structure enables screen reader users to navigate by landmarks and skip irrelevant content.
+Components use native semantic HTML elements (`<button>`, `<nav>`, `<main>`, `<section>`) that communicate roles to assistive technologies @WCAG21 @WAIARIA without requiring additional ARIA annotations. This preference for native semantics over generic `<div>` containers with manual role attributes improves screen reader compatibility and reduces maintenance burden. Navigation structures use `<nav>` landmarks, and content regions use `<main>`, `<aside>`, and `<section>` with appropriate headings, enabling users to navigate by landmarks and skip irrelevant content.
 
 ===== Descriptive ARIA Labels for Context
 
@@ -53,69 +31,8 @@ Without the descriptive label, screen readers would announce only "button" or th
 
 ===== Form Label Association
 
-All form inputs associate with visible labels using explicit `htmlFor` attributes matching input `id` values. This enables clicking labels to focus inputs and ensures screen readers announce labels when inputs receive focus.
-
-#code_example[
-  Form fields use id/htmlFor association rather than implicit label wrapping.
-
-  ```typescript
-  <div className="form-field">
-    <label htmlFor="restaurant-name">Restaurant Name</label>
-    <input
-      id="restaurant-name"
-      type="text"
-      value={form.data.name}
-      onChange={(e) => form.setData('name', e.target.value)}
-    />
-  </div>
-  ```
-]
-
-
-
-#code_example[
-  Validation error messages are connected to inputs using `aria-describedby`, ensuring screen readers announce errors when inputs receive focus.
-
-  ```typescript
-  <input
-    id="email"
-    type="email"
-    value={form.data.email}
-    onChange={(e) => form.setData('email', e.target.value)}
-    aria-describedby={form.errors.email ? 'email-error' : undefined}
-    aria-invalid={!!form.errors.email}
-  />
-  {form.errors.email && (
-    <span id="email-error" className="error-message">
-      {form.errors.email}
-    </span>
-  )}
-  ```
-]
-
-The `aria-invalid` attribute explicitly marks fields with validation errors, triggering screen reader announcements without requiring users to search for error text.
+All form inputs associate with visible labels using explicit `htmlFor`/`id` attribute pairs, enabling label clicks to focus inputs and ensuring screen readers announce labels on focus. Validation errors connect to inputs through `aria-describedby`, and `aria-invalid` marks fields with errors so that screen readers announce the error state without requiring users to search for error text. This pattern integrates with the `useForm`-based error handling described in the form handling implementation.
 
 ===== Focus Management and Keyboard Navigation
 
-All interactive elements support keyboard-only navigation using standard tab order, Enter/Space activation, and Escape dismissal for modals and overlays.
-
-Focus indicators are visible on all interactive elements through CSS `:focus` styles. This enables keyboard-only users to track their position in the interface.
-
-#code_example[
-  Focus styles provide visible indication of active element.
-
-  ```scss
-  .btn-primary:focus {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
-  .btn-primary:focus:not(:focus-visible) {
-    outline: none;
-  }
-  ```
-]
-
-The `:focus-visible` pseudo-class prevents focus outlines from appearing on mouse clicks while preserving them for keyboard navigation, balancing aesthetic preferences with accessibility requirements.
-
-Modal dialogs trap focus within the modal while open, preventing keyboard navigation from escaping to background content. When dismissed, focus returns to the element that triggered the modal.
+All interactive elements support keyboard-only navigation using standard tab order, Enter/Space activation, and Escape dismissal for modals. Visible focus indicators are applied through CSS `:focus` styles, with `:focus-visible` used to suppress outlines on mouse clicks while preserving them for keyboard users. Modal dialogs trap focus within the modal while open and return focus to the triggering element on dismissal, preventing keyboard navigation from escaping to obscured background content.

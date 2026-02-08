@@ -42,10 +42,6 @@
 - The restaurant's displayed rating is automatically recalculated as the average of all its review ratings whenever a review is created, updated, or deleted.
 - The total number of reviews is displayed alongside the aggregate rating for each restaurant to help users make informed choices.
 
-==== Order Sharing
-- Enable group order sharing where multiple users can contribute to a single order and split payment.
-- Share restaurant heatmap or specific menus with friends via a unique link or app invitation.
-
 == For Restaurants
 
 === Registration
@@ -64,10 +60,6 @@
 - Restaurants can send status updates to customers automatically or manually.
 
 === Additional Functionalities
-
-==== Dynamic Pricing and Promotions
-- Tools to create dynamic pricing (e.g., discounts during off-peak hours or happy hour deals).
-- Ability to push promotional campaigns directly to the app users, such as "Buy 1 Get 1 Free."
 
 ==== Analytics and Reporting
 - Provide insights into order trends, customer preferences, and inventory performance.

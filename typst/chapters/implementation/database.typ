@@ -10,34 +10,9 @@ Database migrations are stored in #source_code_link("database/migrations") as ti
 
 Laravel migrations use anonymous class syntax extending `Migration` base class, with `up()` and `down()` methods defining forward and rollback operations respectively. The Schema facade provides a fluent API for table definition.
 
-#code_example[
-  The users table migration establishes the authentication principal with standard Laravel conventions.
+The users migration creates the authentication table with email uniqueness constraint, password hash, and session management columns.
 
-  ```php
-  <?php
-  return new class extends Migration
-  {
-      public function up(): void
-      {
-          Schema::create('users', function (Blueprint $table) {
-              $table->id();
-              $table->string('name');
-              $table->string('email');
-              $table->timestamp('email_verified_at')->nullable();
-              $table->string('password');
-              $table->boolean('is_admin')->default(false);
-              $table->rememberToken();
-              $table->timestamps();
-          });
-      }
-
-      public function down(): void
-      {
-          Schema::dropIfExists('users');
-      }
-  };
-  ```
-]
+#source_code_link("database/migrations")
 
 The `id()` method creates an auto-incrementing unsigned big integer primary key. The `is_admin` boolean distinguishes site administrators from regular users. The `rememberToken()` column stores persistent login session tokens. The `timestamps()` method adds `created_at` and `updated_at` columns with automatic maintenance. Note that the `surname` field is added in a later migration following the evolution of requirements.
 
@@ -45,21 +20,9 @@ The `id()` method creates an auto-incrementing unsigned big integer primary key.
 
 The disjoint role inheritance pattern described in @database-design materializes through separate `customers` and `employees` tables with foreign keys to `users`.
 
-#code_example[
-  The customers table links user authentication to customer-specific data.
+The customers table follows the same pattern, using `user_id` as primary key to enforce the one-to-one constraint at the schema level.
 
-  ```php
-  <?php
-  Schema::create('customers', function (Blueprint $table) {
-      $table->unsignedBigInteger('user_id')->primary();
-      $table->string('payment_method_token')->nullable();
-      $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-      $table->timestamps();
-  });
-  ```
-]
-
-The customers table uses `user_id` as the primary key rather than a separate auto-incremented id, enforcing the one-to-one constraint at the schema level. Cascade deletion removes customer profiles when the associated user is deleted.
+#source_code_link("database/migrations")
 
 #code_example[
   The employees table similarly extends users with restaurant association.
@@ -81,66 +44,17 @@ The employees table follows the same primary key strategy. The `is_admin` boolea
 
 === Menu Hierarchy Implementation
 
-The menu structure implements the transitive categorization strategy through `food_types` and `menu_items` tables with enforced foreign keys.
+Separate migrations create the `food_types` and `menu_items` tables, implementing the hierarchical categorization strategy from @database-design. Menu items inherit restaurant association transitively through their food type.
 
-#code_example[
-  The food_types (categories) table establishes the categorization layer.
-
-  ```php
-  <?php
-  Schema::create('food_types', function (Blueprint $table) {
-      $table->id();
-      $table->string('name');
-      $table->unsignedBigInteger('restaurant_id')->nullable();
-      $table->foreign('restaurant_id')->references('id')
-          ->on('restaurants')->onDelete('set null');
-      $table->timestamps();
-  });
-  ```
-]
-
-#code_example[
-  Menu items link to food types, inheriting restaurant association.
-
-  ```php
-  <?php
-  Schema::create('menu_items', function (Blueprint $table) {
-      $table->id();
-      $table->string('name');
-      $table->double('price');
-      $table->string('description', 512)->nullable();
-      $table->unsignedBigInteger('food_type_id');
-      $table->foreign('food_type_id')->references('id')->on('food_types')->onDelete('cascade');
-      $table->timestamps();
-  });
-  ```
-]
+#source_code_link("database/migrations")
 
 The menu_items table includes a direct `restaurant_id` foreign key for efficient querying, in addition to the `food_type_id` relationship. Price uses `double()` for numeric storage. The `is_available` boolean is added in a subsequent migration, following the evolution of feature requirements and demonstrating the incremental schema modification approach.
 
 === Many-to-Many Relationship Pivots
 
-Stateless many-to-many relationships use pivot tables with composite unique constraints preventing duplicate associations.
+Stateless many-to-many relationships use pivot tables with composite primary keys preventing duplicate associations. For example, the `menu_item_allergen` table uses a composite primary key on `['menu_item_id', 'allergen_id']`.
 
-#code_example[
-  The allergen association table links menu items to allergen definitions.
-
-  ```php
-  <?php
-  Schema::create('menu_item_allergen', function (Blueprint $table) {
-      $table->unsignedBigInteger('menu_item_id');
-      $table->unsignedBigInteger('allergen_id');
-      $table->primary(['menu_item_id', 'allergen_id']);
-      $table->foreign('menu_item_id')->references('id')
-          ->on('menu_items')->onDelete('cascade');
-      $table->foreign('allergen_id')->references('id')
-          ->on('allergens')->onDelete('cascade');
-      $table->timestamps();
-  });
-  ```
-]
-
-No separate `id` column exists on this table — the composite primary key on `['menu_item_id', 'allergen_id']` enforces uniqueness and prevents duplicate associations.
+#source_code_link("database/migrations")
 
 Stateful associations such as order items carry additional data columns beyond the foreign key pair.
 
@@ -165,78 +79,21 @@ The order_items table uses a composite primary key `['order_id', 'menu_item_id']
 
 === Geospatial Column Definition
 
-Spatial data uses standard double-precision float columns as described in @database-design, with explicit indexes for bounding box queries.
+The restaurant migration defines standard `DOUBLE` columns for latitude and longitude, implementing the coordinate-based approach described in @database-design. Separate indexes on these columns are added in a later migration to accelerate bounding box queries.
 
-#code_example[
-  Restaurant locations use nullable double-precision coordinates.
-
-  ```php
-  <?php
-  Schema::create('restaurants', function (Blueprint $table) {
-      $table->id();
-      $table->string('name');
-      $table->string('address');
-      $table->double('latitude')->nullable();
-      $table->double('longitude')->nullable();
-      $table->string('description', 512)->nullable();
-      $table->double('rating')->nullable();
-      $table->timestamps();
-  });
-  ```
-]
-
-The description uses a `string(512)` constraint rather than unbounded text for predictable storage. Separate indexes on `latitude` and `longitude` are added in a later migration to accelerate the bounding box queries described in @database-design. The `opening_hours` column is similarly introduced in a subsequent migration as requirements evolve.
+#source_code_link("database/migrations")
 
 === Model Relationship Definitions
 
 Eloquent relationships translate foreign key constraints into traversable object graph edges. Relationships are defined as methods on model classes returning relationship objects.
 
-#code_example[
-  The User model defines optional relationships to Customer and Employee profiles.
+The User model defines optional `HasOne` relationships to Customer and Employee profiles, with explicit foreign key specification for clarity.
 
-  ```php
-  <?php
-  class User extends Authenticatable
-  {
-      public function customer(): HasOne
-      {
-          return $this->hasOne(Customer::class, 'user_id');
-      }
+#source_code_link("app/Models/User.php")
 
-      public function employee(): HasOne
-      {
-          return $this->hasOne(Employee::class, 'user_id');
-      }
-  }
-  ```
-]
+The Restaurant model defines `HasMany` relationships for food types, images, and employees, forming the root aggregate for the catalog.
 
-The `HasOne` return type annotation enables IDE autocomplete and static analysis. Although Laravel can infer the `user_id` foreign key from conventions, the source specifies it explicitly for clarity.
-
-#code_example[
-  The Restaurant model defines the menu hierarchy through food types.
-
-  ```php
-  <?php
-  class Restaurant extends Model
-  {
-      public function foodTypes(): HasMany
-      {
-          return $this->hasMany(FoodType::class);
-      }
-
-      public function images(): HasMany
-      {
-          return $this->hasMany(Image::class);
-      }
-
-      public function employees(): HasMany
-      {
-          return $this->hasMany(Employee::class);
-      }
-  }
-  ```
-]
+#source_code_link("app/Models/Restaurant.php")
 
 Inverse relationships complete the bidirectional traversal graph.
 
@@ -354,41 +211,9 @@ This accessor allows controllers to reference `$order->total` as if it were a st
 
 === Database Seeding Strategy
 
-Seeders populate the database with required reference data and optional test fixtures. The main #source_code_link("database/seeders/DatabaseSeeder.php") orchestrates execution order.
+Seeders populate the database with required reference data and optional test fixtures. The main DatabaseSeeder orchestrates execution order: creating test users, then calling AllergenSeeder, OrderStatusSeeder, RestaurantSeeder, EmployeeSeeder, and CustomerSeeder in dependency order.
 
-#code_example[
-  The DatabaseSeeder class creates test users and runs all required seeders in dependency order. The `DatabaseSeederService` is injected to provide shared seeding logic.
-
-  ```php
-  <?php
-  class DatabaseSeeder extends Seeder
-  {
-      public function run(DatabaseSeederService $service): void
-      {
-          $adminUser = User::factory()->create([
-              'name' => 'admin',
-              'surname' => 'user',
-              'email' => 'test@example.com',
-              'password' => bcrypt('admin'),
-          ]);
-
-          Customer::factory()->create([
-              'user_id' => $adminUser->id,
-          ]);
-
-          $this->call([
-              AllergenSeeder::class,
-              OrderStatusSeeder::class,
-              RestaurantSeeder::class,
-              EmployeeSeeder::class,
-              CustomerSeeder::class,
-          ]);
-
-          $service->createDefaultEmployee();
-      }
-  }
-  ```
-]
+#source_code_link("database/seeders/DatabaseSeeder.php")
 
 Reference data seeders populate dictionary tables with fixed values.
 
@@ -414,44 +239,9 @@ Reference data seeders populate dictionary tables with fixed values.
 
 The seeder iterates over a PHP enum's cases rather than maintaining a hardcoded array. This approach keeps status definitions centralized in the enum class where they can be referenced throughout the application. The `updateOrCreate` pattern makes seeding idempotent—running seeders multiple times updates existing records rather than creating duplicates.
 
-Entity seeders use Model Factories for generating realistic test fixtures, with configurable counts and progress reporting for use by the `mfs` command.
+Entity seeders use Model Factories for generating realistic test fixtures in configurable batches with progress reporting.
 
-#code_example[
-  The RestaurantSeeder creates restaurants in batches using the factory's fluent geolocation API.
-
-  ```php
-  <?php
-  class RestaurantSeeder extends Seeder
-  {
-      public function run(
-          ?int $count = null,
-          ?float $lat = null,
-          ?float $lon = null,
-          ?float $radius = null,
-          ?callable $progressCallback = null
-      ): void {
-          $count ??= config('seeding.restaurants');
-          $created = 0;
-          $batchSize = 100;
-
-          while ($created < $count) {
-              $batchCount = min($batchSize, $count - $created);
-              Restaurant::factory()
-                  ->center($lat ?? config('seeding.center_lat'),
-                           $lon ?? config('seeding.center_lon'))
-                  ->radius($radius ?? config('seeding.radius'))
-                  ->count($batchCount)
-                  ->create();
-
-              $created += $batchCount;
-              if ($progressCallback) {
-                  $progressCallback($created, $count);
-              }
-          }
-      }
-  }
-  ```
-]
+#source_code_link("database/seeders/RestaurantSeeder.php")
 
 === Model Factories
 
@@ -461,34 +251,6 @@ The most notable factory is `RestaurantFactory`, which uses a Gaussian distribut
 
 === Artisan Command for Database Reset
 
-The custom `mfs` command provides a single-command database reset workflow during development, combining migration refresh and configurable seeding. The command evolved from a simple two-line Artisan alias into a dedicated command class with parameterized seeding, input validation, and progress reporting.
+A custom `mfs` (migrate-fresh-seed) Artisan command wraps the standard `migrate:fresh --seed` workflow, adding visual progress output and parameterized seeding with configurable entity counts. All options fall back to defaults defined in `config/seeding.php`.
 
-#code_example[
-  The `mfs` command is implemented as a dedicated Artisan command class with configurable options. Each option falls back to defaults defined in the `config/seeding.php` configuration file.
-
-  ```php
-  <?php
-  class Mfs extends Command
-  {
-      protected $signature = 'mfs
-          {--force : Force the operation to run when in production}
-          {--restaurants= : Number of restaurants to seed}
-          {--customers= : Number of customers to seed}
-          {--employees-min= : Minimum employees per restaurant}
-          {--employees-max= : Maximum employees per restaurant}
-          {--reviews-per-customer= : Number of reviews per customer}
-          {--orders-per-customer= : Number of orders per customer}
-          {--radius= : Radius in km for restaurant distribution}';
-
-      public function handle(): void
-      {
-          $params = $this->validateOptions();
-          $this->runMigrations();
-          $this->seedData($params);
-          $this->displaySummary($params);
-      }
-  }
-  ```
-]
-
-The command accepts optional flags for controlling the number of seeded entities (restaurants, customers, employees, reviews, orders) and their distribution radius. All options are validated using Laravel's `Validator` facade before execution. A dedicated `DatabaseSeederService` encapsulates the seeding logic, invoked in a defined order: static data (allergens, order statuses), restaurants, admin user, customers with reviews and orders, and employees. A `ConsoleOutputHelper` provides progress bars for long-running seeding steps, giving the developer visual feedback during the process. Default values are externalized in a `config/seeding.php` configuration file, keeping the command itself free of hardcoded constants.
+#source_code_link("app/Console/Commands/Mfs.php")

@@ -16,19 +16,7 @@ When selecting a backend framework, three primary candidates were evaluated: Lar
 
 *Deployment Simplicity* — PHP applications deploy straightforwardly on commodity hosting environments @PHP8Release. Unlike Java applications requiring JVM configuration or .NET applications needing runtime installation, PHP runs natively on most web servers with minimal setup. This aligns with the project goal of providing a solution accessible to small restaurant operators without dedicated IT infrastructure.
 
-*Learning Curve and Team Familiarity* — The development team possessed prior experience with PHP and Laravel conventions. Leveraging existing knowledge reduced ramp-up time and minimized the risk of architectural missteps common when adopting unfamiliar frameworks.
-
-=== PHP Language Maturity and Framework Ecosystem
-
-A common perception in software development discussions positions PHP as lacking the sophistication of more modern languages. This perception largely stems from earlier PHP versions (pre-7.0), which indeed lacked many features now considered standard in contemporary programming languages @PHP8Release. However, PHP 8.x represents a substantial evolution from its earlier iterations.
-
-Modern PHP 8.x includes strict typing, attributes (annotations), named arguments, match expressions, enumerations, and readonly properties @PHP8Release. These features provide capabilities comparable to those found in Java, `C#`, and other statically-typed languages commonly employed for enterprise web applications. The language's evolution directly addresses the historical limitations that informed earlier criticisms, positioning PHP 8.x as a viable foundation for type-safe, maintainable application development.
-
-When evaluating backend technologies for this project, the language's current feature set and ecosystem maturity proved more relevant than its historical reputation. PHP 8.3 provides the type safety, performance characteristics, and developer tooling necessary for building reliable, maintainable enterprise applications. This modern feature set, combined with Laravel's framework abstractions, reduces the gap between PHP-based development and alternatives built on languages traditionally favored for enterprise systems.
-
-Laravel's documentation and community resources further strengthen the framework's suitability for production applications. The official Laravel documentation provides comprehensive coverage of framework features, architectural patterns, and integration points, with practical examples and detailed API references. This documentation quality reduces dependency on external resources during development and enables developers to implement complex features with minimal research overhead.
-
-The Laravel ecosystem extends beyond official documentation. Laracasts offers structured video tutorials covering framework features and related technologies @Laracasts. Community support channels—including forums, Discord servers, and Stack Overflow—provide accessible problem-solving resources. This ecosystem maturity contributed significantly to the framework selection decision, as comprehensive documentation and active community support reduce development friction and accelerate feature implementation.
+*Learning Curve and Team Familiarity* — The development team possessed prior experience with PHP and Laravel conventions. Leveraging existing knowledge reduced ramp-up time and minimized the risk of architectural missteps common when adopting unfamiliar frameworks. PHP 8.x provides modern language features (typed properties, enums, fibers) and Laravel benefits from a mature ecosystem of first-party packages.
 
 === Queue System Selection
 

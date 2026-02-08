@@ -15,16 +15,6 @@ The application relies heavily on location-based services, including filtering e
 
 MariaDB's thread pool handling and query optimizer are highly tuned for read-heavy workloads @MariaDBThreadPool, which characterizes the majority of the application's traffic (e.g., browsing menus, viewing restaurant lists). This ensures efficient handling of concurrent read operations without performance degradation.
 
-==== JSON Compatibility
-
-The support for JSON column types allows for semi-structured data storage within the relational model. While not currently utilized in the schema, this capability provides flexibility for future enhancements, such as storing complex opening hours configurations or varying menu item options, without necessitating a NoSQL solution.
-
-==== Multi-Master Replication
-
-MariaDB supports multi-master replication @MariaDBGaleraCluster, enabling data synchronization across multiple database servers. Unlike traditional master-slave replication, which restricts writes to a single master server, multi-master allows writes on multiple nodes for greater flexibility in distributed environments.
-
-This feature facilitates future scaling by allowing geographic distribution of databases, which aligns with the application's geospatial nature where users _primarily_ access local restaurant data. Such distribution reduces latency for regional queries and maintains data consistency across the system.
-
 ==== Licensing and Ecosystem
 
 As a fully open-source solution with a strong commitment to the GPL license @MariaDBAbout, MariaDB aligns with the project's preference for open technologies. Its binary compatibility with MySQL @MariaDBMySQLCompat ensures seamless integration with the Laravel framework, which treats it as a first-class citizen @LaravelDocs.

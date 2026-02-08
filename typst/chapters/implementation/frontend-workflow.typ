@@ -16,21 +16,7 @@ The Vite development server provides hot module replacement (HMR) that updates c
 
 The HMR configuration in `vite.config.js` recognizes React Fast Refresh @ReactFastRefresh, which preserves component state across edits to component bodies while resetting state when props or hooks change.
 
-#code_example[
-  Vite configuration enables React Fast Refresh for development builds.
-
-  ```typescript
-  export default defineConfig({
-    plugins: [
-      react(),
-      laravel({
-        input: ['resources/js/app.tsx', 'resources/css/main.scss'],
-        refresh: true,
-      }),
-    ],
-  });
-  ```
-]
+"The Vite configuration enables hot module replacement for React components and processes SCSS through the standard build pipeline." #source_code_link("vite.config.js")
 
 The `refresh: true` option enables Blade template detection, triggering full page reloads when server-side templates change rather than attempting to hot-replace server-rendered content.
 
