@@ -15,9 +15,7 @@ class Image extends Model
         'image',
         'description',
         'restaurant_id',
-        'menu_item_id',
         'is_primary_for_restaurant',
-        'is_primary_for_menu_item',
     ];
 
     protected $appends = ['url'];
@@ -26,7 +24,6 @@ class Image extends Model
     {
         return [
             'is_primary_for_restaurant' => 'boolean',
-            'is_primary_for_menu_item' => 'boolean',
         ];
     }
 
@@ -43,10 +40,5 @@ class Image extends Model
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
-    }
-
-    public function menuItem(): BelongsTo
-    {
-        return $this->belongsTo(MenuItem::class);
     }
 }

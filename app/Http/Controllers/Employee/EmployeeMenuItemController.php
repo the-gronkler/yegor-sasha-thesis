@@ -16,7 +16,7 @@ class EmployeeMenuItemController extends Controller
 
         $this->authorize('view', $menuItem);
 
-        $menuItem->load(['allergens', 'images', 'restaurant', 'image']);
+        $menuItem->load(['allergens', 'restaurant', 'image']);
 
         return Inertia::render('Employee/MenuItem/Show', [
             'menuItem' => $menuItem,
@@ -29,7 +29,7 @@ class EmployeeMenuItemController extends Controller
     {
         $this->authorize('update', $menuItem);
 
-        $menuItem->load(['allergens', 'images', 'foodType']);
+        $menuItem->load(['allergens', 'foodType']);
 
         // Get food types for this restaurant
         $foodTypes = \App\Models\FoodType::where('restaurant_id', $menuItem->restaurant_id)->get();
@@ -37,7 +37,6 @@ class EmployeeMenuItemController extends Controller
 
         // Get all restaurant images for photo selection
         $restaurantImages = \App\Models\Image::where('restaurant_id', $menuItem->restaurant_id)
-            ->whereNull('menu_item_id') // Only restaurant photos, not menu item specific ones
             ->orderBy('is_primary_for_restaurant', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -127,7 +126,6 @@ class EmployeeMenuItemController extends Controller
 
         // Get all restaurant images for photo selection
         $restaurantImages = \App\Models\Image::where('restaurant_id', $restaurant->id)
-            ->whereNull('menu_item_id')
             ->orderBy('is_primary_for_restaurant', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();

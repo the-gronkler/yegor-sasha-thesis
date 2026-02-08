@@ -36,9 +36,7 @@ class ImageFactory extends Factory
             'image' => self::$realImageUrls[array_rand(self::$realImageUrls)],
             'description' => $this->faker->sentence(),
             'restaurant_id' => null,
-            'menu_item_id' => null,
             'is_primary_for_restaurant' => false,
-            'is_primary_for_menu_item' => false,
         ];
     }
 }
