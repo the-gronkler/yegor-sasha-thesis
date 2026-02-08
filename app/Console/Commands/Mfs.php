@@ -16,7 +16,7 @@ class Mfs extends Command
                            {--customers= : Number of customers to seed}
                            {--employees-min= : Minimum employees per restaurant}
                            {--employees-max= : Maximum employees per restaurant}
-                           {--orders-per-customer= : Number of orders per customer}
+                           {--orders-per-restaurant= : Number of orders per restaurant}
                            {--radius= : Radius in km for restaurant distribution}';
 
     protected $description = 'Runs migrate:fresh with seed, including migrations from all subdirectories';
@@ -48,7 +48,7 @@ class Mfs extends Command
         $customers = $this->option('customers') ? (int) $this->option('customers') : config('seeding.customers');
         $employeesMin = $this->option('employees-min') ? (int) $this->option('employees-min') : config('seeding.employees_min');
         $employeesMax = $this->option('employees-max') ? (int) $this->option('employees-max') : config('seeding.employees_max');
-        $ordersPerCustomer = $this->option('orders-per-customer') ? (int) $this->option('orders-per-customer') : config('seeding.orders_per_customer');
+        $ordersPerRestaurant = $this->option('orders-per-restaurant') ? (int) $this->option('orders-per-restaurant') : config('seeding.orders_per_restaurant');
         $radius = $this->option('radius') ? (float) $this->option('radius') : config('seeding.radius');
 
         $validator = Validator::make([
@@ -56,14 +56,14 @@ class Mfs extends Command
             'customers' => $customers,
             'employees_min' => $employeesMin,
             'employees_max' => $employeesMax,
-            'orders_per_customer' => $ordersPerCustomer,
+            'orders_per_restaurant' => $ordersPerRestaurant,
             'radius' => $radius,
         ], [
             'restaurants' => 'required|integer|min:1',
             'customers' => 'required|integer|min:1',
             'employees_min' => 'required|integer|min:1',
             'employees_max' => 'required|integer|min:1|gte:employees_min',
-            'orders_per_customer' => 'required|integer|min:1',
+            'orders_per_restaurant' => 'required|integer|min:1',
             'radius' => 'required|numeric|gt:0',
         ]);
 
@@ -79,7 +79,7 @@ class Mfs extends Command
             'customers' => $customers,
             'employees_min' => $employeesMin,
             'employees_max' => $employeesMax,
-            'orders_per_customer' => $ordersPerCustomer,
+            'orders_per_restaurant' => $ordersPerRestaurant,
             'radius' => $radius,
         ];
     }
@@ -117,6 +117,7 @@ class Mfs extends Command
         $this->createAdminUser($service);
         $this->seedCustomers($service, $params);
         $this->seedEmployees($service, $params);
+        $this->seedOrders($service, $params);
         $this->seedReviews($service, $params);
         $this->createDefaultEmployee($service);
     }
@@ -148,10 +149,10 @@ class Mfs extends Command
     private function seedCustomers(DatabaseSeederService $service, array $params): void
     {
         $this->outputHelper->runWithProgressBar(
-            "👥 Seeding {$params['customers']} customers (with orders)",
+            "👥 Seeding {$params['customers']} customers",
             $params['customers'],
             'Customer',
-            fn ($callback) => $service->seedCustomers($params['customers'], $params['orders_per_customer'], $callback)
+            fn ($callback) => $service->seedCustomers($params['customers'], $callback)
         );
     }
 
@@ -163,6 +164,17 @@ class Mfs extends Command
             $restaurantCount,
             'Restaurant',
             fn ($callback) => $service->seedEmployees($params['employees_min'], $params['employees_max'], $callback)
+        );
+    }
+
+    private function seedOrders(DatabaseSeederService $service, array $params): void
+    {
+        $restaurantCount = \App\Models\Restaurant::count();
+        $this->outputHelper->runWithProgressBar(
+            "🛒 Seeding orders ({$params['orders_per_restaurant']} per restaurant)",
+            $restaurantCount,
+            'Restaurant',
+            fn ($callback) => $service->seedOrders($params['orders_per_restaurant'], $callback)
         );
     }
 
@@ -199,7 +211,7 @@ class Mfs extends Command
                 ['Customers', $params['customers']],
                 ['Employees', "{$params['employees_min']}-{$params['employees_max']} per restaurant"],
                 ['Reviews', '2-14 per restaurant'],
-                ['Orders per customer', $params['orders_per_customer']],
+                ['Orders per restaurant', $params['orders_per_restaurant']],
             ]
         );
     }

@@ -7,8 +7,6 @@
 // ======================================================================
 
 .profile-page {
-  min-height: 100vh;
-  background-color: main-colors.$bg-main;
   padding: 1rem;
   padding-bottom: 100px; // Space for bottom nav
 }
@@ -1156,11 +1154,6 @@
 // ======================================================================
 
 @media (min-width: 768px) {
-  .profile-page {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
   .photos-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
