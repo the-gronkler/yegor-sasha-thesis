@@ -27,6 +27,14 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
+        if ($this->app->runningInConsole()) {
+            $this->loadMigrationsFrom(
+                collect(glob(database_path('migrations/*'), GLOB_ONLYDIR))
+                    ->flatten()
+                    ->toArray()
+            );
+        }
+
         // Share validation errors and flash messages with all Inertia responses
         Inertia::share([
             'cart' => function () {
@@ -44,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 // Return all cart orders (one per restaurant)
-                return Order::with(['menuItems.images', 'restaurant'])
+                return Order::with(['menuItems.image', 'menuItems.images', 'restaurant'])
                     ->where('customer_user_id', $customer->user_id)
                     ->where('order_status_id', OrderStatus::InCart)
                     ->get();

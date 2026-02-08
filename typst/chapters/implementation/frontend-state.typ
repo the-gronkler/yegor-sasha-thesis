@@ -21,26 +21,17 @@ Context providers follow a consistent implementation pattern: create a typed con
     updateQuantity: (menuItemId: number, quantity: number) => void;
     clearCart: () => void;
     isLoading: boolean;
+    getOrderId: (restaurantId: number) => number | undefined;
   }
 
   const CartContext = createContext<CartContextType | undefined>(undefined);
 
   export function CartProvider({ children, initialCart }: CartProviderProps) {
     const [items, setItems] = useState<CartItem[]>(() => {
-      // Initialize from server-provided cart data
-      if (initialCart && Array.isArray(initialCart)) {
-        return initialCart.flatMap((order) =>
-          (order.menu_items || []).map((item) => ({
-            ...item,
-            quantity: item.pivot?.quantity || 1,
-            restaurant_id: order.restaurant_id,
-          }))
-        );
-      }
-      return [];
+      // Initialization from server data detailed in next section
+      // ...
     });
 
-    // Derived state values
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -52,12 +43,7 @@ Context providers follow a consistent implementation pattern: create a typed con
         value={{
           items,
           itemCount,
-          totalPrice,
-          addItem,
-          removeItem,
-          updateQuantity,
-          clearCart,
-          isLoading,
+          // ... rest of parameters
         }}
       >
         {children}

@@ -102,8 +102,15 @@
 
     .rating-container {
       display: flex;
+      align-items: center;
       justify-content: center;
+      gap: 0.5rem;
       margin-bottom: 0.5rem;
+
+      .reviews-count {
+        font-size: 0.85rem;
+        color: main-colors.$text-secondary;
+      }
     }
 
     .info-row {

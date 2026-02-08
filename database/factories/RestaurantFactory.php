@@ -122,7 +122,7 @@ class RestaurantFactory extends Factory
             'latitude' => $centerLat + $latOffset,
             'longitude' => $centerLon + $lonOffset,
             'description' => self::$restaurantDescriptions[array_rand(self::$restaurantDescriptions)],
-            'rating' => $this->faker->randomFloat(2, 1, 5),
+            'rating' => null,
             'opening_hours' => $this->faker->randomElement([
                 '10:00 - 22:00',
                 '11:00 - 23:00',
@@ -147,7 +147,6 @@ class RestaurantFactory extends Factory
                 MenuItem::factory()
                     ->count($menuCount)
                     ->state([
-                        'restaurant_id' => $restaurant->id,
                         'food_type_id' => $ft->id,
                     ])
                     ->create()

@@ -408,6 +408,29 @@
   }
 }
 
+.map-layer-controls {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid map-colors.$map-control-border;
+}
+
+.map-heatmap-toggle {
+  @extend .location-control-btn;
+  gap: 6px;
+  color: main-colors.$text-inverse;
+
+  &.is-active {
+    color: main-colors.$text-inverse;
+    background: color.change(main-colors.$brand-primary, $alpha: 0.22);
+    border-color: color.change(main-colors.$brand-primary, $alpha: 0.45);
+  }
+
+  &.is-active:hover {
+    background: color.change(main-colors.$brand-primary, $alpha: 0.3);
+    border-color: color.change(main-colors.$brand-primary, $alpha: 0.55);
+  }
+}
+
 .map-overlay-toggle--close {
   background: map-colors.$map-shadow;
 
