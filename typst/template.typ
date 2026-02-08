@@ -14,6 +14,7 @@
 /// - acknowledgements: Here include your thanks to people who helped you in the journey of implementing and preparing this thesis.
 /// - keywords: Keywords can be both single- or multiple-word phrases. At least 3 keywords are necessary. Treat them as tags. Your thesis must be searchable using them.
 /// - body: The main content of the thesis.
+
 #let project(
   title: "",
   authors: (),
@@ -38,7 +39,7 @@
     number-align: right,
   )
   // Use a modern, professional sans-serif font for the whole document
-  set text(font: ("Segoe UI", "Arial", "Calibri"), lang: "en", size: 12pt)
+  set text(font: ("Segoe UI", "Arial", "Calibri"), lang: "en", size: 12pt, hyphenate: false)
 
   // Title page.
   page(
@@ -122,13 +123,37 @@
   set par(justify: true, leading: 0.8em, spacing: 1.2em)
 
   // Headings
-  set heading(numbering: "1.1")
+  set heading(numbering: (..args) => {
+    let nums = args.pos()
+    if nums.len() >= 4 { none } else {
+      let s = ""
+      for (i, num) in nums.enumerate() {
+        if i > 0 { s += "." }
+        s += str(num)
+      }
+      s
+    }
+  })
   show heading: set block(above: 2em, below: 1em)
 
   show heading.where(level: 1): it => {
     pagebreak(weak: true)
     it
   }
+
+  // Styling for lower-level headings to be less pronounced
+  show heading: it => {
+    if it.level >= 4 {
+      set text(weight: "semibold", size: 1em)
+      set align(left)
+      it
+    } else {
+      it
+    }
+  }
+
+  // Links
+  show link: set text(fill: rgb("#005580"))
 
   // Code blocks
   show raw.where(block: true): it => {
@@ -150,9 +175,59 @@
       radius: 5pt,
       stroke: rgb("#e0e0e0"),
       width: 100%,
+      breakable: false,
       align(left, it),
     )
   }
 
+  // Inline code
+  show raw.where(block: false): it => {
+    box(
+      baseline: 2pt,
+      fill: rgb("#f6f8fa"),
+      inset: (x: 4pt, y: 2pt),
+      radius: 3pt,
+      stroke: rgb("#d1d9e0"),
+    )[
+      #set text(fill: rgb("#24292f"), font: "Consolas", size: 12pt)
+      #it
+    ]
+  }
+
   body
+}
+
+/// A reusable use case scenario table with consistent styling.
+#let use-case-scenario(
+  title: "",
+  actor: "",
+  purpose: "",
+  assumptions: "",
+  preconditions: "",
+  initiating-event: "",
+  basic-flow: [],
+  alternative-flow: [],
+  postconditions: "",
+  font-size: 9pt,
+  leading: 0.4em,
+) = {
+  text(size: font-size)[
+    #set par(leading: leading)
+    #table(
+      columns: (auto, 1fr),
+      stroke: 0.5pt,
+      inset: 4pt,
+      align: (left, left),
+
+      table.cell(colspan: 2, fill: rgb("#e8e8e8"))[*#title*],
+      [*Actor*], [#actor],
+      [*Purpose and Context*], [#purpose],
+      [*Assumptions*], [#assumptions],
+      [*Pre-conditions*], [#preconditions],
+      [*Initiating Business Event*], [#initiating-event],
+      [*Basic Flow of Events*], [#basic-flow],
+      [*Alternative Flow of Events*], [#alternative-flow],
+      [*Post-conditions*], [#postconditions],
+    )
+  ]
 }

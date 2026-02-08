@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Restaurant } from '@/types/models';
 import { useState, DragEvent } from 'react';
 import FavoriteRestaurantCard from '@/Components/Shared/FavoriteRestaurantCard';
@@ -134,6 +134,13 @@ export default function Favorites({
     saveRanks(updatedFavorites);
   };
 
+  // _e is unused but is there to match the FavoriteRestaurantCard interface signature, standard practice :P
+  const handleDragEnd = (_e: DragEvent<HTMLDivElement>) => {
+    setDraggedId(null);
+    setDragOverId(null);
+    setDropPosition(null);
+  };
+
   const saveRanks = (updatedFavorites: Restaurant[]) => {
     setIsSavingOrder(true);
 
@@ -153,7 +160,7 @@ export default function Favorites({
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="My Favorites" />
 
       <div className="profile-page">
@@ -165,10 +172,6 @@ export default function Favorites({
           </Link>
           <h1 className="profile-title">My Favorites</h1>
         </div>
-
-        {isSavingOrder && (
-          <div className="saving-indicator">Saving order...</div>
-        )}
 
         {/* Favorites List */}
         {favorites && favorites.length > 0 ? (
@@ -183,6 +186,7 @@ export default function Favorites({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onDragEnd={handleDragEnd}
                 isDragging={draggedId === restaurant.id}
                 isDropTarget={dragOverId === restaurant.id}
                 dropPosition={
@@ -197,12 +201,12 @@ export default function Favorites({
             <HeartIcon className="empty-icon" />
             <h2>No favorites yet</h2>
             <p>Start adding your favorite restaurants!</p>
-            <Link href={route('restaurants.index')} className="btn-primary">
+            <Link href={route('map.index')} className="btn-primary">
               Browse Restaurants
             </Link>
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

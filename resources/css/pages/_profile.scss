@@ -62,6 +62,20 @@
   padding: 1.5rem;
   box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
   margin-bottom: 1.5rem;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin: 0;
+    }
+  }
 }
 
 // ======================================================================
@@ -122,6 +136,14 @@
   color: inherit;
   box-shadow: 0 1px 3px main-colors.$shadow-color-strong;
   transition: all 0.2s ease;
+
+  // Reset button styles to match links
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
 
   &:hover {
     background-color: main-colors.$bg-alt-1;
@@ -241,6 +263,12 @@
       &::placeholder {
         color: main-colors.$text-secondary;
       }
+
+      &.auto-resize-textarea {
+        resize: none;
+        overflow: hidden;
+        min-height: 3rem;
+      }
     }
 
     .error-message {
@@ -288,6 +316,86 @@
       background-color: main-colors.$btn-primary-disabled-bg;
       color: main-colors.$btn-primary-disabled-text;
       cursor: not-allowed;
+    }
+  }
+}
+
+// ======================================================================
+// LOCATION PICKER
+// ======================================================================
+
+.location-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .location-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: main-colors.$bg-surface;
+    border: 1px solid main-colors.$border-light;
+    border-radius: layout.$border-radius;
+    color: main-colors.$text-primary;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+
+    .icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: main-colors.$brand-primary;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      border-color: main-colors.$brand-primary;
+      background-color: main-colors.$bg-alt-1;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: main-colors.$brand-primary;
+      box-shadow: 0 0 0 3px main-colors.$focus-ring-primary;
+    }
+  }
+
+  .map-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: slideDown 0.3s ease-out;
+
+    .map-instruction {
+      font-size: 0.875rem;
+      color: main-colors.$text-secondary;
+      margin: 0;
+      padding: 0.5rem;
+      background-color: main-colors.$bg-alt-1;
+      border-radius: layout.$border-radius;
+      text-align: center;
+    }
+
+    .location-map {
+      width: 100%;
+      height: 400px;
+      border-radius: layout.$border-radius;
+      overflow: hidden;
+      border: 2px solid main-colors.$border-light;
+    }
+
+    .map-coordinates {
+      font-size: 0.875rem;
+      color: main-colors.$text-primary;
+      font-weight: 600;
+      margin: 0;
+      padding: 0.5rem;
+      background-color: main-colors.$brand-primary-light;
+      border-radius: layout.$border-radius;
+      text-align: center;
     }
   }
 }
@@ -701,6 +809,349 @@
 }
 
 // ======================================================================
+// ESTABLISHMENT - WORKERS LIST
+// ======================================================================
+
+.workers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.worker-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: main-colors.$bg-alt-1;
+  border-radius: layout.$border-radius;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: main-colors.$bg-alt-2;
+  }
+
+  .worker-avatar {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: main-colors.$brand-primary-light;
+    border-radius: 50%;
+
+    .icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      color: main-colors.$brand-primary;
+    }
+  }
+
+  .worker-info {
+    flex: 1;
+    min-width: 0;
+
+    .worker-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .worker-email {
+      font-size: 0.875rem;
+      color: main-colors.$text-secondary;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .worker-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background-color: main-colors.$brand-primary;
+      color: main-colors.$text-inverse;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .worker-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .btn-edit {
+    .icon {
+      color: main-colors.$brand-primary;
+    }
+
+    &:hover {
+      background-color: main-colors.$brand-primary-light;
+    }
+  }
+
+  .btn-confirm {
+    background-color: exception-colors.$status-success;
+
+    .icon {
+      color: main-colors.$text-inverse;
+    }
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .btn-cancel {
+    .icon {
+      color: main-colors.$text-secondary;
+    }
+
+    &:hover {
+      background-color: main-colors.$bg-alt-2;
+    }
+  }
+
+  .btn-delete {
+    flex-shrink: 0;
+    color: exception-colors.$status-error;
+
+    &:hover {
+      background-color: exception-colors.$status-error-bg;
+    }
+  }
+}
+
+.add-worker-form,
+.upload-form {
+  padding: 1rem;
+  background-color: main-colors.$bg-alt-1;
+  border-radius: layout.$border-radius;
+  margin-bottom: 1rem;
+  animation: slideDown 0.3s ease-out;
+  transform-origin: top;
+}
+
+.edit-worker-form {
+  padding: 1rem;
+  background-color: main-colors.$bg-alt-1;
+  border-radius: layout.$border-radius;
+  margin-bottom: 1rem;
+  border: 2px solid main-colors.$brand-primary;
+  animation: slideDown 0.3s ease-out;
+  transform-origin: top;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+.checkbox-group {
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+
+    input[type='checkbox'] {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+    }
+
+    span {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: main-colors.$text-primary;
+    }
+  }
+}
+
+// ======================================================================
+// ESTABLISHMENT - PHOTOS GRID
+// ======================================================================
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.photo-item {
+  position: relative;
+  border-radius: layout.$border-radius;
+  overflow: hidden;
+  background-color: main-colors.$bg-alt-1;
+
+  .photo-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .photo-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: main-colors.$brand-primary;
+    color: main-colors.$text-inverse;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+  }
+
+  .photo-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.5rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .photo-actions {
+    opacity: 1;
+  }
+
+  .btn-photo-action {
+    padding: 0.375rem 0.75rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: main-colors.$text-primary;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    .icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    &:hover {
+      background-color: white;
+    }
+
+    &.btn-danger {
+      background-color: rgba(239, 68, 68, 0.9);
+      color: white;
+
+      &:hover {
+        background-color: rgb(220, 38, 38);
+      }
+    }
+  }
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+
+  .empty-icon {
+    width: 4rem;
+    height: 4rem;
+    color: main-colors.$text-secondary;
+    margin-bottom: 1rem;
+  }
+
+  .empty-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: main-colors.$text-primary;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .empty-description {
+    font-size: 0.875rem;
+    color: main-colors.$text-secondary;
+    margin: 0;
+  }
+}
+
+// ======================================================================
+// MODAL SECTIONS
+// ======================================================================
+
+.modal-section {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: main-colors.$text-primary;
+      margin: 0;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background-color: transparent;
+    color: main-colors.$text-secondary;
+    border: 1px solid main-colors.$border-light;
+    border-radius: layout.$border-radius;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: main-colors.$bg-alt-1;
+      border-color: main-colors.$text-secondary;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ======================================================================
 // RESPONSIVE ADJUSTMENTS
 // ======================================================================
 
@@ -708,5 +1159,13 @@
   .profile-page {
     max-width: 600px;
     margin: 0 auto;
+  }
+
+  .photos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .photo-item .photo-image {
+    height: 200px;
   }
 }

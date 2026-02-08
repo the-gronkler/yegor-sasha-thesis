@@ -7,3 +7,30 @@ $status-success: #16a34a;
 
 $status-error: #dc2626;
 // Purpose: Error text.
+
+$status-error-bg: rgba(220, 38, 38, 0.15);
+
+// ======================================================================
+// ORDER STATUS COLORS
+// ======================================================================
+
+$order-status-new: #3b82f6;
+// Purpose: New/Placed orders (blue).
+
+$order-status-accepted: #10b981;
+// Purpose: Accepted orders (green).
+
+$order-status-declined: #ef4444;
+// Purpose: Declined orders (red).
+
+$order-status-preparing: #f59e0b;
+// Purpose: Preparing orders (orange).
+
+$order-status-ready: #8b5cf6;
+// Purpose: Ready orders (purple).
+
+$order-status-cancelled: #6b7280;
+// Purpose: Cancelled orders (gray).
+
+$order-status-fulfilled: #059669;
+// Purpose: Fulfilled orders (emerald).

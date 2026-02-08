@@ -1,0 +1,151 @@
+@use '../variables/main-colors';
+@use '../variables/exception-colors';
+@use '../variables/layout';
+
+.menu-item-edit-page {
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: main-colors.$bg-surface;
+      border: 1px solid main-colors.$border-light;
+      color: main-colors.$text-secondary;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: main-colors.$bg-alt-1;
+        color: main-colors.$brand-primary;
+        border-color: main-colors.$brand-primary;
+      }
+
+      .icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: main-colors.$text-primary;
+    }
+  }
+
+  .edit-form-container {
+    background-color: main-colors.$bg-surface;
+    border-radius: layout.$border-radius;
+    padding: 2rem;
+    box-shadow: 0 2px 8px main-colors.$shadow-color;
+  }
+
+  .photos-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid main-colors.$border-light;
+  }
+
+  .edit-form {
+    .form-group {
+      margin-bottom: 1.5rem;
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: main-colors.$text-primary;
+      }
+
+      input[type='text'],
+      input[type='number'],
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid main-colors.$border-light;
+        border-radius: layout.$border-radius;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+
+        &:focus {
+          outline: none;
+          border-color: main-colors.$brand-primary;
+          box-shadow: 0 0 0 2px rgba(main-colors.$brand-primary, 0.1);
+        }
+
+        &.error {
+          border-color: exception-colors.$status-error;
+        }
+      }
+
+      .error-message {
+        color: exception-colors.$status-error;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .checkbox-group {
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-weight: normal;
+
+        input[type='checkbox'] {
+          width: 1.25rem;
+          height: 1.25rem;
+          accent-color: main-colors.$brand-primary;
+        }
+      }
+    }
+
+    .allergens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      background-color: main-colors.$bg-alt-1;
+      border-radius: layout.$border-radius;
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+
+        input[type='checkbox'] {
+          width: 1rem;
+          height: 1rem;
+          accent-color: main-colors.$brand-primary;
+        }
+      }
+    }
+
+    .form-actions {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}

@@ -43,6 +43,17 @@ export interface Customer {
   updated_at: string;
 }
 
+export interface Employee {
+  user_id: number;
+  restaurant_id: number;
+  is_admin: boolean;
+  name: string;
+  surname: string | null;
+  email: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Image {
   id: number;
   url: string;
@@ -67,7 +78,10 @@ export interface MenuItem {
   name: string;
   price: number;
   description: string | null;
-  images?: Image[];
+  is_available: boolean;
+  image_id: number | null;
+  image?: Image; // The selected image
+  images?: Image[]; // All images (legacy, may not be used)
   allergens?: Allergen[];
   pivot?: {
     quantity: number;
@@ -98,6 +112,7 @@ export interface Restaurant {
   food_types?: FoodType[];
   restaurant_images?: Image[];
   reviews?: Review[];
+  employees?: Employee[];
   created_at: string;
   updated_at: string;
 }

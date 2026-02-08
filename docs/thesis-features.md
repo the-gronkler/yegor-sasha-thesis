@@ -91,6 +91,38 @@ A modern, real-time shopping cart implementation that allows customers to add me
 **Database Schema:**
 Cart functionality leverages the existing `orders` and `order_items` tables, with orders having `order_status_id = 1` (InCart) representing active carts.
 
+### Optimistic UI Updates for Menu Item Availability Toggle
+
+**Description:**
+An enhancement to the menu item availability toggle that provides immediate visual feedback to employees when changing a menu item's availability status. Instead of waiting for the server response, the UI updates instantly, improving perceived performance and user experience.
+
+**Technical Implementation:**
+
+- **Local State Management:** Uses React's `useState` hook to maintain a local copy of the availability status, initialized from server-provided props.
+- **Optimistic Updates:** When the toggle is clicked, the local state updates immediately, providing instant visual feedback.
+- **Error Handling:** If the server request fails, the local state reverts to the previous value using Inertia.js's `onError` callback.
+- **State Synchronization:** A `useEffect` hook ensures the local state stays in sync with any external prop changes (e.g., from real-time broadcasts).
+- **Integration:** Works seamlessly with existing event broadcasting for customer-side updates.
+
+**Features:**
+
+1.  **Instant Toggle Feedback:** Employees see the availability status change immediately upon clicking the toggle.
+2.  **Error Recovery:** If the update fails (e.g., network issues), the toggle reverts automatically.
+3.  **Consistent State:** Local state syncs with server data on successful updates or external changes.
+
+**User Experience Enhancements:**
+
+- Eliminates perceived lag when toggling availability
+- Provides clear visual confirmation of actions
+- Maintains data consistency through proper error handling
+- No disruption to existing functionality
+
+**Code Reference:**
+
+- Component: `resources/js/Components/Shared/MenuItemCard.tsx`
+
+---
+
 ### User Geolocation
 
 The application uses the browser's Geolocation API to determine the user's location for map-based features.
@@ -189,6 +221,31 @@ DISTANCE_FORMULA=st_distance_sphere  # or 'haversine' for fallback
 
 **Detailed Documentation:** See `docs/mariadb-geospatial-implementation.md` for complete implementation guide.
 
+### User Model Inheritance with Eager Loading
+
+**Description:**
+The `User` model implements an inheritance-like pattern where users can have optional `Customer` or `Employee` profiles. To optimize performance and prevent N+1 query issues in role-checking methods, a global scope automatically eager-loads these relationships on every User query.
+
+**Technical Implementation:**
+
+- **Inheritance Pattern:** Uses `hasOne` relationships (`customer()` and `employee()`) to extend user functionality without a dedicated `type` column.
+- **Global Scope:** Added in the `boot()` method to ensure `customer` and `employee` are always loaded, avoiding lazy loading in `isCustomer()` and `isEmployee()` methods.
+- **Performance:** Eliminates potential N+1 queries in middleware, policies, and shared Inertia props where user roles are frequently checked and profile data accessed.
+
+**Usage:**
+
+- Role checks (`$user->isCustomer()`, `$user->isEmployee()`) now use pre-loaded data without triggering queries.
+- Profile access (e.g., `$user->employee?->restaurant_id`) is immediate after loading.
+- Opt-out available for bulk operations: `User::withoutGlobalScope('withRelations')->get()`.
+
+**Code Reference:**
+
+- Model: `app/Models/User.php`
+- Relationships: `customer()` and `employee()` methods
+- Global Scope: `withRelations` in `boot()` method
+
+---
+
 ### Restaurant Distance Display
 
 The `RestaurantCard` component automatically displays distance information when available:
@@ -196,3 +253,46 @@ The `RestaurantCard` component automatically displays distance information when 
 - Distance is shown in the restaurant meta section (e.g., "5.2 km")
 - Only displayed when the `distance` property is present in restaurant data
 - Properly formatted to 2 decimal places
+
+### Favorite Restaurants System: Bulk Reordering Optimization
+
+**Problem:**
+Reordering a list of favorite restaurants requires updating the `rank` column for multiple rows simultaneously. A naive approach would iterate through the list and execute an `UPDATE` query for each item:
+
+```php
+foreach ($ranks as $rank) {
+    // N+1 Problem: Executes one query per item
+    $user->favorites()->updateExistingPivot($rank['id'], ['rank' => $rank['value']]);
+}
+```
+
+For a list of 50 favorites, this results in 50 separate database round-trips, causing significant latency and potential deadlocks under load.
+
+**Solution: Atomic Upsert Operation**
+We implemented an optimized solution using Laravel's `upsert` method, which compiles down to a single native SQL statement.
+
+**Technical Details:**
+
+1.  **Mechanism:** The operation leverages the database's native "Insert or Update" capability (e.g., `INSERT ... ON DUPLICATE KEY UPDATE` in MariaDB/MySQL).
+2.  **Composite Key:** The `favorite_restaurants` table uses a composite primary key `(customer_user_id, restaurant_id)`. The database engine uses this unique constraint to detect collisions.
+3.  **Execution Flow:**
+    - The system constructs a single bulk payload containing all new ranks.
+    - The database attempts to insert these rows.
+    - Upon encountering a duplicate key (which is guaranteed for existing favorites), it triggers the `UPDATE` clause instead of failing.
+    - Only the specified columns (`rank`, `updated_at`) are modified; other columns like `created_at` remain untouched.
+
+**Performance Impact:**
+
+- **Round-trips:** Reduced from $O(N)$ to $O(1)$.
+- **Atomicity:** The entire batch is processed as a single atomic operation, ensuring data consistency without needing an explicit application-level transaction wrapper for the write itself.
+- **Locking:** Reduces lock contention on the table compared to multiple sequential updates.
+
+**Implementation:**
+
+```php
+\DB::table('favorite_restaurants')->upsert(
+$upsertData,
+['customer_user_id', 'restaurant_id'], // Unique keys identifying the record
+['rank', 'updated_at'] // Columns to update on collision
+);
+```

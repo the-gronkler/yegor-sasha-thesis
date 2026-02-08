@@ -20,32 +20,6 @@ class RestaurantController extends Controller
     }
 
     /**
-     * Display a listing of restaurants (e.g., the "main page").
-     */
-    public function index(Request $request)
-    {
-        $this->authorize('viewAny', Restaurant::class);
-
-        // Try to get last known coordinates from session
-        $geo = $this->geoService->getValidGeoFromSession($request);
-        $lat = $geo['lat'] ?? null;
-        $lng = $geo['lng'] ?? null;
-
-        // Build query with optional distance calculation
-        $restaurants = Restaurant::query()
-            ->select(['id', 'name', 'address', 'latitude', 'longitude', 'rating', 'description', 'opening_hours'])
-            ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
-            ->with(['images', 'foodTypes.menuItems'])
-            ->latest('rating')
-            ->get()
-            ->map(fn ($restaurant) => $this->formatRestaurant($restaurant));
-
-        return Inertia::render('Customer/Restaurants/Index', [
-            'restaurants' => $restaurants,
-        ]);
-    }
-
-    /**
      * Display the specified restaurant along with its categories, menu items, allergens, images.
      */
     public function show(Request $request, Restaurant $restaurant)
@@ -62,8 +36,10 @@ class RestaurantController extends Controller
             ->whereKey($restaurant->getKey())
             ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
             ->with([
+                'foodTypes.menuItems' => fn ($q) => $q->orderBy('name'),
                 'foodTypes.menuItems.images',
-                'menuItems.allergens',
+                'foodTypes.menuItems.allergens',
+                'foodTypes.menuItems.image', // Load selected image
                 'images',
                 'reviews.customer.user',
                 'reviews.images',
@@ -162,6 +138,12 @@ class RestaurantController extends Controller
                     'name' => $mi->name,
                     'price' => $mi->price,
                     'description' => $mi->description,
+                    'is_available' => $mi->is_available,
+                    'image_id' => $mi->image_id,
+                    'image' => $mi->relationLoaded('image') && $mi->image ? [
+                        'id' => $mi->image->id,
+                        'url' => $mi->image->url,
+                    ] : null,
                     'images' => $mi->relationLoaded('images') ? $mi->images->map(fn ($img) => [
                         'id' => $img->id,
                         'url' => $img->url,

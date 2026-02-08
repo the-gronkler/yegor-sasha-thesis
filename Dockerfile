@@ -9,6 +9,19 @@ COPY package.json package-lock.json ./
 RUN npm ci --include=optional && npm install @rollup/rollup-linux-x64-musl --save-optional
 
 COPY . .
+# Pass build arguments for Vite
+ARG VITE_APP_NAME
+ARG VITE_REVERB_APP_KEY
+ARG VITE_REVERB_HOST
+ARG VITE_REVERB_PORT
+ARG VITE_REVERB_SCHEME
+
+ENV VITE_APP_NAME=$VITE_APP_NAME
+ENV VITE_REVERB_APP_KEY=$VITE_REVERB_APP_KEY
+ENV VITE_REVERB_HOST=$VITE_REVERB_HOST
+ENV VITE_REVERB_PORT=$VITE_REVERB_PORT
+ENV VITE_REVERB_SCHEME=$VITE_REVERB_SCHEME
+
 RUN npm run build
 
 # Stage 2: Build Backend & Serve
@@ -25,7 +38,14 @@ RUN apt-get update && apt-get install -y \
     unzip \
     default-mysql-client \
     nginx \
-    supervisor
+    supervisor \
+    gnupg
+
+# Install Node.js (for HMR in local dev)
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update && apt-get install -y nodejs
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -42,8 +62,16 @@ WORKDIR /var/www
 # Copy composer files first to leverage cache
 COPY composer.json composer.lock ./
 
+ARG APP_ENV=local
+ENV APP_ENV=${APP_ENV}
+
 # Install dependencies (skip scripts to avoid 'artisan not found' error)
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+# If production, install --no-dev. Otherwise install everything.
+RUN if [ "$APP_ENV" = "production" ]; then \
+    composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts; \
+    else \
+    composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts; \
+    fi
 
 # Copy application code
 COPY . .

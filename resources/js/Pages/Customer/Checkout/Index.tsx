@@ -1,7 +1,8 @@
 import { Head, useForm, Link } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { Order } from '@/types/models';
 import { FormEvent } from 'react';
+import { useMenuItemUpdates } from '@/Hooks/Updates/useMenuItemUpdates';
 
 interface CheckoutIndexProps {
   order: Order;
@@ -18,21 +19,23 @@ export default function CheckoutIndex({
 
   const items = order.menu_items || [];
 
+  useMenuItemUpdates(order.restaurant?.id);
+
   if (items.length === 0) {
     return (
-      <CustomerLayout>
+      <AppLayout>
         <Head title="Checkout" />
         <div className="checkout-page">
           <div className="checkout-container">
             <div className="empty-checkout">
               <p>This order has no items.</p>
-              <Link href={route('restaurants.index')} className="back-link">
+              <Link href={route('map.index')} className="back-link">
                 Browse Restaurants
               </Link>
             </div>
           </div>
         </div>
-      </CustomerLayout>
+      </AppLayout>
     );
   }
 
@@ -42,7 +45,7 @@ export default function CheckoutIndex({
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Checkout" />
 
       <div className="checkout-page">
@@ -110,6 +113,6 @@ export default function CheckoutIndex({
           </div>
         </div>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

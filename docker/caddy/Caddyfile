@@ -7,6 +7,13 @@
     # Import environment-specific TLS settings (internal vs production)
     import /etc/caddy/tls_config
 
+    # Proxy Reverb WebSockets
+    @reverb {
+        path /app/*
+        path /apps/*
+    }
+    reverse_proxy @reverb app:8080
+
     # Proxy to the app
     reverse_proxy app:80
 

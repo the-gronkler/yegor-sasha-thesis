@@ -2,18 +2,47 @@ import {
   MapPinIcon,
   ShoppingCartIcon,
   UserIcon,
-  BuildingStorefrontIcon,
-  ClipboardDocumentListIcon,
   ArrowRightEndOnRectangleIcon,
+  QueueListIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '@/Contexts/CartContext';
 import { useAuth } from '@/Hooks/useAuth';
 import IconNavItem from '@/Components/UI/IconNavItem';
+import { ClipboardDocumentListIcon } from '@heroicons/react/16/solid';
 
 export default function BottomNav() {
   const { itemCount } = useCart();
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, isEmployee, isRestaurantAdmin, login } = useAuth();
 
+  if (isEmployee) {
+    return (
+      <nav className="bottom-nav">
+        <IconNavItem
+          href={route('employee.orders.index')}
+          active={route().current('employee.orders.*')}
+          icon={ClipboardDocumentListIcon}
+          label="Orders"
+        />
+        <IconNavItem
+          href={route('employee.menu.index')}
+          active={route().current('employee.menu.*')}
+          icon={QueueListIcon}
+          label="Menu"
+        />
+        {isRestaurantAdmin && (
+          <IconNavItem
+            href={route('employee.establishment.index')}
+            active={route().current('employee.establishment.*')}
+            icon={BuildingStorefrontIcon}
+            label="Establishment"
+          />
+        )}
+      </nav>
+    );
+  }
+
+  // Customer
   return (
     <nav className="bottom-nav">
       <IconNavItem
@@ -21,12 +50,6 @@ export default function BottomNav() {
         active={route().current('map.index')}
         icon={MapPinIcon}
         label="Explore"
-      />
-      <IconNavItem
-        href={route('restaurants.index')}
-        active={route().current('restaurants.index')}
-        icon={BuildingStorefrontIcon}
-        label="Restaurants"
       />
       {isAuthenticated && (
         <>

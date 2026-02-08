@@ -54,6 +54,8 @@ export default function MapIndex({
     handlePickLocation,
     mapMarkers,
     reloadMap,
+    showSearchInArea,
+    searchInArea,
   } = useMapPage({ restaurants, filters, mapboxPublicKey });
 
   return (
@@ -108,6 +110,9 @@ export default function MapIndex({
             onError={setLocationError}
             showHeatmap={showHeatmap}
             onToggleHeatmap={setShowHeatmap}
+            showSearchInArea={showSearchInArea}
+            onSearchInArea={searchInArea}
+            mapCenter={viewState}
           />
           <Map
             viewState={viewState}

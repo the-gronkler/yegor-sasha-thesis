@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use App\Events\OrderUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,18 @@ class Order extends Model
         'time_placed',
     ];
 
+    protected $appends = [
+        'total',
+    ];
+
+    /**
+     * Get the total price of the order.
+     */
+    public function getTotalAttribute(): float
+    {
+        return $this->menuItems->sum(fn ($item) => $item->price * $item->pivot->quantity);
+    }
+
     public function menuItems(): BelongsToMany
     {
         return $this->belongsToMany(MenuItem::class, 'order_items')
@@ -44,5 +57,18 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'customer_user_id', 'user_id');
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($order) {
+            OrderUpdated::dispatch($order);
+        });
+
+        static::updated(function ($order) {
+            if ($order->wasChanged('order_status_id')) {
+                OrderUpdated::dispatch($order);
+            }
+        });
     }
 }

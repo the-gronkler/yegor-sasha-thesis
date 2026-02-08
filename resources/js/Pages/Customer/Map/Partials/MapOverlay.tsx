@@ -7,6 +7,7 @@ import {
   PencilSquareIcon,
   CursorArrowRaysIcon,
   FunnelIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
 /**
@@ -47,6 +48,13 @@ interface MapOverlayProps {
   onError: (error: string | null) => void;
   showHeatmap: boolean;
   onToggleHeatmap: (show: boolean) => void;
+  showSearchInArea: boolean;
+  onSearchInArea: () => void;
+  mapCenter: {
+    latitude: number;
+    longitude: number;
+    zoom: number;
+  };
 }
 
 export default function MapOverlay({
@@ -63,6 +71,9 @@ export default function MapOverlay({
   onError,
   showHeatmap,
   onToggleHeatmap,
+  showSearchInArea,
+  onSearchInArea,
+  mapCenter,
 }: MapOverlayProps) {
   // Collapsible overlay states
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -343,6 +354,33 @@ export default function MapOverlay({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Search in this area button */}
+      {showSearchInArea && (
+        <div className="map-search-area-container">
+          <button
+            type="button"
+            className="map-search-area-btn map-search-area-btn--detailed"
+            onClick={onSearchInArea}
+            aria-label={`Search restaurants around ${mapCenter.latitude.toFixed(
+              4,
+            )}, ${mapCenter.longitude.toFixed(4)}`}
+          >
+            <div className="map-search-area-btn__content">
+              <div className="map-search-area-btn__icon">
+                <MagnifyingGlassIcon aria-hidden="true" />
+              </div>
+              <div className="map-search-area-btn__text">
+                <div className="map-search-area-btn__title">Search here</div>
+                <div className="map-search-area-btn__coords">
+                  {mapCenter.latitude.toFixed(4)},{' '}
+                  {mapCenter.longitude.toFixed(4)}
+                </div>
+              </div>
+            </div>
+          </button>
         </div>
       )}
     </div>

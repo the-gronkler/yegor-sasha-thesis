@@ -1,31 +1,41 @@
 import { Head, Link } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
-import { Order, PaginatedResponse } from '@/types/models';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import AppLayout from '@/Layouts/AppLayout';
+import { Order, PaginatedResponse, User } from '@/types/models';
 import { formatDateTime, formatCurrency } from '@/Utils/formatters';
 import {
   calculateOrderTotal,
   calculateOrderItemCount,
 } from '@/Utils/orderHelpers';
 import OrderStatusBadge from '@/Components/Shared/OrderStatusBadge';
+import { useUserOrdersUpdates } from '@/Hooks/Updates/useUserOrdersUpdates';
 
 interface Props {
   orders: PaginatedResponse<Order>;
+  auth: { user: User };
 }
 
-export default function OrdersIndex({ orders }: Props) {
+export default function OrdersIndex({ orders, auth }: Props) {
+  // Enable live updates for all user's orders
+  useUserOrdersUpdates(auth.user.id);
+
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="My Orders" />
 
       <div className="orders-index">
         <div className="orders-index__header">
+          <Link href={route('profile.show')} className="back-button-link">
+            <ArrowLeftIcon className="icon" />
+            <span>Profile</span>
+          </Link>
           <h1>My Orders</h1>
         </div>
 
         {orders.data.length === 0 ? (
           <div className="orders-index__empty">
             <p>You haven't placed any orders yet.</p>
-            <Link href={route('restaurants.index')} className="btn-primary">
+            <Link href={route('map.index')} className="btn-primary">
               Browse Restaurants
             </Link>
           </div>
@@ -65,6 +75,6 @@ export default function OrdersIndex({ orders }: Props) {
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

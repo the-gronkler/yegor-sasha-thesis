@@ -6,6 +6,8 @@ export type PageProps<
 > = T & {
   auth: {
     user: User;
+    restaurant_id?: number | null;
+    isRestaurantAdmin?: boolean;
   };
   errors: Record<string, string>;
   flash: {

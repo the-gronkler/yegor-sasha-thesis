@@ -24,6 +24,7 @@ class MenuItemController extends Controller
         $menuItem->load([
             'images',
             'allergens',
+            'image', // Load selected image
         ]);
 
         return Inertia::render('Customer/MenuItems/Show', [
@@ -32,11 +33,17 @@ class MenuItemController extends Controller
                 'name' => $menuItem->name,
                 'price' => $menuItem->price,
                 'description' => $menuItem->description,
+                'is_available' => $menuItem->is_available,
                 'restaurant_id' => $menuItem->restaurant_id,
                 'food_type_id' => $menuItem->food_type_id,
+                'image_id' => $menuItem->image_id,
+                'image' => $menuItem->image ? [
+                    'id' => $menuItem->image->id,
+                    'url' => $menuItem->image->url,
+                ] : null,
                 'images' => $menuItem->images->map(fn ($img) => [
                     'id' => $img->id,
-                    'url' => $img->image,
+                    'url' => $img->url,
                     'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
                 ]),
                 'allergens' => $menuItem->allergens->map(fn ($allergen) => [

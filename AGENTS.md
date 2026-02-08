@@ -192,7 +192,72 @@ When working in the `typst/` directory, you **MUST** adhere to the guidelines de
 4.  **No Slang or Colloquialisms**: Avoid informal words like "guys", "huge", "okay", "a lot". Use precise vocabulary.
 5.  **Objective Tone**: Avoid emotional or subjective language. Present facts and evidence.
 
-## 📚 Citations & Bibliography (IEEE Style)
+6.  **Formatting of Bullet Points**: Avoid placing emphasis markers (such as `*bold*`) immediately after bullet point prefixes. Instead, prefer applying emphasis to the first significant word and consider using paragraph form instead of bullets for emphasized items.
+
+- _Bad_:
+  - _Lazy loading_ is used when related data is optional and not always required by a request.
+  - _Eager loading_ is used when pages require consistent traversal of relationships, reducing the risk of N+1 query patterns.
+
+- _Good (preferred)_:
+  _Lazy loading_ is used when related data is optional and not always required by a request.
+
+  _Eager loading_ is used when pages require consistent traversal of relationships, reducing the risk of N+1 query patterns.
+
+- _Alternative_:
+  - Lazy loading is used when related data is optional and not always required by a request.
+  - Eager loading is used when pages require consistent traversal of relationships, reducing the risk of N+1 query patterns.
+
+## � Typst Functions and Source Code References (Strictly Enforced)
+
+> **CRITICAL RULE**: When referencing source code files or generating links, **ALWAYS** use the provided functions from `config.typ`. Failure to do so violates thesis standards and will result in broken or outdated references.
+
+### Key Functions
+
+- **`source_code_link(file_path)`**: Generates a clickable link to the GitHub repository at the current release commit.
+  - **Usage**: `#source_code_link("path/to/file.ext")` (include the `#` for function calls in markup).
+  - **Purpose**: Ensures links point to the correct version without hardcoding commits or branches.
+  - **Import Required**: Add `#import "../config.typ"` at the top of each chapter file where used.
+
+- **`code_example(content)`**: **MANDATORY** for all code examples with explanatory text. Prevents page breaks between paragraphs and code blocks.
+  - **Usage**: `#code_example[ Your paragraph here ```code``` ]`
+  - **Purpose**: Ensures code examples and their explanations stay together on the same page. **ALWAYS USE THIS** when presenting code with surrounding text.
+  - **Import Required**: Add `#import "../config.typ": source_code_link, code_example` at the top of each chapter file.
+  - **When to Use**: **MANDATORY** whenever you have explanatory text followed by or preceding code blocks. Failure to use this results in poor document layout with awkward page breaks.
+  - **Structure Note**: Permitted and encouraged to place section headings (e.g., `=== Heading`) _inside_ the `#code_example[...]` block if the heading introduces the example or is tightly coupled with it. This keeps the heading attached to the content.
+
+### Rules for Usage
+
+1. **Import in Every File**: Even if `config.typ` is imported globally in `main.typ`, explicitly import the function in each chapter file: `#import "../config.typ": source_code_link, code_example`.
+2. **Function Call Syntax**: Always prefix with `#` when calling in markup (e.g., `#source_code_link("routes/channels.php")`).
+3. **No Hardcoding**: Never manually write GitHub URLs, commit hashes, or branch names. Always use the function.
+4. **File Paths**: Use relative paths from the repository root (e.g., `"resources/js/Hooks/useChannelUpdates.ts"`).
+5. **Placement**: Use in prose for file references; avoid inside code blocks unless necessary.
+
+### Examples
+
+- **Correct**: Access control is enforced in #source_code_link("routes/channels.php").
+- **Incorrect**: Access control is enforced in `routes/channels.php` (no link) or `https://github.com/repo/blob/commit/file` (hardcoded).
+
+**Code Example Usage**:
+
+````typst
+#code_example[
+  The broadcasting system uses Laravel events to dispatch real-time updates.
+
+  ```php
+  class OrderUpdated implements ShouldBroadcast
+  {
+      // Event implementation
+  }
+````
+
+]
+
+````
+
+**Violation Consequences**: References will break on version changes. Agents must verify function usage in all Typst edits.
+
+## �📚 Citations & Bibliography (IEEE Style)
 
 > **Standard**: **IEEE** (Institute of Electrical and Electronics Engineers).
 
@@ -266,9 +331,13 @@ Follow the standard engineering thesis structure:
     - Use `#include "path/to/file.typ"` to include content.
 2.  **Formatting**:
     - Use `= Heading 1`, `== Heading 2`, `=== Heading 3`.
+    - **CRITICAL**: Avoid pseudo headings. Never use bold text (*Heading*) to simulate headings. Always use proper Typst heading syntax (`=`, `==`, `===`, etc.) for semantic structure and outline generation.
     - Use `-` for bullet points and `+` for numbered lists.
-    - Use `*bold*` and `_italic_` for emphasis.
+    - **CRITICAL**: Use `*text*` for **bold** and `_text_` for _italic_ (Typst syntax, NOT Markdown `**bold**` or `*italic*`).
     - Use ` ```lang ... ``` ` for code blocks.
+    - **CRITICAL (PHP Code Blocks)**: All PHP code blocks **MUST** open with `<?php` on the first line to enable syntax highlighting. This is required even in simplified examples.
+      - **Correct**: ` ```php\n<?php\necho 'Hello';\n``` `
+      - **Incorrect**: ` ```php\necho 'Hello';\n``` ` (missing `<?php`)
 3.  **Math**:
     - Inline math: `$x^2$`.
     - Block math: `$ x^2 $` (with spaces).
@@ -278,4 +347,7 @@ Follow the standard engineering thesis structure:
 - **Vague Aims**: "I want to make an app." -> _Fix_: "To increase process efficiency by 20%..."
 - **Passive Voice Overuse**: While first-person is banned, avoid awkward passive constructions. Use strong verbs where possible.
 - **Hardcoded References**: Never type "Figure 1". Always use `@fig:id`.
+- **Hardcoded Code References**: Never hardcode commit hashes or branches in links to source code. Use the `source_code_link` function from `config.typ` to generate consistent links that can be updated centrally to point to the release version.
+- **Pseudo Headings**: Never use bold text (*Heading*) to mimic headings. Use Typst's `=`, `==`, `===` syntax exclusively for all headings.
 - **LaTeX Habits**: Do not use `\section`, `\textbf`, or `\cite`. Use Typst syntax.
+````

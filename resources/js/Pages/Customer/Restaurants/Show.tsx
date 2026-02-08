@@ -1,17 +1,16 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import { useState } from 'react';
+import AppLayout from '@/Layouts/AppLayout';
 import StarRating from '@/Components/Shared/StarRating';
-import MenuItemCard from '@/Components/Shared/MenuItemCard';
-import SearchInput from '@/Components/UI/SearchInput';
+import RestaurantMenu from '@/Components/Shared/RestaurantMenu';
+import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
 import { Restaurant } from '@/types/models';
 import { PageProps } from '@/types';
 import { useRestaurantCart } from '@/Hooks/useRestaurantCart';
-import { useRestaurantMenu } from '@/Hooks/useRestaurantMenu';
-import RestaurantReviews from '@/Components/Shared/RestaurantReviews';
-import { useState } from 'react';
 import { useAuth } from '@/Hooks/useAuth';
+import { useMenuItemUpdates } from '@/Hooks/Updates/useMenuItemUpdates';
 
 interface RestaurantShowProps extends PageProps {
   restaurant: Restaurant;
@@ -29,12 +28,11 @@ export default function RestaurantShow({
     restaurant.images?.[0];
   const bannerUrl = primaryImage ? primaryImage.url : null;
 
-  const { query, setQuery, displayedCategories } =
-    useRestaurantMenu(restaurant);
-
   const { cartItemCount, cartTotal, handleGoToCart } = useRestaurantCart(
     restaurant.id,
   );
+
+  useMenuItemUpdates(restaurant.id);
 
   const handleToggleFavorite = () => {
     requireAuth(() => {
@@ -54,7 +52,7 @@ export default function RestaurantShow({
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title={restaurant.name} />
 
       <div className="restaurant-show-page">
@@ -64,7 +62,7 @@ export default function RestaurantShow({
           style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : {}}
         >
           <div className="banner-actions">
-            <Link href={route('restaurants.index')} className="back-button">
+            <Link href={route('map.index')} className="back-button">
               <ArrowLeftIcon className="icon" />
             </Link>
           </div>
@@ -112,38 +110,8 @@ export default function RestaurantShow({
           </p>
         </div>
 
-        {/* Search */}
-        <div className="menu-search">
-          <SearchInput
-            value={query}
-            onChange={setQuery}
-            placeholder="Search menu..."
-          />
-        </div>
-
-        {/* Menu Categories */}
-        {displayedCategories?.length ? (
-          displayedCategories.map((category) => (
-            <div key={category.id} className="menu-category">
-              <h3 className="category-title">{category.name}</h3>
-
-              <div className="menu-items-list">
-                {category.menu_items.map((item) => (
-                  // TODO add '-' button to reduce quantity if > 0
-                  <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    restaurantId={restaurant.id}
-                  />
-                ))}
-              </div>
-            </div>
-          ))
-        ) : query ? (
-          <div className="no-results">
-            <p>No menu items found matching "{query}".</p>
-          </div>
-        ) : null}
+        {/* Menu */}
+        <RestaurantMenu restaurant={restaurant} />
 
         {/* Reviews Section */}
         <RestaurantReviews
@@ -164,6 +132,6 @@ export default function RestaurantShow({
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

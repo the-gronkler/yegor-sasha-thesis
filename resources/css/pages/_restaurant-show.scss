@@ -125,31 +125,6 @@
     }
   }
 
-  .menu-search {
-    margin: 0 1rem 1.5rem;
-  }
-
-  .menu-category {
-    margin: 0 1rem 2rem;
-
-    .category-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      border-bottom: 4px solid main-colors.$border-light;
-      display: inline-block;
-      padding-right: 2rem;
-      width: 100%;
-      color: main-colors.$text-primary;
-    }
-  }
-
-  .no-results {
-    text-align: center;
-    padding: 2rem;
-    color: main-colors.$text-secondary;
-  }
-
   .reviews-section-wrapper {
     margin-top: 2rem;
     padding: 0 1rem 5rem; // Bottom padding for floating checkout
@@ -158,7 +133,7 @@
   .floating-checkout-container {
     position: fixed;
     bottom: calc(
-      layout.$bottom-nav-height + 10px
+      #{layout.$bottom-nav-height} + 10px
     ); // Above bottom nav + 10px padding
     left: 0;
     width: 100%;

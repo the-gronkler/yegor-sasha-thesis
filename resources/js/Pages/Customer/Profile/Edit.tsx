@@ -1,7 +1,7 @@
 import { FormEventHandler } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { User, Customer } from '@/types/models';
 
 interface ProfileEditProps {
@@ -39,7 +39,7 @@ export default function ProfileEdit({ user, customer }: ProfileEditProps) {
   };
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Edit Profile" />
 
       <div className="profile-page">
@@ -175,6 +175,6 @@ export default function ProfileEdit({ user, customer }: ProfileEditProps) {
           </form>
         </div>
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }

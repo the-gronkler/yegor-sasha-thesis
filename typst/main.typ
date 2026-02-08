@@ -1,4 +1,5 @@
 #import "template.typ": *
+#import "config.typ": *
 
 // TODO: replace example content with our own thesis content
 
@@ -23,8 +24,8 @@
   keywords: ("Keyword 1", "Keyword 2", "Keyword 3"),
 )
 
-// Main content of the thesis: 
-#include "examples/content-example.typ"
+// Main content of the thesis:
+// #include "examples/content-example.typ"
 
 // Project overview:
 #include "chapters/glossary.typ"
@@ -32,13 +33,25 @@
 #include "chapters/aims-and-objectives.typ"
 #include "chapters/context.typ"
 #include "chapters/functional-requirements.typ"
-// Use Case Diagram
-// Use Case Scenarios
+#include "chapters/use-case-diagram.typ"
+#include "chapters/use-case-scenarios.typ"
 #include "chapters/non-functional-requirements.typ"
+// Security
+// Backlog issues left (very optional)
 
 // Technical chapters:
-#include "chapters/technologies.typ"  //Technologies used (for the app, not in development process)
-#include "chapters/development-process/main.typ"
+#include "chapters/technologies/technologies.typ"  //Technologies used (for the app, not in development process)
+
+#include "chapters/development-process/development-process-main.typ"
+#include "chapters/database-design.typ"
+#include "chapters/system-architecture/system-architecture.typ"
+
+#include "chapters/implementation/implementation-main.typ"
+#include "chapters/testing-and-validation.typ"
+
+// Final chapters:
+#include "chapters/conclusions-and-future-work.typ"
+
 
 
 

@@ -2,15 +2,20 @@ import { MenuItem } from '@/types/models';
 import { useCart } from '@/Contexts/CartContext';
 import { router } from '@inertiajs/react';
 import { useAuth } from '@/Hooks/useAuth';
+import Toggle from '@/Components/UI/Toggle';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from 'react';
 
 interface MenuItemCardProps {
   item: MenuItem;
   restaurantId: number;
+  mode?: 'customer' | 'employee' | 'employee-edit';
 }
 
 export default function MenuItemCard({
   item,
   restaurantId,
+  mode = 'customer',
 }: MenuItemCardProps) {
   const { addItem, updateQuantity, items } = useCart();
   const { requireAuth } = useAuth();
@@ -19,15 +24,15 @@ export default function MenuItemCard({
   const cartItem = items.find((i) => i.id === item.id);
   const quantityInCart = cartItem?.quantity || 0;
 
-  // Placeholder for availability logic.
-  // Assuming available unless specified otherwise (not in current data).
-  //   TODO: implement actual availability check
-  const isAvailable = true;
+  const [isAvailable, setIsAvailable] = useState(item.is_available);
 
-  const primaryImage =
-    item.images?.find((img) => img.is_primary_for_menu_item) ||
-    item.images?.[0];
-  const imageUrl = primaryImage ? primaryImage.url : null;
+  // Sync local state with props if item.is_available changes
+  useEffect(() => {
+    setIsAvailable(item.is_available);
+  }, [item.is_available]);
+
+  // Use the selected image (image_id relationship), fallback to first image, or null
+  const imageUrl = item.image?.url || item.images?.[0]?.url || null;
 
   const handleAddToCart = () => {
     requireAuth(() => {
@@ -45,12 +50,61 @@ export default function MenuItemCard({
     });
   };
 
+  const handleEditClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    router.visit(route('employee.restaurant.menu-items.edit', item.id));
+  };
+
+  const handleEmployeeShowClick = () => {
+    router.visit(route('employee.restaurant.menu-items.show', item.id));
+  };
+
   const handleCardClick = () => {
-    router.visit(route('restaurants.menu-items.show', [restaurantId, item.id]));
+    if (mode === 'customer') {
+      router.visit(
+        route('restaurants.menu-items.show', [restaurantId, item.id]),
+      );
+    } else if (mode === 'employee-edit') {
+      handleEditClick();
+    } else if (mode === 'employee') {
+      handleEmployeeShowClick();
+    }
+  };
+
+  const handleAvailabilityToggle = (checked: boolean) => {
+    // Optimistically update local state
+    setIsAvailable(checked);
+
+    router.put(
+      route('employee.restaurant.menu-items.updateStatus', item.id),
+      {
+        is_available: checked,
+      },
+      {
+        preserveScroll: true,
+        onError: () => {
+          // Revert on error
+          setIsAvailable(!checked);
+        },
+      },
+    );
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      router.delete(route('employee.restaurant.menu-items.destroy', item.id), {
+        preserveScroll: true,
+      });
+    }
   };
 
   return (
-    <div className={`menu-item-card ${!isAvailable ? 'unavailable' : ''}`}>
+    <div
+      className={`menu-item-card ${!isAvailable ? 'unavailable' : ''} ${
+        mode === 'employee' || mode === 'employee-edit' ? 'employee-mode' : ''
+      }`}
+    >
       <div className="menu-item-content" onClick={handleCardClick}>
         {imageUrl ? (
           <img src={imageUrl} alt={item.name} className="menu-item-image" />
@@ -66,27 +120,60 @@ export default function MenuItemCard({
       </div>
 
       <div className="menu-item-actions">
-        {quantityInCart > 0 && (
-          <button
-            className="quantity-btn remove-button"
-            onClick={handleRemoveFromCart}
-            aria-label={`Remove one ${item.name} from cart`}
-          >
-            -
-          </button>
+        {mode === 'customer' && (
+          <>
+            {quantityInCart > 0 && (
+              <button
+                className="quantity-btn remove-button"
+                onClick={handleRemoveFromCart}
+                aria-label={`Remove one ${item.name} from cart`}
+              >
+                -
+              </button>
+            )}
+
+            <button
+              className="quantity-btn add-button"
+              disabled={!isAvailable}
+              onClick={handleAddToCart}
+              aria-label={`Add ${item.name} to cart`}
+            >
+              +
+              {quantityInCart > 0 && (
+                <span className="item-count">{quantityInCart}</span>
+              )}
+            </button>
+          </>
         )}
 
-        <button
-          className="quantity-btn add-button"
-          disabled={!isAvailable}
-          onClick={handleAddToCart}
-          aria-label={`Add ${item.name} to cart`}
-        >
-          +
-          {quantityInCart > 0 && (
-            <span className="item-count">{quantityInCart}</span>
-          )}
-        </button>
+        {mode === 'employee' && (
+          <div className="employee-actions">
+            <Toggle
+              checked={isAvailable}
+              onChange={handleAvailabilityToggle}
+              label={isAvailable ? 'Available' : 'Unavailable'}
+            />
+          </div>
+        )}
+
+        {mode === 'employee-edit' && (
+          <div className="employee-actions">
+            <button
+              className="edit-button"
+              onClick={handleEditClick}
+              aria-label="Edit menu item"
+            >
+              <PencilIcon className="icon" />
+            </button>
+            <button
+              className="delete-button"
+              onClick={handleDelete}
+              aria-label="Delete menu item"
+            >
+              <TrashIcon className="icon" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

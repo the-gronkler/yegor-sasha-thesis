@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
-import CustomerLayout from '@/Layouts/CustomerLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import { useCart } from '@/Contexts/CartContext';
 import { PageProps } from '@/types';
 import { Order } from '@/types/models';
 import CartRestaurantSection from '@/Components/Shared/CartRestaurantSection';
 import { CartItemType } from '@/Components/Shared/CartItem';
+import { useMenuItemUpdates } from '@/Hooks/Updates/useMenuItemUpdates';
 
 interface CartIndexProps extends PageProps {
   cartOrders: Order[];
@@ -13,6 +14,15 @@ interface CartIndexProps extends PageProps {
 
 export default function CartIndex({ cartOrders }: CartIndexProps) {
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
+
+  const restaurantIds = useMemo(
+    () =>
+      cartOrders
+        .map((o) => o.restaurant?.id)
+        .filter((id): id is number => id !== undefined && id !== null),
+    [cartOrders],
+  );
+  useMenuItemUpdates(restaurantIds);
 
   // Initialize notes with saved notes from orders
   const [notes, setNotes] = useState<Record<number, string>>(() => {
@@ -92,7 +102,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
 
   if (items.length === 0) {
     return (
-      <CustomerLayout>
+      <AppLayout>
         <Head title="Cart" />
         <div className="cart-page">
           <div className="cart-header">
@@ -100,12 +110,12 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
           </div>
           <div className="empty-cart">
             <p>Your cart is empty</p>
-            <Link href={route('restaurants.index')} className="btn-primary">
+            <Link href={route('map.index')} className="btn-primary">
               Browse Restaurants
             </Link>
           </div>
         </div>
-      </CustomerLayout>
+      </AppLayout>
     );
   }
 
@@ -120,7 +130,7 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
   });
 
   return (
-    <CustomerLayout>
+    <AppLayout>
       <Head title="Cart" />
       <div className="cart-page">
         {/* Header */}
@@ -179,6 +189,6 @@ export default function CartIndex({ cartOrders }: CartIndexProps) {
           </button>
         </div> */}
       </div>
-    </CustomerLayout>
+    </AppLayout>
   );
 }
