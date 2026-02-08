@@ -28,24 +28,13 @@ The authentication flow relies on Laravel's default `web` guard with session sto
 
 ==== Dual User Type Architecture
 
-The system distinguishes between two user types — customers and employees — while maintaining a unified authentication mechanism. The underlying schema (a shared `users` table with separate `customers` and `employees` profile tables) is described in @database-design. From an authentication perspective, this design enables unified login regardless of user type, while supporting divergent functionality based on the associated profile.
-
-The User model defined in #source_code_link("app/Models/User.php") automatically eager-loads both profile relationships via a global scope, ensuring that role checks (`isCustomer()`, `isEmployee()`) execute without additional queries. This determines which middleware groups, controller namespaces, and authorization policies apply to the authenticated user.
+The system distinguishes between two user types — customers and employees — using a shared `users` table with separate profile tables (@database-design). The User model defined in #source_code_link("app/Models/User.php") automatically eager-loads both profiles via a global scope, ensuring role checks (`isCustomer()`, `isEmployee()`) execute without additional queries.
 
 === Request Validation Architecture
 
 ==== Validation Strategy
 
-The application employs a two-tier validation strategy, choosing the mechanism based on complexity and reuse requirements.
-
-For the majority of controller methods, validation is performed inline using Laravel's `$request->validate()` method directly within the controller action. This approach keeps simple validation rules co-located with the handling logic, reducing indirection for straightforward operations such as CRUD actions, status updates, and form submissions.
-
-For operations involving complex validation logic --- such as authentication with rate limiting or registration with custom error messages and attribute aliases --- dedicated Form Request classes are used. These classes extend Laravel's `FormRequest` base and encapsulate validation rules, authorization checks, custom messages, and additional business logic (such as the rate-limited authentication method in `LoginRequest`) into a single reusable object.
-
-This pragmatic approach balances two concerns:
-
-- *Locality*: Simple validation rules remain visible at the point of use, keeping controllers self-contained for straightforward operations.
-- *Encapsulation and Reusability*: Complex or security-critical validation is extracted into dedicated classes that can be reused across multiple controller actions, preventing controller methods from becoming cluttered with validation logic that would obscure their primary orchestration responsibility.
+The application employs inline validation via `$request->validate()` for simple operations and dedicated Form Request classes for complex logic requiring rate limiting, custom error messages, or reuse. This balances locality (simple rules remain at point of use) with encapsulation (complex validation is extracted into reusable classes).
 
 ==== Rate Limiting for Security
 
@@ -59,29 +48,11 @@ The throttle strategy identifies requests by a combination of user identity and 
 
 ==== Policy-Based Access Control
 
-Access control is implemented through Policy classes, with each major resource (orders, restaurants, menu items, reviews) having an associated policy that defines which users may perform which actions. Policies are registered centrally in the authentication service provider, mapping model classes to their corresponding policy classes.
+Access control is implemented through Policy classes mapping to major resources. Policy methods receive the authenticated user and optional resource, returning boolean authorization decisions. The order policy defined in #source_code_link("app/Policies/OrderPolicy.php") enforces multi-tenancy: customers access only their own orders; employees access only their restaurant's orders; administrators access all orders.
 
-Policy methods receive the authenticated user and (optionally) the resource being accessed, returning a boolean indicating whether the action is permitted. Standard Laravel authorization methods (`view`, `create`, `update`, `delete`) are implemented alongside custom methods for domain-specific actions.
+A global gate in `AuthServiceProvider` grants administrators (`is_admin = true`) unrestricted access. When `Gate::before()` returns `true`, subsequent policy checks are skipped. This centralizes admin override logic.
 
-==== Admin Bypass Gate
-
-A global gate defined in the `AuthServiceProvider` grants system administrators (`is_admin = true`) unrestricted access to all resources. This gate fires before any policy check:
-
-When `Gate::before()` returns `true`, all subsequent policy checks are skipped, granting full access. When it returns `null`, normal policy evaluation proceeds. This pattern centralizes the admin override logic rather than repeating it in every policy method.
-
-==== Context-Aware Authorization
-
-Policies evaluate the user's relationship to the resource being accessed. The order policy defined in #source_code_link("app/Policies/OrderPolicy.php") demonstrates this pattern:
-
-- View is permitted for the owning customer, employees of the associated restaurant, or administrators.
-- Update is permitted for restaurant employees (for status changes), or customers only when the order status is `InCart`.
-- Delete is permitted for customers only when the order status is `InCart`, preventing deletion of placed orders.
-
-These checks enforce multi-tenancy boundaries, ensuring employees can only access orders belonging to their restaurant and customers can only access their own orders.
-
-==== Custom Gate Definitions
-
-Beyond resource policies, custom gates define cross-cutting authorization rules. The `manage-restaurant` gate, for example, permits only restaurant administrators (employees with `is_admin = true` for their restaurant) to perform management operations such as editing restaurant details or managing menu categories.
+Custom gates define cross-cutting rules. The `manage-restaurant` gate permits only restaurant administrators to perform management operations such as editing restaurant details or managing menu categories.
 
 === Controller Architecture
 
@@ -108,16 +79,7 @@ Controllers are organized by user domain rather than resource type. Customer-fac
 
 ==== Domain Services
 
-Complex business logic that spans multiple models or involves external systems is encapsulated in service classes within the `App\Services` namespace. Services are stateless, receiving dependencies through constructor injection, and provide focused methods for specific domain operations.
-
-The `ReviewService` defined in #source_code_link("app/Services/ReviewService.php") demonstrates this pattern. It handles:
-
-- Review creation with optional image uploads to cloud storage (R2)
-- Review updates with image addition and deletion coordination
-- Review deletion with storage cleanup and error logging
-- Automatic recalculation of the parent restaurant's aggregate rating after every create, update, or delete operation, ensuring the displayed rating always reflects current review data
-
-The service returns a `ReviewOperationResult` data transfer object that encapsulates both the resulting review and any upload errors, allowing the controller to provide appropriate feedback without exposing service internals.
+Complex business logic spanning multiple models or external systems is encapsulated in stateless service classes within `App\Services`. The `ReviewService` defined in #source_code_link("app/Services/ReviewService.php") handles review creation with optional image uploads, updates with image coordination, deletion with storage cleanup, and automatic recalculation of parent restaurant ratings. The service returns `ReviewOperationResult` objects encapsulating results and upload errors.
 
 ==== Cross-Cutting Utility Services
 

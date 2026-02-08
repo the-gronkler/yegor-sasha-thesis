@@ -6,31 +6,11 @@ The frontend architecture organizes React components into a layered hierarchy th
 
 === Component Hierarchy
 
-The architecture employs a three-tier component hierarchy inspired by atomic design principles @FrostAtomicDesign2016.
-
-_Page Components_ represent the top level, corresponding directly to application routes. Pages receive data from Laravel controllers via Inertia.js and orchestrate composition of lower-level components. Complex logic delegates to custom hooks, keeping pages focused on assembly and data distribution.
-
-_Layout Components_ provide persistent structural elements wrapping page content. Layouts persist across navigation through Inertia.js, maintaining state while only inner content updates. This prevents unnecessary remounting and preserves component state during navigation.
-
-_Reusable Components_ split into two categories. UI Components (Atoms) provide generic interface elements without domain awareness. Shared Components (Molecules) combine atoms with domain-specific presentation logic, formatting business data for display.
-
-_Custom Hooks_ serve two purposes. Reusable hooks encapsulate shared logic across components—authentication utilities, configurable search, real-time update subscriptions. Component-specific hooks extract complex logic from individual components when complexity warrants separation, transforming components into purely presentational elements.
-
-The directory structure mirrors this hierarchy, enabling developers to locate components through URL patterns. The concrete directory layout and file organization are detailed in @frontend-implementation.
+The architecture employs a three-tier hierarchy inspired by atomic design @FrostAtomicDesign2016. _Page Components_ correspond to application routes, orchestrating composition of lower-level components while delegating complex logic to custom hooks. _Layout Components_ provide persistent structural elements wrapping page content, persisting across navigation through Inertia.js to maintain state. _Reusable Components_ split into UI Components (generic interface elements) and Shared Components (domain-specific presentation logic). _Custom Hooks_ encapsulate shared logic (authentication, search, real-time subscriptions) or extract complexity from individual components. The directory structure mirrors this hierarchy, enabling location via URL patterns (detailed in @frontend-implementation).
 
 === State & Data Flow
 
-The application employs local state as the default, elevating to global contexts only when necessary.
-
-_Local State_ serves most components through React's state hooks. Components manage UI toggles, form inputs, and view-specific data locally. Custom hooks encapsulate complex local state logic.
-
-_Global State_ uses React Context when multiple unrelated components require shared access. Context providers wrap the component tree, exposing state and mutation functions to any descendant. Components consume context directly without receiving props through intermediate layers. This pattern is applied where state must be accessible from structurally distant components — for example, shopping cart data consumed by menu buttons, the cart page, and the navigation badge simultaneously. Context providers initialize from server-provided data and synchronize with Inertia navigation events to maintain server authority over client state. The concrete implementation of this pattern is detailed in @frontend-implementation.
-
-_Server State_ flows through Inertia's shared props mechanism. Authentication state, user profiles, and application data arrive as page props rather than client-side fetches. This maintains the server as the authoritative data source.
-
-_Route Configuration_ uses Ziggy to expose Laravel's named routes to JavaScript. Components navigate using `route('restaurants.show', restaurantId)` rather than hardcoded paths like `/restaurants/${restaurantId}`. This approach maintains URL consistency between server and client—when backend routes change, the frontend automatically uses updated paths without manual synchronization. Route configuration arrives as shared props through Inertia, providing access to all named routes and current location information.
-
-Components communicate through props for parent-child relationships, with callbacks propagating user actions upward. Real-time updates integrate Laravel broadcasting with Inertia—hooks subscribe to channels and trigger prop refreshes when events occur, providing reactivity without polling.
+The application employs local state as default, elevating to global contexts only when necessary. _Local State_ serves most components through React's state hooks managing UI toggles, form inputs, and view-specific data. _Global State_ uses React Context when multiple unrelated components require shared access (e.g., shopping cart data consumed by menu buttons, cart page, and navigation badge). Context providers initialize from server data and synchronize with Inertia navigation events. _Server State_ flows through Inertia's shared props mechanism—authentication state, user profiles, and application data arrive as page props maintaining server authority. _Route Configuration_ uses Ziggy exposing Laravel's named routes to JavaScript (e.g., `route('restaurants.show', restaurantId)`), maintaining URL consistency when backend routes change. Components communicate through props for parent-child relationships, with callbacks propagating actions upward. Real-time updates integrate Laravel broadcasting with Inertia—hooks subscribe to channels and trigger prop refreshes when events occur. Concrete implementation detailed in @frontend-implementation.
 
 === Styling Architecture
 
