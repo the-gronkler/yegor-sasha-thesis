@@ -59,9 +59,7 @@ export interface Image {
   url: string;
   description?: string;
   restaurant_id?: number | null;
-  menu_item_id?: number | null;
   is_primary_for_restaurant?: boolean;
-  is_primary_for_menu_item?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -81,7 +79,6 @@ export interface MenuItem {
   is_available: boolean;
   image_id: number | null;
   image?: Image; // The selected image
-  images?: Image[]; // All images (legacy, may not be used)
   allergens?: Allergen[];
   pivot?: {
     quantity: number;

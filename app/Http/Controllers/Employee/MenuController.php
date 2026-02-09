@@ -15,7 +15,7 @@ class MenuController extends Controller
      */
     public function index(): Response
     {
-        $restaurant = $this->getEmployeeRestaurant(['images', 'allergens', 'image']);
+        $restaurant = $this->getEmployeeRestaurant(['allergens', 'image']);
         $employee = Auth::user()->employee;
 
         return Inertia::render('Employee/Menu', [
@@ -27,7 +27,7 @@ class MenuController extends Controller
     /**
      * Get the restaurant for the current employee with specified menu item relations.
      */
-    private function getEmployeeRestaurant(array $menuItemRelations = ['images', 'allergens']): Restaurant
+    private function getEmployeeRestaurant(array $menuItemRelations = ['allergens', 'image']): Restaurant
     {
         $employee = Auth::user()->employee;
 
