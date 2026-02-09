@@ -56,7 +56,6 @@
 #include "chapters/system-architecture/system-architecture.typ"
 
 #include "chapters/implementation/implementation-main.typ"
-#include "chapters/testing-and-validation.typ"
 
 // Final chapters:
 #include "chapters/conclusions-and-future-work.typ"

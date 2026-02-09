@@ -175,7 +175,7 @@ Query scopes encapsulate reusable query logic in model methods prefixed with `sc
   ```
 ]
 
-The `scopeWithDistanceTo` computes a virtual `distance` column using MariaDB's `ST_Distance_Sphere` function, which returns spherical distance in meters (divided by 1000 for kilometers). The scope preserves existing column selections by conditionally adding `restaurants.*` before appending the computed column. The `scopeWithinRadiusKm` applies a two-stage filter: first a bounding box prefilter using `whereBetween` on the indexed latitude and longitude columns, then an exact distance constraint via a `HAVING` clause on the computed distance. The `scopeOrderByDistance` simply orders results by the computed distance ascending. These scopes compose naturally in controllers — for example, `Restaurant::withDistanceTo($lat, $lng)->withinRadiusKm($lat, $lng, 10)->orderByDistance()`.
+The `scopeWithDistanceTo` computes a virtual `distance` column using MariaDB's `ST_Distance_Sphere` function, which returns spherical distance in meters (divided by 1000 for kilometers). The scope preserves existing column selections by conditionally adding `restaurants.*` before appending the computed column. The `scopeWithinRadiusKm` applies a two-stage filter: first a bounding box prefilter using `whereBetween` on the indexed latitude and longitude columns, then an exact distance constraint via a `HAVING` clause on the computed distance. The `scopeOrderByDistance` simply orders results by the computed distance ascending. These scopes compose naturally in controllers - for example, `Restaurant::withDistanceTo($lat, $lng)->withinRadiusKm($lat, $lng, 10)->orderByDistance()`.
 
 === Accessors for Computed Attributes
 
@@ -237,7 +237,7 @@ Reference data seeders populate dictionary tables with fixed values.
   ```
 ]
 
-The seeder iterates over a PHP enum's cases rather than maintaining a hardcoded array. This approach keeps status definitions centralized in the enum class where they can be referenced throughout the application. The `updateOrCreate` pattern makes seeding idempotent—running seeders multiple times updates existing records rather than creating duplicates.
+The seeder iterates over a PHP enum's cases rather than maintaining a hardcoded array. This approach keeps status definitions centralized in the enum class where they can be referenced throughout the application. The `updateOrCreate` pattern makes seeding idempotent - running seeders multiple times updates existing records rather than creating duplicates.
 
 Entity seeders use Model Factories for generating realistic test fixtures in configurable batches with progress reporting.
 
@@ -245,9 +245,9 @@ Entity seeders use Model Factories for generating realistic test fixtures in con
 
 === Model Factories
 
-Laravel Model Factories define how to generate realistic model instances for seeding and testing. The project contains factories for all major entities: `Restaurant`, `User`, `Customer`, `Employee`, `MenuItem`, `FoodType`, `Image`, `Order`, `Review`, and `Allergen`. Each factory uses Faker to produce random but plausible attribute values and exposes custom state methods for configuring specific variants — for example, `EmployeeFactory` provides `admin()` and `forRestaurant()` states that modify the generated output via a fluent API.
+Laravel Model Factories define how to generate realistic model instances for seeding and testing. The project contains factories for all major entities: `Restaurant`, `User`, `Customer`, `Employee`, `MenuItem`, `FoodType`, `Image`, `Order`, `Review`, and `Allergen`. Each factory uses Faker to produce random but plausible attribute values and exposes custom state methods for configuring specific variants - for example, `EmployeeFactory` provides `admin()` and `forRestaurant()` states that modify the generated output via a fluent API.
 
-The most notable factory is `RestaurantFactory`, which uses a Gaussian distribution (Box-Muller transform) to scatter restaurant coordinates around a configurable center point, and registers an `afterCreating` callback that builds an entire relationship tree — food types, menu items with allergen associations, and images — so that calling `Restaurant::factory()->create()` produces a fully populated entity graph in a single call.
+The most notable factory is `RestaurantFactory`, which uses a Gaussian distribution (Box-Muller transform) to scatter restaurant coordinates around a configurable center point, and registers an `afterCreating` callback that builds an entire relationship tree - food types, menu items with allergen associations, and images - so that calling `Restaurant::factory()->create()` produces a fully populated entity graph in a single call.
 
 === Artisan Command for Database Reset
 

@@ -30,7 +30,7 @@ The authentication flow relies on Laravel's default `web` guard with session sto
 
 ==== Dual User Type Architecture
 
-The system distinguishes between two user types — customers and employees — while maintaining a unified authentication mechanism. The underlying schema (a shared `users` table with separate `customers` and `employees` profile tables) is described in @database-design. From an authentication perspective, this design enables unified login regardless of user type, while supporting divergent functionality based on the associated profile.
+The system distinguishes between two user types - customers and employees - while maintaining a unified authentication mechanism. The underlying schema (a shared `users` table with separate `customers` and `employees` profile tables) is described in @database-design. From an authentication perspective, this design enables unified login regardless of user type, while supporting divergent functionality based on the associated profile.
 
 The User model defined in #source_code_link("app/Models/User.php") automatically eager-loads both profile relationships via a global scope, ensuring that role checks (`isCustomer()`, `isEmployee()`) execute without additional queries. This determines which middleware groups, controller namespaces, and authorization policies apply to the authenticated user.
 
