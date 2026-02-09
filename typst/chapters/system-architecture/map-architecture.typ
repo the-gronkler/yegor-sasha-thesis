@@ -44,6 +44,10 @@ The three phases serve distinct architectural responsibilities:
 
 This separation enforces the architectural guarantee that radius constraints are absolute: when `radius > 0`, no restaurant beyond that distance can appear in results, regardless of its quality score. The three-phase boundary prevents implementation drift where quality-based filtering could accidentally violate geographic constraints. The query architecture computes distance once using a subquery and reuses it in scoring, following a single-pass computation principle.
 
+==== Query Optimization Through Single-Pass Computation <map-arch-query-optimization>
+
+Within the three-phase pipeline, database queries are structured to compute expensive operations (distance calculations, aggregations) exactly once and reuse the results. This single-pass computation principle minimizes redundant work and ensures consistency between filtering and ranking operations.
+
 ==== Service Layer Abstraction
 
 The geospatial logic is isolated in a dedicated service class that provides stateless methods for domain-specific operations. This follows the Domain Service pattern from Domain-Driven Design @EvansDDD2003: logic that does not naturally belong to an entity or value object is extracted into a service.
@@ -95,7 +99,9 @@ For client-side interactions such as search filtering and selection, no server r
 
 The Map component follows React's controlled component pattern: view state is managed by the parent hook and passed as props. Camera movements trigger an `onMove` callback, enabling programmatic camera control and state synchronization.
 
-==== Payload Shaping and Lazy Loading
+==== Geolocation Control Integration Pattern <map-arch-geolocation-pattern>
+
+The geolocation control integration uses a callback registration pattern where the hidden Mapbox `GeolocateControl` is triggered via a callback registered in a ref, allowing custom UI buttons to trigger built-in geolocation functionality while maintaining control over the user interface.
 
 The architecture separates discovery data (restaurant metadata, primary image, distance, score) from detail data (full menu hierarchy, all images, reviews). The map endpoint loads only what is displayed; detailed data is fetched on demand when users navigate to individual restaurant pages.
 
@@ -118,7 +124,9 @@ The map visualization uses a layered architecture: a GeoJSON data source with cl
 ==== Strategic Indexing
 <map-arch-indexing>
 
-Separate single-column indexes on `latitude` and `longitude` columns support the bounding box prefilter that reduces the candidate set before expensive distance calculations.
+==== Bounding Box Prefilter Pattern <map-arch-bounding-box>
+
+Separate single-column indexes on `latitude` and `longitude` columns support a bounding box prefilter that reduces the candidate set before expensive distance calculations.
 
 MariaDB's query optimizer uses index merge @MariaDBIndexMerge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
 
