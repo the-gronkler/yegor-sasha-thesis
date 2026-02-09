@@ -47,17 +47,3 @@ The alternative-using Mapbox GL JS directly with `useEffect` hooks-would require
 _localStorage_ was considered but cannot be read in controller logic, limiting its usefulness for a feature that requires location data on the backend.
 
 _Cookies_ were considered but add bandwidth overhead by being sent with every HTTP request, even when location data is not needed.
-
-
-=== Summary
-
-The map-based discovery feature employs a layered technology stack:
-
-/ Backend geospatial: MariaDB `ST_Distance_Sphere` provides accurate distance calculations entirely in SQL, with Haversine fallback for portability.
-
-/ Map rendering: Mapbox GL JS delivers WebGL-accelerated vector maps with native clustering, wrapped by react-map-gl for React integration.
-
-/ Location persistence: Laravel Session stores user coordinates server-side with automatic expiry.
-
-
-These choices prioritize user experience (smooth interactions, instant search, preserved state), performance (database-level computation, indexed queries), and maintainability (leveraging framework features over custom implementations).

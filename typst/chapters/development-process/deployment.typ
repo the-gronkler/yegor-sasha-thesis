@@ -46,4 +46,10 @@ The `caddy` service acts as the dedicated ingress gateway, decoupling public acc
 ==== Database Service (`db`)
 A MariaDB 10.11 instance provides the relational data storage for the application. As discussed above, co-locating the database within the Compose stack is a deliberate trade-off for this academic project. Data integrity is preserved through a Docker volume mounted to the container's data directory, ensuring that database files persist independently of the container's lifecycle. This means the database can be stopped, upgraded, or rebuilt without losing data - the volume remains on the host filesystem and is reattached when the container restarts.
 
+=== Continuous Deployment with GitHub Actions
 
+Deployments to the production environment are automated through a GitHub Actions workflow (#source_code_link(".github/workflows/deploy.yml")) that triggers on every push to the `master` branch. The workflow connects to the Azure VM via SSH and executes a deployment script that fetches the latest code, verifies the environment configuration, and rebuilds the Docker containers.
+
+The pipeline follows a pull-based deployment model: rather than pushing built artifacts to the server, the workflow instructs the VM to pull changes from the repository and rebuild locally. This approach ensures that the production build process is identical to local development, reducing the risk of environment-specific issues. The workflow also supports manual dispatch with an optional commit SHA parameter, enabling rollbacks to specific versions when needed.
+
+Key steps in the deployment process include container teardown (`docker compose down`), rebuild with cache invalidation (`--build --renew-anon-volumes`), and cleanup of unused images to conserve disk space. The entire deployment completes in under two minutes, providing rapid iteration cycles while maintaining the consistency guarantees of containerized infrastructure.

@@ -6,9 +6,7 @@ The documentation methodology for this thesis is grounded in the "Docs-as-Code" 
 
 === Typst Integration
 
-Typst was selected for its high performance, developer-centric syntax, and powerful scripting capabilities. A primary motivation for this choice, alongside robust version control, is the capability to decouple manuscript content from formatting logic.
-
-While Typst simplifies this separation, it technically allows users to mix styling concerns with content more freely than LaTeX, which typically enforces a stricter boundary. To mitigate this architectural flexibility, the thesis adheres to a rigorous structural convention:
+Typst was selected for its high performance, developer-centric syntax, and powerful scripting capabilities. A primary motivation for this choice is the capability to decouple manuscript content from formatting logic:
 - *Document-wide styling* is exclusively defined in `template.typ` and applied via the `main.typ` entry point.
 - *Helper functions and constants* used within chapters are centralized in `config.typ`.
 
@@ -41,6 +39,8 @@ The thesis source code resides in the `typst/` directory within the main project
 - *template.typ*: Defines the visual styling, layout, and typography rules.
 - #strong("chapters/"): Individual chapters are separated into distinct files to minimize merge conflicts and facilitate parallel writing.
 
-=== Workflow and Versioning
+=== Comparative Technology Analysis
 
-As detailed in the Version Control section, the thesis manuscript is managed with the same rigorous Git workflow as the application codebase. Textual modifications are isolated in feature branches (e.g., #raw("docs/chapter-name")) and submitted via Pull Requests, ensuring that the academic content is subjected to the same mandatory quality assurance -- including automated formatting checks and peer review -- as the application code.
+The decision to utilize Typst was made after a careful evaluation against traditional alternatives.
+
+While LaTeX remains the academic standard, Typst offers incremental compilation for instant rendering @TypstDocs, a markdown-like syntax familiar to developers, and clear error messages -- all without requiring multi-gigabyte distributions @TeXLiveGuide. Its native bibliography management supports BibTeX files and IEEE formatting directly, eliminating the multi-pass builds and external processors required by LaTeX workflows.

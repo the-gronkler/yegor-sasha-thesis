@@ -1,3 +1,3 @@
 = Conclusions and Future Work
 
-// TODO: Write conclusions and future work
+Future features under consideration include group order sharing with split payment, and dynamic pricing tools for off-peak promotions.
