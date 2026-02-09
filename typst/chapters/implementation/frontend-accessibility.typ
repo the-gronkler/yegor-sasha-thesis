@@ -1,5 +1,4 @@
 #import "../../config.typ": code_example, source_code_link
-// TODO shorten this section af
 ==== Accessibility Implementation
 
 Accessibility is enforced at the UI component layer to ensure consistent patterns across the application. The implementation prioritizes semantic HTML, ARIA attributes, keyboard navigation, and focus management.
