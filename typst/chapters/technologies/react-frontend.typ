@@ -10,7 +10,7 @@ When selecting a frontend framework, three primary candidates were evaluated: Re
 
 *Ecosystem Maturity and Community Support* — React's ecosystem significantly surpasses both Vue.js and Angular in size and diversity @StackOverflowSurvey2024. While Vue.js offers excellent official packages (Vue Router, Pinia), its third-party ecosystem remains smaller, limiting options for specialized requirements such as advanced data visualization, complex form handling, or specific UI component libraries. Angular's ecosystem, though mature, remains tightly coupled to the framework's opinionated architecture, requiring developers to adopt Angular-specific solutions rather than leveraging the broader JavaScript ecosystem. React's flexibility allows integration with any compatible library, providing greater adaptability as project requirements evolve.
 
-*Inertia.js Integration Quality* — Inertia.js was originally developed alongside Laravel with React as the primary frontend target. While Inertia adapters exist for Vue.js and Angular, the React implementation receives the most attention, documentation, and community support. The Vue.js adapter, though functional, has fewer real-world examples and community-contributed patterns available. Angular's Inertia support remains experimental and lacks the production-ready stability required for a reliable application. Choosing React ensures access to the most mature Inertia integration, reducing integration risks and development overhead.
+*Inertia.js Integration Quality* — Inertia.js was originally developed alongside Laravel with Vue.js as the primary frontend target. While the Vue adapter was historically the most mature, Inertia v2 elevated the React adapter to first-class status with full feature parity, comprehensive documentation, and strong community support. Angular's Inertia support remains experimental and lacks the production-ready stability required for a reliable application. With Inertia v2, choosing React provides a fully supported integration path without sacrificing any framework capabilities.
 
 *Component Model and Reusability* — React's component model emphasizes composition over configuration, aligning well with the application's UI requirements. The restaurant discovery interface, order management screens, and employee dashboards share common elements (cards, buttons, forms, modals) that benefit from React's composable approach. Vue.js achieves similar composability, but its single-file component structure combines template, logic, and styling in one file, which can complicate component reuse when styling needs differ across contexts. Angular's component model, while powerful, requires understanding directives, pipes, and dependency injection before achieving similar levels of reusability, increasing the learning curve for new developers joining the project.
 
@@ -28,7 +28,7 @@ The frontend uses *TypeScript 5.9* with strict compiler settings. TypeScript add
 
 === Styling: SCSS Over Utility-First CSS
 
-All styling uses *SCSS* (Sass) with semantic class names following BEM-like conventions. Although Tailwind CSS is included in the project dependencies to support Inertia.js architecture, utility classes are not used in any React components
+All styling uses *SCSS* (Sass) with semantic class names following BEM-like conventions. Although Tailwind CSS is included in the project dependencies as part of Laravel's default scaffolding, utility classes are not used in any React components
 
 SCSS was selected over utility-first approaches (Tailwind CSS) and plain CSS for several reasons. SCSS's variables, mixins, and nesting capabilities enable maintainable, DRY (Don't Repeat Yourself) stylesheets without the verbose class lists common in utility-first frameworks. Semantic class names provide clearer intent than utility combinations, improving code readability and maintainability. SCSS's ability to generate CSS custom properties at build time makes theme values accessible to JavaScript when needed for dynamic styling or third-party library integration, providing flexibility that pure utility frameworks lack.
 
@@ -46,7 +46,7 @@ SCSS was selected over utility-first approaches (Tailwind CSS) and plain CSS for
 
 === Client-Side Search with Fuse.js <tech-fuse>
 
-*Fuse.js* provides fuzzy search filtering for client-side datasets across multiple features including restaurant discovery, menu browsing, and order lists @FuseJSDocs. When users type in search boxes, Fuse.js filters data locally without requiring server requests, providing instant feedback.
+*Fuse.js* provides fuzzy search filtering for client-side datasets across multiple features including restaurant discovery and menu browsing @FuseJSDocs. When users type in search boxes, Fuse.js filters data locally without requiring server requests, providing instant feedback.
 
 Fuse.js supports fuzzy matching with typo tolerance, weighted keys for relevance tuning, configurable match thresholds, and nested property search across relationships.
 The library integrates with React through custom hooks that encapsulate configuration and memoization patterns, as described in @frontend-implementation.

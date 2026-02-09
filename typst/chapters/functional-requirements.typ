@@ -27,7 +27,7 @@
 
 ==== Restaurant Ratings and Reviews
 - Authenticated customers can leave ratings and reviews for restaurants they have visited.
-- Each customer may submit one review per restaurant; reviews include a star rating (1--5), an optional title, text content, and optional images.
+- Each customer may submit one review per restaurant; reviews include a star rating (1--5), a required title, optional text content, and optional images.
 - The restaurant's displayed rating is automatically recalculated as the average of all its review ratings whenever a review is created, updated, or deleted.
 - The total number of reviews is displayed alongside the aggregate rating for each restaurant to help users make informed choices.
 

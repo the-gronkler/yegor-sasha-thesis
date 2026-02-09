@@ -10,7 +10,7 @@ Typst was selected for its high performance, developer-centric syntax, and power
 - *Document-wide styling* is exclusively defined in `template.typ` and applied via the `main.typ` entry point.
 - *Helper functions and constants* used within chapters are centralized in `config.typ`.
 
-Unlike LaTeX, which relies on complex macros, Typst uses a consistent, functional scripting language. This enables the creation of custom abstractions, such as the `code_example` and `source_code_link` functions used throughout this document, which dynamically generate links to the specific commit version of the codebase.
+Unlike LaTeX, which relies on complex macros, Typst uses a consistent, functional scripting language. This enables the creation of custom abstractions, such as the `source_code_link` function used throughout this document, which dynamically generates links to the codebase on the main branch, and the `code_example` function, which prevents page breaks between explanatory text and code blocks.
 
 === Comparative Technology Analysis
 
@@ -29,7 +29,7 @@ While LaTeX is the academic standard, Typst was chosen for its modern architectu
 Compared to visual editors like Microsoft Word or Google Docs, Typst aligns with the "Docs-as-Code" methodology:
 - *Version Control*: Typst files are plain text, enabling semantic versioning, diffing, and merging via Git. Binary formats (.docx) or cloud-native documents are opaque to standard developer tools.
 - *Consistency*: Formatting is defined programmatically (e.g., in `template.typ`), ensuring strict adherence to thesis guidelines across all chapters. WYSIWYG tools often suffer from "style drift" due to manual formatting adjustments.
-- *Automation*: Typst integrates seamlessly into CI/CD pipelines (e.g., verifying formatting or broken links), a capability that is difficult to implement with GUI-based editors.
+- *Automation*: Typst's plain-text format is compatible with CI/CD pipelines for automated compilation and validation, a capability that is difficult to implement with GUI-based editors.
 
 === Repository Structure
 
@@ -39,8 +39,3 @@ The thesis source code resides in the `typst/` directory within the main project
 - *template.typ*: Defines the visual styling, layout, and typography rules.
 - #strong("chapters/"): Individual chapters are separated into distinct files to minimize merge conflicts and facilitate parallel writing.
 
-=== Comparative Technology Analysis
-
-The decision to utilize Typst was made after a careful evaluation against traditional alternatives.
-
-While LaTeX remains the academic standard, Typst offers incremental compilation for instant rendering @TypstDocs, a markdown-like syntax familiar to developers, and clear error messages -- all without requiring multi-gigabyte distributions @TeXLiveGuide. Its native bibliography management supports BibTeX files and IEEE formatting directly, eliminating the multi-pass builds and external processors required by LaTeX workflows.

@@ -13,7 +13,7 @@ The hook accepts an initial state object defining all form fields and returns me
 
   ```typescript
   const form = useForm({
-    name: '', email: '', password: '', password_confirmation: '',
+    name: '', surname: '', email: '', password: '', password_confirmation: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,11 +40,11 @@ The hook accepts an initial state object defining all form fields and returns me
 
 The `useForm` hook accepts a generic type parameter (e.g., `useForm<MenuItemFormData>({...})`) that defines the form data shape. This enables autocomplete for field names and compile-time type checking for values, preventing typos and type mismatches.
 
-The typed form interfaces follow the same conventions described in the frontend type system design; an example is visible in #source_code_link("resources/js/Pages/Employee/MenuItems/MenuItemForm.tsx").
+The typed form interfaces follow the same conventions described in the frontend type system design; examples are visible in the menu item management pages under #source_code_link("resources/js/Pages/Employee/MenuItem").
 
 ===== Validation Error Display
 
-Laravel validation errors flow automatically into `form.errors`, keyed by field name. The consistent display pattern checks for the presence of an error, conditionally applies an `input-error` class to the input element, and renders the error message in a styled `<span>`. This pattern is demonstrated in the basic useForm example above and applied uniformly across all forms in the application.
+Laravel validation errors flow automatically into `form.errors`, keyed by field name. The consistent display pattern checks for the presence of an error and renders the error message in a styled element with the `error-message` class. This pattern is demonstrated in the basic useForm example above and applied uniformly across all forms in the application.
 
 ===== Processing State for Button Feedback
 

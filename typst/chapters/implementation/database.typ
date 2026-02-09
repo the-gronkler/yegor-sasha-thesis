@@ -48,7 +48,7 @@ Separate migrations create the `food_types` and `menu_items` tables, implementin
 
 #source_code_link("database/migrations")
 
-The menu_items table includes a direct `restaurant_id` foreign key for efficient querying, in addition to the `food_type_id` relationship. Price uses `double()` for numeric storage. The `is_available` boolean is added in a subsequent migration, following the evolution of feature requirements and demonstrating the incremental schema modification approach.
+Menu items derive their restaurant association transitively through `food_type_id`, as described in @database-design. An initial `restaurant_id` foreign key was removed in a later migration to strictly adhere to Third Normal Form, eliminating the redundancy of storing a relationship that can be inferred from the food type hierarchy. Price uses `double()` for numeric storage. The `is_available` boolean is added in a subsequent migration, following the evolution of feature requirements and demonstrating the incremental schema modification approach.
 
 === Many-to-Many Relationship Pivots
 
@@ -211,7 +211,7 @@ This accessor allows controllers to reference `$order->total` as if it were a st
 
 === Database Seeding Strategy
 
-Seeders populate the database with required reference data and optional test fixtures. The main DatabaseSeeder orchestrates execution order: creating test users, then calling AllergenSeeder, OrderStatusSeeder, RestaurantSeeder, EmployeeSeeder, and CustomerSeeder in dependency order.
+Seeders populate the database with required reference data and optional test fixtures. The main DatabaseSeeder orchestrates execution order: creating test users, then calling AllergenSeeder, OrderStatusSeeder, RestaurantSeeder, EmployeeSeeder, CustomerSeeder, OrderSeeder, and ReviewSeeder in dependency order.
 
 #source_code_link("database/seeders/DatabaseSeeder.php")
 

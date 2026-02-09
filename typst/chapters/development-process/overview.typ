@@ -8,9 +8,7 @@ The development approach integrates modern DevOps principles with rigorous acade
 
 The chapter is structured to cover the following core components of the workflow:
 
-- *Planning and Tracking*: The strategies used to manage requirements and track progress.
-- *Version Control*: The branching models and code review policies enforced to maintain repository health.
-- *Automations*: The automation systems and workflows that support the development process.
+- *Version Control*: The branching models, code review policies, and pre-commit hooks enforced to maintain repository health.
 - *Deployment*: The infrastructure and release pipelines used to host the application on the Microsoft Azure platform.
 - *Documentation Engineering*: The application of software development tools (Typst, Git) to the writing of this thesis.
 - *AI Augmentation*: The ethical and technical utilization of AI assistants in the development process.
