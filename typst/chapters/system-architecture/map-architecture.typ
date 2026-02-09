@@ -30,11 +30,9 @@ These layers communicate through well-defined interfaces: the controller exposes
 
 ==== Three-Phase Processing Pipeline <map-arch-three-phase>
 
-When a user opens the map or changes filters, the application must fetch a relevant subset of restaurants to display. Showing every restaurant in the database is not feasible - metropolitan areas like Warsaw can contain thousands of listings, which would overwhelm both the network payload and the map UI. The system must therefore select a bounded set of restaurants near the user, ranked by a combination of proximity and quality. Performance is also a key concern, as this query is executed on every map interaction and must process a large candidate set efficiently.
+Metropolitan areas such as Warsaw can contain thousands of restaurant listings, making unbounded queries infeasible for both network payloads and map rendering. The system must select a bounded set of nearby restaurants ranked by a combination of proximity and quality, while handling multiple center point sources and maintaining deterministic behavior. This requires a processing strategy that enforces geographic constraints before applying quality-based ranking.
 
-This requires a backend processing strategy that balances conflicting requirements: results must prioritize geographic proximity (respecting user-defined radius constraints), while simultaneously ranking restaurants by quality indicators (ratings, review counts). Additionally, the system must handle multiple input sources for the center point (explicit search coordinates, persistent user location, or default fallback) and ensure consistent, deterministic behavior across requests.
-
-To address these requirements, a deterministic three-phase processing pipeline was developed. This architecture separates input normalization, proximity-based filtering, and quality-based ranking into distinct sequential phases, ensuring that geographic constraints are enforced before quality scoring is applied. This separation prevents high-rated distant restaurants from displacing lower-rated nearby options, maintaining spatial coherence in the result set.
+To address these requirements, a deterministic three-phase processing pipeline was developed, separating input normalization, proximity-based filtering, and quality-based ranking into distinct sequential phases. This separation prevents high-rated distant restaurants from displacing lower-rated nearby options, maintaining spatial coherence in the result set.
 
 The three phases serve distinct architectural responsibilities:
 
@@ -44,7 +42,11 @@ The three phases serve distinct architectural responsibilities:
 
 *Phase C: Quality-Based Ranking* - Hydrates full restaurant models and computes composite quality scores entirely in SQL using derived tables. Within the geographically-bounded set from Phase B, restaurants are ordered by quality (rating 50%, review count 30%, proximity 20%) with distance as a tiebreaker.
 
-This separation enforces the architectural guarantee that radius constraints are absolute: when `radius > 0`, no restaurant beyond that distance can appear in results, regardless of its quality score. The three-phase boundary prevents implementation drift where quality-based filtering could accidentally violate geographic constraints.
+This separation enforces the architectural guarantee that radius constraints are absolute: when `radius > 0`, no restaurant beyond that distance can appear in results, regardless of its quality score. The three-phase boundary prevents implementation drift where quality-based filtering could accidentally violate geographic constraints. The query architecture computes distance once using a subquery and reuses it in scoring, following a single-pass computation principle.
+
+==== Query Optimization Through Single-Pass Computation <map-arch-query-optimization>
+
+Within the three-phase pipeline, database queries are structured to compute expensive operations (distance calculations, aggregations) exactly once and reuse the results. This single-pass computation principle minimizes redundant work and ensures consistency between filtering and ranking operations.
 
 ==== Service Layer Abstraction
 
@@ -59,57 +61,13 @@ This abstraction allows controllers to remain focused on HTTP request handling w
 
 ==== Session-Based Location Persistence <map-arch-session-persistence>
 
-User location is persisted in the server-side session with an expiry timestamp. This architectural choice reflects a balance between convenience (returning users see their neighborhood) and privacy (data expires after a configurable period and is not permanently stored).
-
-#block(breakable: false)[
-  The session pattern follows a read-through cache model:
-
-  ```
-  Controller                    Service                     Session
-      │                            │                           │
-      ├──── getLocation() ────────►│                           │
-      │                            ├──── read & validate ─────►│
-      │                            │◄─── coordinates/null ─────┤
-      │◄─── location/null ─────────┤                           │
-      │                            │                           │
-      ▼ (if null: use default)     │                           │
-  ```
-
-  This design keeps the controller simple (request → service → fallback) while encapsulating session validation logic in the service layer.
-]
+User location is persisted in the server-side session with an expiry timestamp, following a read-through cache model: the service reads and validates session data, returning coordinates or null, with the controller falling back to defaults. This balances convenience for returning users with privacy, as location data expires after a configurable period and is not permanently stored.
 
 === Frontend Architecture Patterns
 
 ==== Component Hierarchy and Separation of Concerns <map-arch-component-hierarchy>
 
-#block(breakable: false)[
-  The frontend follows a clear hierarchy that separates orchestration, state management, and presentation:
-  // TODO: Change the text diagram below to an actual diagram if needed.
-  ```
-  MapIndex (Page Component - Orchestration)
-  ├── useMapPage (Hook - State & Business Logic)
-  ├── MapLayout (Layout - Scroll Management)
-  ├── MapOverlay (Component - Controls)
-  │   ├── Search Input
-  │   ├── Radius Slider
-  │   ├── Location Controls
-  │   └── "Search Here" Button
-  ├── Map (Component - Visualization)
-  │   ├── GeoJSON Source (Restaurants)
-  │   ├── Cluster Layer
-  │   ├── Point Layer
-  │   ├── Selected Point Layer
-  │   └── User Marker Layer
-  ├── MapPopup (Component - Selection Detail)
-  └── BottomSheet (Component - List Sync)
-      └── RestaurantCard (Component - List Item)
-  ```
-
-  This hierarchy follows the single responsibility principle:
-  - The page component composes layout and wires props
-  - The hook owns state and performs side effects (Inertia navigation, geolocation)
-  - Each UI component focuses on one interaction surface (overlay controls, map canvas, list)
-]
+The frontend follows a clear hierarchy that separates orchestration, state management, and presentation. The `MapIndex` page component composes the UI and delegates all geospatial logic to the `useMapPage` hook. Beneath it, `MapOverlay` provides filter controls (search, radius, location), `Map` renders the Mapbox canvas with GeoJSON sources and clustering layers, `MapPopup` displays selection details, and `BottomSheet` synchronizes a scrollable restaurant list with the map view. Each component follows the single responsibility principle, focusing on one interaction surface.
 
 === State Management Architecture
 
@@ -131,177 +89,53 @@ This layered approach follows the principle of state locality @DoddsStateColocat
 
 ==== Data Flow and Synchronization <map-arch-data-flow>
 
-The map feature implements bidirectional data flow between server and client:
+The map feature implements bidirectional data flow between server and client. On initial load or filter changes, the backend executes the three-phase pipeline and returns a restaurant array via Inertia page props; the hook then converts the dataset to GeoJSON markers and the map component re-renders its layers.
 
-*Server → Client (Initial Load & Updates):*
+When users adjust the radius, trigger geolocation, or activate "Search Here," the hook constructs new query parameters and issues an Inertia partial reload (`only: ['restaurants', 'filters']`), updating only the dataset while preserving UI state such as camera position and selection.
 
-1. User navigates to map page or changes filters
-2. Backend executes three-phase pipeline and returns restaurant array
-3. Inertia updates page props
-4. React re-renders with new dataset
-5. Hook converts restaurants to GeoJSON markers
-6. Map component updates layers
-
-*Client → Server (Filter Changes):*
-
-1. User adjusts radius, triggers geolocation, or clicks "Search Here"
-2. Hook constructs new query parameters
-3. Inertia partial reload (`only: ['restaurants', 'filters']`)
-4. Backend re-executes pipeline with new parameters
-5. Response updates only dataset props, preserving UI state
-
-*Client-Only Flow (Search & Selection):*
-
-1. User types in search box
-2. Hook filters restaurant array with Fuse.js
-3. Filtered results update map markers and list
-4. No server request (client-side only)
-
-This hybrid approach optimizes for responsiveness: dataset changes require server validation (radius enforcement, scoring), but UI interactions (search, selection) remain instant through client-side state.
+For client-side interactions such as search filtering and selection, no server request is issued. The hook filters the existing restaurant array using Fuse.js, and updates are reflected immediately in both the map markers and the list view. This hybrid approach optimizes for responsiveness: dataset changes require server validation, while UI interactions remain instant through client-side state.
 
 ==== Controlled Map Component Pattern
 
-The Map component follows React's controlled component pattern: view state (latitude, longitude, zoom, bearing, pitch) is managed by the parent hook and passed down as props. Camera movements trigger an `onMove` callback that updates the parent state, which flows back down as props.
+The Map component follows React's controlled component pattern: view state is managed by the parent hook and passed as props. Camera movements trigger an `onMove` callback, enabling programmatic camera control and state synchronization.
 
-This architecture enables:
-- Programmatic camera control (flying to selected restaurant)
-- Conditional rendering based on view state (showing "Search Here" button)
-- Preserving camera position across dataset updates
-- Testability (mock view state in tests)
+==== Geolocation Control Integration Pattern <map-arch-geolocation-pattern>
 
-The alternative - uncontrolled component with internal ref access - would scatter view state across components and make state synchronization fragile.
+The geolocation control integration uses a callback registration pattern where the hidden Mapbox `GeolocateControl` is triggered via a callback registered in a ref, allowing custom UI buttons to trigger built-in geolocation functionality while maintaining control over the user interface.
 
-==== Geolocation Integration Pattern <map-arch-geolocation-pattern>
-
-Geolocation uses a callback registration pattern to bridge the gap between the Mapbox `GeolocateControl` (which has its own UI and lifecycle) and the custom overlay controls.
-
-Flow:
-1. Map component renders hidden `GeolocateControl`
-2. Geolocation hook inside Map registers a trigger function via callback
-3. Page-level hook stores the trigger function in a ref
-4. Overlay "My Location" button calls the trigger function
-5. Control acquires location and fires success/error events
-6. Events propagate to page hook, which updates state and navigates
-
-This pattern decouples the UI (custom button in overlay) from the implementation (Mapbox control) while maintaining clean component boundaries. The trigger function serves as a stable interface across component re-renders.
-
-=== Data Architecture and Flow Patterns
-
-==== Query Optimization Strategy <map-arch-query-optimization>
-
-The backend query architecture prioritizes single-pass computation:
-
-- Distance is calculated once using a subquery and reused in scoring
-- Review counts are pre-aggregated via grouped subquery, not correlated `COUNT(*)`
-- Composite score is computed once in a derived table
-- Final ordering happens directly on derived columns
-
-This strategy reflects the architectural principle of "compute once, use many times". Rather than recalculating distance in multiple `SELECT` clauses or `ORDER BY` expressions, the architecture uses SQL subqueries to establish a single source of truth.
-
-The derived table pattern (`fromSub`, `joinSub`) allows complex scoring while still returning Eloquent models. This hybrid approach balances SQL efficiency with Laravel's ORM convenience.
-
-==== Bounding Box Prefilter Pattern <map-arch-bounding-box>
-
-The architecture uses a two-stage spatial filter:
-
-1. *Coarse filter (bounding box):* `WHERE latitude BETWEEN ... AND longitude BETWEEN ...`
-2. *Exact filter (distance):* `HAVING ST_Distance_Sphere(...) <= radius`
-
-This reflects the architectural tradeoff between index efficiency and computation cost. Bounding box queries use simple indexed range scans, reducing the candidate set before expensive spherical distance calculations. The HAVING clause ensures accuracy while benefiting from the reduced dataset.
-
-Alternative architectures (spatial indexes on geometry columns, R-tree indexes) were not chosen because they require schema changes and do not benefit `ST_Distance_Sphere` on coordinate columns.
-
-==== Payload Shaping and Lazy Loading
-
-The architecture deliberately separates discovery data from detail data:
-
-- Map endpoint loads: restaurant metadata, single primary image, distance, score
-- Map endpoint omits: full menu hierarchy, all images, reviews
-
-This reflects the architectural principle of loading only what is displayed. The map UI does not render menus, so loading them wastes bandwidth. When users click a restaurant, a separate detail page loads the full dataset.
-
-This pattern follows a lazy loading architecture: load minimal data eagerly for browsing, fetch detailed data on-demand for interaction.
+The architecture separates discovery data (restaurant metadata, primary image, distance, score) from detail data (full menu hierarchy, all images, reviews). The map endpoint loads only what is displayed; detailed data is fetched on demand when users navigate to individual restaurant pages.
 
 === Architectural Guarantees and Invariants <map-arch-guarantees>
 
-The map architecture enforces several key invariants:
+The map architecture enforces two key invariants:
 
-*Radius Determinism:*
+_Radius Determinism_ -- when `radius > 0`, the result set contains only restaurants within that distance. This constraint is enforced via SQL `HAVING`, not application-level filtering, ensuring the database engine upholds the geographic boundary.
 
-When `radius > 0`, the result set contains only restaurants within that distance. This is enforced via SQL HAVING, not application filtering, ensuring the database engine upholds the constraint.
-
-*Score Stability:*
-
-Composite scores are computed exactly once in SQL. No PHP code modifies scores or reorders results. This guarantees that what the database orders is what the user sees.
-
-*Center Point Uniqueness:*
-
-Phase A guarantees exactly one center point per request. The priority cascade is deterministic, so repeated requests with identical parameters produce identical centers.
-
-*Session Isolation:*
-
-User location and search center are separate concepts. Exploring a new area (`search_lat`/`search_lng`) does not overwrite the persistent user location (`lat`/`lng`). This allows exploration without losing context.
-
-*UI State Preservation:*
-
-Partial Inertia reloads update only the dataset, not UI state. Camera position, selection, and overlay state persist across filter changes, maintaining spatial orientation.
-
-These guarantees reflect deliberate architectural choices that prioritize predictability and user experience over implementation simplicity.
+_Session Isolation_ -- user location and search center are maintained as separate concepts. Exploring a new area (`search_lat`/`search_lng`) does not overwrite the persistent user location (`lat`/`lng`), allowing exploration without losing context.
 
 === Integration Architecture
 
-==== Inertia.js Bridge Pattern <map-arch-inertia-bridge>
-
-The map feature relies on the Inertia.js integration described in @inertia-technology, which provides SPA-like navigation with server-authoritative routing and data.
-
-Of particular importance for the map architecture is Inertia's partial reload capability: when the user changes filters, only the restaurant dataset is re-fetched from the server, while the rest of the page state (camera position, selection, overlay) is preserved.
-
-This allows the map to maintain user context (e.g., zoom level, selected restaurant) while updating the underlying data. The architecture leverages this capability to create a responsive, stateful UI without sacrificing server-side control over routing and data.
-
 ==== Mapbox Integration Architecture
 
-The map visualization uses a layered architecture:
-
-*Data Layer:* GeoJSON source with restaurant features
-*Clustering Layer:* Mapbox-native clustering (configured at source level)
-*Visual Layers:* Cluster circles, point circles, selected point overlay
-*Interaction Layer:* Click handlers, hover effects, popup management
-
-This separation allows independent control: data updates do not require re-configuring layers, and visual styling changes do not affect data structure. The architecture uses Mapbox's declarative layer system rather than imperative canvas drawing, enabling GPU-accelerated rendering.
+The map visualization uses a layered architecture: a GeoJSON data source with clustering, visual layers for cluster circles, point markers, and selection highlighting, and an interaction layer for click handlers and popup management. This separation allows independent control, as data updates do not require re-configuring visual layers.
 
 === Scalability and Performance Architecture <map-arch-scalability>
-
-The architecture incorporates several design decisions that support scalability:
-
-==== Hard Result Limit:
-
-The 250-restaurant limit protects against unbounded queries, excessive JSON payloads, and client-side rendering costs. This is an architectural safeguard, not a temporary optimization.
-
-==== Database-Level Computation
-
-All scoring and ordering happens in SQL, leveraging MariaDB's query optimizer. This scales better than fetching all candidates and sorting in PHP.
 
 ==== Strategic Indexing
 <map-arch-indexing>
 
-Separate single-column indexes on `latitude` and `longitude` columns support the bounding box prefilter that reduces the candidate set before expensive distance calculations.
+==== Bounding Box Prefilter Pattern <map-arch-bounding-box>
+
+Separate single-column indexes on `latitude` and `longitude` columns support a bounding box prefilter that reduces the candidate set before expensive distance calculations.
 
 MariaDB's query optimizer uses index merge @MariaDBIndexMerge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
 
 Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently-the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 
-These patterns reflect an architecture designed for predictable resource consumption: capped result sizes, database-offloaded computation, and index-supported queries.
-
 === Summary
 
-The map discovery architecture demonstrates several key patterns:
+The map discovery architecture is built on three key patterns:
 
 - *Three-phase pipeline* separates concerns and enforces semantic guarantees (proximity selection → quality ranking)
 - *Service layer abstraction* centralizes geospatial domain logic
 - *Layered state management* distributes state across server (dataset), page (UI), and global (cart) layers
-- *Controlled components* enable programmatic control and state synchronization
-- *Single-pass SQL computation* avoids redundant calculations and leverages query optimization
-- *Lazy loading* separates discovery data from detail data for payload efficiency
-- *Hybrid client-server* balances server authority (filtering, scoring) with client responsiveness (search, selection)
-
-These architectural choices prioritize deterministic behavior, maintainable code structure, and scalable performance while delivering a smooth user experience across desktop and mobile platforms.

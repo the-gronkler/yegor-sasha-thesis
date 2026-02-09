@@ -14,30 +14,7 @@ It follows the open-closed principle @MartinCleanArch2017, allowing new broadcas
 
 This approach reduces errors by automating event dispatching on data changes, ensures the system remains reactive to all relevant updates, and promotes maintainability through declarative event definitions.
 
-#code_example[
-  For example, the `OrderUpdated` event is defined as follows:
-
-  ```php
-  <?php
-  class OrderUpdated implements ShouldBroadcast
-  {
-      use Dispatchable, InteractsWithSockets, SerializesModels;
-
-      public function __construct(public Order $order) {}
-
-      public function broadcastOn(): array
-      {
-          return [
-              new PrivateChannel('order.'.$this->order->id),
-              new PrivateChannel('restaurant.'.$this->order->restaurant_id),
-              new PrivateChannel('user.'.$this->order->customer_user_id),
-          ];
-      }
-  }
-  ```
-
-  This event broadcasts to the order's private channel, the restaurant's channel, and the customer's channel, ensuring all relevant parties receive updates.
-]
+Each broadcastable event extends Laravel's base event class, specifying the channel name and payload. The `OrderUpdated` event broadcasts to three private channels: the order's channel, the restaurant's channel, and the customer's channel. #source_code_link("app/Events/OrderUpdated.php")
 
 #code_example[
   In the `Order` model, the `booted` method dispatches the event on creation and status changes:
@@ -139,32 +116,10 @@ These specific hooks encapsulate the correct parameters and event handling logic
 
 This layered architecture - generic hook, specific wrappers, and page-level usage - ensures clean separation of concerns and ease of testing.
 
-#code_example[
-  === Channel Security and Authorization
-  Private channels are used for sensitive order data (`private-restaurant.{id}`).
+=== Channel Security and Authorization
+Private channels are used for sensitive order data (`private-restaurant.{id}`).
 
-  Access control is enforced in #source_code_link("routes/channels.php") route definition file, with the `order.{orderId}` channel defined as:
-  ```php
-  <?php
-  Broadcast::channel('order.{orderId}', function ($user, $orderId) {
-      $order = Order::find($orderId);
-      if (! $order) {
-          return false;
-      }
-
-      // Allow customer or employees of the restaurant
-      $employeeRestaurantId = $user->employee?->restaurant_id;
-
-      return (int) $user->id === (int) $order->customer_user_id ||
-          ($employeeRestaurantId !== null &&
-          (int) $employeeRestaurantId === (int) $order->restaurant_id);
-  });
-  ```
-
-  This logic ensures that:
-  - Customers can only listen to their own orders by matching user ID with `order.customer_user_id`.
-  - Employees can only listen to orders for the restaurant they work at by matching `user.employee.restaurant_id` with `order.restaurant_id`.
-]
+Channel authorization routes verify that the authenticated user owns the order before granting access to the private channel. Customers can only listen to their own orders by matching user ID, while employees can only listen to orders for their restaurant. #source_code_link("routes/channels.php")
 
 Authorization leverages Laravel's channel-based authentication, preventing unauthorized access to WebSocket channels. This approach provides fine-grained access control at the channel level, ensuring data privacy and security.
 

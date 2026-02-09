@@ -19,9 +19,13 @@ All changes must be submitted via pull requests (PRs) on GitHub. This mandatory 
 - Potential regressions are identified
 - Knowledge sharing occurs across team members
 
-Each pull request requires at least one approving review before merging. The review process includes automated checks for code formatting and linting, supplemented by manual code review focusing on logic correctness, security implications, and adherence to project conventions.
+Each pull request requires at least one approving review before merging. The review process includes automated checks for code formatting, supplemented by manual code review focusing on logic correctness, security implications, and adherence to project conventions.
 
 This mandatory process is enforced by GitHub branch protection policies, ensuring that all automated checks pass and the required reviews are completed before changes can be merged to the main branch.
+
+=== Pre-Commit Hooks
+
+The project uses *Husky* to run automated checks before each commit (#source_code_link(".husky/pre-commit")). The pre-commit hook invokes `lint-staged`, which runs code formatters (Prettier for frontend files, Laravel Pint for PHP) only on staged files. This ensures that all committed code adheres to the project's formatting standards without requiring developers to manually run formatters before each commit, reducing friction while maintaining consistent code style across the codebase.
 
 === Commit Conventions
 
@@ -33,41 +37,20 @@ The format is:
 type(scope): description
 ```
 
-Alternatively, a strictly hierarchical slash-delimited format is accepted:
+A slash-delimited alternative (`type/scope/description`) is also accepted, as it aligns with platform defaults where branch names are suggested as pull request titles. The *type* field indicates the nature of the change (e.g., `feat`, `fix`, `refactor`, `docs`), and the *scope* specifies the affected component:
 
-```go
-type/scope/sub-scope/description
-```
-
-Where:
-- *type* indicates the nature of the change:
-  - `feat`: A new feature
-  - `fix`: A bug fix
-  - `chore`: Maintenance tasks (e.g., dependency updates)
-  - `refactor`: Code restructuring without functional changes
-  - `docs`: Documentation updates
-  - `style`: Code style changes (formatting, etc.)
-  - `test`: Adding or modifying tests
-  - `perf`: Performance improvements
-  - `ci`: Continuous integration changes
-  - `build`: Build system modifications
-  - `revert`: Reverting previous commits
-- *scope* specifies the affected component:
-  - `FE`: Frontend (React/TypeScript)
-  - `BE`: Backend (Laravel/PHP)
-  - `API`: API-related changes
-  - `Auth`: Authentication and authorization
-  - `devtools`: Development tooling
-  - `thesis`: Typst documentation content
-  - Specific feature names or subscopes (e.g., `FE/menu-card`, `BE/order-processing`)
-- *description* provides a concise, imperative summary of the change
-
-While the standard Conventional Commit format is preferred, the slash-delimited alternative (`type/scope/description`) is also accepted. This alternative format is accepted mainly because it aligns with *tooling defaults* - the branch name is often suggested by platforms like GitHub and VS Code as the default Pull Request title, ensuring that the suggestion is automatically a valid commit message. Additionally, this format improves *typing efficiency* by eliminating the need for shift-keyed characters and offers *hierarchical clarity* by representing feature contexts as paths (e.g., `feat/FE/auth/login`) that map logically to the modular directory structure.
+#figure(
+  table(
+    columns: 2,
+    [*Scope*], [*Area*],
+    [`FE`], [Frontend (React/TypeScript)],
+    [`BE`], [Backend (Laravel/PHP)],
+    [`thesis`], [Typst documentation content],
+    [Feature name], [Subscopes (e.g., `FE/menu-card`)],
+  ),
+  caption: [Commit scope conventions],
+) <tab:commit-scopes>
 
 Examples include:
 - `feat(FE): implement restaurant menu card component`
 - `fix/BE/orders/resolve-race-condition`
-- `docs(thesis): add database design chapter`
-- `refactor/API/responses/standardize-error-format`
-
-This standardized format enables automated changelog generation, semantic versioning determination, and facilitates understanding of the project's evolution through its commit history.
