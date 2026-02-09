@@ -37,7 +37,7 @@ TypeScript numeric enums encode finite-state values like dictionary entity model
 
 Laravel pagination responses follow a consistent structure. Rather than duplicating this shape across multiple interfaces, a generic type captures the pattern once.
 
-A generic `Paginated<T>` interface wraps Laravel's standard pagination response shape, providing type-safe access to paginated data across all list views. Pages receiving paginated data declare their props as `PaginatedResponse<Restaurant>` or `PaginatedResponse<Order>`, automatically receiving correct types for all pagination properties. #source_code_link("resources/js/types/models.ts")
+A generic `PaginatedResponse<T>` interface wraps Laravel's standard pagination response shape, providing type-safe access to paginated data across all list views. Pages receiving paginated data declare their props as `PaginatedResponse<Restaurant>` or `PaginatedResponse<Order>`, automatically receiving correct types for all pagination properties. #source_code_link("resources/js/types/models.ts")
 
 ===== Global PageProps Interface
 

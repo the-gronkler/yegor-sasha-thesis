@@ -25,7 +25,7 @@ This process is supported by GitHub branch protection policies, ensuring that th
 
 === Pre-Commit Hooks
 
-The project uses *Husky* to run automated checks before each commit (#source_code_link(".husky/pre-commit")). The pre-commit hook invokes `lint-staged`, which runs code formatters (Prettier for frontend files, Laravel Pint for PHP) only on staged files. This ensures that all committed code adheres to the project's formatting standards without requiring developers to manually run formatters before each commit, reducing friction while maintaining consistent code style across the codebase.
+The project uses *Husky* to run automated checks before each commit (#source_code_link(".husky/pre-commit")). The pre-commit hook invokes `lint-staged`, which runs code formatters (Prettier for frontend files, Laravel Pint for PHP) only on staged files. This encourages consistent code style across the codebase by automatically formatting staged files before each commit, reducing friction compared to requiring developers to manually run formatters. The hook is configured with a non-blocking fallback to avoid disrupting the development workflow when formatting issues are detected.
 
 === Commit Conventions
 

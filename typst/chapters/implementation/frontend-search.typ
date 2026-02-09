@@ -68,19 +68,22 @@ This optimization matters for large datasets where Fuse.js processing has measur
 While the hook provides general-purpose fuzzy search, specific features supply tailored weighted key configurations for relevance tuning.
 
 #code_example[
-  Restaurant search weights name highest, description second, and nested menu item names lowest, reflecting typical search intent.
+  Restaurant search weights name highest, then description, food type categories, and nested menu item names, reflecting typical search intent.
 
   ```typescript
+  const SEARCH_OPTIONS: IFuseOptions<Restaurant> = {
+    keys: [
+      { name: 'name', weight: 2 },
+      { name: 'description', weight: 1.5 },
+      { name: 'food_types.name', weight: 1 },
+      { name: 'food_types.menu_items.name', weight: 0.5 },
+    ],
+  };
+
   const { query, setQuery, filteredItems } = useSearch(
     restaurants,
-    ['name', 'description', 'food_types.menu_items.name'],
-    {
-      keys: [
-        { name: 'name', weight: 0.5 },
-        { name: 'description', weight: 0.3 },
-        { name: 'food_types.menu_items.name', weight: 0.2 },
-      ],
-    }
+    [],
+    SEARCH_OPTIONS
   );
   ```
 ]
