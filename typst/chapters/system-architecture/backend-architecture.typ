@@ -36,7 +36,9 @@ The User model defined in #source_code_link("app/Models/User.php") automatically
 
 === Request Validation Architecture
 
-The application employs a pragmatic two-tier validation strategy. Most controller methods use inline `$request->validate()` for simple validation rules co-located with handling logic. For complex operations --- such as authentication with rate limiting or registration with custom error formatting --- dedicated Form Request classes encapsulate rules, authorization checks, and custom messages into reusable objects (e.g., #source_code_link("app/Http/Requests/Auth/LoginRequest.php"), which embeds throttling logic within the validation layer for brute-force protection).
+The application employs a two-tier validation strategy. Most controller methods use inline `$request->validate()` for simple validation rules co-located with handling logic.
+
+For complex operations --- such as authentication with rate limiting or registration with custom error formatting --- dedicated Form Request classes encapsulate rules, authorization checks, and custom messages into reusable objects (e.g., #source_code_link("app/Http/Requests/Auth/LoginRequest.php"), which embeds throttling logic within the validation layer for protection against brute-force attacks).
 
 This approach balances locality (simple rules remain visible at point of use) with encapsulation (complex validation is extracted into dedicated classes, keeping controllers focused on orchestration).
 
@@ -44,32 +46,27 @@ This approach balances locality (simple rules remain visible at point of use) wi
 
 ==== Policy-Based Access Control
 
-Access control is implemented through Policy classes, with each major resource (orders, restaurants, menu items, reviews) having an associated policy. Policy methods receive the authenticated user and the target resource, returning a boolean indicating whether the action is permitted.
+Access control is implemented through Policy classes, with each major resource (orders, restaurants, etc.) having an associated policy that centralizes authorization rules for that resource type.
 
-A global `Gate::before()` callback grants administrators unrestricted access, bypassing all subsequent policy checks. When it returns `null`, normal policy evaluation proceeds.
+Policy methods receive the authenticated user and target resource, returning a boolean indicating whether the action is permitted.
+
+For example, the order policy implements business rules determining whether a customer can view their own orders or whether an employee can update orders for their restaurant.
+
+A global `Gate::before()` callback grants system administrators unrestricted access, bypassing all subsequent policy checks. When it returns `null`, normal policy evaluation proceeds.
+
+
+Beyond resource policies, custom gates define cross-cutting rules. The `manage-restaurant` gate for example protects specific routes, permitting only restaurant administrators to perform management operations such as editing details or managing categories.
 
 ==== Context-Aware Authorization
 
-Policies evaluate the user's relationship to the resource. The order policy (#source_code_link("app/Policies/OrderPolicy.php")) permits viewing for the owning customer or associated restaurant employees, restricts updates to restaurant employees (for status changes) or customers (only for `InCart` orders), and prevents deletion of placed orders. These checks enforce multi-tenancy boundaries across the application.
+Policies may also evaluate the user's relationship to the resource. The order policy (#source_code_link("app/Policies/OrderPolicy.php")) permits viewing for the owning customer or associated restaurant employees, restricts updates to restaurant employees (for status changes) or customers (only for `InCart` orders), and prevents deletion of placed orders. These checks enforce multi-tenancy boundaries across the application.
 
-Beyond resource policies, custom gates define cross-cutting rules. The `manage-restaurant` gate permits only restaurant administrators to perform management operations such as editing details or managing categories.
 
 === Controller Architecture
 
-Controllers follow the thin controller pattern @FowlerPEAA2002, focusing exclusively on HTTP-layer concerns: parsing input, invoking authorization, delegating to services, and returning responses. Business logic and side effects are delegated to service classes or model events. When logic is sufficiently simple (straightforward CRUD), it remains in the controller; services are introduced when complexity warrants extraction.
+Controllers follow the thin controller pattern @FowlerPEAA2002, focusing on HTTP-layer concerns: parsing input, invoking authorization, delegating to services, and returning responses.
 
-Controllers in this application follow the thin controller pattern @FowlerPEAA2002, focusing exclusively on HTTP-layer concerns:
-
-+ Parsing and validating request input
-+ Invoking authorization checks via policies
-+ Delegating business logic to services
-+ Constructing and returning responses
-
-Business logic, data transformation, and side effects (such as file uploads or event dispatching) are delegated to service classes or handled through model events. This separation ensures controllers remain testable and maintainable as the application grows.
-
-For example, a review controller receives a review service through constructor injection and delegates all create, update, and delete operations to the service, handling only authorization, validation, and response formatting.
-
-When business logic is sufficiently simple --- such as straightforward CRUD operations or single-model updates --- it may remain in the controller rather than being extracted into a dedicated service. Service classes are introduced when the logic grows complex enough that it would obscure the controller's orchestration responsibility, involves multiple models or external systems, or benefits from reuse across different entry points.
+Business logic and side effects are delegated to service classes or model events. When logic is sufficiently simple however, it remains in the controller; services are introduced when the benefit of separation outweighs the overhead of introducing an additional class.
 
 ==== Domain-Organized Controllers
 
@@ -83,7 +80,9 @@ Cross-cutting utility services, such as the `GeoService` (#source_code_link("app
 
 === Middleware Architecture
 
-Custom middleware enforces role membership at the route group level, rejecting requests from users lacking the required profile before controller logic executes. This complements policy-based authorization: middleware answers "may this user access employee routes at all?" while policies answer "may this user modify this specific order?" The `HandleInertiaRequests` middleware (#source_code_link("app/Http/Middleware/HandleInertiaRequests.php")) bridges the backend with the React frontend by sharing authentication state, flash messages, and environment configuration with every Inertia response.
+Custom middleware enforces role membership at the route group level, rejecting requests from users lacking the required profile before controller logic executes. This complements policy-based authorization: middleware answers "may this user access employee routes at all?" while policies answer "may this user modify this specific order?"
+
+The `HandleInertiaRequests` middleware (#source_code_link("app/Http/Middleware/HandleInertiaRequests.php")) bridges the backend with the React frontend by sharing authentication state, flash messages, and environment configuration with every Inertia response.
 
 
 === Summary
