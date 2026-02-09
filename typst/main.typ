@@ -18,7 +18,7 @@
   department: "Department of Databases",
   specialization: "Software and Database Engineering",
   abstract: include "pre-content/abstract.typ",
-  acknowledgements: include "examples/acknowledgements-example.typ",
+  acknowledgements: include "pre-content/acknowledgements.typ",
   keywords: (
     "Restaurant Management System",
     "Online Food Ordering",
