@@ -5,7 +5,7 @@
 
 // Project settings, title page and other pre-content.
 #show: project.with(
-  title: "Your thesis title",
+  title: "Design and Implementation of a Self-Hosted Online Ordering and Tracking System for Small Restaurants",
   authors: (
     (name: "Oleksandr Svirin", index: "s28259"),
     (name: "Yegor Burykin", index: "s26904"),
@@ -17,7 +17,7 @@
   faculty: "Faculty of Information Technology",
   department: "Department of Databases",
   specialization: "Software and Database Engineering",
-  abstract: include "examples/abstract-example.typ",
+  abstract: include "pre-content/abstract.typ",
   acknowledgements: include "examples/acknowledgements-example.typ",
   keywords: (
     "Restaurant Management System",
