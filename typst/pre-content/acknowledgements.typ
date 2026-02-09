@@ -1,9 +1,9 @@
-We would like to thank our supervisor, Mr. Krzysztof Bajszczak, for his fast feedback and support throughout the development of this thesis.
+This work would not have been possible without the guidance of our supervisor, Mr. Krzysztof Bajszczak, whose prompt responses and steady encouragement kept us on track from start to finish.
 
-We also extend our thanks to Mr. Piotr Gago for conducting the diploma seminar and providing the structural guidelines necessary for this documentation.
+We are equally grateful to Mr. Piotr Gago, who led the diploma seminar and equipped us with the documentation framework that shaped this thesis.
 
-Additionally, we appreciate the support of Mr. Abdulla Mohamed, who has helped us passing MAS and feeling better during the course of our studies.
+A special mention goes to Mr. Abdulla Mohamed, whose presence made navigating MAS and the broader demands of university life considerably easier for both of us.
 
-On a personal note, I, Yegor, would like to thank my girlfriend Lisaveta for her support and for keeping my spirits high during the stressful moments of this journey!
+Speaking for myself, I, Yegor, owe a heartfelt thanks to my girlfriend Lisaveta - her encouragement and warmth carried me through the toughest stretches of this process!
 
-Finally, we thank each other for the effective collaboration and persistence required to deliver this project.
+Above all, we are grateful to one another for the teamwork and determination that brought this project to completion.
