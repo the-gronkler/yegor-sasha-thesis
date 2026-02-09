@@ -36,3 +36,5 @@ env.production
 .junie/mcp/mcp.json
 .mcp.json
 .vscode/mcp.json
+tmpclaude-*
+nul
