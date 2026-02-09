@@ -251,6 +251,8 @@ The most notable factory is `RestaurantFactory`, which uses a Gaussian distribut
 
 === Artisan Command for Database Reset
 
-A custom `mfs` (migrate-fresh-seed) Artisan command wraps the standard `migrate:fresh --seed` workflow, adding visual progress output and parameterized seeding with configurable entity counts. All options fall back to defaults defined in `config/seeding.php`.
+To enable seeding different sets of data for testing, a configurable custom command `mfs` (migrate-fresh-seed) was created to replace the standard `migrate:fresh --seed` workflow, implemented as a dedicated Artisan command class (#source_code_link("app/Console/Commands/Mfs.php")).
 
-#source_code_link("app/Console/Commands/Mfs.php")
+This command accepts optional flags for controlling the number of seeded entities and the distribution radius of restaurants. Each option falls back to defaults defined in the `config/seeding.php` configuration file.
+
+

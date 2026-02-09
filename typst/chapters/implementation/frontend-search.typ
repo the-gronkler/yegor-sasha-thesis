@@ -26,9 +26,23 @@ The #source_code_link("resources/js/Hooks/useSearch.ts") hook encapsulates the F
 
 The generic type parameter `T` enables the hook to work with any data structure while maintaining type safety. TypeScript verifies that `searchKeys` reference actual properties of `T`, preventing runtime errors from invalid property access.
 
-===== Fuse.js Configuration and Caching
+===== Generic Configuration with Context-Specific Customization
 
-The hook configures Fuse.js with defaults optimized for restaurant discovery: a threshold of 0.3 (requiring 70% match quality to tolerate minor typos while filtering irrelevant results), location-agnostic matching, and relevance-based sorting. Callers may override any default through the optional `options` parameter. The Fuse.js instance is wrapped in `useMemo` to prevent redundant instantiation on unrelated re-renders, reindexing only when items, keys, or options change. The full configuration is defined in #source_code_link("resources/js/Hooks/useSearch.ts").
+#code_example[
+    The hook's design separates the generic search mechanism from domain-specific configuration. Default settings  provide sensible behavior across all use cases, while the `options` parameter enables callers to customize search behavior for their specific data structures.
+
+ ```typescript
+  const defaultOptions: IFuseOptions<T> = {
+    keys: searchKeys as string[],
+    threshold: 0.3,
+    ignoreLocation: true,
+    includeScore: true,
+    shouldSort: true,
+  };
+  ```
+]
+
+This reusability is the key advantage: the same hook powers restaurant search, menu item filtering, and order history search by simply passing different data types and searchable keys. The Fuse.js instance is memoized to avoid reindexing on unrelated re-renders. #source_code_link("resources/js/Hooks/useSearch.ts")
 
 ===== Filtering Logic and Empty Query Optimization
 

@@ -31,7 +31,7 @@ Similar interfaces define `MenuItem`, `Order`, `Review`, and related models. #so
 
 Discrete state values use TypeScript numeric enums matching database integer columns. This provides both type safety and semantic clarity.
 
-TypeScript numeric enums encode finite-state values (`OrderStatusEnum`) matching database integer columns, ensuring compile-time exhaustiveness checks. Components use enum members instead of magic numbers, making status checks explicit and preventing invalid values. #source_code_link("resources/js/types/models.ts")
+TypeScript numeric enums encode finite-state values like dictionary entity models (`OrderStatusEnum`) matching database integer columns, ensuring compile-time exhaustiveness checks. Components use enum members instead of magic numbers, making status checks explicit and preventing invalid values. #source_code_link("resources/js/types/models.ts")
 
 ===== Generic Pagination Interface
 
@@ -71,17 +71,13 @@ Page components extend this interface with their specific data requirements usin
   Page-specific props extend `PageProps` to include additional data.
 
   ```typescript
-  interface ShowPageProps extends PageProps {
-    restaurant: Restaurant;
-    menuItems: MenuItem[];
-    reviews: PaginatedResponse<Review>;
+  interface SpecificPageProps extends PageProps {
+    // ... page specific props
   }
 
-  export default function Show({
-    restaurant,
-    menuItems,
-    reviews
-  }: ShowPageProps) {
+  export default function SpecificPage({
+    // ... page specific props
+  }: SpecificPageProps) {
     // Component implementation with fully typed props
   }
   ```

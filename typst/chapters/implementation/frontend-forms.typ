@@ -38,7 +38,9 @@ The hook accepts an initial state object defining all form fields and returns me
 
 ===== TypeScript Generics for Type Safety
 
-The `useForm` hook accepts a generic type parameter (e.g., `useForm<MenuItemFormData>({...})`) that defines the form data shape. This enables autocomplete for field names and compile-time type checking for values, preventing typos and type mismatches. The typed form interfaces follow the same conventions described in the frontend type system design; an example is visible in #source_code_link("resources/js/Pages/Employee/MenuItems/MenuItemForm.tsx").
+The `useForm` hook accepts a generic type parameter (e.g., `useForm<MenuItemFormData>({...})`) that defines the form data shape. This enables autocomplete for field names and compile-time type checking for values, preventing typos and type mismatches.
+
+The typed form interfaces follow the same conventions described in the frontend type system design; an example is visible in #source_code_link("resources/js/Pages/Employee/MenuItems/MenuItemForm.tsx").
 
 ===== Validation Error Display
 
