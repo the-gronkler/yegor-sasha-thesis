@@ -38,7 +38,6 @@ class RestaurantController extends Controller
             ->when($lat !== null && $lng !== null, fn ($q) => $q->withDistanceTo($lat, $lng))
             ->with([
                 'foodTypes.menuItems' => fn ($q) => $q->orderBy('name'),
-                'foodTypes.menuItems.images',
                 'foodTypes.menuItems.allergens',
                 'foodTypes.menuItems.image', // Load selected image
                 'images',
@@ -146,11 +145,6 @@ class RestaurantController extends Controller
                         'id' => $mi->image->id,
                         'url' => $mi->image->url,
                     ] : null,
-                    'images' => $mi->relationLoaded('images') ? $mi->images->map(fn ($img) => [
-                        'id' => $img->id,
-                        'url' => $img->url,
-                        'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
-                    ]) : [],
                     'allergens' => $mi->relationLoaded('allergens') ? $mi->allergens->map(fn ($al) => [
                         'id' => $al->id,
                         'name' => $al->name,

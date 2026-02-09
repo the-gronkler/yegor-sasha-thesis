@@ -15,7 +15,7 @@ class CartController extends Controller
         $customer = $request->user()->customer;
 
         // Get all cart orders (one per restaurant)
-        $query = Order::with(['menuItems.image', 'menuItems.images', 'restaurant'])
+        $query = Order::with(['menuItems.image', 'restaurant'])
             ->where('customer_user_id', $customer->user_id)
             ->where('order_status_id', OrderStatus::InCart);
 

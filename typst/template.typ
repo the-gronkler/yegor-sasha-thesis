@@ -152,6 +152,9 @@
     }
   }
 
+  // Citations: superscript IEEE-style with brackets
+  show cite: it => super(it)
+
   // Links
   show link: set text(fill: rgb("#005580"))
 

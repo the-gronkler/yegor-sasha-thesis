@@ -163,14 +163,11 @@ class RestaurantFactory extends Factory
                     });
             }
 
-            // Create restaurant images (not linked to specific menu items)
-            // These are the images that can be selected for menu items
+            // Create restaurant images that can be selected for menu items
             $restaurantImages = Image::factory()
                 ->count(rand(5, 10))
                 ->create([
                     'restaurant_id' => $restaurant->id,
-                    'menu_item_id' => null, // Not linked to specific menu items
-                    'is_primary_for_menu_item' => false,
                     'is_primary_for_restaurant' => false,
                 ]);
 

@@ -22,7 +22,6 @@ class MenuItemController extends Controller
 
         // Load related data
         $menuItem->load([
-            'images',
             'allergens',
             'image', // Load selected image
         ]);
@@ -41,11 +40,6 @@ class MenuItemController extends Controller
                     'id' => $menuItem->image->id,
                     'url' => $menuItem->image->url,
                 ] : null,
-                'images' => $menuItem->images->map(fn ($img) => [
-                    'id' => $img->id,
-                    'url' => $img->url,
-                    'is_primary_for_menu_item' => $img->is_primary_for_menu_item,
-                ]),
                 'allergens' => $menuItem->allergens->map(fn ($allergen) => [
                     'id' => $allergen->id,
                     'name' => $allergen->name,
