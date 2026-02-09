@@ -7,34 +7,23 @@
 - Orders can be placed online, with the ability to add items to a shopping cart.
 
 === Order Tracking
-- Customers can track both their online orders, and those placed in person, in real time.
-- Additionally, they can check and receive automatic updates about their order status, including estimated preparation and pickup time.
-
-=== Payment Integration
-- Multiple payment methods, including cards, digital wallets, and points earned through the system, are supported.
+- Customers can track their online orders in real time.
+- Additionally, they can check and receive automatic updates about their order status.
 
 === Map Restaurant Discovery
 - The main way to discover restaurants is a map (similar to existing solutions like Google or Apple Maps) which displays restaurant locations.
 
 === Heatmap Feature
-- The restaurant map has a "heat" layer which is calculated based on a combination of restaurant popularity, rating, and proximity to the user (each restaurant is a node "radiating" heat).
-- Areas with a great concentration of high "heat" establishments are designated as "hotspots".
-- Restaurants with a direct line of uninterrupted heat higher than a certain threshold will be added to that hotspot's restaurant list.
-- Users may select a "Hotspot" and view the restaurants inside it as a list, as well as have them clearly highlighted on the map.
+- The restaurant map has a "heat" layer which visualizes the density and concentration of restaurants across the map area.
 
 === User Account Management
-- Customers can create and manage personal profiles, including saved payment methods, favorite restaurants, and past orders.
+- Customers can create and manage personal profiles, including favorite restaurants and past orders.
 - Profile management includes updating personal information and viewing order history.
-
-=== Gamified Rewards
-- Users earn points and badges for placing orders or reserving tables.
-- Points can be redeemed for discount coupons.
 
 === Additional Functionalities
 
 ==== Order Customization
 - Customers can add special instructions for their orders, such as dietary preferences or preparation requests.
-- Options to customize menu items (e.g., selecting toppings or choosing portion sizes).
 
 ==== Restaurant Ratings and Reviews
 - Authenticated customers can leave ratings and reviews for restaurants they have visited.
@@ -43,9 +32,6 @@
 - The total number of reviews is displayed alongside the aggregate rating for each restaurant to help users make informed choices.
 
 == For Restaurants
-
-=== Registration
-- Registration functionality for new restaurant partners.
 
 === Order Management
 - Orders are displayed with real-time updates.
@@ -58,8 +44,3 @@
 
 === Real-Time Updates
 - Restaurants can send status updates to customers automatically or manually.
-
-=== Additional Functionalities
-
-==== Analytics and Reporting
-- Provide insights into order trends, customer preferences, and inventory performance.
