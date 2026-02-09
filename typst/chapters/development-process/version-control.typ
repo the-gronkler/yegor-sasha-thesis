@@ -19,9 +19,13 @@ All changes must be submitted via pull requests (PRs) on GitHub. This mandatory 
 - Potential regressions are identified
 - Knowledge sharing occurs across team members
 
-Each pull request requires at least one approving review before merging. The review process includes automated checks for code formatting and linting, supplemented by manual code review focusing on logic correctness, security implications, and adherence to project conventions.
+Each pull request requires at least one approving review before merging. The review process includes automated checks for code formatting, supplemented by manual code review focusing on logic correctness, security implications, and adherence to project conventions.
 
 This mandatory process is enforced by GitHub branch protection policies, ensuring that all automated checks pass and the required reviews are completed before changes can be merged to the main branch.
+
+=== Pre-Commit Hooks
+
+The project uses *Husky* to run automated checks before each commit (#source_code_link(".husky/pre-commit")). The pre-commit hook invokes `lint-staged`, which runs code formatters (Prettier for frontend files, Laravel Pint for PHP) only on staged files. This ensures that all committed code adheres to the project's formatting standards without requiring developers to manually run formatters before each commit, reducing friction while maintaining consistent code style across the codebase.
 
 === Commit Conventions
 
