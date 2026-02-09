@@ -5,7 +5,7 @@
 
 // Project settings, title page and other pre-content.
 #show: project.with(
-  title: "Design and Implementation of a Self-Hosted Online Ordering and Tracking System for Small and Medium-Sized Restaurants",
+  title: "Design and Implementation of a Self-Hosted Online Ordering and Tracking System for Small Restaurants",
   authors: (
     (name: "Oleksandr Svirin", index: "s28259"),
     (name: "Yegor Burykin", index: "s26904"),
