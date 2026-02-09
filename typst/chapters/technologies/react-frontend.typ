@@ -48,4 +48,6 @@ SCSS was selected over utility-first approaches (Tailwind CSS) and plain CSS for
 
 *Fuse.js* provides fuzzy search filtering for client-side datasets across multiple features including restaurant discovery, menu browsing, and order lists @FuseJSDocs. When users type in search boxes, Fuse.js filters data locally without requiring server requests, providing instant feedback.
 
-Fuse.js supports fuzzy matching with typo tolerance, weighted keys for relevance tuning, configurable match thresholds, and nested property search across relationships. The library integrates with React through custom hooks that encapsulate configuration and memoization patterns, as described in @frontend-implementation. The trade-off is that search operates only on data already in the browser; comprehensive search across entire databases would require server-side indexing.
+Fuse.js supports fuzzy matching with typo tolerance, weighted keys for relevance tuning, configurable match thresholds, and nested property search across relationships.
+The library integrates with React through custom hooks that encapsulate configuration and memoization patterns, as described in @frontend-implementation.
+A given limitation is that search operates only on data already in the browser. Searching the full scope of a given resource from the database requires a server-side implementation, with equivalent functionality requiring specialized database features such as full-text indexes, trigram indexes, or dedicated search engines like Elasticsearch or Meilisearch.
