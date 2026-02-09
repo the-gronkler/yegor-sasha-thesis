@@ -29,7 +29,7 @@ While LaTeX is the academic standard, Typst was chosen for its modern architectu
 Compared to visual editors like Microsoft Word or Google Docs, Typst aligns with the "Docs-as-Code" methodology:
 - *Version Control*: Typst files are plain text, enabling semantic versioning, diffing, and merging via Git. Binary formats (.docx) or cloud-native documents are opaque to standard developer tools.
 - *Consistency*: Formatting is defined programmatically (e.g., in `template.typ`), ensuring strict adherence to thesis guidelines across all chapters. WYSIWYG tools often suffer from "style drift" due to manual formatting adjustments.
-- *Automation*: Typst integrates seamlessly into CI/CD pipelines (e.g., verifying formatting or broken links), a capability that is difficult to implement with GUI-based editors.
+- *Automation*: Typst's plain-text format is compatible with CI/CD pipelines for automated compilation and validation, a capability that is difficult to implement with GUI-based editors.
 
 === Repository Structure
 

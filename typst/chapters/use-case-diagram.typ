@@ -18,7 +18,7 @@ The system identifies several primary actors, each with distinct privileges and 
 - *Restaurant Worker*: A staff member responsible for day-to-day operations, including order processing and menu availability updates.
 - *Restaurant Admin*: A managerial role inheriting from the Restaurant Worker. This actor possesses elevated privileges for managing restaurant details, menu composition, and staff accounts.
 - *Payment System*: An external service (transaction processing is mocked in the current scope) that interacts with the checkout process.
-- *System Actions*: Automated triggers initiated by temporal events, such as new order notifications and daily rating updates.
+- *System Actions*: Automated triggers initiated by domain events, such as new order notifications and real-time rating recalculation.
 
 == Customer-Centric Functionality
 

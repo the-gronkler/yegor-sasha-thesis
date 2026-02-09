@@ -5,8 +5,10 @@
 - Loading times for key functions (e.g., menu display and order tracking) must not exceed 3 seconds.
 
 == Security
-- User data, including payment details, must be encrypted using AES-256 standards @NISTFIPS197.
-- Implement two-factor authentication for restaurant and customer accounts.
+- User passwords must be hashed using industry-standard algorithms (bcrypt) and never stored in plaintext.
+- All external traffic must be served over HTTPS, with SSL/TLS termination handled by the reverse proxy.
+- Cross-site request forgery (CSRF) protection must be enforced on all state-changing requests.
+- Private WebSocket channels must require authentication, ensuring users can only access their own data.
 
 == Scalability
 - The architecture should allow seamless integration of additional features, such as loyalty programs or new payment methods.

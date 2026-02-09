@@ -19,9 +19,9 @@ All changes must be submitted via pull requests (PRs) on GitHub. This mandatory 
 - Potential regressions are identified
 - Knowledge sharing occurs across team members
 
-Each pull request requires at least one approving review before merging. The review process includes automated checks for code formatting, supplemented by manual code review focusing on logic correctness, security implications, and adherence to project conventions.
+Each pull request requires at least one approving review before merging. The review process includes local pre-commit formatting checks (described below), supplemented by manual code review focusing on logic correctness, security implications, and adherence to project conventions.
 
-This mandatory process is enforced by GitHub branch protection policies, ensuring that all automated checks pass and the required reviews are completed before changes can be merged to the main branch.
+This process is supported by GitHub branch protection policies, ensuring that the required reviews are completed before changes can be merged to the main branch.
 
 === Pre-Commit Hooks
 

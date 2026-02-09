@@ -26,9 +26,9 @@ The section is structured to describe each logical entity cluster highlighted in
 
 ==== User and Role Data
 
-User accounts are implemented using a profile-based strategy to separate authentication credentials from role-specific data. The `users` table serves as the primary authentication principal (handling email, password, and session state), while role details are normalized into distinct `customers` and `employees` tables.
+User accounts are implemented using a profile-based strategy to separate authentication credentials from role-specific data. The `users` table serves as the primary authentication principal (handling name, email, password hash, and a site-wide `is_admin` flag), while role details are normalized into distinct `customers` and `employees` tables. Session state is managed in a separate framework-level `sessions` table, not within the users table itself.
 
-The user entity is treated as abstract, with a disjoint inheritance hierarchy implemented to represent Customer and Employee roles. Role-specific attributes are stored in dedicated tables, linked to the base user entity through one-to-one relationships.
+The user entity is treated as abstract, with a disjoint inheritance hierarchy implemented to represent Customer and Employee roles. Role-specific attributes are stored in dedicated tables, linked to the base user entity through one-to-one relationships. The `employees` table includes its own `is_admin` boolean to distinguish restaurant administrators from regular staff within a restaurant context.
 
 ==== Restaurant and Menu
 
@@ -40,6 +40,8 @@ The menu structure employs a hierarchical categorization strategy. A Restaurant 
 
 *Normalization*: Menu items are not directly linked to the restaurant; they inherit this association transitively through their Food Type. This design strictly adheres to the Third Normal Form, eliminating update anomalies where a category's restaurant association might contradict its items'.
 
+Menu items are linked to allergens through a many-to-many relationship implemented via the `menu_item_allergen` pivot table. The `allergens` table stores a dictionary of known allergen names, and the pivot table uses a composite primary key on `(menu_item_id, allergen_id)` to prevent duplicate associations. This design allows each menu item to declare multiple allergens and enables customer filtering by allergen content.
+
 ==== Images
 To support rich media while maintaining schema simplicity, the system utilizes a unified `images` table linked to restaurants via an explicit nullable foreign key (`restaurant_id`). Unlike polymorphic associations (which rely on string-based `model_type` columns and cannot enforce database-level referential integrity), explicit foreign keys allow the database to strictly enforce valid relationships. The foreign key uses `ON DELETE SET NULL` behavior, preserving image records even when the associated restaurant is deleted, which allows for potential orphan cleanup or administrative review.
 
@@ -48,19 +50,22 @@ A boolean flag (`is_primary_for_restaurant`) designates the main display image f
 The table stores only the resource path (e.g., `restaurants/1/cover.jpg`), delegating the actual binary storage to an external object storage service to keep the database lightweight and performant.
 
 ==== Reviews
-Restaurants are associated with customers through a 'Review' joining table, which in addition to the foreign keys also stores review-specific attributes such as rating, comments, as well as a one-to-many relationship to the review_images table. This design allows customers to provide feedback on multiple restaurants while ensuring that each review is uniquely tied to a specific customer-restaurant pair through a composite uniqueness constraint on `(customer_user_id, restaurant_id)`.
+Restaurants are associated with customers through a `reviews` joining table, which in addition to the foreign keys also stores review-specific attributes such as `rating`, `title`, and `content`, as well as a one-to-many relationship to the `review_images` table for customer-uploaded photos. This design allows customers to provide feedback on multiple restaurants while ensuring that each review is uniquely tied to a specific customer-restaurant pair through a composite uniqueness constraint on `(customer_user_id, restaurant_id)`.
 
 *Primary Key Strategy*: The review entity employs a surrogate primary key (`id`) rather than using the natural composite key `(customer_user_id, restaurant_id)` as the primary identifier. While the composite key uniquely identifies each review, using a dedicated surrogate key simplifies foreign key relationships, particularly for the `review_images` table. With a single-column primary key, `review_images` requires only one foreign key column (`review_id`) rather than propagating the composite key through multiple columns. This approach reduces join complexity and improves query readability. The natural uniqueness constraint is still enforced at the database level to prevent duplicate reviews.
 
-The `rating` column on the `restaurants` table stores the aggregate average of all associated review ratings. This value is recalculated whenever a review is created, updated, or deleted, ensuring that the displayed rating always reflects the current state of customer feedback. When a restaurant has no reviews, the rating defaults to 3 (a neutral midpoint on the 1-5 scale) rather than null, guaranteeing that all restaurants are sortable by rating regardless of review coverage. The review count is derived at query time using the reviews relationship rather than being stored as a denormalized column.
+The `rating` column on the `restaurants` table stores the aggregate average of all associated review ratings as a nullable double. This value is recalculated at the application level whenever a review is created, updated, or deleted, ensuring that the displayed rating always reflects the current state of customer feedback. When a restaurant has no reviews, the application-level recalculation logic sets the rating to 3 (a neutral midpoint on the 1-5 scale); however, the database column itself is nullable, meaning a restaurant that has never had its rating recalculated may hold a null value. The review count is derived at query time using the reviews relationship rather than being stored as a denormalized column.
 
 ==== Orders
-Orders are represented by the *Orders* table, linked to customers with a one-to-many relationship and having a many-to-many relationship to menu items. The joining table *Order Items* captures this many-to-many relationship, also storing the quantity of each menu item in the order.
+Orders are represented by the *Orders* table, linked to both customers and restaurants through one-to-many relationships (via `customer_user_id` and `restaurant_id` foreign keys respectively), and having a many-to-many relationship to menu items. The joining table *Order Items* captures this many-to-many relationship, also storing the quantity of each menu item in the order.
 
 
 Order status is tracked using a dedicated *Order Statuses* dictionary table, ensuring consistent status values and supporting future extensibility. The statuses include lifecycle stages: "In Cart", "Placed", "Accepted", "Declined", "Preparing", "Ready", "Cancelled", and "Fulfilled".
 
 Notably, the user's cart is not modeled as a separate table but as an order record with the "In Cart" status. This design choice simplifies the schema by avoiding duplication and reduces write operations when transitioning from cart to placed order, as it merely updates the status and sets the time_placed timestamp.
+
+==== Favorite Restaurants
+Customers can bookmark restaurants through the `favorite_restaurants` pivot table, which implements a many-to-many relationship between `customers` and `restaurants`. The table uses a composite primary key on `(customer_user_id, restaurant_id)` to prevent duplicate entries. A `rank` column supports user-defined ordering of favorites, enabling personalized prioritization within the bookmark list.
 
 === Spatial Data Representation
 The database schema handles geospatial data using standard double-precision floating-point columns for `latitude` and `longitude` within the `restaurants` table, rather than specialized geometric data types. This design prioritizes portability and eliminates dependencies on specific GIS database extensions. Usage of standard primitive types allows for the efficient execution of bounding-box queries directly through standard B-tree indices @BayerMcCreightBTree1972 on the coordinate columns, ensuring that spatial lookups remain performant without introducing the complexity of spatial extension overhead.
@@ -79,26 +84,6 @@ The physical database schema includes several framework-managed tables that supp
 - *Password Reset Tokens*: Temporary token storage for secure password recovery flows
 
 These infrastructure tables are provisioned through framework migrations and operate independently of the business domain model. Their schema and behavior are dictated by framework conventions, ensuring compatibility with the broader ecosystem of libraries and tools that integrate with the framework's job queue, cache, and authentication systems.
-
-=== System Columns and Infrastructure Tables
-
-==== Audit Timestamps
-All domain entities include standard audit timestamp columns (`created_at` and `updated_at`) that automatically track record creation and modification times. These system-level columns are managed transparently by the framework's ORM layer and require no explicit application logic. While omitted from the logical ERD for visual clarity, these timestamps are physically present in all tables and serve multiple purposes: supporting temporal queries, providing audit trails for regulatory compliance, and enabling cache invalidation strategies. The timestamp columns are nullable to accommodate edge cases in data migration scenarios.
-
-==== Framework Infrastructure Tables
-The physical database schema includes several framework-managed tables that support application infrastructure but do not represent business domain entities. These tables are intentionally excluded from the ERD as they constitute implementation details rather than logical design decisions:
-
-- *Sessions*: Server-side session storage for stateful authentication
-- *Cache and Cache Locks*: Application-level caching layer with distributed locking support
-- *Jobs, Job Batches, and Failed Jobs*: Asynchronous task queue management for background processing (email notifications, order status updates, image processing)
-- *Password Reset Tokens*: Temporary token storage for secure password recovery flows
-
-These infrastructure tables are provisioned through framework migrations and operate independently of the business domain model. Their schema and behavior are dictated by framework conventions, ensuring compatibility with the broader ecosystem of libraries and tools that integrate with the framework's job queue, cache, and authentication systems.
-
-=== System Columns and Infrastructure Tables
-
-==== Audit Timestamps
-All domain entities include standard audit timestamp columns (`created_at` and `updated_at`) that automatically track record creation and modification times. These system-level columns are managed transparently by the framework's ORM layer and require no explicit application logic. While omitted from the logical ERD for visual clarity, these timestamps are physically present in all tables and serve multiple purposes: supporting temporal queries, providing audit trails for regulatory compliance, and enabling cache invalidation strategies. The timestamp columns are nullable to accommodate edge cases in data migration scenarios.
 
 === Indexing and Constraint Strategy
 Indexing and constraints are applied to match the dominant access patterns while preserving integrity.

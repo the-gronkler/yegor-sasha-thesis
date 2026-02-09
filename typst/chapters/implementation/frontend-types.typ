@@ -44,28 +44,30 @@ A generic `Paginated<T>` interface wraps Laravel's standard pagination response 
 All Inertia pages receive shared props (authentication state, flash messages, errors) in addition to page-specific data. The global `PageProps` interface defined in #source_code_link("resources/js/types/index.d.ts") establishes this contract, mirroring the shared data structure returned by the `HandleInertiaRequests` middleware on the backend (described in @backend-architecture).
 
 #code_example[
-  `PageProps` defines the baseline properties available to every page component.
+  `PageProps` defines the baseline properties available to every page component using a generic type alias with intersection types.
 
   ```typescript
-  export interface PageProps {
+  export type PageProps<
+    T extends Record<string, unknown> = Record<string, unknown>,
+  > = T & {
     auth: {
       user: User;
       restaurant_id?: number | null;
       isRestaurantAdmin?: boolean;
     };
+    errors: Record<string, string>;
     flash: {
       success?: string;
       error?: string;
     };
-    errors: Record<string, string>;
     ziggy: Config & { location: string };
-  }
+  };
   ```
 ]
 
-This interface replicates the exact structure defined in the middleware's `share()` method, ensuring type safety when accessing shared props across all pages. The `auth` object provides authentication context populated from the session, `flash` contains success and error messages from redirects, `errors` holds validation failures, and `ziggy` supplies routing configuration for client-side route generation.
+This type replicates the exact structure defined in the middleware's `share()` method, ensuring type safety when accessing shared props across all pages. The generic parameter `T` allows page-specific data to be intersected with the shared props, providing a single unified type. The `auth` object provides authentication context populated from the session, `flash` contains success and error messages from redirects, `errors` holds validation failures, and `ziggy` supplies routing configuration for client-side route generation.
 
-Page components extend this interface with their specific data requirements using TypeScript intersection types. The `auth.user` property is always present for authenticated pages, with additional restaurant context for employee users.
+Page components extend this type with their specific data requirements using the generic parameter or TypeScript intersection types. The `auth.user` property is always present for authenticated pages, with additional restaurant context for employee users.
 
 #code_example[
   Page-specific props extend `PageProps` to include additional data.

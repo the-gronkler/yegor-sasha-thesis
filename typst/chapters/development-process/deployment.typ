@@ -34,7 +34,7 @@ Supervisor acts as the container's entry point (PID 1), responsible for spawning
 - *Local Asset Delivery*: Including Nginx inside the container provides the necessary capability to serve compiled frontend assets and handle FastCGI communication over a low-latency local socket, removing the need for complex shared volumes or external web server configuration.
 
 *Build Optimization:*
-The service employs a multi-stage #source_code_link("Dockerfile") to ensure efficiency. By compiling frontend assets in a temporary Node.js stage and copying only the artifacts to the final PHP stage, the production image remains lean, focusing solely on runtime requirements.
+The service employs a multi-stage #source_code_link("Dockerfile") to ensure efficiency. Frontend assets are compiled in a temporary Node.js stage and copied to the final PHP stage. The final stage also includes a Node.js installation to support hot module replacement during local development, as the same image serves both development and production environments (differentiated by the `APP_ENV` argument).
 
 ==== Reverse Proxy (`caddy`)
 The `caddy` service acts as the dedicated ingress gateway, decoupling public access management from the application logic.

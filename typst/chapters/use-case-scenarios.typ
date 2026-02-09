@@ -136,7 +136,7 @@ The system notifies the customer in real-time as the order status changes.
     preconditions: "1. The restaurant worker account belongs to the restaurant that received an order.",
     initiating-event: "The worker notices a new order under the \"New Orders\" tab.",
     basic-flow: [
-      1. The worker changes the order status to "Assigned" in the "Update status" field. \
+      1. The worker changes the order status to "Accepted" in the "Update status" field. \
       2. The restaurant worker prepares or assigns people to prepare the order. \
       3. The worker changes the order status to "Preparing". \
       4. Once prepared, the worker changes the order status to "Ready". \

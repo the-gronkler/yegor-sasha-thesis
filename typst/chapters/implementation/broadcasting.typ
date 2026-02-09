@@ -41,8 +41,8 @@ Each broadcastable event extends Laravel's base event class, specifying the chan
 
   ```php
   <?php
-  // In MenuItemController, after updating allergens
-  $menuItem->allergens()->sync($allergenIds);
+  // In EmployeeMenuItemController, after updating allergens
+  $menuItem->allergens()->sync($validated['allergens']);
   $menuItem->touch(); // Triggers MenuItemUpdated event
   ```
 ]
@@ -102,7 +102,7 @@ These specific hooks encapsulate the correct parameters and event handling logic
   In the Customer Order Status page:
 
   ```typescript
-  const { isConnected } = useOrderUpdates(orderId);
+  useOrderUpdates(orderId);
   ```
 ]
 
@@ -110,7 +110,7 @@ These specific hooks encapsulate the correct parameters and event handling logic
   In the Employee Orders page:
 
   ```typescript
-  const { isConnected } = useRestaurantOrdersUpdates(restaurantId);
+  useRestaurantOrdersUpdates(restaurantId);
   ```
 ]
 
@@ -136,6 +136,6 @@ This required specific configuration in `.env`:
 These settings ensure secure external connections while maintaining reliable internal service-to-service communication, with the reverse proxy handling SSL termination.
 
 === Performance Considerations and Error Handling
-To handle potential connection failures, the implementation includes automatic reconnection logic in the `useChannelUpdates` hook, with exponential backoff to avoid overwhelming the server. Additionally, events are queued on the backend using Laravel's broadcasting system, ensuring no data loss during temporary disconnections.
+Connection resilience is delegated to the underlying Echo and Pusher.js client libraries, which provide built-in automatic reconnection with configurable backoff strategies. On the backend, events are queued using Laravel's broadcasting system, ensuring reliable delivery even during transient connectivity issues.
 
 The debouncing mechanism prevents excessive reloads by delaying the execution of the reload callback, allowing multiple rapid events to be consolidated into a single action. This is implemented using a timeout that resets on each new event, ensuring responsiveness without performance degradation.
