@@ -9,22 +9,7 @@ _Note: Code examples in this section have been simplified for clarity. Productio
 === Filesystem Configuration
 The connection to Cloudflare R2 is defined in the filesystem configuration. To ensure compatibility with the R2 API, the `s3` driver is utilized with a custom endpoint. The configuration explicitly disables path-style endpoints to work correctly with Cloudflare's sub-domain structure.
 
-#code_example[
-  The configuration for the R2 disk in `config/filesystems.php`.
-  ```php
-  <?php
-  'r2' => [
-      'driver' => 's3',
-      'key' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
-      'secret' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
-      'region' => 'auto',
-      'bucket' => env('CLOUDFLARE_R2_BUCKET'),
-      'url' => env('CLOUDFLARE_R2_URL'),
-      'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
-      'use_path_style_endpoint' => env('CLOUDFLARE_R2_USE_PATH_STYLE_ENDPOINT', false),
-  ],
-  ```
-]
+"The filesystem is configured to use Cloudflare R2 as the default disk, with credentials sourced from environment variables and the S3 driver providing API compatibility." #source_code_link("config/filesystems.php")
 
 === Image Entity and URL Resolution
 Using the Accessor pattern described in @sec:orm, the `Image` model computes full URLs at runtime. The database stores only relative paths as part of the path-based persistence strategy described in @sec:media-storage; the Accessor resolves these into absolute URLs using the active storage configuration.
@@ -98,25 +83,4 @@ The deletion process follows a deliberate two-step sequence: database record rem
 
 In the upload case, the file is persisted to R2 before the database transaction begins. If the database operation fails, the catch block must clean up the orphaned file to maintain consistency. In deletion, the database record is removed first (an atomic operation), then the storage file is deleted. If the storage deletion fails, the database record is already gone - the user will not encounter broken image references in the application interface. The trade-off is acceptable: a potential orphaned file in R2 (incurring negligible storage cost) versus user-facing errors from dangling database references. Moreover, database transactions cannot meaningfully wrap external service calls like R2 deletions, as these operations exist outside the transactional boundary and cannot be rolled back atomically.
 
-#code_example[
-  The deletion workflow in #source_code_link("app/Http/Controllers/Employee/EstablishmentController.php") removes images from both database and storage.
-  ```php
-  <?php
-  public function destroyImage(Request $request, Image $image): RedirectResponse
-  {
-      // Verify image belongs to authenticated user's restaurant
-      $this->ensureImageBelongsToRestaurant($image, $restaurant);
-
-      // Capture path before database deletion
-      $path = $image->image;
-
-      // Delete database record first
-      $image->delete();
-
-      // Then delete file from R2 storage
-      Storage::disk('r2')->delete($path);
-
-      return back()->with('success', 'Image deleted successfully.');
-  }
-  ```
-]
+#source_code_link("app/Http/Controllers/Employee/EstablishmentController.php")

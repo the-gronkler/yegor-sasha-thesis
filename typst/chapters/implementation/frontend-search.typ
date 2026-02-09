@@ -26,14 +26,12 @@ The #source_code_link("resources/js/Hooks/useSearch.ts") hook encapsulates the F
 
 The generic type parameter `T` enables the hook to work with any data structure while maintaining type safety. TypeScript verifies that `searchKeys` reference actual properties of `T`, preventing runtime errors from invalid property access.
 
-===== Fuse.js Configuration and Caching
-
-The hook configures Fuse.js with defaults optimized for typical restaurant discovery use cases. The configuration balances match tolerance with result relevance.
+===== Generic Configuration with Context-Specific Customization
 
 #code_example[
-  Default Fuse.js configuration prioritizes relevant matches with location-agnostic search.
+    The hook's design separates the generic search mechanism from domain-specific configuration. Default settings  provide sensible behavior across all use cases, while the `options` parameter enables callers to customize search behavior for their specific data structures.
 
-  ```typescript
+ ```typescript
   const defaultOptions: IFuseOptions<T> = {
     keys: searchKeys as string[],
     threshold: 0.3,
@@ -41,31 +39,10 @@ The hook configures Fuse.js with defaults optimized for typical restaurant disco
     includeScore: true,
     shouldSort: true,
   };
-
-  const fuseOptions = { ...defaultOptions, ...options };
   ```
 ]
 
-Configuration parameters control matching behavior:
-- `threshold: 0.3`: Requires 70% match quality, filtering very distant matches while allowing minor typos
-- `ignoreLocation: true`: Matches anywhere in text, not requiring match at string start
-- `includeScore: true`: Enables relevance-based result ordering
-- `shouldSort: true`: Orders results by match quality
-
-The Fuse.js instance creation is wrapped in `useMemo` to prevent redundant instantiation on unrelated component re-renders.
-
-#code_example[
-  Memoization prevents unnecessary Fuse.js instance creation when dependencies are stable.
-
-  ```typescript
-  const fuse = useMemo(
-    () => new Fuse(items, { ...defaultOptions, ...options }),
-    [items, searchKeys, options]
-  );
-  ```
-]
-
-The dependency array ensures the Fuse instance updates when items, search keys, or options change, triggering reindexing only when necessary.
+This reusability is the key advantage: the same hook powers restaurant search, menu item filtering, and order history search by simply passing different data types and searchable keys. The Fuse.js instance is memoized to avoid reindexing on unrelated re-renders. #source_code_link("resources/js/Hooks/useSearch.ts")
 
 ===== Filtering Logic and Empty Query Optimization
 
@@ -88,10 +65,10 @@ This optimization matters for large datasets where Fuse.js processing has measur
 
 ===== Context-Specific Configurations
 
-While the hook provides general-purpose fuzzy search, specific features require tailored configurations with weighted keys for relevance tuning.
+While the hook provides general-purpose fuzzy search, specific features supply tailored weighted key configurations for relevance tuning.
 
 #code_example[
-  Restaurant search weights name and description higher than nested menu items.
+  Restaurant search weights name highest, description second, and nested menu item names lowest, reflecting typical search intent.
 
   ```typescript
   const { query, setQuery, filteredItems } = useSearch(
@@ -108,25 +85,7 @@ While the hook provides general-purpose fuzzy search, specific features require 
   ```
 ]
 
-The weight distribution reflects search intent: users searching restaurants prioritize restaurant names, secondarily consider descriptions, and only tangentially care about specific menu items. This prevents a restaurant with matching menu items but unrelated name from outranking a restaurant with matching name.
-
-#code_example[
-  Menu filtering prioritizes item names over descriptions and categories.
-
-  ```typescript
-  const { filteredItems } = useSearch(
-    menuItems,
-    ['name', 'description', 'food_type.name'],
-    {
-      keys: [
-        { name: 'name', weight: 0.6 },
-        { name: 'description', weight: 0.25 },
-        { name: 'food_type.name', weight: 0.15 },
-      ],
-    }
-  );
-  ```
-]
+This weight distribution ensures a restaurant with a matching name outranks one that merely contains a matching menu item. Other search contexts, such as menu item filtering, apply analogous weight distributions tuned to their respective data structures.
 
 ===== Constraints and Trade-offs
 

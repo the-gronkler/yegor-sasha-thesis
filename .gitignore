@@ -31,8 +31,10 @@ env.production
 *.crt
 /resources/js/ziggy.js
 
-/typst/*.pdf
+*.pdf
 .claude/settings.local.json
 .junie/mcp/mcp.json
 .mcp.json
 .vscode/mcp.json
+tmpclaude-*
+nul

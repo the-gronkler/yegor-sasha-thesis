@@ -2,13 +2,11 @@
 
 == Thesis Documentation
 
-The documentation methodology for this thesis is grounded in the "Docs-as-Code" philosophy, whereby the manuscript is treated as a software artifact rather than a static document. The thesis is authored using *Typst*, a modern, programmable typesetting system that offers significant advantages over traditional tools like LaTeX or Microsoft Word in the context of software engineering documentation.
+The documentation methodology for this thesis is grounded in the "Docs-as-Code" philosophy @GentleDocsLikeCode2017, whereby the manuscript is treated as a software artifact rather than a static document. The thesis is authored using *Typst* @TypstDocs, a modern, programmable typesetting system that offers significant advantages over traditional tools like LaTeX or Microsoft Word in the context of software engineering documentation.
 
 === Typst Integration
 
-Typst was selected for its high performance, developer-centric syntax, and powerful scripting capabilities. A primary motivation for this choice, alongside robust version control, is the capability to decouple manuscript content from formatting logic.
-
-While Typst simplifies this separation, it technically allows users to mix styling concerns with content more freely than LaTeX, which typically enforces a stricter boundary. To mitigate this architectural flexibility, the thesis adheres to a rigorous structural convention:
+Typst was selected for its high performance, developer-centric syntax, and powerful scripting capabilities. A primary motivation for this choice is the capability to decouple manuscript content from formatting logic:
 - *Document-wide styling* is exclusively defined in `template.typ` and applied via the `main.typ` entry point.
 - *Helper functions and constants* used within chapters are centralized in `config.typ`.
 
@@ -20,12 +18,12 @@ The decision to utilize Typst was made after a careful evaluation against tradit
 
 ==== Typst vs. LaTeX
 While LaTeX is the academic standard, Typst was chosen for its modern architecture:
-- *Performance*: Typst offers incremental compilation, rendering changes instantly, whereas LaTeX compilation is often slow and resource-intensive.
+- *Performance*: Typst offers incremental compilation, rendering changes instantly @TypstDocs, whereas LaTeX compilation is often slow and resource-intensive.
 - *Syntax*: Typst employs a markdown-like syntax familiar to developers, reducing the cognitive load compared to LaTeX's verbose macro system.
 - *Scripting*: The functional scripting language of Typst is more accessible to software engineers than TeX macros, enabling the rapid development of custom document automation.
 - *Error Reporting*: Typst provides clear, descriptive error messages, significantly streamlining the debugging process compared to LaTeX's often cryptic logs.
-- *Toolchain Simplicity*: Unlike LaTeX, which typically requires multi-gigabyte distributions (e.g., TeX Live) and complex package management, Typst operates as a single, lightweight binary with built-in package management, eliminating setup friction.
-- *Bibliography Management*: Typst natively integrates citation management, supporting standard BibTeX files and IEEE formatting directly within the compilation process. This removes the need for multi-pass builds and external bibliography processors (like Biber) required by traditional LaTeX workflows.
+- *Toolchain Simplicity*: Unlike LaTeX, which typically requires multi-gigabyte distributions (e.g., TeX Live) @TeXLiveGuide and complex package management, Typst operates as a single, lightweight binary with built-in package management, eliminating setup friction.
+- *Bibliography Management*: Typst natively integrates citation management, supporting standard BibTeX files and IEEE formatting directly within the compilation process. This removes the need for multi-pass builds and external bibliography processors (like Biber) @TeXLiveGuide required by traditional LaTeX workflows.
 
 ==== Typst vs. WYSIWYG Editors
 Compared to visual editors like Microsoft Word or Google Docs, Typst aligns with the "Docs-as-Code" methodology:
@@ -41,6 +39,8 @@ The thesis source code resides in the `typst/` directory within the main project
 - *template.typ*: Defines the visual styling, layout, and typography rules.
 - #strong("chapters/"): Individual chapters are separated into distinct files to minimize merge conflicts and facilitate parallel writing.
 
-=== Workflow and Versioning
+=== Comparative Technology Analysis
 
-As detailed in the Version Control section, the thesis manuscript is managed with the same rigorous Git workflow as the application codebase. Textual modifications are isolated in feature branches (e.g., #raw("docs/chapter-name")) and submitted via Pull Requests, ensuring that the academic content is subjected to the same mandatory quality assurance -- including automated formatting checks and peer review -- as the application code.
+The decision to utilize Typst was made after a careful evaluation against traditional alternatives.
+
+While LaTeX remains the academic standard, Typst offers incremental compilation for instant rendering @TypstDocs, a markdown-like syntax familiar to developers, and clear error messages -- all without requiring multi-gigabyte distributions @TeXLiveGuide. Its native bibliography management supports BibTeX files and IEEE formatting directly, eliminating the multi-pass builds and external processors required by LaTeX workflows.
