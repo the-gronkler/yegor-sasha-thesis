@@ -26,9 +26,7 @@ The map feature is organized into six architectural layers:
 
 These layers communicate through well-defined interfaces: the controller exposes a REST-like endpoint, the service provides stateless methods, and frontend layers interact via props and callbacks.
 
-=== Backend Architecture Patterns
-
-==== Three-Phase Processing Pipeline <map-arch-three-phase>
+=== Three-Phase Processing Pipeline <map-arch-three-phase>
 
 Metropolitan areas such as Warsaw can contain thousands of restaurant listings, making unbounded queries infeasible for both network payloads and map rendering. The system must select a bounded set of nearby restaurants ranked by a combination of proximity and quality, while handling multiple center point sources and maintaining deterministic behavior. This requires a processing strategy that enforces geographic constraints before applying quality-based ranking.
 
@@ -44,11 +42,11 @@ The three phases serve distinct architectural responsibilities:
 
 This separation enforces the architectural guarantee that radius constraints are absolute: when `radius > 0`, no restaurant beyond that distance can appear in results, regardless of its quality score. The three-phase boundary prevents implementation drift where quality-based filtering could accidentally violate geographic constraints. The query architecture computes distance once using a subquery and reuses it in scoring, following a single-pass computation principle.
 
-==== Query Optimization Through Single-Pass Computation <map-arch-query-optimization>
+=== Query Optimization Through Single-Pass Computation <map-arch-query-optimization>
 
 Within the three-phase pipeline, database queries are structured to compute expensive operations (distance calculations, aggregations) exactly once and reuse the results. This single-pass computation principle minimizes redundant work and ensures consistency between filtering and ranking operations.
 
-==== Service Layer Abstraction
+=== Service Layer Abstraction
 
 The geospatial logic is isolated in a dedicated service class that provides stateless methods for domain-specific operations. This follows the Domain Service pattern from Domain-Driven Design @EvansDDD2003: logic that does not naturally belong to an entity or value object is extracted into a service.
 
@@ -59,13 +57,11 @@ The service exposes methods for:
 
 This abstraction allows controllers to remain focused on HTTP request handling while delegating geospatial domain logic to a specialized component. The service is stateless and side-effect-free (except for session writes), making it straightforward to test and reason about.
 
-==== Session-Based Location Persistence <map-arch-session-persistence>
+=== Session-Based Location Persistence <map-arch-session-persistence>
 
 User location is persisted in the server-side session with an expiry timestamp, following a read-through cache model: the service reads and validates session data, returning coordinates or null, with the controller falling back to defaults. This balances convenience for returning users with privacy, as location data expires after a configurable period and is not permanently stored.
 
-=== Frontend Architecture Patterns
-
-==== Component Hierarchy and Separation of Concerns <map-arch-component-hierarchy>
+=== Component Hierarchy and Separation of Concerns <map-arch-component-hierarchy>
 
 The frontend follows a clear hierarchy that separates orchestration, state management, and presentation. The `MapIndex` page component composes the UI and delegates all geospatial logic to the `useMapPage` hook. Beneath it, `MapOverlay` provides filter controls (search, radius, location), `Map` renders the Mapbox canvas with GeoJSON sources and clustering layers, `MapPopup` displays selection details, and `BottomSheet` synchronizes a scrollable restaurant list with the map view. Each component follows the single responsibility principle, focusing on one interaction surface.
 
@@ -113,18 +109,11 @@ _Radius Determinism_ -- when `radius > 0`, the result set contains only restaura
 
 _Session Isolation_ -- user location and search center are maintained as separate concepts. Exploring a new area (`search_lat`/`search_lng`) does not overwrite the persistent user location (`lat`/`lng`), allowing exploration without losing context.
 
-=== Integration Architecture
-
-==== Mapbox Integration Architecture
+=== Mapbox Integration Architecture
 
 The map visualization uses a layered architecture: a GeoJSON data source with clustering, visual layers for cluster circles, point markers, and selection highlighting, and an interaction layer for click handlers and popup management. This separation allows independent control, as data updates do not require re-configuring visual layers.
 
-=== Scalability and Performance Architecture <map-arch-scalability>
-
-==== Strategic Indexing
-<map-arch-indexing>
-
-==== Bounding Box Prefilter Pattern <map-arch-bounding-box>
+=== Bounding Box Prefilter Pattern <map-arch-bounding-box>
 
 Separate single-column indexes on `latitude` and `longitude` columns support a bounding box prefilter that reduces the candidate set before expensive distance calculations.
 
