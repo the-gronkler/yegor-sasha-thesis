@@ -18,4 +18,4 @@ Both authors collaborated on several critical areas. The thesis documentation wa
 
 == Documentation
 
-The complete commit history of the project, demonstrating the detailed breakdown of individual contributions, is available in the project repository @github-repo.
+The complete commit history of the project, demonstrating the detailed breakdown of individual contributions, is available in the project repository @SourceCodeRepo.
