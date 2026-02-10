@@ -46,4 +46,4 @@ Yegor Burykin focused on the frontend scaffold, the map and geolocation subsyste
 The collaboration was balanced, with each author taking ownership of distinct feature areas while contributing to overlapping domains.
 
 
-The complete commit history of the project, demonstrating the detailed breakdown of individual contributions, is available in the project repository @SourceCodeRepo.
+The complete commit history of the project, demonstrating the detailed breakdown of individual contributions, is available in the project repository. @SourceCodeRepo. It is important to note that commit history and authorship alone does not fully capture the collaborative nature of the project, as line count doesn't reflect the complexity or significance of contributions, and many changes were made collaboratively through code reviews and pair programming sessions.
