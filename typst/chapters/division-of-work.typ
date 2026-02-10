@@ -2,20 +2,48 @@
 
 This section outlines the distribution of responsibilities between the two authors throughout the development of the restaurant management system and its accompanying documentation.
 
+The project was developed collaboratively from its inception. While individual features were typically _led_ by one author, every change was subject to mandatory code review through pull requests before merging, ensuring that both authors maintained awareness of and influence over the entire codebase. Additionally, features led by one author were often adjusted by the other. The subsections below describe the primary areas of focus for each author.
+
 == Application Development
 
-=== Yegor Burykin
+*Yegor Burykin* established the frontend foundation, configuring the build tooling and single-page application framework, and created the initial route structure, controllers, and authentication pages.
 
-Yegor Burykin focused primarily on customer-facing features and interactive user interfaces. Major contributions included the complete implementation of the map-based restaurant discovery system, incorporating geolocation services, marker clustering, adaptive radius selection, and bottom sheet navigation. The favorites system, which enabled customers to rank and reorder preferred restaurants using drag-and-drop functionality, was implemented with optimistic updates and transaction-based persistence. Menu item detailed views and cart functionality were developed, including quantity management, item availability checks, and restaurant-specific cart separation. The checkout workflow, spanning order summary generation, payment interface integration, and order placement logic, was implemented with comprehensive validation. Customer order history and detail pages were created with proper status visualization. Profile management functionality for all user roles (customers, restaurant workers, and administrators) was established, handling distinct permission levels. UI components and styling across the application were refined, with particular attention to button variants, form interactions, and mobile responsiveness. The rating and review system was enhanced with real-time recalculation of restaurant ratings based on customer feedback. Database seeding infrastructure was improved with configurable options, progress tracking, and realistic test data generation. Several bug fixes and performance optimizations were applied, including resolution of N+1 query issues and image display problems.
+A primary area of focus was the map-based restaurant discovery system, including geolocation services, a composite scoring algorithm, marker clustering, search-in-area functionality, and a density-based heatmap visualization for restaurant distribution and quality.
 
-=== Oleksandr Svirin
+Additional features led by Yegor Burykin included the shopping cart system, the restaurant favorites system with drag-and-drop reordering, the authentication and registration flows, the menu item detail view, the toast notification component, the customer profile page, the restaurant index with search functionality, and the employee-side establishment management and menu category interfaces.
 
-Oleksandr Svirin concentrated on backend architecture, real-time communication, and documentation infrastructure. The real-time broadcasting system was architected and implemented using Laravel Reverb and WebSocket channels, including private channel authentication, event dispatching for menu item and order updates, and optimistic update patterns on the frontend. The employee-facing application structure was established, including role-based access control, dedicated routing for restaurant administrators and workers, menu management interfaces, and order fulfillment workflows. Database design was formalized, encompassing schema normalization, migration creation, geospatial indexing for location-based queries, and relationship modeling. The review system with image upload capabilities was implemented, integrating Cloudflare R2 for blob storage, image processing workflows, and lightbox display components. Error handling infrastructure was improved across HTTP responses, including custom error pages with role-based redirects and proper exception handling. Search functionality was abstracted into a reusable fuzzy search component using Fuse.js, with configurable weighting and multi-field matching. Development tooling was enhanced through pre-commit hooks for code formatting, VS Code task configurations for rapid PR creation, and improved environment configuration documentation. Several architectural refactoring efforts were completed, including extraction of geospatial logic into a dedicated service class, normalization of menu item relationships, and implementation of accessor patterns for computed attributes.
+Database seeding infrastructure was also a primary responsibility, with extensive work on factories and seeders to provide realistic test data.
 
-== Shared Responsibilities
+*Oleksandr Svirin* created the initial backend project scaffold, designed the database schema, and defined the data models with their relationships and authorization policies.
 
-Both authors collaborated on several critical areas. The thesis documentation was jointly developed using Typst, with both contributors authoring chapters on system architecture, implementation details, and technical decisions. Version control practices were maintained collaboratively, with code reviews conducted on all pull requests before merging. Deployment configuration using Docker Compose was refined through paired efforts, ensuring consistency across development and production environments. The development process chapter, covering AI-assisted development, automated workflows, and version control strategies, reflects contributions from both team members.
+A primary area of focus was the real-time broadcasting system, enabling live order and menu updates via WebSocket channels.
 
-== Documentation
+Additional features led by Oleksandr Svirin included the checkout and order processing pipeline, the review system with image uploads and cloud-based media storage, the restaurant detail page, the reusable search component, and the customer layout.
+
+TypeScript configuration and frontend architecture conventions were established and documented. Deployment and continuous integration infrastructure, including containerization, web server configuration, and automated deployment workflows, was primarily created. Developer tooling such as code formatting, pre-commit hooks, and editor configurations was also established.
+
+*Shared Responsibilities*: Both authors contributed equally to the employee-side management interface, restaurant listing and detail pages, application styling, and the API routing structure.
+
+== Thesis Manuscript
+
+The thesis was jointly developed using Typst with Git-based version control.
+
+The introduction, aims and objectives, context, functional requirements, non-functional requirements, and glossary chapters were developed through close collaboration between both authors, with neither taking a singular lead.
+
+*Oleksandr Svirin* focused on sections covering the development process chapter, as well as complete coverage (technology choices, architecture, and implementation) for database and ORM, real-time broadcasting, and media storage. For the frontend, he authored the architecture and implementation sections. He also initialized the Typst project structure and performed cross-cutting editorial work including citations and length reduction.
+
+*Yegor Burykin* focused on sections providing complete coverage (technology choices, architecture, and implementation) for the map-based discovery system. He also authored backend architecture and technology choices, the technology descriptions for Inertia.js and React, and the use case diagrams and scenarios. He performed a dedicated inconsistency review pass across the document.
+
+Several additional sections, particularly within the Technologies and System Architecture chapters, received meaningful contributions from both authors.
+
+
+== Summary
+
+In summary, Oleksandr Svirin focused on backend architecture, real-time features, deployment infrastructure, and thesis sections on frontend implementation, the development process, and database design.
+
+Yegor Burykin focused on the frontend scaffold, the map and geolocation subsystem, the shopping cart, authentication, data population, and thesis sections on map architecture, backend technologies, and use cases.
+
+The collaboration was balanced, with each author taking ownership of distinct feature areas while contributing to overlapping domains.
+
 
 The complete commit history of the project, demonstrating the detailed breakdown of individual contributions, is available in the project repository @SourceCodeRepo.
