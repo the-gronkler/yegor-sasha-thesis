@@ -59,6 +59,7 @@
 
 // Final chapters:
 #include "chapters/conclusions-and-future-work.typ"
+#include "chapters/division-of-work.typ"
 
 
 
