@@ -11,7 +11,6 @@
     (name: "Yegor Burykin", index: "s26904"),
   ),
   supervisor: "Krzysztof Bajszczak, M. Eng.",
-  aux_supervisor: "Piotr Gago, M. Eng.",
   date: "Warsaw, February 2025",
   logo: "resources/logo.png",
   faculty: "Faculty of Information Technology",

@@ -19,7 +19,6 @@
   title: "",
   authors: (),
   supervisor: "",
-  aux_supervisor: "",
   date: "",
   logo: none,
   faculty: "",
@@ -81,8 +80,7 @@
         #set align(left)
         Bachelor's degree thesis written under the supervision of: \
         #v(0.5em)
-        #text(weight: "bold")[#supervisor] \
-        #aux_supervisor
+        #text(weight: "bold")[#supervisor]
       ]
     ]
 
