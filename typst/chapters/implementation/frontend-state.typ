@@ -26,7 +26,7 @@ Context providers follow a consistent pattern: define a typed context with `crea
 
   export function useCart() {
     const context = useContext(CartContext);
-    if (!context) throw new Error('useCart must be used within CartProvider');
+    if (!context) throw new Error('useCart must be used within a CartProvider');
     return context;
   }
   ```

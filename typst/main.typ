@@ -1,8 +1,6 @@
 #import "template.typ": *
 #import "config.typ": *
 
-// TODO: replace example content with our own thesis content
-
 // Project settings, title page and other pre-content.
 #show: project.with(
   title: "Design and Implementation of a Self-Hosted Online Ordering and Tracking System for Small Restaurants",
@@ -11,7 +9,7 @@
     (name: "Yegor Burykin", index: "s26904"),
   ),
   supervisor: "Krzysztof Bajszczak, M. Eng.",
-  date: "Warsaw, February 2025",
+  date: "Warsaw, February 2026",
   logo: "resources/logo.png",
   faculty: "Faculty of Information Technology",
   department: "Department of Databases",

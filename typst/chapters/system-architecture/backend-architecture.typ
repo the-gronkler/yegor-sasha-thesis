@@ -26,7 +26,7 @@ Cross-cutting concerns (authentication, authorization, validation) are handled t
 
 Authentication is provided by Laravel Sanctum @LaravelSanctumDocs, which offers both session-based authentication for web requests and token-based authentication for API consumers. Given the web-first nature of this application, session-based authentication is used exclusively.
 
-The authentication flow relies on Laravel's default `web` guard with session storage. Upon successful login, a session is established and maintained through encrypted cookies. Subsequent requests are authenticated by validating the session against the database-backed session store.
+The authentication flow relies on Laravel's default `web` guard with session storage. Upon successful login, a session is established and maintained through encrypted cookies. Subsequent requests are authenticated by validating the session against the server-side session store.
 
 ==== Dual User Type Architecture
 
@@ -55,7 +55,7 @@ For example, the order policy implements business rules determining whether a cu
 A global `Gate::before()` callback grants system administrators unrestricted access, bypassing all subsequent policy checks. When it returns `null`, normal policy evaluation proceeds.
 
 
-Beyond resource policies, custom gates define cross-cutting rules. The `manage-restaurant` gate for example protects specific routes, permitting only restaurant administrators to perform management operations such as editing details or managing categories.
+Beyond resource policies, custom gates define cross-cutting rules. The `manage-restaurant` gate for example protects specific routes, permitting only restaurant administrators to perform management operations such as editing restaurant details, managing photos, and managing staff accounts.
 
 ==== Context-Aware Authorization
 

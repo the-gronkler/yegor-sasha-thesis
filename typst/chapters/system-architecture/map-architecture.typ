@@ -52,7 +52,7 @@ The geospatial logic is isolated in a dedicated service class that provides stat
 
 The service exposes methods for:
 - Bounding box calculation (approximates lat/lng deltas from radius)
-- Distance formatting (converts kilometers to human-readable strings)
+- Distance formatting (rounds kilometer values to two decimal places)
 - Session persistence (stores/retrieves coordinates with expiry validation)
 
 This abstraction allows controllers to remain focused on HTTP request handling while delegating geospatial domain logic to a specialized component. The service is stateless and side-effect-free (except for session writes), making it straightforward to test and reason about.
@@ -119,7 +119,7 @@ Separate single-column indexes on `latitude` and `longitude` columns support a b
 
 MariaDB's query optimizer uses index merge @MariaDBIndexMerge to combine separate indexes for range queries (`BETWEEN`) on both columns. This approach was selected over spatial indexes (R-tree), which require geometry columns and schema changes. The `ST_Distance_Sphere` function operates on raw coordinate columns, making traditional B-tree indexes more compatible with the existing schema.
 
-Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently-the query optimizer cannot efficiently use a composite index when both columns have range conditions.
+Composite `(latitude, longitude)` indexes were not chosen because they do not benefit range queries that filter on both columns independently --- the query optimizer cannot efficiently use a composite index when both columns have range conditions.
 
 === Summary
 

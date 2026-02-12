@@ -35,7 +35,7 @@ _Leaflet with OpenStreetMap_ was considered as an open-source alternative requir
 
 The library supports the controlled component pattern used in the map architecture (see @map-architecture), enabling programmatic camera control and view state synchronization.
 
-The alternative-using Mapbox GL JS directly with `useEffect` hooks-would require manual imperative management of map initialization, event listener registration, and cleanup, increasing complexity and bug potential.
+The alternative --- using Mapbox GL JS directly with `useEffect` hooks --- would require manual imperative management of map initialization, event listener registration, and cleanup, increasing complexity and bug potential.
 
 === Location Persistence <map-tech-location-persistence>
 

@@ -42,5 +42,5 @@
 - Upload and manage detailed menus, including picture item descriptions, prices, images, and allergen information, as well as placing dishes in custom categories.
 - When uploading pictures, restaurant administrators have an option to select one of the pictures already uploaded for this restaurant, either for a menu item or the restaurant profile.
 
-=== Real-Time Updates
+=== Real-Time Updates //Maybe we should change that to something similar to our implementation, but not really needed i guess
 - Restaurants can send status updates to customers automatically or manually.
