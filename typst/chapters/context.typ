@@ -44,7 +44,6 @@ Customers of small restaurants, who expect a convenient, user-friendly system fo
 - An intuitive interface for selecting restaurants, browsing menus, placing orders, and tracking their food orders.
 - Effective real-time updates on order status.
 - Access to features like the restaurant heatmap to enable seamless and intuitive selection/discovery of a restaurant that best fits that user’s current needs.
-- Engagement through rewards systems (e.g., earning points, badges, and discounts) in future iterations.
 
 == Other Systems and Integrations
 
