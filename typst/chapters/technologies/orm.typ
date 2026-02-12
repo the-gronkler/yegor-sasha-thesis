@@ -57,4 +57,4 @@ _Mitigation_: This risk is managed through the consistent use of PHPDoc annotati
 
 *Separation of Concerns*: Eloquent models, by design, mix domain logic with persistence logic. While beneficial for speed, this violates the Single Responsibility Principle @MartinCleanArch2017, whereas strict Data Mapper implementations keep domain entities pure.
 
-_Mitigation_: To prevent "fat models," the architecture enforces a separation of duties: complex business logic is delegated to *Service classes*, and complex validation is handled by *FormRequests*. This ensures Models remain focused solely on data access and relationship definitions, with controllers orchestrating the transformation of data for Inertia responses
+_Mitigation_: To prevent "fat models," the architecture enforces a separation of duties: complex business logic is delegated to *Service classes*, and complex validation is handled by *FormRequests*. This ensures Models remain focused solely on data access and relationship definitions, with controllers orchestrating the transformation of data for Inertia responses.

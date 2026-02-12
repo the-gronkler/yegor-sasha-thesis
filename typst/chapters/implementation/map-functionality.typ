@@ -12,7 +12,7 @@ The principal implementation artifacts are:
 
 === Backend implementation: deterministic three-phase processing
 
-The dataset for the map is produced by the `index` action in #source_code_link("app/Http/Controllers/Customer/MapController.php"). The endpoint authorizes access through Laravel policies and validates all optional geospatial query parameters (`lat`, `lng`, `search_lat`, `search_lng`, `radius`). All parameters may be absent, defaulting to a radius of 50 km; `radius = 0` is interpreted as "no range limit." The default center coordintaes are set to Warsaw, since that is the most likely location of a user of the application.  The following sections present the concrete implementation of each phase from @map-arch-three-phase.
+The dataset for the map is produced by the `index` action in #source_code_link("app/Http/Controllers/Customer/MapController.php"). The endpoint authorizes access through Laravel policies and validates all optional geospatial query parameters (`lat`, `lng`, `search_lat`, `search_lng`, `radius`). All parameters may be absent, defaulting to a radius of 50 km; `radius = 0` is interpreted as "no range limit." The default center coordinates are set to Warsaw, since that is the most likely location of a user of the application. The following sections present the concrete implementation of each phase from @map-arch-three-phase.
 
 ==== Phase A: center coordinate normalization
 

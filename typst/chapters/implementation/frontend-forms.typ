@@ -16,7 +16,7 @@ The hook accepts an initial state object defining all form fields and returns me
     name: '', surname: '', email: '', password: '', password_confirmation: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     form.post(window.route('register.store'), {
       onFinish: () => form.reset('password', 'password_confirmation'),
@@ -28,10 +28,9 @@ The hook accepts an initial state object defining all form fields and returns me
     type="email"
     value={form.data.email}
     onChange={(e) => form.setData('email', e.target.value)}
-    disabled={form.processing}
   />
   {form.errors.email && (
-    <span className="error-message">{form.errors.email}</span>
+    <p className="error-message">{form.errors.email}</p>
   )}
   ```
 ]

@@ -91,10 +91,10 @@ This pattern ensures pages have access to both shared authentication state and t
 
 The TypeScript compiler configuration enforces strict mode, catching potential null reference errors and implicit any types at compile time. This configuration is defined in `tsconfig.json`:
 
-- `strict: true`: Enables all strict type checking options
-- `noImplicitAny: true`: Prevents accidental use of `any` type
-- `strictNullChecks: true`: Requires explicit handling of null and undefined
-- `strictFunctionTypes: true`: Enforces strict checking of function parameters
-- `strictPropertyInitialization: true`: Ensures class properties are initialized
+- `strict: true`: Enables all strict type checking options, which implicitly activates `noImplicitAny`, `strictNullChecks`, `strictFunctionTypes`, and `strictPropertyInitialization`
+- `noUnusedLocals: true`: Flags unused local variables as errors
+- `noUnusedParameters: true`: Flags unused function parameters as errors
+- `noFallthroughCasesInSwitch: true`: Prevents unintentional fallthrough in switch statements
+- `forceConsistentCasingInFileNames: true`: Enforces consistent file name casing across imports
 
 These settings transform TypeScript from a permissive type annotation system into a rigorous verification tool that catches errors before runtime.

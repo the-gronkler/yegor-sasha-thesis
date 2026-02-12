@@ -2,11 +2,11 @@
 
 == Deployment
 
-The deployment strategy for the system relies on containerization to ensure consistency across development and production environments. The application is hosted on a virtualized infrastructure provided by Microsoft Azure, utilizing Docker for service orchestration.
+The deployment strategy for the system relies on containerization to ensure consistency across development and production environments. The application is hosted on a virtualized infrastructure provided by Microsoft Azure, utilizing Docker and Docker Compose for containerization and service orchestration.
 
 === Infrastructure
 
-The production environment is hosted on an Azure Virtual Machine @AzureVMDocs. The decision to utilize a self-managed VM rather than a Platform-as-a-Service (PaaS) solution was driven by cost efficacy and the need for granular control over the environment. While PaaS offerings provide automated scaling, a VM offers a predictable cost structure and allows for a custom Docker-based configuration that exactly mirrors the local development setup. Security is enforced through network security groups (NSGs) which restrict access to essential ports (HTTP/HTTPS for public access and SSH for administration).
+The production environment is hosted on an Azure Virtual Machine @AzureVMDocs. The decision to utilize a self-managed VM rather than a Platform-as-a-Service (PaaS) solution was driven by cost efficiency and the need for granular control over the environment. While PaaS offerings provide automated scaling, a VM offers a predictable cost structure and allows for a custom Docker-based configuration that exactly mirrors the local development setup. Security is enforced through network security groups (NSGs) which restrict access to essential ports (HTTP/HTTPS for public access and SSH for administration).
 
 === Container Orchestration
 
@@ -26,7 +26,7 @@ By encapsulating the entire technology stack in container definitions, the host 
 ==== Application Service (`app`)
 The `app` service functions as the central logic unit, purposely deviating from the standard "single process per container" paradigm to prioritize consistency and deployment simplicity. By utilizing *Supervisor* @SupervisorDocs as an internal process manager, this service packages the entire application runtime -- PHP-FPM, the Nginx web server, and asynchronous workers -- into a cohesive artifact.
 
-Supervisor acts as the container's entry point (PID 1), responsible for spawning and monitoring the disparate components required for the application to function. Unlike a standard shell script, Supervisor provides active process control: it ensures that the Nginx web server, the PHP-FPM runtime, the Laravel queue worker, and the Reverb WebSocket server run simultaneously. Crucially, it provides a self-healing mechanism by automatically restarting any of these critical background processes if they fail or crash, ensuring high availability within the isolated environment.
+An initialization script (`entrypoint.sh`) acts as the container's entry point, performing setup tasks such as migrations, caching, and permission configuration before delegating to Supervisor as PID 1. Supervisor is then responsible for spawning and monitoring the disparate components required for the application to function. Unlike a standard shell script, Supervisor provides active process control: it ensures that the Nginx web server, the PHP-FPM runtime, the Laravel queue worker, and the Reverb WebSocket server run simultaneously. Crucially, it provides a self-healing mechanism by automatically restarting any of these critical background processes if they fail or crash, ensuring high availability within the isolated environment.
 
 *Rationale for Internal Architecture:*
 - *Versioning Consistency*: Bundling the request handlers (Nginx/PHP) with the background processors (Queue Workers/Reverb) guarantees that all components operate on the exact same version of the source code. This eliminates the risk of "skew" where a separate worker container might process a job using outdated class definitions.
@@ -52,4 +52,4 @@ Deployments to the production environment are automated through a GitHub Actions
 
 The pipeline follows a pull-based deployment model: rather than pushing built artifacts to the server, the workflow instructs the VM to pull changes from the repository and rebuild locally. This approach ensures that the production build process is identical to local development, reducing the risk of environment-specific issues. The workflow also supports manual dispatch with an optional commit SHA parameter, enabling rollbacks to specific versions when needed.
 
-Key steps in the deployment process include container teardown (`docker compose down`), rebuild with cache invalidation (`--build --renew-anon-volumes`), and cleanup of unused images to conserve disk space. The entire deployment completes in under two minutes, providing rapid iteration cycles while maintaining the consistency guarantees of containerized infrastructure.
+Key steps in the deployment process include container teardown (`docker compose down`), rebuild with fresh containers (`--build --remove-orphans --renew-anon-volumes`), and cleanup of unused images to conserve disk space. The entire deployment completes in under two minutes, providing rapid iteration cycles while maintaining the consistency guarantees of containerized infrastructure.
