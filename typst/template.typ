@@ -38,7 +38,7 @@
     number-align: right,
   )
   // Use a modern, professional sans-serif font for the whole document
-  set text(font: ("Segoe UI", "Arial", "Calibri"), lang: "en", size: 12pt, hyphenate: false)
+  set text(font: ("Calibri"), lang: "en", size: 12pt, hyphenate: false)
 
   // Title page.
   page(
