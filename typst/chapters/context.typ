@@ -18,7 +18,7 @@ Several external factors influence the development and operation of this system:
 
 - *Market Trends*: The ongoing trend toward digitizing restaurant operations, particularly for quick-service restaurants (e.g., fast food or cafes), underpins the demand for systems like this one. Consumers increasingly expect online ordering, real-time tracking, and seamless payment processes @GrandViewOnlineFood2024 @QubeyondQSR2025.
 
-- *Competition*: This is a fairly unique product, so there are few similar systems on the market. However, this does not mean that it has no competition; This system instead competes against third party solutions in the food delivery industry. Existing third-party food delivery platforms (Uber Eats, Glovo, etc.) dominate the market, but they often impose fees and restrictions that smaller businesses find prohibitive. This project's system offers an alternative, allowing restaurants to sidestep such constraints while still meeting modern consumer expectations, although without delivery.
+- *Competition*: This is a fairly unique product, so there are few similar systems on the market. However, this does not mean that it has no competition; this system instead competes against third-party solutions in the food delivery industry. Existing third-party food delivery platforms (Uber Eats, Glovo, etc.) dominate the market, but they often impose fees and restrictions that smaller businesses find prohibitive. This project's system offers an alternative, allowing restaurants to sidestep such constraints while still meeting modern consumer expectations, although without delivery.
 
 - *Technological Advancements*: The growing accessibility of web and mobile technologies makes it feasible for small businesses to adopt systems that previously required large-scale infrastructure. This project leverages modern web frameworks and mobile development practices to ensure the system can be deployed efficiently across a variety of devices.
 
@@ -44,17 +44,16 @@ Customers of small restaurants, who expect a convenient, user-friendly system fo
 - An intuitive interface for selecting restaurants, browsing menus, placing orders, and tracking their food orders.
 - Effective real-time updates on order status.
 - Access to features like the restaurant heatmap to enable seamless and intuitive selection/discovery of a restaurant that best fits that user’s current needs.
-- Engagement through rewards systems (e.g., earning points, badges, and discounts).
 
 == Other Systems and Integrations
 
 Although the system is designed to function independently, it is flexible enough to integrate with existing systems and processes in small restaurants:
 
-- *Payment Gateways*: The system supports integration with common payment gateways to handle transactions securely.
+- *Payment Gateways*: The system is designed to support future integration with common payment gateways to handle transactions securely. The current implementation uses a mocked payment flow to validate the order lifecycle.
 - *POS Systems*: The system is built in such a way as to allow for future integration with Point of Sale (POS) systems, which would enable seamless order processing from both online and in-person customers.
 
 == Industry Standards and Regulations
 
 Given the legal landscape surrounding online transactions and data privacy, compliance with standards such as GDPR is essential. The system is designed to ensure that sensitive customer data is handled securely, with clear consent mechanisms and robust encryption for any personal or payment-related information.
 
-The system further ensures compliance by offloading transactions to reputable third party gateways.
+The system is designed to ensure compliance by offloading transactions to reputable third-party gateways in future iterations.

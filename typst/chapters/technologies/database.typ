@@ -2,7 +2,7 @@
 
 == Database Management System: MariaDB
 
-The selection of the database management system (DBMS) was a critical architectural decision, given the data-intensive nature of the restaurant ordering platform and its specific requirements for geospatial processing. MariaDB was chosen as the primary relational database, serving as the persistent storage layer for all structured data, including user profiles, restaurant catalog, orders, and transactional records.
+The selection of the database management system (DBMS) was a critical architectural decision, given the data-intensive nature of the restaurant ordering platform and its specific requirements for geospatial processing. MariaDB was chosen as the primary relational database, serving as the persistent storage layer for all structured data, including user profiles, restaurant catalogs, orders, and transactional records.
 
 === Justification for MariaDB
 MariaDB, a community-developed fork of MySQL @MariaDBAbout, was selected over competitors such as PostgreSQL and standard MySQL for several strategic reasons:
@@ -17,7 +17,7 @@ MariaDB's thread pool handling and query optimizer are highly tuned for read-hea
 
 ==== JSON Compatibility
 
-The support for JSON column types allows for semi-structured data storage within the relational model. While not currently utilized in the schema, this capability provides flexibility for future enhancements, such as storing complex opening hours configurations or varying menu item options, without necessitating a NoSQL solution.
+The support for JSON column types allows for semi-structured data storage within the relational model. While not currently utilized as a JSON column type in the schema (opening hours, for example, are stored as a string), this capability provides flexibility for future enhancements, such as storing varying menu item options or complex scheduling configurations, without necessitating a NoSQL solution.
 
 ==== Multi-Master Replication
 
@@ -34,7 +34,6 @@ As a fully open-source solution with a strong commitment to the GPL license @Mar
 While MariaDB excels in the areas outlined above, it has some limitations. As a fork of MySQL, it may lag behind in adopting the latest features from the broader MySQL ecosystem.
 
 MariaDB-specific deployment and hosting options are more limited than MySQL. However, its binary compatibility with MySQL means it can typically be hosted on MySQL-compatible environments and use MySQL drivers.
-
 
 Its community and ecosystem are smaller than MySQL's, potentially affecting long-term support and third-party integrations.
 

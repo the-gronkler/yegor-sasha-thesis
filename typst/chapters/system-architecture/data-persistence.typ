@@ -2,7 +2,7 @@
 
 == Data Persistence <data-persistence>
 
-The system persists domain state in a relational database. Any and all interactions, including schema modifications, with the underlying data store are mediated exclusively through the Object-Relational Mapping (ORM) layer. This ensures that all data access operations are managed within a unified architectural boundary. The persistence layer is designed to prioritise data integrity and data access performance through explicit constraints and predictable query patterns.
+The system persists domain state in a relational database. Any and all interactions, including schema modifications, with the underlying data store are mediated exclusively through the Object-Relational Mapping (ORM) layer. This ensures that all data access operations are managed within a unified architectural boundary. The persistence layer is designed to prioritize data integrity and data access performance through explicit constraints and predictable query patterns.
 
 === Persistence Strategy and Pattern Selection
 An Object-Relational Mapping (ORM) layer abstracts the interaction between the application domain and the relational database. Each domain entity is represented by a corresponding model class that encapsulates both the data structure and the persistence logic.
@@ -11,7 +11,7 @@ This is an example of the Active Record design pattern @FowlerPEAA2002, which wa
 
 The ORM handles tasks such as query construction, relationship management, and lifecycle events, allowing developers to interact with the database using high-level abstractions rather than raw SQL.
 
-=== Domain Modelling and Capabilities
+=== Domain Modeling and Capabilities
 The application's domain entities are defined within the `app/Models` directory#footnote[#source_code_link("app/Models")]. Each model class acts as a representation of a database entity and serves as the primary interface for data access. These models are not passive data transfer objects; they are responsible for enforcing data integrity, defining relationships, and encapsulating domain-specific query logic.
 
 Key responsibilities of the Model layer include:
@@ -48,7 +48,7 @@ The architecture employs a bifurcated strategy for modeling many-to-many associa
 
 For relationships that serve primarily as structural connections without complex additional attributes, the system uses lightweight pivot tables. In cases such as the association between menu items and allergens, a dedicated `MenuItemAllergen` pivot model class exists to provide explicit table naming and relationship methods, but the pivot itself carries no business logic beyond the linkage, keeping the pattern lightweight.
 
-In contrast, when an association possesses its own data lifecycle or attributes, the architecture elevates the connection to a "Rich Association" @FowlerPEAA2002. The relationship is explicitly modelled as a distinct domain entity rather than a passive database link.
+In contrast, when an association possesses its own data lifecycle or attributes, the architecture elevates the connection to a "Rich Association" @FowlerPEAA2002. The relationship is explicitly modeled as a distinct domain entity rather than a passive database link.
 
 This approach is applied to complex associations such as order line items and favorite restaurants, which require the encapsulation of stateful data like quantities or rankings. By formalizing these intersections as entities, the architecture ensures that relationship attributes are subject to the same validation, typing, and business logic constraints as core domain objects, preserving the integrity of the aggregate boundary.
 

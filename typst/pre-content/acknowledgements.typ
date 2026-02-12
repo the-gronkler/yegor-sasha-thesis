@@ -4,6 +4,6 @@ We are equally grateful to Mr. Piotr Gago, who led the diploma seminar, equipped
 
 A special mention goes to Mr. Abdulla Mohamed, whose presence made navigating MAS and the broader demands of university life considerably easier for both of us.
 
-Speaking for myself, I, Yegor, owe a heartfelt thanks to my girlfriend Lizaveta - her encouragement and warmth carried me through the toughest stretches of this process!
+Speaking for myself, I, Yegor, owe a heartfelt thanks to my girlfriend Lizaveta - her encouragement and warmth carried me through the toughest stretches of this process.
 
 Above all, we are grateful to one another for the teamwork and determination that brought this project to completion.

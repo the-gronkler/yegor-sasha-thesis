@@ -60,7 +60,7 @@ This scenario describes the typical ordering flow, including restaurant selectio
 
 In the main flow, the customer browses the restaurant menu, adds selected items to the cart, reviews the order on the cart page, and initiates checkout.
 
-During checkout, the customer provides payment details (mocked for this implementation). and confirms the order details.
+During checkout, the customer provides payment details (mocked for this implementation) and confirms the order details.
 
 If the customer has not authenticated, they must log in or register before proceeding to checkout, which we do not show in the table for simplicity (we assume the customer has logged in in the main flow).
 
