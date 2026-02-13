@@ -24,7 +24,7 @@ class ReviewSeeder extends Seeder
         $total = Restaurant::count();
         $current = 0;
 
-        Restaurant::lazy()->each(function ($restaurant) use ($customerIds, $allImageUrls, &$current, $total, $progressCallback) {
+        Restaurant::all()->each(function ($restaurant) use ($customerIds, $allImageUrls, &$current, $total, $progressCallback) {
             $reviewCount = rand(1, min(14, count($customerIds)));
 
             $selectedCustomerIds = collect($customerIds)
@@ -34,6 +34,13 @@ class ReviewSeeder extends Seeder
             $reviewIndex = 0;
 
             foreach ($selectedCustomerIds as $customerId) {
+                // Prevent duplicate reviews for the same restaurant/customer pair
+                if (Review::where('customer_user_id', $customerId)
+                    ->where('restaurant_id', $restaurant->id)
+                    ->exists()) {
+                    continue;
+                }
+
                 $review = Review::factory()->create([
                     'customer_user_id' => $customerId,
                     'restaurant_id' => $restaurant->id,
